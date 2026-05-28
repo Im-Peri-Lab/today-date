@@ -10,6 +10,10 @@ const schema = z.object({
 })
 
 export async function POST(req: NextRequest) {
+  console.log('[send-verify] RESEND_API_KEY:', process.env.RESEND_API_KEY?.slice(0, 6) ?? 'MISSING')
+  console.log('[send-verify] RESEND_FROM_EMAIL:', process.env.RESEND_FROM_EMAIL ?? 'MISSING')
+  console.log('[send-verify] NEXT_PUBLIC_APP_URL:', process.env.NEXT_PUBLIC_APP_URL ?? 'MISSING')
+
   try {
     const body = await req.json()
     const result = schema.safeParse(body)
@@ -41,14 +45,20 @@ export async function POST(req: NextRequest) {
     const rawToken = await createToken('verify_email', email, 60)
 
     const verifyUrl = `${process.env.NEXT_PUBLIC_APP_URL}/setup/verify?token=${rawToken}`
-    await sendEmail({
+    const emailResult = await sendEmail({
       to: email,
       subject: '[Today Date] 이메일 인증',
       html: getVerifyEmailTemplate(verifyUrl),
     })
 
+    if (!emailResult.success) {
+      console.error('[send-verify] email failed:', emailResult.error)
+    }
+
+    // 사용자 열거 방지: 이메일 실패 여부와 무관하게 항상 200 반환
     return NextResponse.json({ success: true })
-  } catch {
+  } catch (e) {
+    console.error('[send-verify] unexpected error:', e)
     return NextResponse.json({ error: '서버 오류가 발생했습니다.' }, { status: 500 })
   }
 }

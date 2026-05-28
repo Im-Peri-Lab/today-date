@@ -22,13 +22,13 @@ export async function POST(req: NextRequest) {
     const { passcode } = result.data
     const supabase = getSupabaseClient()
 
-    const { data: config } = await supabase
+    const { data: config, error: dbError } = await supabase
       .from('app_config')
       .select('passcode_hash, failed_attempts, locked_until, session_version')
       .eq('id', 1)
       .single()
 
-    if (!config?.passcode_hash) {
+    if (dbError || !config?.passcode_hash) {
       return NextResponse.json({ error: '앱 설정이 완료되지 않았습니다.' }, { status: 403 })
     }
 

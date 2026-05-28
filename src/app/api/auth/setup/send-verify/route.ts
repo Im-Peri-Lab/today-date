@@ -10,10 +10,6 @@ const schema = z.object({
 })
 
 export async function POST(req: NextRequest) {
-  console.log('[send-verify] RESEND_API_KEY:', process.env.RESEND_API_KEY?.slice(0, 6) ?? 'MISSING')
-  console.log('[send-verify] RESEND_FROM_EMAIL:', process.env.RESEND_FROM_EMAIL ?? 'MISSING')
-  console.log('[send-verify] NEXT_PUBLIC_APP_URL:', process.env.NEXT_PUBLIC_APP_URL ?? 'MISSING')
-
   try {
     const body = await req.json()
     const result = schema.safeParse(body)

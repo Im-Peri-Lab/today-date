@@ -18,18 +18,21 @@ const emailSchema = z.object({
 })
 
 type EmailForm = z.infer<typeof emailSchema>
-
 type Step = 1 | 2 | 3
+// 패스코드 단계 내부 상태: 'set'=첫 입력, 'confirm'=확인 입력
+type PasscodeSubStep = 'set' | 'confirm'
 
 export default function SetupPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [step, setStep] = useState<Step>(1)
   const [sentEmail, setSentEmail] = useState('')
-  const [passcode, setPasscode] = useState('')
-  const [passcodeError, setPasscodeError] = useState('')
-  const [confirmError, setConfirmError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+
+  // 패스코드 단계 상태 (step 3)
+  const [passcodeSubStep, setPasscodeSubStep] = useState<PasscodeSubStep>('set')
+  const [firstPasscode, setFirstPasscode] = useState('')
+  const [confirmError, setConfirmError] = useState('')
 
   useEffect(() => {
     if (searchParams.get('verified') === 'true') {
@@ -39,6 +42,7 @@ export default function SetupPage() {
       toast.error('링크가 유효하지 않거나 만료되었습니다. 다시 시도해 주세요.')
     }
   }, [searchParams])
+
 
   const { register, handleSubmit, formState: { errors } } = useForm<EmailForm>({
     resolver: zodResolver(emailSchema),
@@ -64,13 +68,16 @@ export default function SetupPage() {
     }
   }
 
-  async function onPasscodeSet(code: string) {
-    setPasscode(code)
-    setPasscodeError('')
+  // 첫 번째 패스코드 입력 완료 → 확인 단계로만 전환 (API 호출 없음)
+  function onFirstPasscodeComplete(code: string) {
+    setFirstPasscode(code)
+    setConfirmError('')
+    setPasscodeSubStep('confirm')
   }
 
-  async function onConfirmSet(code: string) {
-    if (code !== passcode) {
+  // 확인 입력 완료 → 일치 검증 후 단 1회 API 호출
+  async function onConfirmPasscodeComplete(code: string) {
+    if (code !== firstPasscode) {
       setConfirmError('패스코드가 일치하지 않습니다.')
       return
     }
@@ -80,12 +87,14 @@ export default function SetupPage() {
       const res = await fetch('/api/auth/setup/passcode', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ passcode }),
+        body: JSON.stringify({ passcode: firstPasscode }),
       })
       const json = await res.json()
       if (!res.ok) {
         toast.error(json.error ?? '오류가 발생했습니다.')
-        setPasscode('')
+        // 실패 시 첫 번째 단계로 리셋
+        setFirstPasscode('')
+        setPasscodeSubStep('set')
         return
       }
       toast.success('패스코드가 설정되었습니다!')
@@ -112,7 +121,7 @@ export default function SetupPage() {
                   <Input
                     id="email"
                     type="email"
-                    placeholder="example@email.com"
+                    placeholder="[MASKED_EMAIL]"
                     autoComplete="email"
                     {...register('email')}
                     className="border-violet-200 focus-visible:ring-violet-500"
@@ -163,7 +172,7 @@ export default function SetupPage() {
         {step === 3 && (
           <>
             <CardHeader className="text-center pb-2">
-              {!passcode ? (
+              {passcodeSubStep === 'set' ? (
                 <>
                   <CheckCircle2 className="w-10 h-10 text-violet-500 mx-auto mb-2" />
                   <CardTitle className="text-xl text-violet-800">패스코드 설정</CardTitle>
@@ -178,16 +187,17 @@ export default function SetupPage() {
               )}
             </CardHeader>
             <CardContent className="flex justify-center py-4">
-              {!passcode ? (
+              {passcodeSubStep === 'set' ? (
+                // key로 완전 재마운트 보장 — 이전 value 잔재 없음
                 <PasscodeInput
-                  onComplete={onPasscodeSet}
+                  key="set"
+                  onComplete={onFirstPasscodeComplete}
                   disabled={isLoading}
-                  error={passcodeError}
                 />
               ) : (
                 <PasscodeInput
                   key="confirm"
-                  onComplete={onConfirmSet}
+                  onComplete={onConfirmPasscodeComplete}
                   disabled={isLoading}
                   error={confirmError}
                   clearOnError

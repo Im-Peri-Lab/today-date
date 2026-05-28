@@ -1,18 +1,20 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { toast } from 'sonner'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { PasscodeInput } from '@/components/PasscodeInput'
+
+type SubStep = 'set' | 'confirm'
 
 export default function ResetPage() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const token = searchParams.get('token') ?? ''
 
-  const [passcode, setPasscode] = useState('')
-  const [error, setError] = useState('')
+  const [subStep, setSubStep] = useState<SubStep>('set')
+  const [firstPasscode, setFirstPasscode] = useState('')
   const [confirmError, setConfirmError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
 
@@ -23,23 +25,30 @@ export default function ResetPage() {
     }
   }, [token, router])
 
-  const handleConfirm = useCallback(async (code: string) => {
-    if (code !== passcode) {
+  function onFirstPasscodeComplete(code: string) {
+    setFirstPasscode(code)
+    setConfirmError('')
+    setSubStep('confirm')
+  }
+
+  async function onConfirmPasscodeComplete(code: string) {
+    if (code !== firstPasscode) {
       setConfirmError('패스코드가 일치하지 않습니다.')
       return
     }
     setIsLoading(true)
+    setConfirmError('')
     try {
       const res = await fetch('/api/auth/reset', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token, passcode }),
+        body: JSON.stringify({ token, passcode: firstPasscode }),
       })
       const json = await res.json()
       if (!res.ok) {
         toast.error(json.error ?? '오류가 발생했습니다.')
-        setPasscode('')
-        setConfirmError('')
+        setFirstPasscode('')
+        setSubStep('set')
         return
       }
       toast.success('패스코드가 변경되었습니다!')
@@ -47,7 +56,7 @@ export default function ResetPage() {
     } finally {
       setIsLoading(false)
     }
-  }, [passcode, token, router])
+  }
 
   if (!token) return null
 
@@ -55,31 +64,27 @@ export default function ResetPage() {
     <main className="min-h-screen bg-gradient-to-br from-violet-50 to-purple-100 flex items-center justify-center p-4">
       <Card className="w-full max-w-sm shadow-xl border-violet-100">
         <CardHeader className="text-center pb-2">
-          <div className="text-4xl mb-2">{!passcode ? '🔐' : '✅'}</div>
+          <div className="text-4xl mb-2">{subStep === 'set' ? '🔐' : '✅'}</div>
           <CardTitle className="text-xl text-violet-800">
-            {!passcode ? '새 패스코드 설정' : '패스코드 확인'}
+            {subStep === 'set' ? '새 패스코드 설정' : '패스코드 확인'}
           </CardTitle>
           <CardDescription>
-            {!passcode
+            {subStep === 'set'
               ? '새로운 4~6자리 패스코드를 입력하세요'
               : '패스코드를 한 번 더 입력하세요'}
           </CardDescription>
         </CardHeader>
         <CardContent className="flex justify-center py-4">
-          {!passcode ? (
+          {subStep === 'set' ? (
             <PasscodeInput
-              onComplete={(code) => {
-                setPasscode(code)
-                setError('')
-              }}
+              key="set"
+              onComplete={onFirstPasscodeComplete}
               disabled={isLoading}
-              error={error}
-              clearOnError
             />
           ) : (
             <PasscodeInput
               key="confirm"
-              onComplete={handleConfirm}
+              onComplete={onConfirmPasscodeComplete}
               disabled={isLoading}
               error={confirmError}
               clearOnError

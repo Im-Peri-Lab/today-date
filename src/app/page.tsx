@@ -1,8 +1,8 @@
 import { redirect } from 'next/navigation'
 import { getSession } from '@/lib/auth/session'
-import { Heart, LogOut } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { Heart } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { LogoutButton } from '@/components/LogoutButton'
 
 export default async function HomePage() {
   const session = await getSession()
@@ -23,16 +23,7 @@ export default async function HomePage() {
         <CardContent className="space-y-4">
           <p className="text-gray-600">인증이 완료되었습니다.</p>
           <p className="text-sm text-gray-400">다음 단계에서 데이트 대시보드가 여기에 표시됩니다.</p>
-          <form action="/api/auth/logout" method="POST">
-            <Button
-              type="submit"
-              variant="outline"
-              className="w-full border-violet-200 text-violet-600 hover:bg-violet-50"
-            >
-              <LogOut className="w-4 h-4 mr-2" />
-              로그아웃
-            </Button>
-          </form>
+          <LogoutButton />
         </CardContent>
       </Card>
     </main>

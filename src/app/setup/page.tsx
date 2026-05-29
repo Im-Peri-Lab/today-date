@@ -8,7 +8,7 @@ import { z } from 'zod'
 import { toast } from 'sonner'
 import { Mail, MailCheck } from 'lucide-react'
 import { PasscodeInput } from '@/components/PasscodeInput'
-import { AuthShell } from '@/components/auth/AuthShell'
+import { AuthLayout } from '@/components/auth/AuthLayout'
 import styles from '@/components/auth/auth.module.css'
 
 const emailSchema = z.object({
@@ -110,7 +110,7 @@ function SetupFlow() {
         : '패스코드만 정하면 끝이에요'
 
   return (
-    <AuthShell subtitle={subtitle}>
+    <AuthLayout subtitle={subtitle}>
       {/* 단계 인디케이터 */}
       <div className={styles.steps} role="status" aria-label={`${step}/3 단계`}>
         {[1, 2, 3].map((s) => (
@@ -197,7 +197,7 @@ function SetupFlow() {
             label="패스코드 확인"
           />
         ))}
-    </AuthShell>
+    </AuthLayout>
   )
 }
 

@@ -61,14 +61,23 @@
   }
 }
 
-/* ── 상단: 브랜드 헤더 ──────────────────────── */
+/* ── 헤더 + 본문을 하나의 그룹으로 뷰포트 중앙 정렬 ── */
+.center {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2.25rem; /* 헤더 ↔ 본문 */
+  width: 100%;
+}
+
+/* ── 브랜드 헤더 ────────────────────────────── */
 .header {
-  flex-shrink: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 0.5rem;
-  padding-top: 1.5rem;
 }
 
 .heart {
@@ -119,9 +128,8 @@
   color: #9ca3af;
 }
 
-/* ── 중앙: 본문 (수직 중앙) ────────────────── */
+/* ── 본문 (헤더와 함께 .center 안에서 중앙 정렬) ── */
 .body {
-  flex: 1 1 auto;
   display: flex;
   flex-direction: column;
   align-items: center;

@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { PasscodeInput } from '@/components/PasscodeInput'
-import { AuthShell } from '@/components/auth/AuthShell'
+import { AuthLayout } from '@/components/auth/AuthLayout'
 import styles from '@/components/auth/auth.module.css'
 
 // 로컬에서 잠금 메시지 디자인을 확인하려면 true 로 바꾼다. (배포 시 false 유지)
@@ -75,7 +75,7 @@ export default function LockPage() {
   const displaySeconds = DEV_FORCE_LOCK && !isLocked ? 582 : countdown
 
   return (
-    <AuthShell
+    <AuthLayout
       subtitle="우리 둘만의 데이트 위시리스트"
       footer={
         <Link href="/forgot" className={styles.link}>
@@ -99,6 +99,6 @@ export default function LockPage() {
         clearOnError
         label={showLock ? undefined : '패스코드 입력'}
       />
-    </AuthShell>
+    </AuthLayout>
   )
 }

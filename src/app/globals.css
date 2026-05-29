@@ -64,16 +64,24 @@
 }
 
 /*
- * 인증 화면(lock/setup/forgot/reset) 한정 canvas(html) 배경.
- * AuthShell 이 마운트된 동안에만 <html> 에 붙으므로 다른 페이지엔 영향 없다.
- * 주소창 토글 / 오버스크롤 시 흰 여백 노출을 막는다.
+ * 인증 화면(lock/setup/forgot/reset) 한정 canvas 배경.
+ * AuthLayout 이 마운트된 동안에만 <html> 에 'auth-canvas' 가 붙으므로 다른
+ * 페이지엔 영향이 없다. html + body 양쪽 + min-height 로 박아 주소창 토글 /
+ * 오버스크롤 / 콘텐츠 단축 어디서도 흰 여백이 드러나지 않게 한다.
  */
-html.auth-canvas {
+html,
+body {
+  min-height: 100dvh;
+}
+
+html.auth-canvas,
+html.auth-canvas body {
   background: #f4f0fa;
 }
 
 @media (prefers-color-scheme: dark) {
-  html.auth-canvas {
+  html.auth-canvas,
+  html.auth-canvas body {
     background: #0a0712;
   }
 }

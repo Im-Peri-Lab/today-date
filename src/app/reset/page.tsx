@@ -4,7 +4,7 @@ import { Suspense, useEffect, useRef, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { toast } from 'sonner'
 import { PasscodeInput } from '@/components/PasscodeInput'
-import { AuthShell } from '@/components/auth/AuthShell'
+import { AuthLayout } from '@/components/auth/AuthLayout'
 
 type SubStep = 'set' | 'confirm'
 
@@ -67,7 +67,7 @@ function ResetForm() {
   if (!token) return null
 
   return (
-    <AuthShell
+    <AuthLayout
       subtitle={
         subStep === 'set'
           ? '새로운 4~6자리 패스코드를 설정하세요'
@@ -91,7 +91,7 @@ function ResetForm() {
           label="패스코드 확인"
         />
       )}
-    </AuthShell>
+    </AuthLayout>
   )
 }
 

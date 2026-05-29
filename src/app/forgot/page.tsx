@@ -6,7 +6,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Mail, MailCheck } from 'lucide-react'
-import { AuthShell } from '@/components/auth/AuthShell'
+import { AuthLayout } from '@/components/auth/AuthLayout'
 import styles from '@/components/auth/auth.module.css'
 
 const schema = z.object({
@@ -38,7 +38,7 @@ export default function ForgotPage() {
   }
 
   return (
-    <AuthShell
+    <AuthLayout
       subtitle="패스코드를 잊으셨나요?"
       footer={
         <Link href="/lock" className={styles.link}>
@@ -90,6 +90,6 @@ export default function ForgotPage() {
           <p className={styles.hint}>링크는 30분 후 만료됩니다.</p>
         </div>
       )}
-    </AuthShell>
+    </AuthLayout>
   )
 }

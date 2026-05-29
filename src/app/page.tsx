@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
 import { getSession } from '@/lib/auth/session'
-import { Heart, Zap, MapPin } from 'lucide-react'
+import { Heart, Zap, MapPin, List } from 'lucide-react'
 import Link from 'next/link'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -39,6 +39,16 @@ export default async function HomePage() {
             >
               <MapPin className="w-4 h-4" />
               장소 추가하기
+            </Button>
+          </Link>
+
+          <Link href="/list" className="block">
+            <Button
+              variant="ghost"
+              className="w-full text-violet-700 hover:bg-violet-50 gap-2"
+            >
+              <List className="w-4 h-4" />
+              목록 보기
             </Button>
           </Link>
 

@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import localFont from 'next/font/local'
 import { Toaster } from '@/components/ui/sonner'
+import { Providers } from './providers'
 import { cn } from '@/lib/utils'
 import './globals.css'
 
@@ -35,7 +36,7 @@ export default function RootLayout({
   return (
     <html lang="ko" className={cn('font-sans', geistSans.variable)}>
       <body className={`${geistMono.variable} antialiased`}>
-        {children}
+        <Providers>{children}</Providers>
         <Toaster position="top-center" richColors />
       </body>
     </html>

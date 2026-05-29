@@ -1,0 +1,112 @@
+'use client'
+
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { useState } from 'react'
+import { toast } from 'sonner'
+import { MapPin } from 'lucide-react'
+import { CategoryBadge } from './CategoryBadge'
+import { ItemMenu } from './ItemMenu'
+import { RatingStars } from './RatingStars'
+import { DeleteConfirmDialog } from './DeleteConfirmDialog'
+import { VisitedDialog } from '@/components/VisitedDialog'
+import { useDeletePlace, useUpdatePlace } from '@/hooks/usePlaces'
+import { MEAL_LABELS } from '@/lib/labels'
+import type { Place } from '@/types'
+
+export function PlaceCard({ place }: { place: Place }) {
+  const router = useRouter()
+  const [deleteOpen, setDeleteOpen] = useState(false)
+  const [visitedOpen, setVisitedOpen] = useState(false)
+  const del = useDeletePlace()
+  const update = useUpdatePlace()
+
+  function handleRevert() {
+    update.mutate(
+      { id: place.id, patch: { status: 'wishlist' } },
+      {
+        onSuccess: () => toast.success('위시리스트로 옮겼어요'),
+        onError: () => toast.error('변경 중 오류가 발생했습니다.'),
+      }
+    )
+  }
+
+  function handleDelete() {
+    del.mutate(place.id, {
+      onSuccess: () => {
+        toast.success('삭제했어요')
+        setDeleteOpen(false)
+      },
+      onError: () => toast.error('삭제 중 오류가 발생했습니다.'),
+    })
+  }
+
+  const isVisited = place.status === 'visited'
+
+  return (
+    <div className="group relative rounded-xl bg-card ring-1 ring-foreground/10 transition-shadow hover:shadow-md">
+      <div className="absolute right-1.5 top-1.5 z-10">
+        <ItemMenu
+          status={place.status}
+          onEdit={() => router.push(`/places/${place.id}/edit`)}
+          onDelete={() => setDeleteOpen(true)}
+          onMarkVisited={() => setVisitedOpen(true)}
+          onRevert={handleRevert}
+        />
+      </div>
+
+      <Link href={`/places/${place.id}`} className="block p-4 pr-11">
+        <h3 className="mb-2 line-clamp-1 font-medium text-foreground">{place.title}</h3>
+
+        <div className="mb-2 flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
+          {place.category && <CategoryBadge category={place.category} />}
+          {place.location && (
+            <span className="inline-flex items-center gap-1">
+              <MapPin className="h-3 w-3" />
+              {place.location}
+            </span>
+          )}
+          {place.meal_times?.map((m) => (
+            <span
+              key={m}
+              className="rounded-full bg-muted px-2 py-0.5 text-[11px] text-muted-foreground"
+            >
+              {MEAL_LABELS[m]}
+            </span>
+          ))}
+        </div>
+
+        {place.memo && (
+          <p className="line-clamp-2 text-sm text-muted-foreground">{place.memo}</p>
+        )}
+
+        {isVisited && (
+          <div className="mt-2 flex items-center gap-2 border-t pt-2 text-xs text-muted-foreground">
+            {place.rating ? <RatingStars value={place.rating} size="sm" /> : null}
+            {place.visited_at && <span>{place.visited_at}</span>}
+          </div>
+        )}
+      </Link>
+
+      <DeleteConfirmDialog
+        open={deleteOpen}
+        onOpenChange={setDeleteOpen}
+        title={place.title}
+        loading={del.isPending}
+        onConfirm={handleDelete}
+      />
+      <VisitedDialog
+        open={visitedOpen}
+        onOpenChange={setVisitedOpen}
+        track="place"
+        id={place.id}
+        title={place.title}
+        initial={{
+          visited_at: place.visited_at,
+          rating: place.rating,
+          review_note: place.review_note,
+        }}
+      />
+    </div>
+  )
+}

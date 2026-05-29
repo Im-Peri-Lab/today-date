@@ -5,11 +5,13 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { toast } from 'sonner'
+import { useQueryClient } from '@tanstack/react-query'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { CategorySelect } from '@/components/CategorySelect'
+import type { Place } from '@/types'
 
 const schema = z.object({
   title: z.string().min(1, '제목을 입력해 주세요.').max(100, '제목은 100자 이하로 입력해 주세요.'),
@@ -36,8 +38,10 @@ const MEAL_OPTIONS = [
   { value: 'dinner' as const, label: '저녁' },
 ]
 
-export function PlaceForm() {
+export function PlaceForm({ place }: { place?: Place }) {
   const router = useRouter()
+  const queryClient = useQueryClient()
+  const isEdit = !!place
   const {
     register,
     handleSubmit,
@@ -46,7 +50,16 @@ export function PlaceForm() {
     formState: { errors, isSubmitting },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { meal_times: [] },
+    defaultValues: place
+      ? {
+          title: place.title,
+          category_id: place.category_id ?? '',
+          location: place.location,
+          meal_times: place.meal_times,
+          memo: place.memo ?? '',
+          reference_url: place.reference_url ?? '',
+        }
+      : { meal_times: [] },
   })
 
   const categoryValue = watch('category_id') ?? ''
@@ -61,16 +74,18 @@ export function PlaceForm() {
   }
 
   async function onSubmit(values: FormValues) {
-    const res = await fetch('/api/places', {
-      method: 'POST',
+    const payload = {
+      ...values,
+      category_id: values.category_id || null,
+      reference_url: values.reference_url || null,
+      memo: values.memo || null,
+      added_by: values.added_by || null,
+    }
+
+    const res = await fetch(isEdit ? `/api/places/${place!.id}` : '/api/places', {
+      method: isEdit ? 'PATCH' : 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        ...values,
-        category_id: values.category_id || null,
-        reference_url: values.reference_url || null,
-        memo: values.memo || null,
-        added_by: values.added_by || null,
-      }),
+      body: JSON.stringify(payload),
     })
 
     const json = await res.json()
@@ -79,8 +94,15 @@ export function PlaceForm() {
       return
     }
 
-    toast.success('장소가 등록되었습니다! 📍')
-    router.push('/')
+    if (isEdit) {
+      queryClient.invalidateQueries({ queryKey: ['places'] })
+      queryClient.invalidateQueries({ queryKey: ['place', place!.id] })
+      toast.success('수정되었습니다! ✏️')
+      router.push(`/places/${place!.id}`)
+    } else {
+      toast.success('장소가 등록되었습니다! 📍')
+      router.push('/list')
+    }
   }
 
   return (
@@ -209,7 +231,7 @@ export function PlaceForm() {
         disabled={isSubmitting}
         className="w-full bg-violet-600 hover:bg-violet-700 text-white"
       >
-        {isSubmitting ? '저장 중...' : '장소 등록하기'}
+        {isSubmitting ? '저장 중...' : isEdit ? '수정 저장하기' : '장소 등록하기'}
       </Button>
     </form>
   )

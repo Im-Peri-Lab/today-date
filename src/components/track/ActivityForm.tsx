@@ -5,11 +5,13 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { toast } from 'sonner'
+import { useQueryClient } from '@tanstack/react-query'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { CategorySelect } from '@/components/CategorySelect'
+import type { Activity } from '@/types'
 
 const schema = z.object({
   title: z.string().min(1, '제목을 입력해 주세요.').max(100, '제목은 100자 이하로 입력해 주세요.'),
@@ -42,8 +44,10 @@ const TIME_OPTIONS = [
   { value: 'any', label: '상관없음' },
 ] as const
 
-export function ActivityForm() {
+export function ActivityForm({ activity }: { activity?: Activity }) {
   const router = useRouter()
+  const queryClient = useQueryClient()
+  const isEdit = !!activity
   const {
     register,
     handleSubmit,
@@ -52,7 +56,16 @@ export function ActivityForm() {
     formState: { errors, isSubmitting },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { time_of_day: 'any' },
+    defaultValues: activity
+      ? {
+          title: activity.title,
+          category_id: activity.category_id ?? '',
+          duration_bucket: activity.duration_bucket ?? undefined,
+          time_of_day: activity.time_of_day,
+          memo: activity.memo ?? '',
+          reference_url: activity.reference_url ?? '',
+        }
+      : { time_of_day: 'any' },
   })
 
   const durationValue = watch('duration_bucket')
@@ -60,16 +73,18 @@ export function ActivityForm() {
   const categoryValue = watch('category_id') ?? ''
 
   async function onSubmit(values: FormValues) {
-    const res = await fetch('/api/activities', {
-      method: 'POST',
+    const payload = {
+      ...values,
+      category_id: values.category_id || null,
+      reference_url: values.reference_url || null,
+      memo: values.memo || null,
+      added_by: values.added_by || null,
+    }
+
+    const res = await fetch(isEdit ? `/api/activities/${activity!.id}` : '/api/activities', {
+      method: isEdit ? 'PATCH' : 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        ...values,
-        category_id: values.category_id || null,
-        reference_url: values.reference_url || null,
-        memo: values.memo || null,
-        added_by: values.added_by || null,
-      }),
+      body: JSON.stringify(payload),
     })
 
     const json = await res.json()
@@ -78,8 +93,15 @@ export function ActivityForm() {
       return
     }
 
-    toast.success('활동이 등록되었습니다! 🎉')
-    router.push('/')
+    if (isEdit) {
+      queryClient.invalidateQueries({ queryKey: ['activities'] })
+      queryClient.invalidateQueries({ queryKey: ['activity', activity!.id] })
+      toast.success('수정되었습니다! ✏️')
+      router.push(`/activities/${activity!.id}`)
+    } else {
+      toast.success('활동이 등록되었습니다! 🎉')
+      router.push('/list')
+    }
   }
 
   return (
@@ -199,7 +221,7 @@ export function ActivityForm() {
         disabled={isSubmitting}
         className="w-full bg-violet-600 hover:bg-violet-700 text-white"
       >
-        {isSubmitting ? '저장 중...' : '활동 등록하기'}
+        {isSubmitting ? '저장 중...' : isEdit ? '수정 저장하기' : '활동 등록하기'}
       </Button>
     </form>
   )

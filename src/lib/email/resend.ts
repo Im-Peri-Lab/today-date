@@ -22,7 +22,7 @@ export async function sendEmail(options: {
   }
 
   const resend = getResend()
-  const { data, error } = await resend.emails.send({
+  const { error } = await resend.emails.send({
     from: fromEmail,
     to: options.to,
     subject: options.subject,

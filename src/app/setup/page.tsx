@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -22,7 +22,7 @@ type Step = 1 | 2 | 3
 // 패스코드 단계 내부 상태: 'set'=첫 입력, 'confirm'=확인 입력
 type PasscodeSubStep = 'set' | 'confirm'
 
-export default function SetupPage() {
+function SetupFlow() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [step, setStep] = useState<Step>(1)
@@ -208,5 +208,13 @@ export default function SetupPage() {
         )}
       </Card>
     </main>
+  )
+}
+
+export default function SetupPage() {
+  return (
+    <Suspense fallback={null}>
+      <SetupFlow />
+    </Suspense>
   )
 }

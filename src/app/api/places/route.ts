@@ -40,10 +40,16 @@ export async function GET(req: NextRequest) {
       .eq('status', status)
       .order('created_at', { ascending: false })
 
-    if (category_id) query = query.eq('category_id', category_id)
+    if (category_id) {
+      const ids = category_id.split(',').filter(Boolean)
+      query = ids.length > 1 ? query.in('category_id', ids) : query.eq('category_id', ids[0])
+    }
     if (location) query = query.ilike('location', `%${location}%`)
     if (meal_time) query = query.contains('meal_times', [meal_time])
-    if (q) query = query.ilike('memo', `%${q}%`)
+    if (q) {
+      const term = q.replace(/[%,]/g, ' ')
+      query = query.or(`title.ilike.%${term}%,memo.ilike.%${term}%`)
+    }
 
     const { data, error } = await query
     if (error) throw error

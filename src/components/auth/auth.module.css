@@ -1,0 +1,495 @@
+/*
+ * 인증 흐름 공통 디자인 — "미니멀 럭셔리 + 로맨틱 한 스푼"
+ * lock / setup / forgot / reset 가 공유한다.
+ *
+ * 레이아웃: .page(min-h-dvh flex column) → .header / .body(flex-1 center) / .footer
+ * 배경: .page(컨테이너) + html.auth-canvas(globals) 양쪽 → 흰 여백 노출 금지
+ * 다크 톤은 인증 화면 마운트 동안에만 적용(AuthShell 이 html 에 클래스 토글).
+ * PasscodeInput 은 --pi-* 변수로 테마화 (lock/setup/reset 공통).
+ */
+
+.page {
+  min-height: 100vh;
+  min-height: 100dvh; /* iOS 주소창 동적 높이 대응 */
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+
+  background: linear-gradient(180deg, #ffffff 0%, #f4f0fa 100%);
+
+  /* 상단 노치 / 하단 브라우저 바와 분리 */
+  padding-top: calc(env(safe-area-inset-top) + 1.5rem);
+  padding-right: 1.5rem;
+  padding-bottom: calc(env(safe-area-inset-bottom) + 1.5rem);
+  padding-left: 1.5rem;
+
+  font-family:
+    'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont,
+    'SF Pro Display', 'SF Pro Text', 'Apple SD Gothic Neo', system-ui,
+    'Segoe UI', Roboto, sans-serif;
+
+  /* 하트 그라데이션 */
+  --heart-from: #a855f7;
+  --heart-to: #ec4899;
+
+  /* PasscodeInput 테마 토큰 (light) */
+  --pi-dot-border: #d4cce3;
+  --pi-dot-fill: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);
+  --pi-dot-glow: rgba(168, 85, 247, 0.4);
+  --pi-key-bg: #fcfcfd;
+  --pi-key-border: #eee9f5;
+  --pi-key-shadow: 0 1px 2px rgba(20, 10, 40, 0.05);
+  --pi-key-text: #1a1033;
+  --pi-key-hover: #f5f0ff;
+  --pi-key-active: #ede4ff;
+  --pi-key-press-shadow: rgba(124, 58, 237, 0.12);
+  --pi-del-color: #9ca3af;
+  --pi-error-color: #be123c;
+  --pi-label-color: #6b7280;
+
+  animation: pageIn 300ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes pageIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── 상단: 브랜드 헤더 ──────────────────────── */
+.header {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding-top: 1.5rem;
+}
+
+.heart {
+  width: 48px;
+  height: 48px;
+  filter: drop-shadow(0 4px 12px rgba(168, 85, 247, 0.35));
+  animation: float 3s ease-in-out infinite;
+}
+
+.heartPulse {
+  animation: heartPulse 1.4s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+@keyframes heartPulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.08);
+    opacity: 0.75;
+  }
+}
+
+.title {
+  font-size: 1.875rem;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  color: #1a1033;
+  line-height: 1.1;
+}
+
+.subtitle {
+  font-size: 0.875rem;
+  font-weight: 400;
+  line-height: 1.5;
+  color: #9ca3af;
+}
+
+/* ── 중앙: 본문 (수직 중앙) ────────────────── */
+.body {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.75rem;
+  width: 100%;
+}
+
+/* ── 하단: 링크 영역 ───────────────────────── */
+.footer {
+  flex-shrink: 0;
+  padding-top: 1.5rem;
+}
+
+.link {
+  font-size: 0.875rem;
+  color: #6b7280;
+  text-decoration: none;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+  transition: color 150ms ease;
+}
+
+.link:hover,
+.link:active {
+  color: #7c3aed;
+  text-decoration: underline;
+}
+
+/* ── 단계 인디케이터 (setup 마법사) ────────── */
+.steps {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.stepDot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 9999px;
+  background: #e0d8ee;
+  transition: width 250ms ease, background 250ms ease;
+}
+
+.stepDotActive {
+  width: 1.5rem;
+  background: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);
+}
+
+/* ── 카드 (setup / forgot 폼) ──────────────── */
+.card {
+  width: 100%;
+  max-width: 22rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding: 1.75rem 1.5rem;
+  border-radius: 1.25rem;
+  background: #ffffff;
+  border: 1px solid #eee9f5;
+  box-shadow: 0 8px 32px -8px rgba(124, 58, 237, 0.1);
+}
+
+.cardHeader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.cardTitle {
+  font-size: 1.125rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: #1a1033;
+}
+
+.cardDesc {
+  font-size: 0.8125rem;
+  line-height: 1.55;
+  color: #6b7280;
+}
+
+.cardDesc strong,
+.cardDesc b {
+  font-weight: 600;
+  color: #7c3aed;
+}
+
+/* 아이콘 배지 (메일/체크 등) */
+.iconBadge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  margin-bottom: 0.25rem;
+  border-radius: 9999px;
+  color: #a855f7;
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.12) 0%, rgba(236, 72, 153, 0.12) 100%);
+}
+
+/* ── 폼 요소 ───────────────────────────────── */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  text-align: left;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4375rem;
+}
+
+.label {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #6b7280;
+}
+
+.input {
+  height: 2.875rem;
+  width: 100%;
+  padding: 0 0.9375rem;
+  border-radius: 0.875rem;
+  border: 1px solid #e3dcef;
+  background: #fcfcfd;
+  color: #1a1033;
+  font-size: 1rem;
+  outline: none;
+  transition:
+    border-color 150ms ease,
+    box-shadow 150ms ease;
+}
+
+.input::placeholder {
+  color: #b8b2c4;
+}
+
+.input:focus {
+  border-color: #a855f7;
+  box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.15);
+}
+
+.errorText {
+  font-size: 0.8125rem;
+  color: #be123c;
+}
+
+.hint {
+  font-size: 0.8125rem;
+  line-height: 1.55;
+  color: #6b7280;
+}
+
+/* ── 버튼 ──────────────────────────────────── */
+.btnPrimary,
+.btnSecondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  height: 2.875rem;
+  border-radius: 0.875rem;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    transform 100ms ease,
+    box-shadow 150ms ease,
+    filter 150ms ease,
+    background-color 150ms ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.btnPrimary {
+  color: #ffffff;
+  border: none;
+  background: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);
+  box-shadow: 0 6px 18px -6px rgba(168, 85, 247, 0.55);
+}
+
+.btnPrimary:hover:not(:disabled) {
+  filter: brightness(1.05);
+}
+
+.btnSecondary {
+  color: #7c3aed;
+  background: #ffffff;
+  border: 1px solid #e3dcef;
+}
+
+.btnSecondary:hover:not(:disabled) {
+  background: #faf7ff;
+  border-color: #d4cce3;
+}
+
+.btnPrimary:active:not(:disabled),
+.btnSecondary:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.btnPrimary:disabled,
+.btnSecondary:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* ── 잠금 안내 배너 (lock, 5회 실패) ───────── */
+.lockNotice {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  max-width: 16rem;
+  padding: 0.75rem 1.25rem;
+  border-radius: 0.875rem;
+  background: #fef2f2;
+  border: 1px solid #fecdd3;
+}
+
+.lockTitle {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: #be123c;
+}
+
+.lockTimer {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: #be123c;
+  opacity: 0.85;
+}
+
+/* ── 다크 모드 (OS 설정, 인증 화면 한정) ───── */
+@media (prefers-color-scheme: dark) {
+  .page {
+    background: linear-gradient(180deg, #0a0712 0%, #120c1e 100%);
+
+    --heart-from: #c084fc;
+    --heart-to: #f472b6;
+
+    --pi-dot-border: #3f3454;
+    --pi-dot-fill: linear-gradient(135deg, #c084fc 0%, #f472b6 100%);
+    --pi-dot-glow: rgba(192, 132, 252, 0.5);
+    --pi-key-bg: #251d38;
+    --pi-key-border: #322843;
+    --pi-key-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+    --pi-key-text: #f5f3fa;
+    --pi-key-hover: #2f2647;
+    --pi-key-active: #382d54;
+    --pi-key-press-shadow: rgba(0, 0, 0, 0.45);
+    --pi-del-color: #9890a8;
+    --pi-error-color: #fb7185;
+    --pi-label-color: #a8a0b8;
+  }
+
+  .heart {
+    filter: drop-shadow(0 4px 14px rgba(192, 132, 252, 0.5));
+  }
+
+  .title {
+    color: #f5f3fa;
+  }
+
+  .subtitle {
+    color: #a8a0b8;
+  }
+
+  .link {
+    color: #a8a0b8;
+  }
+
+  .link:hover,
+  .link:active {
+    color: #c084fc;
+  }
+
+  .stepDot {
+    background: #322843;
+  }
+
+  .stepDotActive {
+    background: linear-gradient(135deg, #c084fc 0%, #f472b6 100%);
+  }
+
+  .card {
+    background: #181122;
+    border-color: #2a2140;
+    box-shadow: 0 8px 32px -8px rgba(0, 0, 0, 0.5);
+  }
+
+  .cardTitle {
+    color: #f5f3fa;
+  }
+
+  .cardDesc {
+    color: #a8a0b8;
+  }
+
+  .cardDesc strong,
+  .cardDesc b {
+    color: #c084fc;
+  }
+
+  .iconBadge {
+    color: #c084fc;
+    background: linear-gradient(135deg, rgba(192, 132, 252, 0.16) 0%, rgba(244, 114, 182, 0.16) 100%);
+  }
+
+  .label {
+    color: #a8a0b8;
+  }
+
+  .input {
+    background: #1f1830;
+    border-color: #322843;
+    color: #f5f3fa;
+  }
+
+  .input::placeholder {
+    color: #6b6480;
+  }
+
+  .input:focus {
+    border-color: #c084fc;
+    box-shadow: 0 0 0 3px rgba(192, 132, 252, 0.2);
+  }
+
+  .errorText {
+    color: #fb7185;
+  }
+
+  .hint {
+    color: #a8a0b8;
+  }
+
+  .btnSecondary {
+    color: #d8b4fe;
+    background: #1f1830;
+    border-color: #322843;
+  }
+
+  .btnSecondary:hover:not(:disabled) {
+    background: #281f3c;
+    border-color: #3f3454;
+  }
+
+  .lockNotice {
+    background: #2d1820;
+    border-color: #4a1c2c;
+  }
+
+  .lockTitle,
+  .lockTimer {
+    color: #fb7185;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page,
+  .heart,
+  .heartPulse {
+    animation: none;
+  }
+}

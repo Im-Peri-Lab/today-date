@@ -5,11 +5,9 @@ import Link from 'next/link'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Mail, ArrowLeft } from 'lucide-react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import { Mail, MailCheck } from 'lucide-react'
+import { AuthShell } from '@/components/auth/AuthShell'
+import styles from '@/components/auth/auth.module.css'
 
 const schema = z.object({
   email: z.string().email('올바른 이메일 주소를 입력하세요.'),
@@ -40,71 +38,58 @@ export default function ForgotPage() {
   }
 
   return (
-    <main className="min-h-[100dvh] bg-gradient-to-br from-violet-50 to-purple-100 flex items-center justify-center p-4">
-      <Card className="w-full max-w-sm shadow-xl border-violet-100">
-        {!sent ? (
-          <>
-            <CardHeader className="text-center pb-2">
-              <div className="text-4xl mb-2">🔑</div>
-              <CardTitle className="text-xl text-violet-800">패스코드 재설정</CardTitle>
-              <CardDescription>등록한 이메일 주소를 입력하세요</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="email">이메일 주소</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="[MASKED_EMAIL]"
-                    autoComplete="email"
-                    {...register('email')}
-                    className="border-violet-200 focus-visible:ring-violet-500"
-                  />
-                  {errors.email && (
-                    <p className="text-sm text-red-500">{errors.email.message}</p>
-                  )}
-                </div>
-                <Button
-                  type="submit"
-                  disabled={isLoading}
-                  className="w-full bg-violet-700 hover:bg-violet-800"
-                >
-                  <Mail className="w-4 h-4 mr-2" />
-                  {isLoading ? '발송 중...' : '재설정 메일 발송'}
-                </Button>
-                <Link href="/lock">
-                  <Button variant="ghost" className="w-full text-violet-600" type="button">
-                    <ArrowLeft className="w-4 h-4 mr-2" />
-                    돌아가기
-                  </Button>
-                </Link>
-              </form>
-            </CardContent>
-          </>
-        ) : (
-          <>
-            <CardHeader className="text-center pb-2">
-              <div className="text-4xl mb-2">📬</div>
-              <CardTitle className="text-xl text-violet-800">메일을 확인해 주세요</CardTitle>
-              <CardDescription>
-                이메일이 등록되어 있다면<br />재설정 링크를 보내드렸습니다.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-gray-500 text-center mb-4">
-                링크는 30분 후 만료됩니다.
-              </p>
-              <Link href="/lock">
-                <Button variant="outline" className="w-full border-violet-200 text-violet-700">
-                  <ArrowLeft className="w-4 h-4 mr-2" />
-                  잠금 화면으로
-                </Button>
-              </Link>
-            </CardContent>
-          </>
-        )}
-      </Card>
-    </main>
+    <AuthShell
+      subtitle="패스코드를 잊으셨나요?"
+      footer={
+        <Link href="/lock" className={styles.link}>
+          잠금 화면으로 돌아가기
+        </Link>
+      }
+    >
+      {!sent ? (
+        <div className={styles.card}>
+          <div className={styles.cardHeader}>
+            <span className={styles.iconBadge}>
+              <Mail size={22} strokeWidth={1.75} />
+            </span>
+            <p className={styles.cardTitle}>패스코드 재설정</p>
+            <p className={styles.cardDesc}>등록한 이메일 주소를 입력하세요</p>
+          </div>
+          <form onSubmit={handleSubmit(onSubmit)} className={styles.form}>
+            <div className={styles.field}>
+              <label htmlFor="email" className={styles.label}>이메일 주소</label>
+              <input
+                id="email"
+                type="email"
+                placeholder="you@example.com"
+                autoComplete="email"
+                className={styles.input}
+                {...register('email')}
+              />
+              {errors.email && (
+                <p className={styles.errorText}>{errors.email.message}</p>
+              )}
+            </div>
+            <button type="submit" disabled={isLoading} className={styles.btnPrimary}>
+              <Mail size={18} strokeWidth={1.75} />
+              {isLoading ? '발송 중...' : '재설정 메일 발송'}
+            </button>
+          </form>
+        </div>
+      ) : (
+        <div className={styles.card}>
+          <div className={styles.cardHeader}>
+            <span className={styles.iconBadge}>
+              <MailCheck size={22} strokeWidth={1.75} />
+            </span>
+            <p className={styles.cardTitle}>메일을 확인해 주세요</p>
+            <p className={styles.cardDesc}>
+              이메일이 등록되어 있다면<br />재설정 링크를 보내드렸습니다.
+            </p>
+          </div>
+          <p className={styles.hint}>링크는 30분 후 만료됩니다.</p>
+        </div>
+      )}
+    </AuthShell>
   )
 }

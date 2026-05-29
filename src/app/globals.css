@@ -64,16 +64,16 @@
 }
 
 /*
- * /lock 페이지 한정 canvas(html) 배경.
- * 이 클래스는 LockPage 가 마운트된 동안에만 <html> 에 붙으므로 다른 페이지에
- * 영향을 주지 않는다. 주소창 토글 / 오버스크롤 시 흰 여백 노출을 막는다.
+ * 인증 화면(lock/setup/forgot/reset) 한정 canvas(html) 배경.
+ * AuthShell 이 마운트된 동안에만 <html> 에 붙으므로 다른 페이지엔 영향 없다.
+ * 주소창 토글 / 오버스크롤 시 흰 여백 노출을 막는다.
  */
-html.lock-canvas {
+html.auth-canvas {
   background: #f4f0fa;
 }
 
 @media (prefers-color-scheme: dark) {
-  html.lock-canvas {
+  html.auth-canvas {
     background: #0a0712;
   }
 }

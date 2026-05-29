@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import { toast } from 'sonner'
 import { Clock, Sun, Moon } from 'lucide-react'
 import { CategoryBadge } from './CategoryBadge'
@@ -12,9 +12,16 @@ import { DeleteConfirmDialog } from './DeleteConfirmDialog'
 import { VisitedDialog } from '@/components/VisitedDialog'
 import { useDeleteActivity, useUpdateActivity } from '@/hooks/useActivities'
 import { DURATION_LABELS, TIME_OF_DAY_LABELS } from '@/lib/labels'
+import { cn } from '@/lib/utils'
 import type { Activity } from '@/types'
 
-export function ActivityCard({ activity }: { activity: Activity }) {
+interface ActivityCardProps {
+  activity: Activity
+  hideMenu?: boolean
+  actionSlot?: ReactNode
+}
+
+export function ActivityCard({ activity, hideMenu, actionSlot }: ActivityCardProps) {
   const router = useRouter()
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [visitedOpen, setVisitedOpen] = useState(false)
@@ -45,17 +52,22 @@ export function ActivityCard({ activity }: { activity: Activity }) {
 
   return (
     <div className="group relative rounded-xl bg-card ring-1 ring-foreground/10 transition-shadow hover:shadow-md">
-      <div className="absolute right-1.5 top-1.5 z-10">
-        <ItemMenu
-          status={activity.status}
-          onEdit={() => router.push(`/activities/${activity.id}/edit`)}
-          onDelete={() => setDeleteOpen(true)}
-          onMarkVisited={() => setVisitedOpen(true)}
-          onRevert={handleRevert}
-        />
-      </div>
+      {!hideMenu && (
+        <div className="absolute right-1.5 top-1.5 z-10">
+          <ItemMenu
+            status={activity.status}
+            onEdit={() => router.push(`/activities/${activity.id}/edit`)}
+            onDelete={() => setDeleteOpen(true)}
+            onMarkVisited={() => setVisitedOpen(true)}
+            onRevert={handleRevert}
+          />
+        </div>
+      )}
 
-      <Link href={`/activities/${activity.id}`} className="block p-4 pr-11">
+      <Link
+        href={`/activities/${activity.id}`}
+        className={cn('block p-4', hideMenu ? 'pr-4' : 'pr-11')}
+      >
         <h3 className="mb-2 line-clamp-1 font-medium text-foreground">{activity.title}</h3>
 
         <div className="mb-2 flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
@@ -91,6 +103,8 @@ export function ActivityCard({ activity }: { activity: Activity }) {
           </div>
         )}
       </Link>
+
+      {actionSlot && <div className="border-t px-4 py-3">{actionSlot}</div>}
 
       <DeleteConfirmDialog
         open={deleteOpen}

@@ -1,17 +1,14 @@
 import { redirect } from 'next/navigation'
 import { getSession } from '@/lib/auth/session'
-import { HomeDashboard } from '@/components/HomeDashboard'
+import { PlaceRecommendWizard } from '@/components/recommend/PlaceRecommendWizard'
 
-export default async function HomePage() {
+export default async function RecommendPlacePage() {
   const session = await getSession()
-
-  if (!session.authenticated) {
-    redirect('/lock')
-  }
+  if (!session.authenticated) redirect('/lock')
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-violet-50 to-purple-100">
-      <HomeDashboard />
+      <PlaceRecommendWizard />
     </main>
   )
 }

@@ -78,6 +78,7 @@ export default function LockPage() {
       {/* 뷰포트 전체를 덮는 고정 배경 (주소창 접힘 시 흰 여백 방지) */}
       <div className={styles.bg} aria-hidden />
 
+      <div className={styles.content}>
       {/* 앱 아이덴티티 */}
       <header className={styles.header}>
         <svg
@@ -123,6 +124,7 @@ export default function LockPage() {
         <Link href="/forgot" className={styles.forgot}>
           패스코드를 잊으셨나요?
         </Link>
+      </div>
       </div>
     </main>
   )

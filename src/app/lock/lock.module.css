@@ -1,13 +1,9 @@
 .page {
   position: relative;
-  z-index: 0;
   min-height: 100vh;
-  min-height: 100svh; /* 주소창이 접혀도 콘텐츠가 보이는 영역 기준으로 중앙 정렬 */
+  min-height: 100svh; /* 주소창이 접혀도 콘텐츠가 보이는 영역 기준 */
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 3rem; /* 헤더 ↔ 키패드 영역 분리 */
   /* 상단 노치 / 하단 브라우저 바(safe-area)와 분리되도록 여백 확보 */
   padding-top: calc(env(safe-area-inset-top) + 1.5rem);
   padding-right: 1.5rem;
@@ -54,12 +50,24 @@
 }
 
 /* 배경을 콘텐츠 높이가 아니라 뷰포트 전체에 고정해, 주소창이 접혀도
-   아래쪽에 흰 여백이 드러나지 않게 한다. */
+   아래쪽에 흰 여백이 드러나지 않게 한다. (양수 z-index 로 명확히 뒤에 깐다) */
 .bg {
   position: fixed;
   inset: 0;
-  z-index: -1;
+  z-index: 0;
   background: linear-gradient(180deg, #ffffff 0%, #f4f0fa 100%);
+}
+
+/* 실제 콘텐츠 — 배경 위(z-index 1), margin:auto 로 중앙 정렬하되
+   넘칠 때는 위가 잘리지 않고 스크롤로 접근 가능하게 한다. */
+.content {
+  position: relative;
+  z-index: 1;
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3rem; /* 헤더 ↔ 키패드 영역 분리 */
 }
 
 /* ── 헤더 ──────────────────────────────────── */

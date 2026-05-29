@@ -1,6 +1,6 @@
 'use client'
 
-import { Suspense, useEffect, useState } from 'react'
+import { Suspense, useEffect, useRef, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { toast } from 'sonner'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -17,6 +17,9 @@ function ResetForm() {
   const [firstPasscode, setFirstPasscode] = useState('')
   const [confirmError, setConfirmError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  // 일회용 토큰이라 중복 제출 시 두 번째부터는 "만료된 링크" 오류가 난다.
+  // setIsLoading 은 비동기라 동기적 재호출을 막지 못하므로 ref 로 in-flight 를 가드한다.
+  const submittingRef = useRef(false)
 
   useEffect(() => {
     if (!token) {
@@ -36,6 +39,8 @@ function ResetForm() {
       setConfirmError('패스코드가 일치하지 않습니다.')
       return
     }
+    if (submittingRef.current) return
+    submittingRef.current = true
     setIsLoading(true)
     setConfirmError('')
     try {
@@ -49,6 +54,7 @@ function ResetForm() {
         toast.error(json.error ?? '오류가 발생했습니다.')
         setFirstPasscode('')
         setSubStep('set')
+        submittingRef.current = false
         return
       }
       toast.success('패스코드가 변경되었습니다!')

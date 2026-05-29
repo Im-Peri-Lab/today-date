@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Delete } from 'lucide-react'
 
 interface PasscodeInputProps {
@@ -22,17 +22,32 @@ export function PasscodeInput({
 }: PasscodeInputProps) {
   const [value, setValue] = useState('')
 
+  // 항상 최신 onComplete 를 참조하되, 호출 트리거는 value 길이 변화에만 의존시킨다.
+  // (onComplete 를 effect deps 에 넣으면 부모 리렌더로 함수 정체성이 바뀔 때마다
+  //  완료 상태에서 effect 가 재실행되어 onComplete 가 중복 호출되는 버그가 발생함)
+  const onCompleteRef = useRef(onComplete)
+  useEffect(() => {
+    onCompleteRef.current = onComplete
+  })
+
   useEffect(() => {
     if (error && clearOnError) {
       setValue('')
     }
   }, [error, clearOnError])
 
+  // 완료 시 정확히 한 번만 onComplete 가 발사되도록 보장한다.
+  const firedRef = useRef(false)
   useEffect(() => {
     if (value.length === length) {
-      onComplete(value)
+      if (!firedRef.current) {
+        firedRef.current = true
+        onCompleteRef.current(value)
+      }
+    } else {
+      firedRef.current = false
     }
-  }, [value, length, onComplete])
+  }, [value, length])
 
   function handleKey(key: string) {
     if (disabled) return

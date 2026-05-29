@@ -8,9 +8,24 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1.75rem;
+  gap: 1.25rem; /* 도트 그룹 ↔ 키패드 */
   user-select: none;
   -webkit-user-select: none;
+}
+
+/* 라벨 + 도트를 하나의 시각적 그룹으로 묶는다 */
+.head {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem; /* 라벨 ↔ 도트 (가깝게) */
+}
+
+.label {
+  font-size: 0.8125rem;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  color: var(--pi-label-color, #6b7280);
 }
 
 /* ── 도트 인디케이터 ─────────────────────────── */
@@ -41,7 +56,7 @@
 
 /* ── 오류 / 잠금 메시지 ──────────────────────── */
 .error {
-  margin: -0.5rem 0;
+  margin: -0.25rem 0;
   font-size: 0.8125rem;
   letter-spacing: -0.01em;
   color: var(--pi-error-color, #be123c);

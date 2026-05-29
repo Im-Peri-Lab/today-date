@@ -10,6 +10,8 @@ interface PasscodeInputProps {
   disabled?: boolean
   error?: string
   clearOnError?: boolean
+  /** 도트 인디케이터 바로 위에 표시되는 라벨 (예: "패스코드 입력") */
+  label?: string
 }
 
 const KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '', '0', 'del']
@@ -20,6 +22,7 @@ export function PasscodeInput({
   disabled = false,
   error,
   clearOnError = true,
+  label,
 }: PasscodeInputProps) {
   const [value, setValue] = useState('')
 
@@ -64,18 +67,21 @@ export function PasscodeInput({
 
   return (
     <div className={styles.wrap}>
-      {/* 점(dot) 표시 */}
-      <div
-        className={styles.dots}
-        role="status"
-        aria-label={`패스코드 ${value.length}/${length}자리 입력됨`}
-      >
-        {Array.from({ length }).map((_, i) => (
-          <div
-            key={i}
-            className={`${styles.dot} ${i < value.length ? styles.dotFilled : ''}`}
-          />
-        ))}
+      {/* 라벨 + 도트 그룹 */}
+      <div className={styles.head}>
+        {label && <p className={styles.label}>{label}</p>}
+        <div
+          className={styles.dots}
+          role="status"
+          aria-label={`패스코드 ${value.length}/${length}자리 입력됨`}
+        >
+          {Array.from({ length }).map((_, i) => (
+            <div
+              key={i}
+              className={`${styles.dot} ${i < value.length ? styles.dotFilled : ''}`}
+            />
+          ))}
+        </div>
       </div>
 
       {/* 오류 메시지 */}

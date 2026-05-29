@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { Lock } from 'lucide-react'
 import { PasscodeInput } from '@/components/PasscodeInput'
 import styles from './lock.module.css'
 
@@ -84,31 +83,21 @@ export default function LockPage() {
           />
         </svg>
         <h1 className={styles.title}>Today Date</h1>
-        <p className={styles.subtitle}>
-          둘이서 모으는 데이트 위시리스트<br />
-          오늘 뭐할지 · 어디 갈지 골라드려요
-        </p>
+        <p className={styles.subtitle}>우리 둘만의 데이트 위시리스트</p>
       </header>
 
       {/* 패스코드 입력 */}
       <div className={styles.panel}>
-        <div className={styles.section}>
-          <Lock className={styles.lockIcon} size={18} strokeWidth={1.5} aria-hidden />
-          <p className={styles.sectionTitle}>
-            {isLocked ? '잠시 잠겨 있어요' : '두 사람만의 공간'}
-          </p>
-          <p className={styles.sectionDesc}>
-            {isLocked
-              ? `잠금 해제까지 ${Math.floor(countdown / 60)}분 ${countdown % 60}초`
-              : '패스코드를 입력하세요'}
-          </p>
-        </div>
-
         <PasscodeInput
           onComplete={handleComplete}
           disabled={isLoading || isLocked}
           error={error}
           clearOnError
+          label={
+            isLocked
+              ? `잠금 해제까지 ${Math.floor(countdown / 60)}분 ${countdown % 60}초`
+              : '패스코드 입력'
+          }
         />
 
         <Link href="/forgot" className={styles.forgot}>

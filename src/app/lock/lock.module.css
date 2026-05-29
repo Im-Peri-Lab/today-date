@@ -1,15 +1,29 @@
+/*
+ * /lock 레이아웃 — flexbox 3분할로 단순화.
+ *   .page (min-h-dvh, flex column, 배경)
+ *     ├ .header  (flex-shrink:0)        상단 아이덴티티
+ *     ├ .middle  (flex:1, center)       패스코드 입력 (수직 중앙)
+ *     └ .footer  (flex-shrink:0)        하단 링크 + safe-area
+ *
+ * 배경은 .page(컨테이너) + html(canvas) 양쪽에 깔아 주소창 토글/오버스크롤
+ * 어디서도 흰 여백이 드러나지 않게 한다. 다크 톤은 /lock 에만 스코프된다.
+ * (PasscodeInput 은 --pi-* 변수로 테마화 — /setup·/reset 라이트 룩은 영향 없음)
+ */
+
 .page {
-  position: relative;
   min-height: 100vh;
-  min-height: 100svh; /* 주소창이 접혀도 콘텐츠가 보이는 영역 기준 */
+  min-height: 100dvh; /* iOS 주소창 동적 높이 대응 */
   display: flex;
   flex-direction: column;
-  /* 상단 노치 / 하단 브라우저 바(safe-area)와 분리되도록 여백 확보 */
+  text-align: center;
+
+  background: linear-gradient(180deg, #ffffff 0%, #f4f0fa 100%);
+
+  /* 상단 노치 / 하단 브라우저 바와 분리 */
   padding-top: calc(env(safe-area-inset-top) + 1.5rem);
   padding-right: 1.5rem;
   padding-bottom: calc(env(safe-area-inset-bottom) + 1.5rem);
   padding-left: 1.5rem;
-  text-align: center;
 
   font-family:
     -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text',
@@ -49,33 +63,14 @@
   }
 }
 
-/* 배경을 콘텐츠 높이가 아니라 뷰포트 전체에 고정해, 주소창이 접혀도
-   아래쪽에 흰 여백이 드러나지 않게 한다. (양수 z-index 로 명확히 뒤에 깐다) */
-.bg {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  background: linear-gradient(180deg, #ffffff 0%, #f4f0fa 100%);
-}
-
-/* 실제 콘텐츠 — 배경 위(z-index 1), margin:auto 로 중앙 정렬하되
-   넘칠 때는 위가 잘리지 않고 스크롤로 접근 가능하게 한다. */
-.content {
-  position: relative;
-  z-index: 1;
-  margin: auto;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 3rem; /* 헤더 ↔ 키패드 영역 분리 */
-}
-
-/* ── 헤더 ──────────────────────────────────── */
+/* ── 상단: 아이덴티티 ───────────────────────── */
 .header {
+  flex-shrink: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 0.5rem;
+  padding-top: 1.5rem;
 }
 
 .heart {
@@ -110,16 +105,23 @@
   color: #9ca3af;
 }
 
-/* ── 패스코드 패널 ─────────────────────────── */
-.panel {
+/* ── 중앙: 패스코드 입력 (수직 중앙) ───────── */
+.middle {
+  flex: 1 1 auto;
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: 1.75rem;
 }
 
+/* ── 하단: 링크 ────────────────────────────── */
+.footer {
+  flex-shrink: 0;
+  padding-top: 1.5rem;
+}
+
 .forgot {
-  margin-top: 2.5rem; /* 키패드와 충분히 떨어뜨려 실수 탭 방지 */
   font-size: 0.875rem;
   color: #6b7280;
   text-decoration: none;
@@ -164,11 +166,9 @@
 
 /* ── 다크 모드 (OS 설정 기준, /lock 한정) ──── */
 @media (prefers-color-scheme: dark) {
-  .bg {
-    background: linear-gradient(180deg, #0a0712 0%, #120c1e 100%);
-  }
-
   .page {
+    background: linear-gradient(180deg, #0a0712 0%, #120c1e 100%);
+
     --heart-from: #c084fc;
     --heart-to: #f472b6;
 

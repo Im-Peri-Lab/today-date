@@ -25,6 +25,12 @@ export default function LockPage() {
   const [isLoading, setIsLoading] = useState(false)
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
+  // /lock 동안에만 <html> canvas 를 페이지 배경과 같은 톤으로 (흰 여백 방지)
+  useEffect(() => {
+    document.documentElement.classList.add('lock-canvas')
+    return () => document.documentElement.classList.remove('lock-canvas')
+  }, [])
+
   useEffect(() => {
     if (!lockedUntil) return
     function tick() {
@@ -75,11 +81,7 @@ export default function LockPage() {
 
   return (
     <main className={styles.page}>
-      {/* 뷰포트 전체를 덮는 고정 배경 (주소창 접힘 시 흰 여백 방지) */}
-      <div className={styles.bg} aria-hidden />
-
-      <div className={styles.content}>
-      {/* 앱 아이덴티티 */}
+      {/* 상단: 앱 아이덴티티 */}
       <header className={styles.header}>
         <svg
           className={styles.heart}
@@ -102,8 +104,8 @@ export default function LockPage() {
         <p className={styles.subtitle}>우리 둘만의 데이트 위시리스트</p>
       </header>
 
-      {/* 패스코드 입력 */}
-      <div className={styles.panel}>
+      {/* 중앙: 패스코드 입력 */}
+      <div className={styles.middle}>
         {showLock && (
           <div className={styles.lockNotice} role="alert">
             <p className={styles.lockTitle}>잠시 후 다시 시도해주세요</p>
@@ -120,12 +122,14 @@ export default function LockPage() {
           clearOnError
           label={showLock ? undefined : '패스코드 입력'}
         />
+      </div>
 
+      {/* 하단: 링크 */}
+      <footer className={styles.footer}>
         <Link href="/forgot" className={styles.forgot}>
           패스코드를 잊으셨나요?
         </Link>
-      </div>
-      </div>
+      </footer>
     </main>
   )
 }

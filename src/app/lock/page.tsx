@@ -62,11 +62,23 @@ export default function LockPage() {
   }, [router])
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-violet-50 to-purple-100 flex items-center justify-center p-4">
+    <main className="min-h-[100dvh] bg-gradient-to-br from-violet-50 to-purple-100 flex flex-col items-center justify-center gap-7 px-4 py-8">
+      {/* 앱 아이덴티티 */}
+      <header className="text-center space-y-2">
+        <div className="text-5xl">💜</div>
+        <h1 className="text-3xl font-bold tracking-tight text-violet-800">Today Date</h1>
+        <p className="max-w-xs text-sm leading-relaxed text-violet-500">
+          둘이서 모으는 데이트 위시리스트<br />
+          오늘 뭐할지 · 어디 갈지 골라드려요
+        </p>
+      </header>
+
       <Card className="w-full max-w-sm shadow-xl border-violet-100">
         <CardHeader className="text-center pb-2">
-          <div className="text-4xl mb-2">🔒</div>
-          <CardTitle className="text-2xl text-violet-800">Today Date</CardTitle>
+          <div className="text-3xl mb-1">🔒</div>
+          <CardTitle className="text-lg text-violet-800">
+            {isLocked ? '잠시 잠겨 있어요' : '두 사람만의 공간'}
+          </CardTitle>
           <CardDescription>
             {isLocked
               ? `잠금 해제까지 ${Math.floor(countdown / 60)}분 ${countdown % 60}초`

@@ -40,7 +40,7 @@ export default function ForgotPage() {
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-violet-50 to-purple-100 flex items-center justify-center p-4">
+    <main className="min-h-[100dvh] bg-gradient-to-br from-violet-50 to-purple-100 flex items-center justify-center p-4">
       <Card className="w-full max-w-sm shadow-xl border-violet-100">
         {!sent ? (
           <>

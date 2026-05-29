@@ -5,7 +5,11 @@
   align-items: center;
   justify-content: center;
   gap: 3rem; /* 헤더 ↔ 키패드 영역 분리 */
-  padding: 2rem 1.5rem;
+  /* 상단 노치 / 하단 브라우저 바(safe-area)와 분리되도록 여백 확보 */
+  padding-top: calc(env(safe-area-inset-top) + 1.5rem);
+  padding-right: 1.5rem;
+  padding-bottom: calc(env(safe-area-inset-bottom) + 1.5rem);
+  padding-left: 1.5rem;
   text-align: center;
 
   background: linear-gradient(180deg, #ffffff 0%, #f4f0fa 100%);
@@ -93,10 +97,11 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2.75rem; /* 키패드 ↔ 링크 (실수 탭 방지) */
+  gap: 1.75rem;
 }
 
 .forgot {
+  margin-top: 2.5rem; /* 키패드와 충분히 떨어뜨려 실수 탭 방지 */
   font-size: 0.875rem;
   color: #6b7280;
   text-decoration: none;
@@ -109,6 +114,34 @@
 .forgot:active {
   color: #7c3aed;
   text-decoration: underline;
+}
+
+/* ── 잠금 안내 배너 (5회 실패) ─────────────── */
+.lockNotice {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  max-width: 16rem;
+  padding: 0.75rem 1.25rem;
+  border-radius: 0.875rem;
+  background: #fef2f2;
+  border: 1px solid #fecdd3;
+}
+
+.lockTitle {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: #be123c;
+}
+
+.lockTimer {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: #be123c;
+  opacity: 0.85;
 }
 
 /* ── 다크 모드 (OS 설정 기준, /lock 한정) ──── */
@@ -153,6 +186,16 @@
   .forgot:hover,
   .forgot:active {
     color: #c084fc;
+  }
+
+  .lockNotice {
+    background: #2d1820;
+    border-color: #4a1c2c;
+  }
+
+  .lockTitle,
+  .lockTimer {
+    color: #fb7185;
   }
 }
 

@@ -26,6 +26,8 @@ export const viewport: Viewport = {
   themeColor: '#6d28d9',
   width: 'device-width',
   initialScale: 1,
+  // iPhone 노치 / 하단 바 영역까지 화면을 쓰되, CSS env(safe-area-inset-*) 로 여백을 제어한다.
+  viewportFit: 'cover',
 }
 
 export default function RootLayout({

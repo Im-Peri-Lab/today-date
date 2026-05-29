@@ -6,6 +6,16 @@ import Link from 'next/link'
 import { PasscodeInput } from '@/components/PasscodeInput'
 import styles from './lock.module.css'
 
+// 로컬에서 잠금 메시지 디자인을 확인하려면 true 로 바꾼다. (배포 시 false 유지)
+// true 일 때는 5회 실패 없이도 잠금 배너가 보이고, 09:42 가짜 카운트다운이 표시된다.
+const DEV_FORCE_LOCK = false
+
+function formatCountdown(totalSeconds: number) {
+  const mm = String(Math.floor(totalSeconds / 60)).padStart(2, '0')
+  const ss = String(totalSeconds % 60).padStart(2, '0')
+  return `${mm}:${ss}`
+}
+
 export default function LockPage() {
   const router = useRouter()
   const [error, setError] = useState('')
@@ -45,7 +55,6 @@ export default function LockPage() {
       if (res.status === 423 || json.locked) {
         setIsLocked(true)
         setLockedUntil(new Date(json.lockedUntil))
-        setError('너무 많이 실패했습니다. 잠시 후 다시 시도하세요.')
         return
       }
 
@@ -60,6 +69,9 @@ export default function LockPage() {
       setIsLoading(false)
     }
   }, [router])
+
+  const showLock = isLocked || DEV_FORCE_LOCK
+  const displaySeconds = DEV_FORCE_LOCK && !isLocked ? 582 : countdown
 
   return (
     <main className={styles.page}>
@@ -88,16 +100,21 @@ export default function LockPage() {
 
       {/* 패스코드 입력 */}
       <div className={styles.panel}>
+        {showLock && (
+          <div className={styles.lockNotice} role="alert">
+            <p className={styles.lockTitle}>잠시 후 다시 시도해주세요</p>
+            <p className={styles.lockTimer}>
+              남은 시간 {formatCountdown(displaySeconds)}
+            </p>
+          </div>
+        )}
+
         <PasscodeInput
           onComplete={handleComplete}
-          disabled={isLoading || isLocked}
-          error={error}
+          disabled={isLoading || showLock}
+          error={showLock ? '' : error}
           clearOnError
-          label={
-            isLocked
-              ? `잠금 해제까지 ${Math.floor(countdown / 60)}분 ${countdown % 60}초`
-              : '패스코드 입력'
-          }
+          label={showLock ? undefined : '패스코드 입력'}
         />
 
         <Link href="/forgot" className={styles.forgot}>

@@ -1,0 +1,124 @@
+/*
+ * PasscodeInput — 테마는 CSS 변수로 노출하고, 여기서는 밝은(light) 기본값만 fallback 으로 둔다.
+ * 부모(예: /lock)가 --pi-* 변수를 내려주면 그 값이 우선 적용되어 다크모드/럭셔리 팔레트로 바뀐다.
+ * 변수를 내려주지 않는 화면(/setup, /reset 등)은 아래 fallback(밝은 톤)을 그대로 사용한다.
+ */
+
+.wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2.25rem; /* 도트 그룹 ↔ 키패드 (충분히 분리) */
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* 라벨 + 도트를 하나의 시각적 그룹으로 묶는다 */
+.head {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem; /* 라벨 ↔ 도트 */
+}
+
+.label {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: var(--pi-label-color, #6b7280);
+}
+
+/* ── 도트 인디케이터 ─────────────────────────── */
+.dots {
+  display: flex;
+  gap: 1.125rem;
+}
+
+.dot {
+  width: 0.9375rem;
+  height: 0.9375rem;
+  border-radius: 9999px;
+  border: 1.5px solid var(--pi-dot-border, #d4cce3);
+  background: transparent;
+  transform: scale(0.82);
+  transition:
+    transform 150ms cubic-bezier(0.34, 1.4, 0.64, 1),
+    box-shadow 150ms ease,
+    border-color 150ms ease;
+}
+
+.dotFilled {
+  border-color: transparent;
+  background: var(--pi-dot-fill, linear-gradient(135deg, #a855f7 0%, #ec4899 100%));
+  box-shadow: 0 1px 4px var(--pi-dot-glow, rgba(168, 85, 247, 0.45));
+  transform: scale(1);
+}
+
+/* ── 오류 / 잠금 메시지 ──────────────────────── */
+.error {
+  margin: -0.25rem 0;
+  font-size: 0.8125rem;
+  letter-spacing: -0.01em;
+  color: var(--pi-error-color, #be123c);
+}
+
+/* ── 키패드 ─────────────────────────────────── */
+.pad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+}
+
+.spacer {
+  width: 4.75rem;
+  height: 4rem;
+}
+
+.key {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 4.75rem;
+  height: 4rem;
+  border-radius: 1.125rem;
+  font-size: 1.4rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: var(--pi-key-text, #1a1033);
+  background: var(--pi-key-bg, #fcfcfd);
+  border: 1px solid var(--pi-key-border, #eee9f5);
+  box-shadow: var(--pi-key-shadow, 0 1px 2px rgba(0, 0, 0, 0.04));
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    transform 100ms ease,
+    background-color 100ms ease,
+    box-shadow 100ms ease;
+}
+
+.key:hover:not(:disabled) {
+  background: var(--pi-key-hover, #f5f0ff);
+}
+
+.key:active:not(:disabled) {
+  transform: scale(0.95);
+  background: var(--pi-key-active, #ede4ff);
+  box-shadow: inset 0 1px 3px var(--pi-key-press-shadow, rgba(124, 58, 237, 0.12));
+}
+
+.key:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* 백스페이스 키 — 숫자 키와 동일한 면, 아이콘만 한 톤 차분하게 */
+.keyDel {
+  color: var(--pi-del-color, #9ca3af);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dot,
+  .key {
+    transition: none;
+  }
+}

@@ -3,8 +3,18 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { PasscodeInput } from '@/components/PasscodeInput'
+import styles from './lock.module.css'
+
+// 로컬에서 잠금 메시지 디자인을 확인하려면 true 로 바꾼다. (배포 시 false 유지)
+// true 일 때는 5회 실패 없이도 잠금 배너가 보이고, 09:42 가짜 카운트다운이 표시된다.
+const DEV_FORCE_LOCK = false
+
+function formatCountdown(totalSeconds: number) {
+  const mm = String(Math.floor(totalSeconds / 60)).padStart(2, '0')
+  const ss = String(totalSeconds % 60).padStart(2, '0')
+  return `${mm}:${ss}`
+}
 
 export default function LockPage() {
   const router = useRouter()
@@ -14,6 +24,12 @@ export default function LockPage() {
   const [countdown, setCountdown] = useState(0)
   const [isLoading, setIsLoading] = useState(false)
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+
+  // /lock 동안에만 <html> canvas 를 페이지 배경과 같은 톤으로 (흰 여백 방지)
+  useEffect(() => {
+    document.documentElement.classList.add('lock-canvas')
+    return () => document.documentElement.classList.remove('lock-canvas')
+  }, [])
 
   useEffect(() => {
     if (!lockedUntil) return
@@ -45,7 +61,6 @@ export default function LockPage() {
       if (res.status === 423 || json.locked) {
         setIsLocked(true)
         setLockedUntil(new Date(json.lockedUntil))
-        setError('너무 많이 실패했습니다. 잠시 후 다시 시도하세요.')
         return
       }
 
@@ -61,33 +76,60 @@ export default function LockPage() {
     }
   }, [router])
 
+  const showLock = isLocked || DEV_FORCE_LOCK
+  const displaySeconds = DEV_FORCE_LOCK && !isLocked ? 582 : countdown
+
   return (
-    <main className="min-h-screen bg-gradient-to-br from-violet-50 to-purple-100 flex items-center justify-center p-4">
-      <Card className="w-full max-w-sm shadow-xl border-violet-100">
-        <CardHeader className="text-center pb-2">
-          <div className="text-4xl mb-2">🔒</div>
-          <CardTitle className="text-2xl text-violet-800">Today Date</CardTitle>
-          <CardDescription>
-            {isLocked
-              ? `잠금 해제까지 ${Math.floor(countdown / 60)}분 ${countdown % 60}초`
-              : '패스코드를 입력하세요'}
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="flex flex-col items-center gap-6 py-4">
-          <PasscodeInput
-            onComplete={handleComplete}
-            disabled={isLoading || isLocked}
-            error={error}
-            clearOnError
+    <main className={styles.page}>
+      {/* 상단: 앱 아이덴티티 */}
+      <header className={styles.header}>
+        <svg
+          className={styles.heart}
+          viewBox="0 0 24 24"
+          role="img"
+          aria-label="Today Date"
+        >
+          <defs>
+            <linearGradient id="heartGradient" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stopColor="var(--heart-from, #a855f7)" />
+              <stop offset="100%" stopColor="var(--heart-to, #ec4899)" />
+            </linearGradient>
+          </defs>
+          <path
+            fill="url(#heartGradient)"
+            d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
           />
-          <Link
-            href="/forgot"
-            className="text-sm text-violet-500 hover:text-violet-700 underline underline-offset-2"
-          >
-            패스코드를 잊으셨나요?
-          </Link>
-        </CardContent>
-      </Card>
+        </svg>
+        <h1 className={styles.title}>Today Date</h1>
+        <p className={styles.subtitle}>우리 둘만의 데이트 위시리스트</p>
+      </header>
+
+      {/* 중앙: 패스코드 입력 */}
+      <div className={styles.middle}>
+        {showLock && (
+          <div className={styles.lockNotice} role="alert">
+            <p className={styles.lockTitle}>잠시 후 다시 시도해주세요</p>
+            <p className={styles.lockTimer}>
+              남은 시간 {formatCountdown(displaySeconds)}
+            </p>
+          </div>
+        )}
+
+        <PasscodeInput
+          onComplete={handleComplete}
+          disabled={isLoading || showLock}
+          error={showLock ? '' : error}
+          clearOnError
+          label={showLock ? undefined : '패스코드 입력'}
+        />
+      </div>
+
+      {/* 하단: 링크 */}
+      <footer className={styles.footer}>
+        <Link href="/forgot" className={styles.forgot}>
+          패스코드를 잊으셨나요?
+        </Link>
+      </footer>
     </main>
   )
 }

@@ -4,7 +4,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 3.25rem; /* 헤더 ↔ 키패드 영역 분리 */
+  gap: 3rem; /* 헤더 ↔ 키패드 영역 분리 */
   padding: 2rem 1.5rem;
   text-align: center;
 
@@ -20,7 +20,7 @@
   --heart-to: #ec4899;
 
   /* PasscodeInput 테마 토큰 (light) */
-  --pi-dot-border: #d9d2ec;
+  --pi-dot-border: #d4cce3;
   --pi-dot-fill: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);
   --pi-dot-glow: rgba(168, 85, 247, 0.4);
   --pi-key-bg: #fcfcfd;
@@ -93,20 +93,22 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1.75rem;
+  gap: 2.75rem; /* 키패드 ↔ 링크 (실수 탭 방지) */
 }
 
 .forgot {
-  font-size: 0.8125rem;
-  color: #9ca3af;
-  text-decoration: underline;
+  font-size: 0.875rem;
+  color: #6b7280;
+  text-decoration: none;
   text-underline-offset: 3px;
   text-decoration-thickness: 1px;
   transition: color 150ms ease;
 }
 
-.forgot:hover {
+.forgot:hover,
+.forgot:active {
   color: #7c3aed;
+  text-decoration: underline;
 }
 
 /* ── 다크 모드 (OS 설정 기준, /lock 한정) ──── */
@@ -145,10 +147,11 @@
   }
 
   .forgot {
-    color: #8b8299;
+    color: #a8a0b8;
   }
 
-  .forgot:hover {
+  .forgot:hover,
+  .forgot:active {
     color: #c084fc;
   }
 }

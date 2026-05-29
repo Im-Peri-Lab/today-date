@@ -61,17 +61,17 @@ export function ActivityCard({ activity }: { activity: Activity }) {
         <div className="mb-2 flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
           {activity.category && <CategoryBadge category={activity.category} />}
           {activity.duration_bucket && (
-            <span className="inline-flex items-center gap-1">
-              <Clock className="h-3 w-3" />
+            <span className="inline-flex items-center gap-1 whitespace-nowrap">
+              <Clock className="h-3 w-3 shrink-0" />
               {DURATION_LABELS[activity.duration_bucket]}
             </span>
           )}
           {activity.time_of_day && activity.time_of_day !== 'any' && (
-            <span className="inline-flex items-center gap-1">
+            <span className="inline-flex items-center gap-1 whitespace-nowrap">
               {activity.time_of_day === 'day' ? (
-                <Sun className="h-3 w-3" />
+                <Sun className="h-3 w-3 shrink-0" />
               ) : (
-                <Moon className="h-3 w-3" />
+                <Moon className="h-3 w-3 shrink-0" />
               )}
               {TIME_OF_DAY_LABELS[activity.time_of_day]}
             </span>

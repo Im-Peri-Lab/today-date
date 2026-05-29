@@ -5,7 +5,6 @@ import Link from 'next/link'
 import { ArrowLeft, Search, Plus } from 'lucide-react'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
 import { ActivityCard } from './ActivityCard'
 import { PlaceCard } from './PlaceCard'
 import { EmptyState } from './EmptyState'
@@ -34,7 +33,7 @@ function Chip({
       type="button"
       onClick={onClick}
       className={cn(
-        'rounded-full border px-3 py-1.5 text-sm transition-colors',
+        'whitespace-nowrap rounded-full border px-3 py-1.5 text-sm transition-colors',
         active
           ? 'border-violet-500 bg-violet-50 font-medium text-violet-700'
           : 'border-input text-muted-foreground hover:border-violet-300'
@@ -57,14 +56,14 @@ function StatusToggle({
     { value: 'visited', label: '다녀온 곳' },
   ]
   return (
-    <div className="inline-flex rounded-lg bg-muted p-0.5">
+    <div className="inline-flex shrink-0 rounded-lg bg-muted p-0.5">
       {options.map((opt) => (
         <button
           key={opt.value}
           type="button"
           onClick={() => onChange(opt.value)}
           className={cn(
-            'rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
+            'whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
             value === opt.value
               ? 'bg-white text-violet-700 shadow-sm'
               : 'text-muted-foreground hover:text-foreground'
@@ -73,6 +72,26 @@ function StatusToggle({
           {opt.label}
         </button>
       ))}
+    </div>
+  )
+}
+
+function SearchBox({
+  value,
+  onChange,
+}: {
+  value: string
+  onChange: (v: string) => void
+}) {
+  return (
+    <div className="relative flex-1">
+      <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+      <Input
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder="제목·메모 검색"
+        className="w-full pl-8"
+      />
     </div>
   )
 }
@@ -127,93 +146,68 @@ export function ListView() {
   const addHref = track === 'activity' ? '/activities/new' : '/places/new'
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-6">
-      <div className="mb-4 flex items-center justify-between">
-        <Link
-          href="/"
-          className="inline-flex items-center gap-1.5 text-sm text-violet-600 hover:text-violet-800"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          홈으로
-        </Link>
-        <Link href={addHref}>
-          <Button size="sm" className="gap-1 bg-violet-600 hover:bg-violet-700 text-white">
-            <Plus className="h-4 w-4" />
-            추가
-          </Button>
-        </Link>
-      </div>
-
+    <div className="mx-auto max-w-4xl px-4 py-6 pb-24">
+      {/* 헤더 */}
+      <Link
+        href="/"
+        className="mb-3 inline-flex items-center gap-1.5 text-sm text-violet-600 hover:text-violet-800"
+      >
+        <ArrowLeft className="h-4 w-4" />
+        홈으로
+      </Link>
       <h1 className="mb-4 text-2xl font-bold text-violet-800">우리의 목록 💜</h1>
 
       <Tabs
         value={track}
         onValueChange={(v) => setTrack(v as Track)}
-        className="w-full"
+        className="w-full flex-col"
       >
-        <TabsList className="w-full max-w-xs">
+        <TabsList className="w-full">
           <TabsTrigger value="activity">활동</TabsTrigger>
           <TabsTrigger value="place">장소</TabsTrigger>
         </TabsList>
 
-        {/* 상태 토글 + 검색 */}
-        <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <StatusToggle value={status} onChange={setStatus} />
-          <div className="relative w-full sm:w-64">
-            <Search className="absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="제목·메모 검색"
-              className="pl-8"
-            />
-          </div>
-        </div>
-
         {/* ── 활동 탭 ── */}
         <TabsContent value="activity" className="mt-4">
-          <div className="mb-5 space-y-3">
-            {activityCats.data && activityCats.data.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {activityCats.data.map((c) => (
-                  <Chip
-                    key={c.id}
-                    active={actCats.includes(c.id)}
-                    onClick={() => toggleCat(actCats, c.id, setActCats)}
-                  >
-                    {c.icon} {c.name}
-                  </Chip>
-                ))}
-              </div>
-            )}
-            <div className="flex flex-wrap gap-2">
-              {DURATION_OPTIONS.map((o) => (
-                <Chip
-                  key={o.value}
-                  active={actDuration === o.value}
-                  onClick={() => setActDuration(actDuration === o.value ? '' : o.value)}
-                >
-                  {o.label}
-                </Chip>
-              ))}
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {TIME_OPTIONS.map((o) => (
-                <Chip
-                  key={o.value}
-                  active={actTime === o.value}
-                  onClick={() => setActTime(actTime === o.value ? '' : o.value)}
-                >
-                  {o.label}
-                </Chip>
-              ))}
-            </div>
+          <div className="mb-3 flex items-center gap-2">
+            <StatusToggle value={status} onChange={setStatus} />
+            <SearchBox value={search} onChange={setSearch} />
+          </div>
+
+          <div className="mb-4 flex flex-wrap gap-2">
+            {activityCats.data?.map((c) => (
+              <Chip
+                key={c.id}
+                active={actCats.includes(c.id)}
+                onClick={() => toggleCat(actCats, c.id, setActCats)}
+              >
+                {c.icon} {c.name}
+              </Chip>
+            ))}
+            {DURATION_OPTIONS.map((o) => (
+              <Chip
+                key={o.value}
+                active={actDuration === o.value}
+                onClick={() => setActDuration(actDuration === o.value ? '' : o.value)}
+              >
+                {o.label}
+              </Chip>
+            ))}
+            {TIME_OPTIONS.map((o) => (
+              <Chip
+                key={o.value}
+                active={actTime === o.value}
+                onClick={() => setActTime(actTime === o.value ? '' : o.value)}
+              >
+                {o.label}
+              </Chip>
+            ))}
           </div>
 
           {activitiesQ.isLoading ? (
             <CardGridSkeleton />
           ) : activitiesQ.data && activitiesQ.data.length > 0 ? (
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {activitiesQ.data.map((a) => (
                 <ActivityCard key={a.id} activity={a} />
               ))}
@@ -234,44 +228,45 @@ export function ListView() {
 
         {/* ── 장소 탭 ── */}
         <TabsContent value="place" className="mt-4">
-          <div className="mb-5 space-y-3">
-            {placeCatsQuery.data && placeCatsQuery.data.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {placeCatsQuery.data.map((c) => (
-                  <Chip
-                    key={c.id}
-                    active={placeCats.includes(c.id)}
-                    onClick={() => toggleCat(placeCats, c.id, setPlaceCats)}
-                  >
-                    {c.icon} {c.name}
-                  </Chip>
-                ))}
-              </div>
-            )}
-            <div className="flex flex-wrap gap-2">
-              {MEAL_OPTIONS.map((o) => (
-                <Chip
-                  key={o.value}
-                  active={placeMeal === o.value}
-                  onClick={() => setPlaceMeal(placeMeal === o.value ? '' : o.value)}
-                >
-                  {o.label}
-                </Chip>
-              ))}
-            </div>
-            <div className="relative w-full sm:max-w-xs">
-              <Input
-                value={placeLocation}
-                onChange={(e) => setPlaceLocation(e.target.value)}
-                placeholder="위치로 검색 (예: 성수동)"
-              />
-            </div>
+          <div className="mb-3 flex items-center gap-2">
+            <StatusToggle value={status} onChange={setStatus} />
+            <SearchBox value={search} onChange={setSearch} />
+          </div>
+
+          <div className="mb-4 flex flex-wrap gap-2">
+            {placeCatsQuery.data?.map((c) => (
+              <Chip
+                key={c.id}
+                active={placeCats.includes(c.id)}
+                onClick={() => toggleCat(placeCats, c.id, setPlaceCats)}
+              >
+                {c.icon} {c.name}
+              </Chip>
+            ))}
+            {MEAL_OPTIONS.map((o) => (
+              <Chip
+                key={o.value}
+                active={placeMeal === o.value}
+                onClick={() => setPlaceMeal(placeMeal === o.value ? '' : o.value)}
+              >
+                {o.label}
+              </Chip>
+            ))}
+          </div>
+
+          <div className="mb-4">
+            <Input
+              value={placeLocation}
+              onChange={(e) => setPlaceLocation(e.target.value)}
+              placeholder="위치로 검색 (예: 성수동)"
+              className="w-full sm:max-w-xs"
+            />
           </div>
 
           {placesQ.isLoading ? (
             <CardGridSkeleton />
           ) : placesQ.data && placesQ.data.length > 0 ? (
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {placesQ.data.map((p) => (
                 <PlaceCard key={p.id} place={p} />
               ))}
@@ -290,6 +285,15 @@ export function ListView() {
           )}
         </TabsContent>
       </Tabs>
+
+      {/* FAB */}
+      <Link
+        href={addHref}
+        className="fixed bottom-6 right-6 z-20 flex h-14 w-14 items-center justify-center rounded-full bg-violet-600 text-white shadow-lg transition-colors hover:bg-violet-700"
+        aria-label="추가하기"
+      >
+        <Plus className="h-6 w-6" />
+      </Link>
     </div>
   )
 }

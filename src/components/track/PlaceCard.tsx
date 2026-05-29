@@ -61,15 +61,15 @@ export function PlaceCard({ place }: { place: Place }) {
         <div className="mb-2 flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
           {place.category && <CategoryBadge category={place.category} />}
           {place.location && (
-            <span className="inline-flex items-center gap-1">
-              <MapPin className="h-3 w-3" />
+            <span className="inline-flex items-center gap-1 whitespace-nowrap">
+              <MapPin className="h-3 w-3 shrink-0" />
               {place.location}
             </span>
           )}
           {place.meal_times?.map((m) => (
             <span
               key={m}
-              className="rounded-full bg-muted px-2 py-0.5 text-[11px] text-muted-foreground"
+              className="whitespace-nowrap rounded-full bg-muted px-2 py-0.5 text-[11px] text-muted-foreground"
             >
               {MEAL_LABELS[m]}
             </span>

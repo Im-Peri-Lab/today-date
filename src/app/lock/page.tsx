@@ -3,8 +3,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Lock } from 'lucide-react'
 import { PasscodeInput } from '@/components/PasscodeInput'
+import styles from './lock.module.css'
 
 export default function LockPage() {
   const router = useRouter()
@@ -62,44 +63,58 @@ export default function LockPage() {
   }, [router])
 
   return (
-    <main className="min-h-[100dvh] bg-gradient-to-br from-violet-50 to-purple-100 flex flex-col items-center justify-center gap-7 px-4 py-8">
+    <main className={styles.page}>
       {/* 앱 아이덴티티 */}
-      <header className="text-center space-y-2">
-        <div className="text-5xl">💜</div>
-        <h1 className="text-3xl font-bold tracking-tight text-violet-800">Today Date</h1>
-        <p className="max-w-xs text-sm leading-relaxed text-violet-500">
+      <header className={styles.header}>
+        <svg
+          className={styles.heart}
+          viewBox="0 0 24 24"
+          role="img"
+          aria-label="Today Date"
+        >
+          <defs>
+            <linearGradient id="heartGradient" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stopColor="var(--heart-from, #a855f7)" />
+              <stop offset="100%" stopColor="var(--heart-to, #ec4899)" />
+            </linearGradient>
+          </defs>
+          <path
+            fill="url(#heartGradient)"
+            d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+          />
+        </svg>
+        <h1 className={styles.title}>Today Date</h1>
+        <p className={styles.subtitle}>
           둘이서 모으는 데이트 위시리스트<br />
           오늘 뭐할지 · 어디 갈지 골라드려요
         </p>
       </header>
 
-      <Card className="w-full max-w-sm shadow-xl border-violet-100">
-        <CardHeader className="text-center pb-2">
-          <div className="text-3xl mb-1">🔒</div>
-          <CardTitle className="text-lg text-violet-800">
+      {/* 패스코드 입력 */}
+      <div className={styles.panel}>
+        <div className={styles.section}>
+          <Lock className={styles.lockIcon} size={18} strokeWidth={1.5} aria-hidden />
+          <p className={styles.sectionTitle}>
             {isLocked ? '잠시 잠겨 있어요' : '두 사람만의 공간'}
-          </CardTitle>
-          <CardDescription>
+          </p>
+          <p className={styles.sectionDesc}>
             {isLocked
               ? `잠금 해제까지 ${Math.floor(countdown / 60)}분 ${countdown % 60}초`
               : '패스코드를 입력하세요'}
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="flex flex-col items-center gap-6 py-4">
-          <PasscodeInput
-            onComplete={handleComplete}
-            disabled={isLoading || isLocked}
-            error={error}
-            clearOnError
-          />
-          <Link
-            href="/forgot"
-            className="text-sm text-violet-500 hover:text-violet-700 underline underline-offset-2"
-          >
-            패스코드를 잊으셨나요?
-          </Link>
-        </CardContent>
-      </Card>
+          </p>
+        </div>
+
+        <PasscodeInput
+          onComplete={handleComplete}
+          disabled={isLoading || isLocked}
+          error={error}
+          clearOnError
+        />
+
+        <Link href="/forgot" className={styles.forgot}>
+          패스코드를 잊으셨나요?
+        </Link>
+      </div>
     </main>
   )
 }

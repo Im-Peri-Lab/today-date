@@ -1,0 +1,190 @@
+.page {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2.75rem;
+  padding: 2rem 1.5rem;
+  text-align: center;
+
+  background: linear-gradient(180deg, #ffffff 0%, #f4f0fa 100%);
+
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text',
+    'Pretendard Variable', Pretendard, 'Apple SD Gothic Neo', system-ui,
+    'Segoe UI', Roboto, sans-serif;
+
+  /* 하트 그라데이션 */
+  --heart-from: #a855f7;
+  --heart-to: #ec4899;
+
+  /* PasscodeInput 테마 토큰 (light) */
+  --pi-dot-border: #d9d2ec;
+  --pi-dot-fill: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);
+  --pi-dot-glow: rgba(168, 85, 247, 0.4);
+  --pi-key-bg: #fcfcfd;
+  --pi-key-border: #eee9f5;
+  --pi-key-shadow: 0 1px 2px rgba(20, 10, 40, 0.05);
+  --pi-key-text: #1a1033;
+  --pi-key-hover: #f5f0ff;
+  --pi-key-active: #ede4ff;
+  --pi-key-press-shadow: rgba(124, 58, 237, 0.12);
+  --pi-del-color: #9ca3af;
+  --pi-error-color: #be123c;
+
+  animation: pageIn 300ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes pageIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── 헤더 ──────────────────────────────────── */
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.625rem;
+}
+
+.heart {
+  width: 48px;
+  height: 48px;
+  filter: drop-shadow(0 4px 12px rgba(168, 85, 247, 0.35));
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+.title {
+  font-size: 1.875rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: #1a1033;
+  line-height: 1.1;
+}
+
+.subtitle {
+  max-width: 18rem;
+  font-size: 0.875rem;
+  line-height: 1.65;
+  color: #6b7280;
+}
+
+/* ── 패스코드 패널 ─────────────────────────── */
+.panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.75rem;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.lockIcon {
+  color: #b8afc9;
+}
+
+.sectionTitle {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: #1a1033;
+}
+
+.sectionDesc {
+  font-size: 0.8125rem;
+  color: #6b7280;
+}
+
+.forgot {
+  font-size: 0.8125rem;
+  color: #9ca3af;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+  transition: color 150ms ease;
+}
+
+.forgot:hover {
+  color: #7c3aed;
+}
+
+/* ── 다크 모드 (OS 설정 기준, /lock 한정) ──── */
+@media (prefers-color-scheme: dark) {
+  .page {
+    background: linear-gradient(180deg, #0a0712 0%, #120c1e 100%);
+
+    --heart-from: #c084fc;
+    --heart-to: #f472b6;
+
+    --pi-dot-border: #3a2f4f;
+    --pi-dot-fill: linear-gradient(135deg, #c084fc 0%, #f472b6 100%);
+    --pi-dot-glow: rgba(192, 132, 252, 0.5);
+    --pi-key-bg: #161020;
+    --pi-key-border: #1f1830;
+    --pi-key-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --pi-key-text: #f5f3fa;
+    --pi-key-hover: #221a33;
+    --pi-key-active: #2a2040;
+    --pi-key-press-shadow: rgba(0, 0, 0, 0.5);
+    --pi-del-color: #6b6480;
+    --pi-error-color: #fb7185;
+  }
+
+  .heart {
+    filter: drop-shadow(0 4px 14px rgba(192, 132, 252, 0.5));
+  }
+
+  .title,
+  .sectionTitle {
+    color: #f5f3fa;
+  }
+
+  .subtitle,
+  .sectionDesc {
+    color: #9890a8;
+  }
+
+  .lockIcon {
+    color: #5a5070;
+  }
+
+  .forgot {
+    color: #8b8299;
+  }
+
+  .forgot:hover {
+    color: #c084fc;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page {
+    animation: none;
+  }
+  .heart {
+    animation: none;
+  }
+}

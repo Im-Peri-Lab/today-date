@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { Delete } from 'lucide-react'
+import styles from './PasscodeInput.module.css'
 
 interface PasscodeInputProps {
   length?: 4 | 5 | 6
@@ -62,33 +63,33 @@ export function PasscodeInput({
   }
 
   return (
-    <div className="flex flex-col items-center gap-6 select-none">
+    <div className={styles.wrap}>
       {/* 점(dot) 표시 */}
-      <div className="flex gap-4" role="status" aria-label={`패스코드 ${value.length}/${length}자리 입력됨`}>
+      <div
+        className={styles.dots}
+        role="status"
+        aria-label={`패스코드 ${value.length}/${length}자리 입력됨`}
+      >
         {Array.from({ length }).map((_, i) => (
           <div
             key={i}
-            className={`w-4 h-4 rounded-full border-2 transition-all duration-150 ${
-              i < value.length
-                ? 'bg-violet-700 border-violet-700 scale-110'
-                : 'bg-transparent border-violet-300'
-            }`}
+            className={`${styles.dot} ${i < value.length ? styles.dotFilled : ''}`}
           />
         ))}
       </div>
 
       {/* 오류 메시지 */}
       {error && (
-        <p className="text-sm text-red-500 animate-pulse" role="alert">
+        <p className={styles.error} role="alert">
           {error}
         </p>
       )}
 
       {/* 숫자 키패드 */}
-      <div className="grid grid-cols-3 gap-3">
+      <div className={styles.pad}>
         {KEYS.map((key, idx) => {
           if (key === '') {
-            return <div key={idx} />
+            return <div key={idx} className={styles.spacer} aria-hidden />
           }
           return (
             <button
@@ -97,19 +98,9 @@ export function PasscodeInput({
               onClick={() => handleKey(key)}
               disabled={disabled || (key !== 'del' && value.length >= length)}
               aria-label={key === 'del' ? '지우기' : key}
-              className={`
-                flex items-center justify-center
-                w-20 h-16 rounded-2xl text-xl font-semibold
-                transition-all duration-100
-                active:scale-95
-                ${key === 'del'
-                  ? 'text-violet-500 hover:bg-violet-50 active:bg-violet-100'
-                  : 'bg-white text-gray-800 shadow-sm border border-violet-100 hover:bg-violet-50 active:bg-violet-100'
-                }
-                disabled:opacity-40 disabled:cursor-not-allowed
-              `}
+              className={`${styles.key} ${key === 'del' ? styles.keyDel : ''}`}
             >
-              {key === 'del' ? <Delete className="w-5 h-5" /> : key}
+              {key === 'del' ? <Delete size={22} strokeWidth={1.5} /> : key}
             </button>
           )
         })}

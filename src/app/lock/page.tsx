@@ -75,6 +75,9 @@ export default function LockPage() {
 
   return (
     <main className={styles.page}>
+      {/* 뷰포트 전체를 덮는 고정 배경 (주소창 접힘 시 흰 여백 방지) */}
+      <div className={styles.bg} aria-hidden />
+
       {/* 앱 아이덴티티 */}
       <header className={styles.header}>
         <svg

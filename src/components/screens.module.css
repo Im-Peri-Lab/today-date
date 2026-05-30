@@ -1,0 +1,174 @@
+/*
+ * 메인 사용 화면(홈 / 리스트 / 카드) 공통 디자인 — "미니멀 럭셔리 + 로맨틱 한 스푼".
+ * auth.module.css 와 동일한 무드/톤을 공유한다.
+ *
+ * [다크모드 스코프 전략]
+ * 다크는 OS(prefers-color-scheme) 기반이며 .page 컨테이너 "안에서만" 적용된다.
+ *  - .page 가 다크일 때 --s-* 토큰 변수를 정의 → 자식(카드 등)이 상속해서 다크가 됨.
+ *  - .page 밖(추천/상세 등 아직 리디자인 안 한 페이지)에서는 변수가 없으므로
+ *    모든 색이 var(--s-*, <라이트값>) 의 라이트 폴백을 사용 → 다크 회귀 없음.
+ * 공유 카드(ActivityCard/PlaceCard)가 여러 페이지에서 쓰여도 안전하다.
+ */
+
+.page {
+  min-height: 100vh;
+  min-height: 100dvh; /* iOS 주소창 동적 높이 */
+  background: linear-gradient(180deg, #ffffff 0%, #f4f0fa 100%);
+  /* 노치/홈 인디케이터 안전 영역 */
+  padding-top: calc(env(safe-area-inset-top) + 0.5rem);
+  padding-bottom: calc(env(safe-area-inset-bottom) + 0.5rem);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+  font-family:
+    'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont,
+    'SF Pro Display', 'SF Pro Text', 'Apple SD Gothic Neo', system-ui,
+    'Segoe UI', Roboto, sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  .page {
+    background: linear-gradient(180deg, #0a0712 0%, #120c1e 100%);
+
+    --s-ink: #f5f3fa; /* 제목/주요 텍스트 */
+    --s-sub: #a8a0b8; /* 서브카피 */
+    --s-faint: #8c84a0; /* 더 옅은 보조 */
+    --s-accent: #c084fc; /* 보라 강조 → 다크는 라벤더 */
+    --s-accent-soft-bg: #2d2540; /* 활성 칩/소프트 배경 */
+    --s-accent-soft-text: #d8b4fe;
+
+    --s-card-bg: #1a1228; /* 카드 표면 */
+    --s-card-border: #322a48;
+    --s-card-shadow: 0 12px 34px -16px rgba(0, 0, 0, 0.7);
+    --s-card-shadow-hover: 0 18px 44px -16px rgba(0, 0, 0, 0.82);
+    --s-divider: #2c2442;
+    --s-track: #1b1430; /* 세그먼트 트랙(눌린 면) */
+    --s-raised: #2f2647; /* 세그먼트 활성(떠오른 면) */
+
+    /* 그라데이션(주요 액션/아이콘/FAB) — 다크는 한 톤 밝게 */
+    --s-grad: linear-gradient(135deg, #c084fc 0%, #f472b6 100%);
+    --s-grad-shadow: 0 8px 20px -8px rgba(192, 132, 252, 0.45);
+  }
+}
+
+/* ── 텍스트 톤 (라이트 폴백 내장) ───────────────── */
+.ink {
+  color: var(--s-ink, #1a1033);
+}
+.sub {
+  color: var(--s-sub, #6b7280);
+}
+.faint {
+  color: var(--s-faint, #9ca3af);
+}
+.accent {
+  color: var(--s-accent, #7c3aed);
+}
+
+/* ── 브랜드 헤더 (홈 상단, 인증 헤더보다 작게) ──── */
+.miniHeart {
+  width: 24px;
+  height: 24px;
+  filter: drop-shadow(0 2px 6px rgba(168, 85, 247, 0.32));
+}
+.brand {
+  font-size: 1rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: var(--s-ink, #1a1033);
+}
+.greeting {
+  font-size: 1.5rem;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  color: var(--s-ink, #1a1033);
+}
+
+/* ── 카드 표면 ─────────────────────────────────── */
+.card {
+  background: var(--s-card-bg, #ffffff);
+  border: 1px solid var(--s-card-border, #ece7f5);
+  border-radius: 1rem; /* 16px */
+  box-shadow: var(
+    --s-card-shadow,
+    0 1px 2px rgba(20, 10, 40, 0.04),
+    0 10px 26px -18px rgba(124, 58, 237, 0.22)
+  );
+}
+
+/* 클릭 가능한 카드: 호버 시 살짝 떠오름 */
+.cardInteractive {
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease,
+    border-color 160ms ease;
+}
+.cardInteractive:hover {
+  transform: translateY(-2px);
+  box-shadow: var(
+    --s-card-shadow-hover,
+    0 10px 24px -10px rgba(124, 58, 237, 0.28)
+  );
+}
+.cardInteractive:active {
+  transform: translateY(0);
+}
+
+/* ── 그라데이션 아이콘 배지 (CTA/주요 액션 한정) ── */
+.gradIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.875rem;
+  color: #ffffff;
+  background: var(--s-grad, linear-gradient(135deg, #a855f7 0%, #ec4899 100%));
+  box-shadow: var(--s-grad-shadow, 0 6px 16px -8px rgba(168, 85, 247, 0.5));
+}
+
+/* ── 통계 숫자 ─────────────────────────────────── */
+.statNum {
+  font-size: 1.75rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  color: var(--s-accent, #7c3aed);
+}
+
+/* ── 아이콘 버튼 (헤더 목록/로그아웃) ───────────── */
+.iconBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 0.625rem;
+  color: var(--s-sub, #6b7280);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition:
+    background 140ms ease,
+    color 140ms ease;
+}
+.iconBtn:hover:not(:disabled) {
+  background: var(--s-accent-soft-bg, #f5f0ff);
+  color: var(--s-accent, #7c3aed);
+}
+.iconBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ── 보조 텍스트 링크 ──────────────────────────── */
+.textLink {
+  color: var(--s-sub, #6b7280);
+  transition: color 140ms ease;
+}
+.textLink:hover {
+  color: var(--s-accent, #7c3aed);
+}
+
+/* ── 구분선 ────────────────────────────────────── */
+.divider {
+  border-top: 1px solid var(--s-divider, #ece7f5);
+}

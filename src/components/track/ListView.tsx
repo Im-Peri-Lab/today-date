@@ -2,11 +2,14 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { ArrowLeft, Search, Plus } from 'lucide-react'
+import { Search } from 'lucide-react'
 import { ActivityCard } from './ActivityCard'
 import { PlaceCard } from './PlaceCard'
 import { EmptyState } from './EmptyState'
 import { CardGridSkeleton } from './CardGridSkeleton'
+import { MiniHeart } from '@/components/BrandMark'
+import { HomeMenu } from '@/components/HomeMenu'
+import { HomeFab } from '@/components/HomeFab'
 import { useActivities } from '@/hooks/useActivities'
 import { usePlaces } from '@/hooks/usePlaces'
 import { useActivityCategories, usePlaceCategories } from '@/hooks/useCategories'
@@ -134,19 +137,25 @@ export function ListView() {
     setter(list.includes(id) ? list.filter((c) => c !== id) : [...list, id])
   }
 
-  const addHref = track === 'activity' ? '/activities/new' : '/places/new'
-
   return (
-    <div className="mx-auto w-full max-w-4xl px-4 pb-28 pt-3">
-      {/* 헤더 */}
-      <Link href="/" className={cn(styles.backLink, 'mb-3')}>
-        <ArrowLeft className="h-4 w-4" />
-        홈으로
-      </Link>
-      <h1 className={cn(styles.heading, 'mb-4')}>우리의 목록</h1>
+    <div className="mx-auto w-full max-w-4xl px-5 pb-28 pt-6 lg:px-8 lg:pt-10">
+      {/* 헤더: 브랜드(홈으로) + 미니멀 메뉴 — 홈과 동일 패턴 */}
+      <header className="flex items-center justify-between">
+        <Link href="/" className="flex items-center gap-2.5" aria-label="홈으로">
+          <MiniHeart />
+          <span className={cn(styles.brand, 'lg:text-lg')}>Today Date</span>
+        </Link>
+        <HomeMenu />
+      </header>
+
+      {/* 페이지 제목 — 홈과 동일한 타이포 위계 */}
+      <div className="mt-8 lg:mt-10">
+        <h1 className={cn(styles.greeting, 'text-2xl lg:text-4xl')}>우리의 위시리스트</h1>
+        <p className={cn('mt-1 text-sm lg:mt-1.5 lg:text-lg', styles.sub)}>함께 쌓아온 곳들</p>
+      </div>
 
       {/* 탭 */}
-      <div className={styles.tabBar} role="tablist">
+      <div className={cn(styles.tabBar, 'mt-8')} role="tablist">
         <button
           type="button"
           role="tab"
@@ -289,10 +298,8 @@ export function ListView() {
         </div>
       )}
 
-      {/* FAB */}
-      <Link href={addHref} className={styles.fab} aria-label="추가하기">
-        <Plus className="h-6 w-6" />
-      </Link>
+      {/* FAB — 홈과 동일 (활동/장소 추가 메뉴) */}
+      <HomeFab />
     </div>
   )
 }

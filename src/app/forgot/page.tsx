@@ -40,6 +40,7 @@ export default function ForgotPage() {
   return (
     <AuthLayout
       subtitle="패스코드를 잊으셨나요?"
+      inlineFooter
       footer={
         <Link href="/lock" className={styles.link}>
           <ArrowLeft size={15} strokeWidth={1.75} aria-hidden />

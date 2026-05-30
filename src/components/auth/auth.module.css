@@ -61,14 +61,23 @@
   }
 }
 
-/* ── 헤더 + 본문을 하나의 그룹으로 뷰포트 중앙 정렬 ── */
+/* ── 헤더 + 본문(+inlineFooter)을 하나의 그룹으로 뷰포트 중앙 정렬 ── */
 .center {
   flex: 1 1 auto;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 2.25rem; /* 헤더 ↔ 본문 */
+  gap: 2rem; /* 헤더 ↔ 본문(카드): 32px */
+  width: 100%;
+}
+
+/* 카드 + 보조 링크를 한 묶음으로 — inlineFooter 일 때 사용 */
+.bodyGroup {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem; /* 카드 ↔ 보조 링크: 20px */
   width: 100%;
 }
 

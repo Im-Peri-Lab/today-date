@@ -108,7 +108,7 @@ export function HomeDashboard() {
       </header>
 
       {/* Hero */}
-      <div className="mt-12 lg:mt-12">
+      <div className="mt-8 lg:mt-10">
         <h1 className={cn(styles.greeting, 'text-2xl lg:text-4xl')}>오늘, 우리 어떻게 보낼까?</h1>
         <p className={cn('mt-3 text-sm lg:mt-4 lg:text-lg', styles.sub)}>
           위시리스트에서 골라드릴게요 💜
@@ -137,7 +137,7 @@ export function HomeDashboard() {
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-5">
           <StatCard label="활동" value={data?.totalActivities} loading={isLoading} />
           <StatCard label="장소" value={data?.totalPlaces} loading={isLoading} />
-          <StatCard label="다녀온 곳" value={data?.totalVisited} loading={isLoading} accent />
+          <StatCard label="다녀온 곳" value={data?.totalVisited} loading={isLoading} />
           <StatCard label="이번 달" value={data?.visitedThisMonth} loading={isLoading} />
         </div>
       </div>

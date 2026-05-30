@@ -72,6 +72,7 @@ html,
 body {
   min-height: 100dvh;
   background-color: #ffffff;
+  overscroll-behavior: none;
 }
 
 html.dark,

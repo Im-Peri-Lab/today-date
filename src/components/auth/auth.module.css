@@ -189,8 +189,8 @@
   padding: 1.75rem 1.5rem;
   border-radius: 1.25rem;
   background: #ffffff;
-  border: 1px solid #eee9f5;
-  box-shadow: 0 8px 32px -8px rgba(124, 58, 237, 0.1);
+  border: 1px solid #ebe4f4;
+  box-shadow: 0 10px 34px -10px rgba(124, 58, 237, 0.16);
 }
 
 .cardHeader {
@@ -422,9 +422,10 @@
   }
 
   .card {
-    background: #181122;
-    border-color: #2a2140;
-    box-shadow: 0 8px 32px -8px rgba(0, 0, 0, 0.5);
+    /* 페이지 배경(#0a0712~#120c1e)보다 한 단계 밝게 + 보이는 보더 + 떠 있는 그림자 */
+    background: #221a38;
+    border-color: #392c54;
+    box-shadow: 0 12px 36px -10px rgba(0, 0, 0, 0.7);
   }
 
   .cardTitle {

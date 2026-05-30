@@ -49,22 +49,20 @@ function CtaCard({
       className={cn(
         styles.card,
         styles.cardInteractive,
-        'flex items-center gap-4 px-5 py-4 lg:gap-6 lg:px-7 lg:py-6'
+        'flex aspect-[4/5] flex-col justify-between p-5 lg:aspect-auto lg:h-52 lg:p-6'
       )}
     >
-      <span className={cn(styles.gradIcon, 'h-12 w-12 shrink-0 lg:h-16 lg:w-16')}>{icon}</span>
-      <span className="min-w-0">
-        <span className={cn('block text-base font-semibold lg:text-xl', styles.ink)}>{title}</span>
-        <span className={cn('mt-0.5 block text-[13px] leading-snug lg:mt-1 lg:text-base', styles.sub)}>
-          {subtitle}
-        </span>
+      <span className={cn(styles.gradIcon, 'h-12 w-12 lg:h-14 lg:w-14')}>{icon}</span>
+      <span className="block">
+        <span className={cn('block text-base font-semibold lg:text-lg', styles.ink)}>{title}</span>
+        <span className={cn('mt-0.5 block text-sm', styles.sub)}>{subtitle}</span>
       </span>
     </Link>
   )
 }
 
-/** 통계 한 항목: "활동 13" — 라벨(일반 톤) + 숫자(보라 강조), 박스 없이 텍스트만 */
-function StatItem({
+/** 통계 카드 — CTA와 동일한 카드 토큰. 숫자 강조 + 라벨, 호버 없음(정보 전용) */
+function StatCard({
   label,
   value,
   loading,
@@ -74,23 +72,19 @@ function StatItem({
   loading: boolean
 }) {
   return (
-    <span className="inline-flex items-baseline gap-1">
-      <span className={cn('text-sm', styles.ink)}>{label}</span>
-      {loading ? (
-        <Skeleton className="inline-block h-4 w-5 rounded" />
-      ) : (
-        <span className={cn(styles.statNum, 'text-base')}>{value ?? 0}</span>
+    <div
+      className={cn(
+        styles.card,
+        'flex aspect-[4/3] flex-col justify-center p-4 lg:aspect-auto lg:h-32 lg:p-5'
       )}
-    </span>
-  )
-}
-
-/** 점 구분자 · (흐린 톤) */
-function Dot() {
-  return (
-    <span className={cn('text-sm', styles.faint)} aria-hidden>
-      ·
-    </span>
+    >
+      {loading ? (
+        <Skeleton className="h-8 w-12 lg:h-10" />
+      ) : (
+        <span className={cn(styles.statNum, 'text-3xl lg:text-4xl')}>{value ?? 0}</span>
+      )}
+      <span className={cn('mt-1 text-sm', styles.sub)}>{label}</span>
+    </div>
   )
 }
 
@@ -101,7 +95,7 @@ export function HomeDashboard() {
     <div
       className={cn(
         styles.fill,
-        'mx-auto w-full max-w-xl px-5 pb-16 pt-6 lg:max-w-6xl lg:px-8 lg:pb-24 lg:pt-12'
+        'mx-auto w-full max-w-xl px-5 pb-16 pt-6 lg:max-w-3xl lg:px-8 lg:pb-24 lg:pt-12'
       )}
     >
       {/* 헤더: 브랜드 + 미니멀 메뉴 */}
@@ -121,8 +115,8 @@ export function HomeDashboard() {
         </p>
       </div>
 
-      {/* 메인 CTA — 흰/다크 카드 + 그라데이션 아이콘(강조는 아이콘에만) */}
-      <div className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:mt-8 lg:gap-4">
+      {/* 메인 CTA — 정사각 통통 카드 2열, 아이콘 상단 + 텍스트 하단 */}
+      <div className="mt-8 grid grid-cols-2 gap-3 lg:mt-8 lg:gap-4">
         <CtaCard
           href="/recommend/activity"
           icon={<Sparkles className="h-[22px] w-[22px] lg:h-8 lg:w-8" strokeWidth={1.75} />}
@@ -137,23 +131,21 @@ export function HomeDashboard() {
         />
       </div>
 
-      {/* 통계 — 카드 없이 정보 라인으로. CTA보다 시각적으로 작게(보조 정보) */}
-      <div className="mt-8 lg:mt-10 lg:flex lg:gap-16">
+      {/* 통계 — CTA와 동일한 카드 언어. 위시리스트 / 함께한 기록 두 그룹 */}
+      <div className="mt-8 lg:mt-10">
         <div>
-          <p className={cn('mb-1.5 text-sm font-medium', styles.sub)}>위시리스트</p>
-          <p className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
-            <StatItem label="활동" value={data?.totalActivities} loading={isLoading} />
-            <Dot />
-            <StatItem label="장소" value={data?.totalPlaces} loading={isLoading} />
-          </p>
+          <p className={cn('mb-2 text-sm font-medium', styles.sub)}>위시리스트</p>
+          <div className="grid grid-cols-2 gap-3 lg:gap-4">
+            <StatCard label="활동" value={data?.totalActivities} loading={isLoading} />
+            <StatCard label="장소" value={data?.totalPlaces} loading={isLoading} />
+          </div>
         </div>
-        <div className="mt-5 lg:mt-0">
-          <p className={cn('mb-1.5 text-sm font-medium', styles.sub)}>함께한 기록</p>
-          <p className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
-            <StatItem label="다녀온 곳" value={data?.totalVisited} loading={isLoading} />
-            <Dot />
-            <StatItem label="이번 달" value={data?.visitedThisMonth} loading={isLoading} />
-          </p>
+        <div className="mt-6">
+          <p className={cn('mb-2 text-sm font-medium', styles.sub)}>함께한 기록</p>
+          <div className="grid grid-cols-2 gap-3 lg:gap-4">
+            <StatCard label="다녀온 곳" value={data?.totalVisited} loading={isLoading} />
+            <StatCard label="이번 달" value={data?.visitedThisMonth} loading={isLoading} />
+          </div>
         </div>
       </div>
 

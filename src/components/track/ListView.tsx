@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { Search } from 'lucide-react'
+import { Search, Filter } from 'lucide-react'
 import { ActivityCard } from './ActivityCard'
 import { PlaceCard } from './PlaceCard'
 import { EmptyState } from './EmptyState'
@@ -88,12 +88,49 @@ function SearchBox({
   )
 }
 
+/** 필터 칩 영역 접기/펼치기 — 기본 접힘, 활성 개수 뱃지 표시 */
+function FilterBar({
+  count,
+  open,
+  onToggle,
+  children,
+}: {
+  count: number
+  open: boolean
+  onToggle: () => void
+  children: React.ReactNode
+}) {
+  return (
+    <div className="mt-3">
+      <button
+        type="button"
+        onClick={onToggle}
+        aria-expanded={open}
+        className={cn(styles.filterToggle, (open || count > 0) && styles.filterToggleActive)}
+      >
+        <Filter className="h-4 w-4" />
+        필터
+        {count > 0 && <span className={styles.filterCount}>{count}</span>}
+      </button>
+      <div
+        className={cn(
+          'grid transition-all duration-300 ease-out',
+          open ? 'mt-3 grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
+        )}
+      >
+        <div className="overflow-hidden">{children}</div>
+      </div>
+    </div>
+  )
+}
+
 const GRID = 'grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3'
 
 export function ListView() {
   const [track, setTrack] = useState<Track>('activity')
   const [status, setStatus] = useState<Status>('wishlist')
   const [search, setSearch] = useState('')
+  const [filtersOpen, setFiltersOpen] = useState(false)
 
   // 활동 필터
   const [actCats, setActCats] = useState<string[]>([])
@@ -136,6 +173,12 @@ export function ListView() {
   function toggleCat(list: string[], id: string, setter: (v: string[]) => void) {
     setter(list.includes(id) ? list.filter((c) => c !== id) : [...list, id])
   }
+
+  // 활성 필터 개수 / 검색·필터 사용 여부 (빈 상태 카피 분기용)
+  const activityFilterCount = actCats.length + (actDuration ? 1 : 0) + (actTime ? 1 : 0)
+  const placeFilterCount = placeCats.length + (placeMeal ? 1 : 0) + (placeLocation ? 1 : 0)
+  const activityFiltering = Boolean(debouncedSearch) || activityFilterCount > 0
+  const placeFiltering = Boolean(debouncedSearch) || placeFilterCount > 0
 
   return (
     <div className="mx-auto w-full max-w-4xl px-5 pb-28 pt-6 lg:px-8 lg:pt-10">
@@ -184,56 +227,70 @@ export function ListView() {
             <SearchBox value={search} onChange={setSearch} />
           </div>
 
-          <div className="mb-4 flex flex-wrap gap-2">
-            {activityCats.data?.map((c) => (
-              <Chip
-                key={c.id}
-                active={actCats.includes(c.id)}
-                onClick={() => toggleCat(actCats, c.id, setActCats)}
-              >
-                {c.icon} {c.name}
-              </Chip>
-            ))}
-            {DURATION_OPTIONS.map((o) => (
-              <Chip
-                key={o.value}
-                active={actDuration === o.value}
-                onClick={() => setActDuration(actDuration === o.value ? '' : o.value)}
-              >
-                {o.label}
-              </Chip>
-            ))}
-            {TIME_OPTIONS.map((o) => (
-              <Chip
-                key={o.value}
-                active={actTime === o.value}
-                onClick={() => setActTime(actTime === o.value ? '' : o.value)}
-              >
-                {o.label}
-              </Chip>
-            ))}
-          </div>
-
-          {activitiesQ.isLoading ? (
-            <CardGridSkeleton />
-          ) : activitiesQ.data && activitiesQ.data.length > 0 ? (
-            <div className={GRID}>
-              {activitiesQ.data.map((a) => (
-                <ActivityCard key={a.id} activity={a} />
+          <FilterBar
+            count={activityFilterCount}
+            open={filtersOpen}
+            onToggle={() => setFiltersOpen((v) => !v)}
+          >
+            <div className="flex flex-wrap gap-2">
+              {activityCats.data?.map((c) => (
+                <Chip
+                  key={c.id}
+                  active={actCats.includes(c.id)}
+                  onClick={() => toggleCat(actCats, c.id, setActCats)}
+                >
+                  {c.icon} {c.name}
+                </Chip>
+              ))}
+              {DURATION_OPTIONS.map((o) => (
+                <Chip
+                  key={o.value}
+                  active={actDuration === o.value}
+                  onClick={() => setActDuration(actDuration === o.value ? '' : o.value)}
+                >
+                  {o.label}
+                </Chip>
+              ))}
+              {TIME_OPTIONS.map((o) => (
+                <Chip
+                  key={o.value}
+                  active={actTime === o.value}
+                  onClick={() => setActTime(actTime === o.value ? '' : o.value)}
+                >
+                  {o.label}
+                </Chip>
               ))}
             </div>
-          ) : (
-            <EmptyState
-              message={
-                status === 'wishlist'
-                  ? '아직 위시리스트가 비어있어요'
-                  : '아직 다녀온 활동이 없어요'
-              }
-              hint="함께 하고 싶은 활동을 추가해 보세요"
-              addHref="/activities/new"
-              addLabel="활동 추가하기"
-            />
-          )}
+          </FilterBar>
+
+          <div className="mt-4">
+            {activitiesQ.isLoading ? (
+              <CardGridSkeleton />
+            ) : activitiesQ.data && activitiesQ.data.length > 0 ? (
+              <div className={GRID}>
+                {activitiesQ.data.map((a) => (
+                  <ActivityCard key={a.id} activity={a} />
+                ))}
+              </div>
+            ) : activityFiltering ? (
+              <EmptyState
+                noResults
+                message="찾으시는 항목이 없어요 💜"
+                hint="다른 필터로 시도해보세요"
+              />
+            ) : (
+              <EmptyState
+                message={
+                  status === 'wishlist'
+                    ? '아직 위시리스트가 비어있어요'
+                    : '아직 다녀온 활동이 없어요'
+                }
+                hint="함께 하고 싶은 활동을 추가해 보세요"
+                addHref="/activities/new"
+                addLabel="첫 활동 추가하기"
+              />
+            )}
+          </div>
         </div>
       )}
 
@@ -245,56 +302,67 @@ export function ListView() {
             <SearchBox value={search} onChange={setSearch} />
           </div>
 
-          <div className="mb-4 flex flex-wrap gap-2">
-            {placeCatsQuery.data?.map((c) => (
-              <Chip
-                key={c.id}
-                active={placeCats.includes(c.id)}
-                onClick={() => toggleCat(placeCats, c.id, setPlaceCats)}
-              >
-                {c.icon} {c.name}
-              </Chip>
-            ))}
-            {MEAL_OPTIONS.map((o) => (
-              <Chip
-                key={o.value}
-                active={placeMeal === o.value}
-                onClick={() => setPlaceMeal(placeMeal === o.value ? '' : o.value)}
-              >
-                {o.label}
-              </Chip>
-            ))}
-          </div>
-
-          <div className="mb-4">
+          <FilterBar
+            count={placeFilterCount}
+            open={filtersOpen}
+            onToggle={() => setFiltersOpen((v) => !v)}
+          >
+            <div className="flex flex-wrap gap-2">
+              {placeCatsQuery.data?.map((c) => (
+                <Chip
+                  key={c.id}
+                  active={placeCats.includes(c.id)}
+                  onClick={() => toggleCat(placeCats, c.id, setPlaceCats)}
+                >
+                  {c.icon} {c.name}
+                </Chip>
+              ))}
+              {MEAL_OPTIONS.map((o) => (
+                <Chip
+                  key={o.value}
+                  active={placeMeal === o.value}
+                  onClick={() => setPlaceMeal(placeMeal === o.value ? '' : o.value)}
+                >
+                  {o.label}
+                </Chip>
+              ))}
+            </div>
             <input
               value={placeLocation}
               onChange={(e) => setPlaceLocation(e.target.value)}
               placeholder="위치로 검색 (예: 성수동)"
-              className={cn(styles.plainInput, 'sm:max-w-xs')}
+              className={cn(styles.plainInput, 'mt-2 sm:max-w-xs')}
             />
-          </div>
+          </FilterBar>
 
-          {placesQ.isLoading ? (
-            <CardGridSkeleton />
-          ) : placesQ.data && placesQ.data.length > 0 ? (
-            <div className={GRID}>
-              {placesQ.data.map((p) => (
-                <PlaceCard key={p.id} place={p} />
-              ))}
-            </div>
-          ) : (
-            <EmptyState
-              message={
-                status === 'wishlist'
-                  ? '아직 가보고 싶은 장소가 없어요'
-                  : '아직 다녀온 장소가 없어요'
-              }
-              hint="가고 싶은 장소를 추가해 보세요"
-              addHref="/places/new"
-              addLabel="장소 추가하기"
-            />
-          )}
+          <div className="mt-4">
+            {placesQ.isLoading ? (
+              <CardGridSkeleton />
+            ) : placesQ.data && placesQ.data.length > 0 ? (
+              <div className={GRID}>
+                {placesQ.data.map((p) => (
+                  <PlaceCard key={p.id} place={p} />
+                ))}
+              </div>
+            ) : placeFiltering ? (
+              <EmptyState
+                noResults
+                message="찾으시는 항목이 없어요 💜"
+                hint="다른 필터로 시도해보세요"
+              />
+            ) : (
+              <EmptyState
+                message={
+                  status === 'wishlist'
+                    ? '아직 가보고 싶은 장소가 없어요'
+                    : '아직 다녀온 장소가 없어요'
+                }
+                hint="가고 싶은 장소를 추가해 보세요"
+                addHref="/places/new"
+                addLabel="첫 장소 추가하기"
+              />
+            )}
+          </div>
         </div>
       )}
 

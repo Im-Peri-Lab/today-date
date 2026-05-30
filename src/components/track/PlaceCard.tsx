@@ -72,7 +72,7 @@ export function PlaceCard({ place, hideMenu, actionSlot }: PlaceCardProps) {
           </div>
         )}
 
-        <h3 className={cn('mb-1.5 line-clamp-1', styles.cardTitle)}>{place.title}</h3>
+        <h3 className={cn('mb-1 line-clamp-1 text-lg font-semibold', styles.ink)}>{place.title}</h3>
 
         <div className={cn('mb-2 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-xs', styles.sub)}>
           {place.location && (
@@ -89,7 +89,7 @@ export function PlaceCard({ place, hideMenu, actionSlot }: PlaceCardProps) {
         </div>
 
         {place.memo && (
-          <p className={cn('line-clamp-2 text-[13px] leading-relaxed', styles.sub)}>{place.memo}</p>
+          <p className={cn('line-clamp-1 text-sm', styles.faint)}>{place.memo}</p>
         )}
 
         {isVisited && (

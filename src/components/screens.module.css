@@ -109,7 +109,15 @@
   flex: 1 1 auto;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: center; /* 모바일: 콘텐츠가 화면을 채우며 세로 중앙 */
+}
+
+/* 데스크탑(lg↑): 세로 중앙 정렬 해제 → 헤더부터 위에서 자연스럽게 시작.
+ * 아래 빈 공간은 정상적인 여백으로 둔다(상단 쏠림/외로운 헤더 해소). */
+@media (min-width: 1024px) {
+  .homeCenter {
+    justify-content: flex-start;
+  }
 }
 
 /* 통계 그룹 라벨 + 핵심 통계 강조 */

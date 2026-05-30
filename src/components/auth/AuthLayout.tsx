@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, type ReactNode } from 'react'
+import { type ReactNode } from 'react'
 import { BrandHeader } from './BrandHeader'
 import styles from './auth.module.css'
 
@@ -22,15 +22,10 @@ interface AuthLayoutProps {
  * - min-h-dvh flex column + safe-area + 라이트/다크 배경 (auth.module.css)
  * - 헤더 + 본문을 .center 그룹으로 묶어 뷰포트 중앙 정렬 (카드가 위/아래로
  *   치우치지 않음), 푸터만 하단에 고정
- * - 마운트 동안 <html> 에 auth-canvas 클래스를 붙여 canvas(body 포함) 배경까지
- *   통일 → 주소창 토글·오버스크롤 시 흰 여백 방지 (다른 페이지엔 영향 없음)
+ * - 흰/검은 여백 방지는 globals.css 의 전역 body 배경이 SSR 시점부터 담당
+ *   (JS 불필요). 여기 .page 는 그 위에 그라데이션을 얹는다.
  */
 export function AuthLayout({ title, subtitle, pulse, children, footer }: AuthLayoutProps) {
-  useEffect(() => {
-    document.documentElement.classList.add('auth-canvas')
-    return () => document.documentElement.classList.remove('auth-canvas')
-  }, [])
-
   return (
     <main className={styles.page}>
       <div className={styles.center}>

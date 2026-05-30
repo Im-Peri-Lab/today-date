@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Mail, MailCheck } from 'lucide-react'
+import { Mail, MailCheck, ArrowLeft } from 'lucide-react'
 import { AuthLayout } from '@/components/auth/AuthLayout'
 import styles from '@/components/auth/auth.module.css'
 
@@ -42,6 +42,7 @@ export default function ForgotPage() {
       subtitle="패스코드를 잊으셨나요?"
       footer={
         <Link href="/lock" className={styles.link}>
+          <ArrowLeft size={15} strokeWidth={1.75} aria-hidden />
           잠금 화면으로 돌아가기
         </Link>
       }
@@ -53,7 +54,6 @@ export default function ForgotPage() {
               <Mail size={22} strokeWidth={1.75} />
             </span>
             <p className={styles.cardTitle}>패스코드 재설정</p>
-            <p className={styles.cardDesc}>등록한 이메일 주소를 입력하세요</p>
           </div>
           <form onSubmit={handleSubmit(onSubmit)} className={styles.form}>
             <div className={styles.field}>
@@ -61,7 +61,6 @@ export default function ForgotPage() {
               <input
                 id="email"
                 type="email"
-                placeholder="you@example.com"
                 autoComplete="email"
                 className={styles.input}
                 {...register('email')}

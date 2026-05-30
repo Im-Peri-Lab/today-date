@@ -145,12 +145,25 @@
 }
 
 .link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
   font-size: 0.875rem;
   color: #6b7280;
   text-decoration: none;
   text-underline-offset: 3px;
   text-decoration-thickness: 1px;
   transition: color 150ms ease;
+}
+
+/* 화살표 아이콘: hover 시 살짝 왼쪽으로 — "돌아가기" 방향 암시 */
+.link svg {
+  transition: transform 150ms ease;
+}
+
+.link:hover svg,
+.link:active svg {
+  transform: translateX(-2px);
 }
 
 .link:hover,
@@ -186,7 +199,8 @@
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
-  padding: 1.75rem 1.5rem;
+  /* 콘텐츠 높이에 자연스럽게 맞춤(고정 높이 없음) + 좌우보다 상하를 살짝 줄여 비례 정리 */
+  padding: 1.5rem;
   border-radius: 1.25rem;
   background: #ffffff;
   border: 1px solid #ebe4f4;
@@ -262,6 +276,8 @@
   color: #1a1033;
   font-size: 1rem;
   outline: none;
+  /* iOS: 포커스 시 가상 키보드가 input 을 가리지 않도록 위로 스크롤될 여백 확보 */
+  scroll-margin-bottom: 6rem;
   transition:
     border-color 150ms ease,
     box-shadow 150ms ease;
@@ -312,7 +328,8 @@
   color: #ffffff;
   border: none;
   background: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);
-  box-shadow: 0 6px 18px -6px rgba(168, 85, 247, 0.55);
+  /* 그림자를 옅게 — 풀폭 그라데이션 버튼의 시각적 무게 완화 */
+  box-shadow: 0 4px 14px -7px rgba(168, 85, 247, 0.45);
 }
 
 .btnPrimary:hover:not(:disabled) {

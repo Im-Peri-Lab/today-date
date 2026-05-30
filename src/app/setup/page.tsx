@@ -128,7 +128,6 @@ function SetupFlow() {
               <Mail size={22} strokeWidth={1.75} />
             </span>
             <p className={styles.cardTitle}>이메일 인증</p>
-            <p className={styles.cardDesc}>시작하려면 이메일을 인증하세요</p>
           </div>
           <form onSubmit={handleSubmit(onSendVerify)} className={styles.form}>
             <div className={styles.field}>
@@ -136,7 +135,6 @@ function SetupFlow() {
               <input
                 id="email"
                 type="email"
-                placeholder="you@example.com"
                 autoComplete="email"
                 className={styles.input}
                 {...register('email')}

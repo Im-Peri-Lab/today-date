@@ -49,7 +49,7 @@ function CtaCard({
       className={cn(
         styles.card,
         styles.cardInteractive,
-        'flex items-center gap-4 p-5 lg:gap-6 lg:px-7 lg:py-8'
+        'flex items-center gap-4 px-5 py-4 lg:gap-6 lg:px-7 lg:py-6'
       )}
     >
       <span className={cn(styles.gradIcon, 'h-12 w-12 shrink-0 lg:h-16 lg:w-16')}>{icon}</span>
@@ -75,15 +75,21 @@ function StatCard({
   accent?: boolean
 }) {
   return (
-    <div className={cn(styles.card, accent && styles.statCardAccent, 'p-4 lg:p-6')}>
-      {loading ? (
-        <Skeleton className="h-8 w-12 lg:h-10" />
-      ) : (
-        <p className={cn(styles.statNum, 'text-3xl lg:text-4xl')}>{value ?? 0}</p>
+    <div
+      className={cn(
+        styles.card,
+        accent && styles.statCardAccent,
+        'flex items-center gap-2.5 px-4 py-3 lg:gap-3 lg:px-5 lg:py-3.5'
       )}
-      <p className={cn('mt-1 text-xs lg:mt-2 lg:text-sm', accent ? styles.accent : styles.sub)}>
+    >
+      {loading ? (
+        <Skeleton className="h-7 w-9 lg:h-8" />
+      ) : (
+        <span className={cn(styles.statNum, 'text-2xl lg:text-3xl')}>{value ?? 0}</span>
+      )}
+      <span className={cn('text-xs lg:text-sm', accent ? styles.accent : styles.sub)}>
         {label}
-      </p>
+      </span>
     </div>
   )
 }
@@ -110,13 +116,13 @@ export function HomeDashboard() {
       {/* Hero */}
       <div className="mt-8 lg:mt-10">
         <h1 className={cn(styles.greeting, 'text-2xl lg:text-4xl')}>오늘, 우리 어떻게 보낼까?</h1>
-        <p className={cn('mt-3 text-sm lg:mt-4 lg:text-lg', styles.sub)}>
+        <p className={cn('mt-1 text-sm lg:mt-1.5 lg:text-lg', styles.sub)}>
           위시리스트에서 골라드릴게요 💜
         </p>
       </div>
 
       {/* 메인 CTA — 흰/다크 카드 + 그라데이션 아이콘(강조는 아이콘에만) */}
-      <div className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:mt-8 lg:gap-5">
+      <div className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:mt-8 lg:gap-4">
         <CtaCard
           href="/recommend/activity"
           icon={<Sparkles className="h-[22px] w-[22px] lg:h-8 lg:w-8" strokeWidth={1.75} />}
@@ -131,18 +137,18 @@ export function HomeDashboard() {
         />
       </div>
 
-      {/* 통계 — 위시리스트 / 함께한 기록 두 그룹으로 분리, 위 콘텐츠와 분리 */}
-      <div className={cn('mt-12 lg:mt-16', styles.sectionTop)}>
+      {/* 통계 — 위시리스트 / 함께한 기록 두 그룹. 모바일 세로 stack / 데스크탑 좌우 분할 */}
+      <div className={cn('mt-8 lg:mt-10 lg:grid lg:grid-cols-2 lg:gap-8', styles.sectionTop)}>
         <div>
-          <p className={cn('mb-3 lg:mb-5', styles.statLabel)}>위시리스트</p>
-          <div className="grid grid-cols-2 gap-3 lg:gap-5">
+          <p className={cn('mb-2 lg:mb-3', styles.statLabel)}>위시리스트</p>
+          <div className="grid grid-cols-2 gap-3 lg:gap-4">
             <StatCard label="활동" value={data?.totalActivities} loading={isLoading} />
             <StatCard label="장소" value={data?.totalPlaces} loading={isLoading} />
           </div>
         </div>
-        <div className="mt-10 lg:mt-12">
-          <p className={cn('mb-3 lg:mb-5', styles.statLabel)}>함께한 기록</p>
-          <div className="grid grid-cols-2 gap-3 lg:gap-5">
+        <div className="mt-6 lg:mt-0">
+          <p className={cn('mb-2 lg:mb-3', styles.statLabel)}>함께한 기록</p>
+          <div className="grid grid-cols-2 gap-3 lg:gap-4">
             <StatCard label="다녀온 곳" value={data?.totalVisited} loading={isLoading} />
             <StatCard label="이번 달" value={data?.visitedThisMonth} loading={isLoading} />
           </div>

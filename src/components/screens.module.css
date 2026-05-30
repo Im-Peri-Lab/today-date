@@ -13,6 +13,8 @@
 .page {
   min-height: 100vh;
   min-height: 100dvh; /* iOS 주소창 동적 높이 */
+  display: flex;
+  flex-direction: column;
   background: linear-gradient(180deg, #ffffff 0%, #f4f0fa 100%);
   /* 노치/홈 인디케이터 안전 영역 */
   padding-top: calc(env(safe-area-inset-top) + 0.5rem);
@@ -36,10 +38,10 @@
     --s-accent-soft-bg: #2d2540; /* 활성 칩/소프트 배경 */
     --s-accent-soft-text: #d8b4fe;
 
-    --s-card-bg: #1a1228; /* 카드 표면 */
-    --s-card-border: #322a48;
-    --s-card-shadow: 0 12px 34px -16px rgba(0, 0, 0, 0.7);
-    --s-card-shadow-hover: 0 18px 44px -16px rgba(0, 0, 0, 0.82);
+    --s-card-bg: #1f1830; /* 카드 표면 — 페이지 배경(#0a0712~#120c1e)보다 또렷이 밝게 */
+    --s-card-border: #2a1f3e; /* 보더로 분리감 확보 */
+    --s-card-shadow: 0 8px 24px -16px rgba(0, 0, 0, 0.6);
+    --s-card-shadow-hover: 0 16px 40px -16px rgba(0, 0, 0, 0.75);
     --s-divider: #2c2442;
     --s-track: #1b1430; /* 세그먼트 트랙(눌린 면) */
     --s-raised: #2f2647; /* 세그먼트 활성(떠오른 면) */
@@ -88,13 +90,38 @@
 /* ── 카드 표면 ─────────────────────────────────── */
 .card {
   background: var(--s-card-bg, #ffffff);
-  border: 1px solid var(--s-card-border, #ece7f5);
+  border: 1px solid var(--s-card-border, rgba(0, 0, 0, 0.06));
   border-radius: 1rem; /* 16px */
   box-shadow: var(
     --s-card-shadow,
     0 1px 2px rgba(20, 10, 40, 0.04),
-    0 10px 26px -18px rgba(124, 58, 237, 0.22)
+    0 8px 24px -18px rgba(124, 58, 237, 0.16)
   );
+}
+
+/* 화면 높이를 채우는 세로 컬럼 (헤더 상단 고정 + 본문 중앙) */
+.fill {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+}
+.homeCenter {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* 통계 그룹 라벨 + 핵심 통계 강조 */
+.statLabel {
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--s-faint, #9ca3af);
+}
+.statCardAccent {
+  background: var(--s-accent-soft-bg, #f6f1ff);
+  border-color: transparent;
 }
 
 /* 클릭 가능한 카드: 호버 시 살짝 떠오름 */

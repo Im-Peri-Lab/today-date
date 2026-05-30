@@ -1,9 +1,10 @@
 'use client'
 
 import Link from 'next/link'
-import { Sparkles, MapPin, List } from 'lucide-react'
+import { Sparkles, MapPin } from 'lucide-react'
 import { Skeleton } from '@/components/ui/skeleton'
-import { LogoutButton } from '@/components/LogoutButton'
+import { HomeMenu } from '@/components/HomeMenu'
+import { HomeFab } from '@/components/HomeFab'
 import { useDashboardStats } from '@/hooks/useDashboardStats'
 import { cn } from '@/lib/utils'
 import styles from '@/components/screens.module.css'
@@ -30,13 +31,15 @@ function StatCard({
   label,
   value,
   loading,
+  accent,
 }: {
   label: string
   value: number | undefined
   loading: boolean
+  accent?: boolean
 }) {
   return (
-    <div className={cn(styles.card, 'p-4')}>
+    <div className={cn(styles.card, accent && styles.statCardAccent, 'p-4')}>
       {loading ? (
         <Skeleton className="h-7 w-10" />
       ) : (
@@ -51,77 +54,71 @@ export function HomeDashboard() {
   const { data, isLoading } = useDashboardStats()
 
   return (
-    <div className="mx-auto w-full max-w-xl px-5 pb-10 pt-3">
-      {/* 헤더: 브랜드 + 빠른 액션 */}
-      <header className="mb-7 flex items-center justify-between">
+    <div className={cn(styles.fill, 'mx-auto w-full max-w-xl px-5 pb-6 pt-3 lg:max-w-5xl')}>
+      {/* 헤더: 브랜드 + 미니멀 메뉴 (상단 고정) */}
+      <header className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <MiniHeart />
           <span className={styles.brand}>Today Date</span>
         </div>
-        <div className="flex items-center gap-1">
-          <Link href="/list" className={styles.iconBtn} aria-label="목록 보기">
-            <List className="h-[18px] w-[18px]" />
-          </Link>
-          <LogoutButton />
-        </div>
+        <HomeMenu />
       </header>
 
-      {/* 인사 */}
-      <div className="mb-7">
-        <h1 className={styles.greeting}>오늘은 뭐 할까?</h1>
-        <p className={cn('mt-1.5 text-sm', styles.sub)}>마음에 드는 걸 골라봐요 💜</p>
-      </div>
+      {/* 본문: 인사 → CTA → 통계 (남은 공간에서 세로 중앙) */}
+      <div className={cn(styles.homeCenter, 'gap-8 py-8')}>
+        {/* 인사 */}
+        <div>
+          <h1 className={styles.greeting}>오늘, 우리 어떻게 보낼까?</h1>
+          <p className={cn('mt-1.5 text-sm', styles.sub)}>위시리스트에서 골라드릴게요 💜</p>
+        </div>
 
-      {/* 메인 CTA — 흰/다크 카드 + 그라데이션 아이콘(강조는 아이콘에만) */}
-      <div className="mb-8 grid grid-cols-1 gap-3 sm:grid-cols-2">
-        <Link
-          href="/recommend/activity"
-          className={cn(styles.card, styles.cardInteractive, 'flex items-center gap-4 p-5')}
-        >
-          <span className={cn(styles.gradIcon, 'h-12 w-12 shrink-0')}>
-            <Sparkles className="h-[22px] w-[22px]" strokeWidth={1.75} />
-          </span>
-          <span className="min-w-0">
-            <span className={cn('block text-base font-semibold', styles.ink)}>오늘 뭐할까?</span>
-            <span className={cn('mt-0.5 block text-[13px] leading-snug', styles.sub)}>
-              위시리스트에서 골라드려요
+        {/* 메인 CTA — 흰/다크 카드 + 그라데이션 아이콘(강조는 아이콘에만) */}
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <Link
+            href="/recommend/activity"
+            className={cn(styles.card, styles.cardInteractive, 'flex items-center gap-4 p-5')}
+          >
+            <span className={cn(styles.gradIcon, 'h-12 w-12 shrink-0')}>
+              <Sparkles className="h-[22px] w-[22px]" strokeWidth={1.75} />
             </span>
-          </span>
-        </Link>
-
-        <Link
-          href="/recommend/place"
-          className={cn(styles.card, styles.cardInteractive, 'flex items-center gap-4 p-5')}
-        >
-          <span className={cn(styles.gradIcon, 'h-12 w-12 shrink-0')}>
-            <MapPin className="h-[22px] w-[22px]" strokeWidth={1.75} />
-          </span>
-          <span className="min-w-0">
-            <span className={cn('block text-base font-semibold', styles.ink)}>어디 갈까?</span>
-            <span className={cn('mt-0.5 block text-[13px] leading-snug', styles.sub)}>
-              메뉴와 위치로 골라드려요
+            <span className="min-w-0">
+              <span className={cn('block text-base font-semibold', styles.ink)}>오늘 뭐할까?</span>
+              <span className={cn('mt-0.5 block text-[13px] leading-snug', styles.sub)}>
+                활동 추천 받기
+              </span>
             </span>
-          </span>
-        </Link>
+          </Link>
+
+          <Link
+            href="/recommend/place"
+            className={cn(styles.card, styles.cardInteractive, 'flex items-center gap-4 p-5')}
+          >
+            <span className={cn(styles.gradIcon, 'h-12 w-12 shrink-0')}>
+              <MapPin className="h-[22px] w-[22px]" strokeWidth={1.75} />
+            </span>
+            <span className="min-w-0">
+              <span className={cn('block text-base font-semibold', styles.ink)}>오늘 어디갈까?</span>
+              <span className={cn('mt-0.5 block text-[13px] leading-snug', styles.sub)}>
+                장소 추천 받기
+              </span>
+            </span>
+          </Link>
+        </div>
+
+        {/* 통계 — 모바일 2x2 / 데스크탑 1x4, "다녀온 곳" 강조 */}
+        <div>
+          <p className={cn('mb-3', styles.statLabel)}>우리의 기록</p>
+          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+            <StatCard label="활동" value={data?.totalActivities} loading={isLoading} />
+            <StatCard label="장소" value={data?.totalPlaces} loading={isLoading} />
+            <StatCard label="다녀온 곳" value={data?.totalVisited} loading={isLoading} accent />
+            <StatCard label="이번 달" value={data?.visitedThisMonth} loading={isLoading} />
+          </div>
+        </div>
       </div>
 
-      {/* 통계 — 2x2, 큰 숫자 + 작은 라벨 */}
-      <div className="grid grid-cols-2 gap-3">
-        <StatCard label="활동" value={data?.totalActivities} loading={isLoading} />
-        <StatCard label="장소" value={data?.totalPlaces} loading={isLoading} />
-        <StatCard label="다녀온 곳" value={data?.totalVisited} loading={isLoading} />
-        <StatCard label="이번 달" value={data?.visitedThisMonth} loading={isLoading} />
-      </div>
-
-      {/* 보조 링크 */}
-      <div className="mt-7 flex items-center justify-center gap-5 text-sm">
-        <Link href="/activities/new" className={styles.textLink}>
-          + 활동 추가
-        </Link>
-        <Link href="/places/new" className={styles.textLink}>
-          + 장소 추가
-        </Link>
-      </div>
+      {/* 추가 — 우하단 FAB (활동/장소 메뉴) */}
+      <HomeFab />
     </div>
   )
 }

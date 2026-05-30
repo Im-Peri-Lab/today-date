@@ -14,6 +14,7 @@ import { useDeleteActivity, useUpdateActivity } from '@/hooks/useActivities'
 import { DURATION_LABELS, TIME_OF_DAY_LABELS } from '@/lib/labels'
 import { cn } from '@/lib/utils'
 import type { Activity } from '@/types'
+import styles from '@/components/screens.module.css'
 
 interface ActivityCardProps {
   activity: Activity
@@ -51,7 +52,7 @@ export function ActivityCard({ activity, hideMenu, actionSlot }: ActivityCardPro
   const isVisited = activity.status === 'visited'
 
   return (
-    <div className="group relative rounded-xl bg-card ring-1 ring-foreground/10 transition-shadow hover:shadow-md">
+    <div className={cn(styles.card, styles.cardInteractive, 'group relative')}>
       {!hideMenu && (
         <div className="absolute right-1.5 top-1.5 z-10">
           <ItemMenu
@@ -68,10 +69,15 @@ export function ActivityCard({ activity, hideMenu, actionSlot }: ActivityCardPro
         href={`/activities/${activity.id}`}
         className={cn('block p-4', hideMenu ? 'pr-4' : 'pr-11')}
       >
-        <h3 className="mb-2 line-clamp-1 font-medium text-foreground">{activity.title}</h3>
+        {activity.category && (
+          <div className="mb-2">
+            <CategoryBadge category={activity.category} />
+          </div>
+        )}
 
-        <div className="mb-2 flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
-          {activity.category && <CategoryBadge category={activity.category} />}
+        <h3 className={cn('mb-1.5 line-clamp-1', styles.cardTitle)}>{activity.title}</h3>
+
+        <div className={cn('mb-2 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-xs', styles.sub)}>
           {activity.duration_bucket && (
             <span className="inline-flex items-center gap-1 whitespace-nowrap">
               <Clock className="h-3 w-3 shrink-0" />
@@ -91,11 +97,11 @@ export function ActivityCard({ activity, hideMenu, actionSlot }: ActivityCardPro
         </div>
 
         {activity.memo && (
-          <p className="line-clamp-2 text-sm text-muted-foreground">{activity.memo}</p>
+          <p className={cn('line-clamp-2 text-[13px] leading-relaxed', styles.sub)}>{activity.memo}</p>
         )}
 
         {isVisited && (
-          <div className="mt-2 flex items-center gap-2 border-t pt-2 text-xs text-muted-foreground">
+          <div className={cn('mt-2.5 flex items-center gap-2 pt-2.5 text-xs', styles.divider, styles.sub)}>
             {activity.rating ? (
               <RatingStars value={activity.rating} size="sm" />
             ) : null}
@@ -104,7 +110,7 @@ export function ActivityCard({ activity, hideMenu, actionSlot }: ActivityCardPro
         )}
       </Link>
 
-      {actionSlot && <div className="border-t px-4 py-3">{actionSlot}</div>}
+      {actionSlot && <div className={cn('px-4 py-3', styles.divider)}>{actionSlot}</div>}
 
       <DeleteConfirmDialog
         open={deleteOpen}

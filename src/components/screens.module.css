@@ -126,6 +126,23 @@
   box-shadow: var(--s-grad-shadow, 0 6px 16px -8px rgba(168, 85, 247, 0.5));
 }
 
+/* ── 아이템 카드 (ActivityCard / PlaceCard) ────── */
+.cardTitle {
+  font-size: 1rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: var(--s-ink, #1a1033);
+}
+/* 식사시간 등 보조 뱃지 */
+.mealBadge {
+  white-space: nowrap;
+  border-radius: 9999px;
+  padding: 0.0625rem 0.5rem;
+  font-size: 11px;
+  background: var(--s-track, #f1ecfa);
+  color: var(--s-sub, #6b7280);
+}
+
 /* ── 통계 숫자 ─────────────────────────────────── */
 .statNum {
   font-size: 1.75rem;

@@ -108,15 +108,15 @@ export function HomeDashboard() {
       </header>
 
       {/* Hero */}
-      <div className="mt-12 lg:mt-16">
-        <h1 className={cn(styles.greeting, 'text-3xl lg:text-5xl')}>오늘, 우리 어떻게 보낼까?</h1>
+      <div className="mt-12 lg:mt-12">
+        <h1 className={cn(styles.greeting, 'text-2xl lg:text-4xl')}>오늘, 우리 어떻게 보낼까?</h1>
         <p className={cn('mt-3 text-sm lg:mt-4 lg:text-lg', styles.sub)}>
           위시리스트에서 골라드릴게요 💜
         </p>
       </div>
 
       {/* 메인 CTA — 흰/다크 카드 + 그라데이션 아이콘(강조는 아이콘에만) */}
-      <div className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:mt-12 lg:gap-5">
+      <div className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:mt-8 lg:gap-5">
         <CtaCard
           href="/recommend/activity"
           icon={<Sparkles className="h-[22px] w-[22px] lg:h-8 lg:w-8" strokeWidth={1.75} />}
@@ -132,7 +132,7 @@ export function HomeDashboard() {
       </div>
 
       {/* 통계 — 모바일 2x2 / 데스크탑 1x4, 위 콘텐츠와 분리 */}
-      <div className={cn('mt-12 lg:mt-20', styles.sectionTop)}>
+      <div className={cn('mt-12 lg:mt-16', styles.sectionTop)}>
         <p className={cn('mb-3 lg:mb-5', styles.statLabel)}>우리의 기록</p>
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-5">
           <StatCard label="활동" value={data?.totalActivities} loading={isLoading} />

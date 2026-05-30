@@ -131,14 +131,21 @@ export function HomeDashboard() {
         />
       </div>
 
-      {/* 통계 — 모바일 2x2 / 데스크탑 1x4, 위 콘텐츠와 분리 */}
+      {/* 통계 — 위시리스트 / 함께한 기록 두 그룹으로 분리, 위 콘텐츠와 분리 */}
       <div className={cn('mt-12 lg:mt-16', styles.sectionTop)}>
-        <p className={cn('mb-3 lg:mb-5', styles.statLabel)}>우리의 기록</p>
-        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-5">
-          <StatCard label="활동" value={data?.totalActivities} loading={isLoading} />
-          <StatCard label="장소" value={data?.totalPlaces} loading={isLoading} />
-          <StatCard label="다녀온 곳" value={data?.totalVisited} loading={isLoading} />
-          <StatCard label="이번 달" value={data?.visitedThisMonth} loading={isLoading} />
+        <div>
+          <p className={cn('mb-3 lg:mb-5', styles.statLabel)}>위시리스트</p>
+          <div className="grid grid-cols-2 gap-3 lg:gap-5">
+            <StatCard label="활동" value={data?.totalActivities} loading={isLoading} />
+            <StatCard label="장소" value={data?.totalPlaces} loading={isLoading} />
+          </div>
+        </div>
+        <div className="mt-10 lg:mt-12">
+          <p className={cn('mb-3 lg:mb-5', styles.statLabel)}>함께한 기록</p>
+          <div className="grid grid-cols-2 gap-3 lg:gap-5">
+            <StatCard label="다녀온 곳" value={data?.totalVisited} loading={isLoading} />
+            <StatCard label="이번 달" value={data?.visitedThisMonth} loading={isLoading} />
+          </div>
         </div>
       </div>
 

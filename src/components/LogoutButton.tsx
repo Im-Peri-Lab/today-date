@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { LogOut } from 'lucide-react'
 import { toast } from 'sonner'
-import { Button } from '@/components/ui/button'
+import styles from '@/components/screens.module.css'
 
 export function LogoutButton() {
   const router = useRouter()
@@ -28,14 +28,15 @@ export function LogoutButton() {
   }
 
   return (
-    <Button
-      variant="outline"
+    <button
+      type="button"
       onClick={handleLogout}
       disabled={isLoading}
-      className="w-full border-violet-200 text-violet-600 hover:bg-violet-50"
+      className={styles.iconBtn}
+      aria-label="로그아웃"
+      title="로그아웃"
     >
-      <LogOut className="w-4 h-4 mr-2" />
-      {isLoading ? '로그아웃 중...' : '로그아웃'}
-    </Button>
+      <LogOut className="h-[18px] w-[18px]" />
+    </button>
   )
 }

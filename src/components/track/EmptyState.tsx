@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { Heart } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
+import styles from '@/components/screens.module.css'
 
 interface EmptyStateProps {
   message: string
@@ -11,12 +12,12 @@ interface EmptyStateProps {
 
 export function EmptyState({ message, hint, addHref, addLabel }: EmptyStateProps) {
   return (
-    <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-violet-200 bg-white/50 px-6 py-16 text-center">
-      <Heart className="mb-3 h-10 w-10 text-violet-300 fill-violet-100" />
-      <p className="font-medium text-violet-800">{message}</p>
-      {hint && <p className="mt-1 text-sm text-gray-500">{hint}</p>}
-      <Link href={addHref} className="mt-5">
-        <Button className="bg-violet-600 hover:bg-violet-700 text-white">{addLabel}</Button>
+    <div className={styles.empty}>
+      <Heart className={cn('mb-3 h-10 w-10', styles.accent)} strokeWidth={1.5} />
+      <p className={cn('font-medium', styles.ink)}>{message}</p>
+      {hint && <p className={cn('mt-1 text-sm', styles.sub)}>{hint}</p>}
+      <Link href={addHref} className={cn(styles.gradIcon, 'mt-5 h-auto w-auto px-5 py-2.5 text-sm font-medium')}>
+        {addLabel}
       </Link>
     </div>
   )

@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { getSession } from '@/lib/auth/session'
 import { HomeDashboard } from '@/components/HomeDashboard'
+import styles from '@/components/screens.module.css'
 
 export default async function HomePage() {
   const session = await getSession()
@@ -10,7 +11,7 @@ export default async function HomePage() {
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-violet-50 to-purple-100">
+    <main className={styles.page}>
       <HomeDashboard />
     </main>
   )

@@ -1,33 +1,80 @@
 'use client'
 
 import Link from 'next/link'
-import { Zap, MapPin, CheckCircle2, CalendarHeart, List } from 'lucide-react'
+import { Sparkles, MapPin } from 'lucide-react'
 import { Skeleton } from '@/components/ui/skeleton'
-import { LogoutButton } from '@/components/LogoutButton'
+import { HomeMenu } from '@/components/HomeMenu'
+import { HomeFab } from '@/components/HomeFab'
 import { useDashboardStats } from '@/hooks/useDashboardStats'
+import { cn } from '@/lib/utils'
+import styles from '@/components/screens.module.css'
 
-function StatCard({
+/** 보라→핑크 그라데이션 하트 (auth BrandHeader 와 동일 모티프) */
+function MiniHeart() {
+  return (
+    <svg
+      className={cn(styles.miniHeart, 'h-6 w-6 lg:h-7 lg:w-7')}
+      viewBox="0 0 24 24"
+      role="img"
+      aria-label="Today Date"
+    >
+      <defs>
+        <linearGradient id="homeHeartGradient" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#a855f7" />
+          <stop offset="100%" stopColor="#ec4899" />
+        </linearGradient>
+      </defs>
+      <path
+        fill="url(#homeHeartGradient)"
+        d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+      />
+    </svg>
+  )
+}
+
+function CtaCard({
+  href,
   icon,
+  title,
+  subtitle,
+}: {
+  href: string
+  icon: React.ReactNode
+  title: string
+  subtitle: string
+}) {
+  return (
+    <Link
+      href={href}
+      className={cn(styles.card, styles.cardInteractive, 'flex flex-col p-5')}
+    >
+      <span className={cn(styles.gradIcon, 'h-8 w-8')}>{icon}</span>
+      <span className="mt-4 block">
+        <span className={cn('block text-base font-semibold lg:text-lg', styles.ink)}>{title}</span>
+        <span className={cn('mt-0.5 block text-sm', styles.sub)}>{subtitle}</span>
+      </span>
+    </Link>
+  )
+}
+
+/** 통계 카드 — CTA와 동일한 카드 토큰. 숫자 강조 + 라벨, 호버 없음(정보 전용) */
+function StatCard({
   label,
   value,
   loading,
 }: {
-  icon: React.ReactNode
   label: string
   value: number | undefined
   loading: boolean
 }) {
   return (
-    <div className="rounded-xl bg-white/70 p-4 ring-1 ring-violet-100">
-      <div className="mb-1 flex items-center gap-1.5 text-violet-500">
-        {icon}
-        <span className="text-xs text-muted-foreground">{label}</span>
-      </div>
+    <div className={cn(styles.card, 'flex flex-col p-4')}>
       {loading ? (
         <Skeleton className="h-7 w-10" />
       ) : (
-        <p className="text-2xl font-bold text-violet-800">{value ?? 0}</p>
+        <span className={cn(styles.statNum, 'text-2xl lg:text-3xl')}>{value ?? 0}</span>
       )}
+      <span className={cn('mt-1 text-sm', styles.sub)}>{label}</span>
     </div>
   )
 }
@@ -36,82 +83,65 @@ export function HomeDashboard() {
   const { data, isLoading } = useDashboardStats()
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-8">
-      {/* 헤더 */}
-      <div className="mb-6 flex items-start justify-between">
-        <div>
-          <p className="text-sm text-violet-500">우리의 데이트 플래너 💜</p>
-          <h1 className="text-2xl font-bold text-violet-900">오늘 어떤 데이트 하지?</h1>
+    <div
+      className={cn(
+        styles.fill,
+        'mx-auto w-full max-w-xl px-5 pb-16 pt-6 lg:max-w-3xl lg:px-8 lg:pb-24 lg:pt-12'
+      )}
+    >
+      {/* 헤더: 브랜드 + 미니멀 메뉴 */}
+      <header className="flex items-center justify-between">
+        <div className="flex items-center gap-2.5">
+          <MiniHeart />
+          <span className={cn(styles.brand, 'lg:text-lg')}>Today Date</span>
         </div>
-        <div className="w-28 shrink-0">
-          <LogoutButton />
-        </div>
+        <HomeMenu />
+      </header>
+
+      {/* Hero */}
+      <div className="mt-8 lg:mt-10">
+        <h1 className={cn(styles.greeting, 'text-2xl lg:text-4xl')}>오늘, 우리 어떻게 보낼까?</h1>
+        <p className={cn('mt-1 text-sm lg:mt-1.5 lg:text-lg', styles.sub)}>
+          위시리스트에서 골라드릴게요 💜
+        </p>
       </div>
 
-      {/* 메인 CTA */}
-      <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
-        <Link
+      {/* 메인 CTA — 정사각 통통 카드 2열, 아이콘 상단 + 텍스트 하단 */}
+      <div className="mt-8 grid grid-cols-2 gap-3 lg:mt-8 lg:gap-4">
+        <CtaCard
           href="/recommend/activity"
-          className="group rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 p-5 text-white shadow-lg transition-transform hover:-translate-y-0.5"
-        >
-          <div className="mb-2 text-3xl">🎯</div>
-          <div className="text-lg font-bold">오늘 뭐할까?</div>
-          <div className="text-sm text-violet-100">조건에 맞는 활동 추천받기</div>
-        </Link>
-        <Link
+          icon={<Sparkles className="h-5 w-5" strokeWidth={1.75} />}
+          title="오늘 뭐할까?"
+          subtitle="활동 추천 받기"
+        />
+        <CtaCard
           href="/recommend/place"
-          className="group rounded-2xl bg-gradient-to-br from-fuchsia-500 to-pink-600 p-5 text-white shadow-lg transition-transform hover:-translate-y-0.5"
-        >
-          <div className="mb-2 text-3xl">📍</div>
-          <div className="text-lg font-bold">어디 갈까?</div>
-          <div className="text-sm text-pink-100">분위기 맞는 장소 추천받기</div>
-        </Link>
-      </div>
-
-      {/* 통계 */}
-      <div className="mb-6 grid grid-cols-2 gap-3">
-        <StatCard
-          icon={<Zap className="h-4 w-4" />}
-          label="총 활동"
-          value={data?.totalActivities}
-          loading={isLoading}
-        />
-        <StatCard
-          icon={<MapPin className="h-4 w-4" />}
-          label="총 장소"
-          value={data?.totalPlaces}
-          loading={isLoading}
-        />
-        <StatCard
-          icon={<CheckCircle2 className="h-4 w-4" />}
-          label="다녀온 곳"
-          value={data?.totalVisited}
-          loading={isLoading}
-        />
-        <StatCard
-          icon={<CalendarHeart className="h-4 w-4" />}
-          label="이번 달 다녀온 곳"
-          value={data?.visitedThisMonth}
-          loading={isLoading}
+          icon={<MapPin className="h-5 w-5" strokeWidth={1.75} />}
+          title="오늘 어디갈까?"
+          subtitle="장소 추천 받기"
         />
       </div>
 
-      {/* 빠른 링크 */}
-      <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-sm">
-        <Link
-          href="/list"
-          className="inline-flex items-center gap-1.5 text-violet-600 hover:text-violet-800"
-        >
-          <List className="h-4 w-4" />
-          목록 보기
-        </Link>
-        <Link href="/activities/new" className="text-violet-600 hover:text-violet-800">
-          + 활동 추가
-        </Link>
-        <Link href="/places/new" className="text-violet-600 hover:text-violet-800">
-          + 장소 추가
-        </Link>
+      {/* 통계 — CTA와 동일한 카드 언어, 더 컴팩트(보조 정보). 두 그룹 */}
+      <div className="mt-6">
+        <div>
+          <p className={cn('mb-2 text-sm font-medium', styles.sub)}>위시리스트</p>
+          <div className="grid grid-cols-2 gap-3 lg:gap-4">
+            <StatCard label="활동" value={data?.totalActivities} loading={isLoading} />
+            <StatCard label="장소" value={data?.totalPlaces} loading={isLoading} />
+          </div>
+        </div>
+        <div className="mt-5">
+          <p className={cn('mb-2 text-sm font-medium', styles.sub)}>함께한 기록</p>
+          <div className="grid grid-cols-2 gap-3 lg:gap-4">
+            <StatCard label="다녀온 곳" value={data?.totalVisited} loading={isLoading} />
+            <StatCard label="이번 달" value={data?.visitedThisMonth} loading={isLoading} />
+          </div>
+        </div>
       </div>
+
+      {/* 추가 — 우하단 FAB (활동/장소 메뉴) */}
+      <HomeFab />
     </div>
   )
 }

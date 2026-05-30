@@ -46,14 +46,10 @@ function CtaCard({
   return (
     <Link
       href={href}
-      className={cn(
-        styles.card,
-        styles.cardInteractive,
-        'flex aspect-[4/5] flex-col justify-between p-5 lg:aspect-auto lg:h-52 lg:p-6'
-      )}
+      className={cn(styles.card, styles.cardInteractive, 'flex flex-col p-5')}
     >
-      <span className={cn(styles.gradIcon, 'h-12 w-12 lg:h-14 lg:w-14')}>{icon}</span>
-      <span className="block">
+      <span className={cn(styles.gradIcon, 'h-12 w-12')}>{icon}</span>
+      <span className="mt-4 block">
         <span className={cn('block text-base font-semibold lg:text-lg', styles.ink)}>{title}</span>
         <span className={cn('mt-0.5 block text-sm', styles.sub)}>{subtitle}</span>
       </span>
@@ -72,16 +68,11 @@ function StatCard({
   loading: boolean
 }) {
   return (
-    <div
-      className={cn(
-        styles.card,
-        'flex aspect-[4/3] flex-col justify-center p-4 lg:aspect-auto lg:h-32 lg:p-5'
-      )}
-    >
+    <div className={cn(styles.card, 'flex flex-col p-4')}>
       {loading ? (
-        <Skeleton className="h-8 w-12 lg:h-10" />
+        <Skeleton className="h-7 w-10" />
       ) : (
-        <span className={cn(styles.statNum, 'text-3xl lg:text-4xl')}>{value ?? 0}</span>
+        <span className={cn(styles.statNum, 'text-2xl lg:text-3xl')}>{value ?? 0}</span>
       )}
       <span className={cn('mt-1 text-sm', styles.sub)}>{label}</span>
     </div>
@@ -131,8 +122,8 @@ export function HomeDashboard() {
         />
       </div>
 
-      {/* 통계 — CTA와 동일한 카드 언어. 위시리스트 / 함께한 기록 두 그룹 */}
-      <div className="mt-8 lg:mt-10">
+      {/* 통계 — CTA와 동일한 카드 언어, 더 컴팩트(보조 정보). 두 그룹 */}
+      <div className="mt-6">
         <div>
           <p className={cn('mb-2 text-sm font-medium', styles.sub)}>위시리스트</p>
           <div className="grid grid-cols-2 gap-3 lg:gap-4">
@@ -140,7 +131,7 @@ export function HomeDashboard() {
             <StatCard label="장소" value={data?.totalPlaces} loading={isLoading} />
           </div>
         </div>
-        <div className="mt-6">
+        <div className="mt-5">
           <p className={cn('mb-2 text-sm font-medium', styles.sub)}>함께한 기록</p>
           <div className="grid grid-cols-2 gap-3 lg:gap-4">
             <StatCard label="다녀온 곳" value={data?.totalVisited} loading={isLoading} />

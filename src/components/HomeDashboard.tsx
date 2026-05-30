@@ -48,7 +48,7 @@ function CtaCard({
       href={href}
       className={cn(styles.card, styles.cardInteractive, 'flex flex-col p-5')}
     >
-      <span className={cn(styles.gradIcon, 'h-12 w-12')}>{icon}</span>
+      <span className={cn(styles.gradIcon, 'h-8 w-8')}>{icon}</span>
       <span className="mt-4 block">
         <span className={cn('block text-base font-semibold lg:text-lg', styles.ink)}>{title}</span>
         <span className={cn('mt-0.5 block text-sm', styles.sub)}>{subtitle}</span>
@@ -110,13 +110,13 @@ export function HomeDashboard() {
       <div className="mt-8 grid grid-cols-2 gap-3 lg:mt-8 lg:gap-4">
         <CtaCard
           href="/recommend/activity"
-          icon={<Sparkles className="h-[22px] w-[22px] lg:h-8 lg:w-8" strokeWidth={1.75} />}
+          icon={<Sparkles className="h-5 w-5" strokeWidth={1.75} />}
           title="오늘 뭐할까?"
           subtitle="활동 추천 받기"
         />
         <CtaCard
           href="/recommend/place"
-          icon={<MapPin className="h-[22px] w-[22px] lg:h-8 lg:w-8" strokeWidth={1.75} />}
+          icon={<MapPin className="h-5 w-5" strokeWidth={1.75} />}
           title="오늘 어디갈까?"
           subtitle="장소 추천 받기"
         />

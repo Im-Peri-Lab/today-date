@@ -15,7 +15,11 @@
   min-height: 100dvh; /* iOS 주소창 동적 높이 */
   display: flex;
   flex-direction: column;
-  background: linear-gradient(180deg, #ffffff 0%, #f4f0fa 100%);
+  /* 베이스 그라데이션 + "있는 듯 없는 듯" 코너 글로우(인증 흐름 톤) */
+  background:
+    radial-gradient(50rem 32rem at 100% -8%, rgba(168, 85, 247, 0.05), transparent 62%),
+    radial-gradient(44rem 30rem at -6% 6%, rgba(236, 72, 153, 0.04), transparent 60%),
+    linear-gradient(180deg, #ffffff 0%, #f4f0fa 100%);
   /* 노치/홈 인디케이터 안전 영역 */
   padding-top: calc(env(safe-area-inset-top) + 0.5rem);
   padding-bottom: calc(env(safe-area-inset-bottom) + 0.5rem);
@@ -29,7 +33,10 @@
 
 @media (prefers-color-scheme: dark) {
   .page {
-    background: linear-gradient(180deg, #0a0712 0%, #120c1e 100%);
+    background:
+      radial-gradient(50rem 32rem at 100% -8%, rgba(192, 132, 252, 0.12), transparent 62%),
+      radial-gradient(44rem 30rem at -6% 6%, rgba(244, 114, 182, 0.07), transparent 60%),
+      linear-gradient(180deg, #0a0712 0%, #120c1e 100%);
 
     --s-ink: #f5f3fa; /* 제목/주요 텍스트 */
     --s-sub: #a8a0b8; /* 서브카피 */
@@ -41,7 +48,8 @@
     --s-card-bg: #1f1830; /* 카드 표면 — 페이지 배경(#0a0712~#120c1e)보다 또렷이 밝게 */
     --s-card-border: #2a1f3e; /* 보더로 분리감 확보 */
     --s-card-shadow: 0 8px 24px -16px rgba(0, 0, 0, 0.6);
-    --s-card-shadow-hover: 0 16px 40px -16px rgba(0, 0, 0, 0.75);
+    --s-card-shadow-hover: 0 16px 40px -16px rgba(0, 0, 0, 0.72), 0 4px 22px -10px rgba(192, 132, 252, 0.3);
+    --s-card-hover-border: rgba(192, 132, 252, 0.5); /* 호버 시 라벤더 보더 */
     --s-divider: #2c2442;
     --s-track: #1b1430; /* 세그먼트 트랙(눌린 면) */
     --s-raised: #2f2647; /* 세그먼트 활성(떠오른 면) */
@@ -69,9 +77,8 @@
 
 /* ── 브랜드 헤더 (홈 상단, 인증 헤더보다 작게) ──── */
 .miniHeart {
-  width: 24px;
-  height: 24px;
-  filter: drop-shadow(0 2px 6px rgba(168, 85, 247, 0.32));
+  /* 크기는 Tailwind(h-/w-)로 반응형 지정 — 모듈은 글로우만 */
+  filter: drop-shadow(0 2px 7px rgba(168, 85, 247, 0.34));
 }
 .brand {
   font-size: 1rem;
@@ -80,10 +87,10 @@
   color: var(--s-ink, #1a1033);
 }
 .greeting {
-  font-size: 1.5rem;
+  /* 크기는 Tailwind(text-3xl lg:text-5xl)로 — 모듈은 톤만 */
   font-weight: 500;
   letter-spacing: -0.02em;
-  line-height: 1.2;
+  line-height: 1.15;
   color: var(--s-ink, #1a1033);
 }
 
@@ -105,18 +112,11 @@
   display: flex;
   flex-direction: column;
 }
-.homeCenter {
-  flex: 1 1 auto;
-  display: flex;
-  flex-direction: column;
-  justify-content: center; /* 모바일: 콘텐츠가 화면을 채우며 세로 중앙 */
-}
-
-/* 데스크탑(lg↑): 세로 중앙 정렬 해제 → 헤더부터 위에서 자연스럽게 시작.
- * 아래 빈 공간은 정상적인 여백으로 둔다(상단 쏠림/외로운 헤더 해소). */
+/* 통계 섹션을 위 콘텐츠와 분리 — 데스크탑에서만 얇은 구분선 + 여백 */
 @media (min-width: 1024px) {
-  .homeCenter {
-    justify-content: flex-start;
+  .sectionTop {
+    border-top: 1px solid var(--s-divider, rgba(0, 0, 0, 0.06));
+    padding-top: 2.75rem;
   }
 }
 
@@ -141,9 +141,10 @@
 }
 .cardInteractive:hover {
   transform: translateY(-2px);
+  border-color: var(--s-card-hover-border, rgba(168, 85, 247, 0.4));
   box-shadow: var(
     --s-card-shadow-hover,
-    0 10px 24px -10px rgba(124, 58, 237, 0.28)
+    0 12px 28px -12px rgba(168, 85, 247, 0.32)
   );
 }
 .cardInteractive:active {
@@ -180,7 +181,7 @@
 
 /* ── 통계 숫자 ─────────────────────────────────── */
 .statNum {
-  font-size: 1.75rem;
+  /* 크기는 Tailwind(text-3xl lg:text-4xl)로 — 모듈은 톤만 */
   font-weight: 600;
   letter-spacing: -0.02em;
   line-height: 1;

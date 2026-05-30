@@ -63,34 +63,34 @@ function CtaCard({
   )
 }
 
-function StatCard({
+/** 통계 한 항목: "활동 13" — 라벨(일반 톤) + 숫자(보라 강조), 박스 없이 텍스트만 */
+function StatItem({
   label,
   value,
   loading,
-  accent,
 }: {
   label: string
   value: number | undefined
   loading: boolean
-  accent?: boolean
 }) {
   return (
-    <div
-      className={cn(
-        styles.card,
-        accent && styles.statCardAccent,
-        'flex items-center gap-2.5 px-4 py-3 lg:gap-3 lg:px-5 lg:py-3.5'
-      )}
-    >
+    <span className="inline-flex items-baseline gap-1">
+      <span className={cn('text-sm', styles.ink)}>{label}</span>
       {loading ? (
-        <Skeleton className="h-7 w-9 lg:h-8" />
+        <Skeleton className="inline-block h-4 w-5 rounded" />
       ) : (
-        <span className={cn(styles.statNum, 'text-2xl lg:text-3xl')}>{value ?? 0}</span>
+        <span className={cn(styles.statNum, 'text-base')}>{value ?? 0}</span>
       )}
-      <span className={cn('text-xs lg:text-sm', accent ? styles.accent : styles.sub)}>
-        {label}
-      </span>
-    </div>
+    </span>
+  )
+}
+
+/** 점 구분자 · (흐린 톤) */
+function Dot() {
+  return (
+    <span className={cn('text-sm', styles.faint)} aria-hidden>
+      ·
+    </span>
   )
 }
 
@@ -137,21 +137,23 @@ export function HomeDashboard() {
         />
       </div>
 
-      {/* 통계 — 위시리스트 / 함께한 기록 두 그룹. 모바일 세로 stack / 데스크탑 좌우 분할 */}
-      <div className={cn('mt-8 lg:mt-10 lg:grid lg:grid-cols-2 lg:gap-8', styles.sectionTop)}>
+      {/* 통계 — 카드 없이 정보 라인으로. CTA보다 시각적으로 작게(보조 정보) */}
+      <div className="mt-8 lg:mt-10 lg:flex lg:gap-16">
         <div>
-          <p className={cn('mb-2 lg:mb-3', styles.statLabel)}>위시리스트</p>
-          <div className="grid grid-cols-2 gap-3 lg:gap-4">
-            <StatCard label="활동" value={data?.totalActivities} loading={isLoading} />
-            <StatCard label="장소" value={data?.totalPlaces} loading={isLoading} />
-          </div>
+          <p className={cn('mb-1.5 text-sm font-medium', styles.sub)}>위시리스트</p>
+          <p className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+            <StatItem label="활동" value={data?.totalActivities} loading={isLoading} />
+            <Dot />
+            <StatItem label="장소" value={data?.totalPlaces} loading={isLoading} />
+          </p>
         </div>
-        <div className="mt-6 lg:mt-0">
-          <p className={cn('mb-2 lg:mb-3', styles.statLabel)}>함께한 기록</p>
-          <div className="grid grid-cols-2 gap-3 lg:gap-4">
-            <StatCard label="다녀온 곳" value={data?.totalVisited} loading={isLoading} />
-            <StatCard label="이번 달" value={data?.visitedThisMonth} loading={isLoading} />
-          </div>
+        <div className="mt-5 lg:mt-0">
+          <p className={cn('mb-1.5 text-sm font-medium', styles.sub)}>함께한 기록</p>
+          <p className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+            <StatItem label="다녀온 곳" value={data?.totalVisited} loading={isLoading} />
+            <Dot />
+            <StatItem label="이번 달" value={data?.visitedThisMonth} loading={isLoading} />
+          </p>
         </div>
       </div>
 

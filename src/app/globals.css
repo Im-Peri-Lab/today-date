@@ -64,16 +64,25 @@
 }
 
 /*
- * /lock 페이지 한정 canvas(html) 배경.
- * 이 클래스는 LockPage 가 마운트된 동안에만 <html> 에 붙으므로 다른 페이지에
- * 영향을 주지 않는다. 주소창 토글 / 오버스크롤 시 흰 여백 노출을 막는다.
+ * 전역 배경 — JS 없이 SSR 시점부터 적용되어, 콘텐츠 길이/스크롤/주소창 토글/
+ * 오버스크롤 어디서도 흰·검은 여백이 절대 노출되지 않게 한다.
+ * 라이트 #FFFFFF / 다크 #0A0712. OS(prefers-color-scheme) + .dark 클래스 둘 다 대응.
  */
-html.lock-canvas {
-  background: #f4f0fa;
+html,
+body {
+  min-height: 100dvh;
+  background-color: #ffffff;
+  overscroll-behavior: none;
+}
+
+html.dark,
+html.dark body {
+  background-color: #0a0712;
 }
 
 @media (prefers-color-scheme: dark) {
-  html.lock-canvas {
-    background: #0a0712;
+  html:not(.light),
+  html:not(.light) body {
+    background-color: #0a0712;
   }
 }

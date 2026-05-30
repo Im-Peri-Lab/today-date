@@ -4,7 +4,8 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { PasscodeInput } from '@/components/PasscodeInput'
-import styles from './lock.module.css'
+import { AuthLayout } from '@/components/auth/AuthLayout'
+import styles from '@/components/auth/auth.module.css'
 
 // 로컬에서 잠금 메시지 디자인을 확인하려면 true 로 바꾼다. (배포 시 false 유지)
 // true 일 때는 5회 실패 없이도 잠금 배너가 보이고, 09:42 가짜 카운트다운이 표시된다.
@@ -24,12 +25,6 @@ export default function LockPage() {
   const [countdown, setCountdown] = useState(0)
   const [isLoading, setIsLoading] = useState(false)
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
-
-  // /lock 동안에만 <html> canvas 를 페이지 배경과 같은 톤으로 (흰 여백 방지)
-  useEffect(() => {
-    document.documentElement.classList.add('lock-canvas')
-    return () => document.documentElement.classList.remove('lock-canvas')
-  }, [])
 
   useEffect(() => {
     if (!lockedUntil) return
@@ -80,56 +75,30 @@ export default function LockPage() {
   const displaySeconds = DEV_FORCE_LOCK && !isLocked ? 582 : countdown
 
   return (
-    <main className={styles.page}>
-      {/* 상단: 앱 아이덴티티 */}
-      <header className={styles.header}>
-        <svg
-          className={styles.heart}
-          viewBox="0 0 24 24"
-          role="img"
-          aria-label="Today Date"
-        >
-          <defs>
-            <linearGradient id="heartGradient" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stopColor="var(--heart-from, #a855f7)" />
-              <stop offset="100%" stopColor="var(--heart-to, #ec4899)" />
-            </linearGradient>
-          </defs>
-          <path
-            fill="url(#heartGradient)"
-            d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
-          />
-        </svg>
-        <h1 className={styles.title}>Today Date</h1>
-        <p className={styles.subtitle}>우리 둘만의 데이트 위시리스트</p>
-      </header>
-
-      {/* 중앙: 패스코드 입력 */}
-      <div className={styles.middle}>
-        {showLock && (
-          <div className={styles.lockNotice} role="alert">
-            <p className={styles.lockTitle}>잠시 후 다시 시도해주세요</p>
-            <p className={styles.lockTimer}>
-              남은 시간 {formatCountdown(displaySeconds)}
-            </p>
-          </div>
-        )}
-
-        <PasscodeInput
-          onComplete={handleComplete}
-          disabled={isLoading || showLock}
-          error={showLock ? '' : error}
-          clearOnError
-          label={showLock ? undefined : '패스코드 입력'}
-        />
-      </div>
-
-      {/* 하단: 링크 */}
-      <footer className={styles.footer}>
-        <Link href="/forgot" className={styles.forgot}>
+    <AuthLayout
+      subtitle="우리 둘만의 데이트 위시리스트"
+      footer={
+        <Link href="/forgot" className={styles.link}>
           패스코드를 잊으셨나요?
         </Link>
-      </footer>
-    </main>
+      }
+    >
+      {showLock && (
+        <div className={styles.lockNotice} role="alert">
+          <p className={styles.lockTitle}>잠시 후 다시 시도해주세요</p>
+          <p className={styles.lockTimer}>
+            남은 시간 {formatCountdown(displaySeconds)}
+          </p>
+        </div>
+      )}
+
+      <PasscodeInput
+        onComplete={handleComplete}
+        disabled={isLoading || showLock}
+        error={showLock ? '' : error}
+        clearOnError
+        label={showLock ? undefined : '패스코드 입력'}
+      />
+    </AuthLayout>
   )
 }

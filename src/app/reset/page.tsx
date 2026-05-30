@@ -3,8 +3,8 @@
 import { Suspense, useEffect, useRef, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { toast } from 'sonner'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { PasscodeInput } from '@/components/PasscodeInput'
+import { AuthLayout } from '@/components/auth/AuthLayout'
 
 type SubStep = 'set' | 'confirm'
 
@@ -67,38 +67,31 @@ function ResetForm() {
   if (!token) return null
 
   return (
-    <main className="min-h-[100dvh] bg-gradient-to-br from-violet-50 to-purple-100 flex items-center justify-center p-4">
-      <Card className="w-full max-w-sm shadow-xl border-violet-100">
-        <CardHeader className="text-center pb-2">
-          <div className="text-4xl mb-2">{subStep === 'set' ? '🔐' : '✅'}</div>
-          <CardTitle className="text-xl text-violet-800">
-            {subStep === 'set' ? '새 패스코드 설정' : '패스코드 확인'}
-          </CardTitle>
-          <CardDescription>
-            {subStep === 'set'
-              ? '새로운 4~6자리 패스코드를 입력하세요'
-              : '패스코드를 한 번 더 입력하세요'}
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="flex justify-center py-4">
-          {subStep === 'set' ? (
-            <PasscodeInput
-              key="set"
-              onComplete={onFirstPasscodeComplete}
-              disabled={isLoading}
-            />
-          ) : (
-            <PasscodeInput
-              key="confirm"
-              onComplete={onConfirmPasscodeComplete}
-              disabled={isLoading}
-              error={confirmError}
-              clearOnError
-            />
-          )}
-        </CardContent>
-      </Card>
-    </main>
+    <AuthLayout
+      subtitle={
+        subStep === 'set'
+          ? '새로운 4~6자리 패스코드를 설정하세요'
+          : '패스코드를 한 번 더 입력하세요'
+      }
+    >
+      {subStep === 'set' ? (
+        <PasscodeInput
+          key="set"
+          onComplete={onFirstPasscodeComplete}
+          disabled={isLoading}
+          label="새 패스코드 입력"
+        />
+      ) : (
+        <PasscodeInput
+          key="confirm"
+          onComplete={onConfirmPasscodeComplete}
+          disabled={isLoading}
+          error={confirmError}
+          clearOnError
+          label="패스코드 확인"
+        />
+      )}
+    </AuthLayout>
   )
 }
 

@@ -534,11 +534,12 @@
 
 /*
  * /list 하단 여백 — env()/dvh 없는 완전 고정값. 스크롤·툴바 토글과 무관하게 항상 일정.
- * FAB 가 안전영역에서 최대로 떠오를 때(env≈2.1rem + 1.25rem 오프셋 + 3.5rem 높이 ≈ 6.85rem)
- * 까지 마지막 카드를 안 가리도록 7rem 으로 둔다. (홈 인디케이터 위로도 충분히 띄움)
+ * 짧은 리스트에서 마지막 카드 아래 빈 공간을 줄이려고 5rem 으로 둔다.
+ * (FAB 는 env=0 일 때 약 4.75rem footprint → 5rem 이면 안 가림. iOS 툴바 숨김으로 env 가
+ *  커지면 긴 리스트 맨 끝에서 FAB 가 살짝 겹칠 수 있음 — 그땐 FAB 를 고정값으로 정리 권장)
  */
 .listBottom {
-  padding-bottom: 7rem;
+  padding-bottom: 5rem;
 }
 
 /* FAB (추가) — 그라데이션 원형 */

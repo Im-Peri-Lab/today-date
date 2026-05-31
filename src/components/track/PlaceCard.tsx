@@ -70,7 +70,7 @@ export function PlaceCard({ place, hideMenu, actionSlot }: PlaceCardProps) {
 
       <Link href={`/places/${place.id}`} className={cn('block p-3.5', hideMenu ? 'pr-3.5' : 'pr-11')}>
         {place.category && (
-          <div className="mb-2 -ml-2">
+          <div className="mb-2">
             <CategoryBadge category={place.category} />
           </div>
         )}

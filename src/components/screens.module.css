@@ -40,13 +40,13 @@
 }
 
 /*
- * /list 용 — dvh/env 의존 제거 + 짧은 콘텐츠 세로 균형.
- *  - min-height: 100svh → 뷰포트를 채우되 svh(고정값)라 주소창 토글로 출렁이지 않음.
- *    (콘텐츠가 짧을 때 카드 영역을 flex margin:auto 로 위~중앙에 균형 배치하기 위한 높이 확보)
- *  - padding-bottom: 0 → .page 의 env(safe-area-inset-bottom) 의존 제거(출렁임 방지).
+ * /list 용 — 콘텐츠 주도(위 정렬). dvh/env 의존 제거가 목적.
+ *  - min-height: auto → 뷰포트 높이에 의존하지 않음(콘텐츠가 높이를 결정). 짧으면 아래는 배경이 보임(정상).
+ *  - padding-bottom: 0 → .page 의 env(safe-area-inset-bottom) 의존 제거(스크롤 출렁임 방지).
+ * (중앙정렬/공간분배는 쓰지 않음 — 길든 짧든 마지막 카드 + listBottom 에서 끝남)
  */
 .pageStatic {
-  min-height: 100svh;
+  min-height: auto;
   padding-bottom: 0;
 }
 
@@ -532,11 +532,10 @@
 
 /*
  * /list 하단 여백 — env()/dvh 없는 고정값. 마지막 카드와 FAB 사이 간격 확보용.
- * FAB footprint = bottom 1.5rem + height 3.5rem = 5rem(고정). 6.5rem 이면 긴 리스트
- * 스크롤 끝에서도 마지막 카드와 FAB 사이 ~1.5rem 여유가 생긴다.
+ * FAB footprint = bottom 1.5rem + height 3.5rem = 5rem(고정). 5rem 이면 카드와 FAB 가 바짝 붙지 않게.
  */
 .listBottom {
-  padding-bottom: 6.5rem;
+  padding-bottom: 5rem;
 }
 
 /* FAB (추가) — 그라데이션 원형 */

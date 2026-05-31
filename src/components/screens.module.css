@@ -40,6 +40,16 @@
 }
 
 /*
+ * 스크롤이 긴 페이지(/list)용 — dvh 추적 제거.
+ * dvh 는 모바일 주소창 접힘/펼침에 따라 실시간으로 변해 스크롤 중 하단 여백이 출렁인다.
+ * svh(없으면 vh)는 스크롤 중 값이 고정되므로 출렁임이 없다. (콘텐츠가 짧아도 화면을 채움)
+ */
+.pageStatic {
+  min-height: 100vh;
+  min-height: 100svh;
+}
+
+/*
  * 배경을 뷰포트에 고정된 레이어로 분리한다.
  * 콘텐츠 높이에 종속되지 않으므로 탭 전환·스크롤로 콘텐츠 길이가 달라져도
  * 그라데이션 끝점이 움직이지 않는다. (베이스 그라데이션 + 코너 글로우)
@@ -511,9 +521,13 @@
   color: var(--s-active-line, #7c3aed);
 }
 
-/* /list 하단 여백 — 마지막 카드가 FAB·안전영역에 가리지 않는 최소선(FAB 높이 + 약간) */
+/*
+ * /list 하단 여백 — FAB 가림 방지 고정값(스크롤과 무관하게 일정).
+ * 안전영역은 .page 의 padding-bottom 이 이미 처리하고, FAB 위치도 같은 env() 를 쓰므로
+ * 여기서는 env() 없이 고정 5rem 만 둬야 스크롤 중 여백이 출렁이지 않는다.
+ */
 .listBottom {
-  padding-bottom: calc(env(safe-area-inset-bottom) + 5rem);
+  padding-bottom: 5rem;
 }
 
 /* FAB (추가) — 그라데이션 원형 */

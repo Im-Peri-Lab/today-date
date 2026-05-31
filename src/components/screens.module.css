@@ -25,6 +25,7 @@
   --s-active-fill: linear-gradient(135deg, #a855f7 0%, #ec4899 100%); /* 채움(칩) */
   --s-active-on: #ffffff; /* 채움 위 글씨/아이콘 */
   --s-active-line: #7c3aed; /* 활성/포커스 보더·링 */
+  --s-active-text: #7c3aed; /* 외곽선형 활성(토글/필터버튼)의 글씨·아이콘 — 다크에선 밝게 */
   --s-active-glow: rgba(124, 58, 237, 0.2); /* 옅은 포커스 링/글로우 */
 
   /* 노치/홈 인디케이터 안전 영역 */
@@ -63,6 +64,7 @@
   }
   .page {
     --s-active-fill: linear-gradient(135deg, #c084fc 0%, #f472b6 100%); /* 다크는 한 톤 밝게 */
+    --s-active-text: #d8b4fe; /* 다크: 외곽선형 활성 글씨/아이콘을 밝은 라벤더로 */
     --s-ink: #f5f3fa; /* 제목/주요 텍스트 */
     --s-sub: #a8a0b8; /* 서브카피 */
     --s-faint: #8c84a0; /* 더 옅은 보조 */
@@ -328,7 +330,7 @@
     box-shadow 140ms ease;
 }
 .segmentBtnActive {
-  color: var(--s-active-line, #7c3aed);
+  color: var(--s-active-text, #7c3aed);
   background: var(--s-card-bg, #ffffff);
   box-shadow:
     0 0 0 1px var(--s-active-line, #7c3aed),
@@ -373,16 +375,21 @@
   color: var(--s-faint, #b0aabe);
 }
 /*
- * 통일 포커스 — 차분한 보라 보더 한 톤 + 옅은 링(형광 X, 라이트/다크 동일 강도).
+ * 포커스 역할 분리:
+ *  - 텍스트 입력(검색/위치): 연보라 포커스 링 + 활성 보더 (입력 필드 관례)
+ *  - 버튼류(필터/칩): 링 없이 활성 보더만
  * 보더는 항상 1px 자리를 차지(색만 변경)하므로 포커스 시 레이아웃 점프가 없다.
  */
 .searchInput:focus,
-.plainInput:focus,
+.plainInput:focus {
+  outline: none;
+  border-color: var(--s-active-line, #7c3aed);
+  box-shadow: 0 0 0 3px var(--s-active-glow, rgba(124, 58, 237, 0.2));
+}
 .filterToggle:focus-visible,
 .chip:focus-visible {
   outline: none;
   border-color: var(--s-active-line, #7c3aed);
-  box-shadow: 0 0 0 3px var(--s-active-glow, rgba(124, 58, 237, 0.2));
 }
 
 /* 필터 칩 */
@@ -446,10 +453,10 @@
 }
 .filterToggle:hover {
   border-color: var(--s-active-line, #c4b5fd);
-  color: var(--s-active-line, #7c3aed);
+  color: var(--s-active-text, #7c3aed);
 }
 .filterToggleActive {
-  color: var(--s-active-line, #7c3aed);
+  color: var(--s-active-text, #7c3aed);
   border-color: var(--s-active-line, #c4b5fd);
 }
 /* 활성 필터 개수 뱃지 (그라데이션) */

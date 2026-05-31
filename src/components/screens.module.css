@@ -60,6 +60,7 @@
 
     --s-card-bg: #1f1830; /* 카드 표면 — 페이지 배경(#0a0712~#120c1e)보다 또렷이 밝게 */
     --s-card-border: #2a1f3e; /* 보더로 분리감 확보 */
+    --s-card-border-strong: #3a2f4e; /* 검색/필터/팝업용 또렷한 보더(배경보다 한 단계 밝게) */
     --s-card-shadow: 0 8px 24px -16px rgba(0, 0, 0, 0.6);
     --s-card-shadow-hover: 0 16px 40px -16px rgba(0, 0, 0, 0.72), 0 4px 22px -10px rgba(192, 132, 252, 0.3);
     --s-card-hover-border: rgba(192, 132, 252, 0.5); /* 호버 시 라벤더 보더 */
@@ -340,7 +341,7 @@
   width: 100%;
   height: 2.5rem;
   border-radius: 0.75rem;
-  border: 1px solid var(--s-card-border, #e3dcef);
+  border: 1px solid var(--s-card-border-strong, #c9b8e4);
   background: var(--s-card-bg, #ffffff);
   color: var(--s-ink, #1a1033);
   font-size: 0.875rem;
@@ -412,7 +413,7 @@
   font-weight: 500;
   color: var(--s-sub, #6b7280);
   background: var(--s-card-bg, #ffffff);
-  border: 1px solid var(--s-card-border, #e3dcef);
+  border: 1px solid var(--s-card-border-strong, #c9b8e4);
   cursor: pointer;
   transition:
     border-color 140ms ease,

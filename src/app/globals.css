@@ -88,11 +88,16 @@ html.dark body {
 }
 
 /*
- * 드롭다운 메뉴(⋮ / 햄버거 / FAB) 다크 대응.
- * 앱 다크는 prefers-color-scheme 기반이고 메뉴는 body 로 portal 되어 .page 의
- * --s-* 토큰을 받지 못한다. 인접 카드 톤(다크 카드 #1f1830 / 보더 #2a1f3e)에
- * 맞춰 직접 지정해 배경에서 붕 뜨지 않게 한다. (라이트모드는 기존 유지)
+ * 드롭다운 메뉴(⋮ / 햄버거 / FAB) 보더·입체감.
+ * 메뉴는 body 로 portal 되어 .page 의 --s-* 토큰을 받지 못하므로 직접 지정한다.
+ * 보더는 검색바·필터 버튼과 동일한 톤(라이트 #c9b8e4 / 다크 #3a2f4e)으로 또렷하게,
+ * 그림자로 카드 배경에서 띄운다.
  */
+[data-slot='dropdown-menu-content'] {
+  box-shadow:
+    0 0 0 1px #c9b8e4,
+    0 14px 32px -12px rgba(80, 40, 120, 0.22);
+}
 @media (prefers-color-scheme: dark) {
   [data-slot='dropdown-menu-content'] {
     background-color: #1f1830;

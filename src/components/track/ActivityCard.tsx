@@ -70,7 +70,7 @@ export function ActivityCard({ activity, hideMenu, actionSlot }: ActivityCardPro
 
       <Link
         href={`/activities/${activity.id}`}
-        className={cn('block p-4', hideMenu ? 'pr-4' : 'pr-11')}
+        className={cn('block p-3.5', hideMenu ? 'pr-3.5' : 'pr-11')}
       >
         {activity.category && (
           <div className="mb-2">

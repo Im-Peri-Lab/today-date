@@ -429,10 +429,16 @@
   color: var(--s-accent, #7c3aed);
   flex-shrink: 0;
 }
-/* 호버는 미선택 칩에만 — 활성 칩의 흰 글씨를 덮어쓰지 않도록 :not 으로 제외 */
-.chip:hover:not(.chipActive) {
-  border-color: var(--s-active-line, #c4b5fd);
-  color: var(--s-active-line, #7c3aed);
+/*
+ * 호버는 "진짜 호버 가능한 기기(마우스)"에서만 — 미선택 칩 한정.
+ * 터치 기기는 탭 후 :hover 가 들러붙어(sticky hover) 선택 해제 후에도 보라 테두리가
+ * 남는 버그가 있으므로 @media (hover: hover) 로 제외한다.
+ */
+@media (hover: hover) {
+  .chip:hover:not(.chipActive) {
+    border-color: var(--s-active-line, #c4b5fd);
+    color: var(--s-active-line, #7c3aed);
+  }
 }
 /* 활성 칩: 단일 토큰만 참조 — 그라데이션 채움 + 흰 글씨/아이콘 (예외 없음) */
 .chipActive,
@@ -478,9 +484,11 @@
     border-color 140ms ease,
     color 140ms ease;
 }
-.filterToggle:hover {
-  border-color: var(--s-active-line, #c4b5fd);
-  color: var(--s-active-text, #7c3aed);
+@media (hover: hover) {
+  .filterToggle:hover {
+    border-color: var(--s-active-line, #c4b5fd);
+    color: var(--s-active-text, #7c3aed);
+  }
 }
 .filterToggleActive {
   color: var(--s-active-text, #7c3aed);

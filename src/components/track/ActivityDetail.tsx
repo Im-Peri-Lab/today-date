@@ -15,7 +15,6 @@ import {
   Moon,
   ExternalLink,
 } from 'lucide-react'
-import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { CategoryBadge } from './CategoryBadge'
@@ -24,6 +23,8 @@ import { DeleteConfirmDialog } from './DeleteConfirmDialog'
 import { VisitedDialog } from '@/components/VisitedDialog'
 import { useActivity, useDeleteActivity, useUpdateActivity } from '@/hooks/useActivities'
 import { DURATION_LABELS, TIME_OF_DAY_LABELS } from '@/lib/labels'
+import { cn } from '@/lib/utils'
+import styles from '@/components/screens.module.css'
 
 export function ActivityDetail({ id }: { id: string }) {
   const router = useRouter()
@@ -54,94 +55,90 @@ export function ActivityDetail({ id }: { id: string }) {
   }
 
   return (
-    <div className="mx-auto max-w-lg px-4 py-6">
-      <Link
-        href="/list"
-        className="mb-4 inline-flex items-center gap-1.5 text-sm text-violet-600 hover:text-violet-800"
-      >
+    <div className="mx-auto w-full max-w-lg px-5 pb-16 pt-6 lg:pt-10">
+      <Link href="/list" className={styles.backLink}>
         <ArrowLeft className="h-4 w-4" />
         목록으로
       </Link>
 
       {isLoading ? (
-        <Card className="shadow-xl border-violet-100">
-          <CardHeader>
-            <Skeleton className="h-7 w-2/3" />
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <Skeleton className="h-5 w-1/3" />
-            <Skeleton className="h-20 w-full" />
-          </CardContent>
-        </Card>
-      ) : isError || !activity ? (
-        <div className="rounded-xl border border-dashed border-violet-200 bg-white/50 p-10 text-center text-gray-500">
-          활동을 찾을 수 없어요.
+        <div className={cn(styles.card, 'mt-4 p-5')}>
+          <Skeleton className="h-7 w-2/3" />
+          <Skeleton className="mt-3 h-5 w-1/3" />
+          <Skeleton className="mt-3 h-20 w-full" />
         </div>
+      ) : isError || !activity ? (
+        <div className={cn(styles.empty, 'mt-4', styles.sub)}>활동을 찾을 수 없어요.</div>
       ) : (
         <>
-          <Card className="shadow-xl border-violet-100">
-            <CardHeader>
-              <div className="flex flex-wrap items-center gap-2">
-                {activity.category && <CategoryBadge category={activity.category} />}
-                {activity.status === 'visited' && (
-                  <span className="rounded-full bg-violet-100 px-2 py-0.5 text-xs font-medium text-violet-700">
-                    다녀온 곳
-                  </span>
+          <div className={cn(styles.card, 'mt-4 p-5 lg:p-6')}>
+            <div className="flex flex-wrap items-center gap-2">
+              {activity.category && <CategoryBadge category={activity.category} />}
+              {activity.status === 'visited' && <span className={styles.visitedTag}>다녀온 곳</span>}
+            </div>
+            <h1 className={cn('mt-2 text-2xl font-bold lg:text-3xl', styles.ink)}>{activity.title}</h1>
+
+            <div
+              className={cn(
+                'mt-3 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-sm',
+                styles.sub
+              )}
+            >
+              {activity.duration_bucket && (
+                <span className="inline-flex items-center gap-1.5">
+                  <Clock className="h-4 w-4" />
+                  {DURATION_LABELS[activity.duration_bucket]}
+                </span>
+              )}
+              {activity.time_of_day && activity.time_of_day !== 'any' && (
+                <span className="inline-flex items-center gap-1.5">
+                  {activity.time_of_day === 'night' ? (
+                    <Moon className="h-4 w-4" />
+                  ) : (
+                    <Sun className="h-4 w-4" />
+                  )}
+                  {TIME_OF_DAY_LABELS[activity.time_of_day]}
+                </span>
+              )}
+            </div>
+
+            {activity.memo && (
+              <p className={cn('mt-4 whitespace-pre-wrap text-sm leading-relaxed', styles.ink)}>
+                {activity.memo}
+              </p>
+            )}
+
+            {activity.reference_url && (
+              <a
+                href={activity.reference_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={cn('mt-4 inline-flex items-center gap-1.5 text-sm hover:underline', styles.accent)}
+              >
+                <ExternalLink className="h-4 w-4" />
+                참고 링크
+              </a>
+            )}
+
+            {activity.status === 'visited' && (
+              <div className={cn(styles.visitBox, 'mt-4 p-4')}>
+                <p className={cn('text-xs font-medium', styles.faint)}>방문 기록</p>
+                {activity.visited_at && (
+                  <p className={cn('mt-1.5 text-sm', styles.ink)}>방문일 · {activity.visited_at}</p>
+                )}
+                {activity.rating ? (
+                  <div className="mt-1.5">
+                    <RatingStars value={activity.rating} size="sm" />
+                  </div>
+                ) : null}
+                {activity.review_note && (
+                  <p className={cn('mt-1.5 whitespace-pre-wrap text-sm leading-relaxed', styles.sub)}>
+                    {activity.review_note}
+                  </p>
                 )}
               </div>
-              <h1 className="mt-1 text-2xl font-bold text-violet-900">{activity.title}</h1>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex flex-wrap gap-3 text-sm text-muted-foreground">
-                {activity.duration_bucket && (
-                  <span className="inline-flex items-center gap-1.5">
-                    <Clock className="h-4 w-4" />
-                    {DURATION_LABELS[activity.duration_bucket]}
-                  </span>
-                )}
-                {activity.time_of_day && (
-                  <span className="inline-flex items-center gap-1.5">
-                    {activity.time_of_day === 'night' ? (
-                      <Moon className="h-4 w-4" />
-                    ) : (
-                      <Sun className="h-4 w-4" />
-                    )}
-                    {TIME_OF_DAY_LABELS[activity.time_of_day]}
-                  </span>
-                )}
-              </div>
-
-              {activity.memo && (
-                <p className="whitespace-pre-wrap text-sm text-foreground">{activity.memo}</p>
-              )}
-
-              {activity.reference_url && (
-                <a
-                  href={activity.reference_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 text-sm text-violet-600 hover:underline"
-                >
-                  <ExternalLink className="h-4 w-4" />
-                  참고 링크
-                </a>
-              )}
-
-              {activity.status === 'visited' && (
-                <div className="space-y-2 rounded-lg bg-violet-50/60 p-3">
-                  {activity.visited_at && (
-                    <p className="text-sm text-violet-800">방문일: {activity.visited_at}</p>
-                  )}
-                  {activity.rating ? <RatingStars value={activity.rating} size="sm" /> : null}
-                  {activity.review_note && (
-                    <p className="whitespace-pre-wrap text-sm text-foreground">
-                      {activity.review_note}
-                    </p>
-                  )}
-                </div>
-              )}
-            </CardContent>
-          </Card>
+            )}
+          </div>
 
           <div className="mt-4 flex flex-wrap gap-2">
             <Link href={`/activities/${id}/edit`}>

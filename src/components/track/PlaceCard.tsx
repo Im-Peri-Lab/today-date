@@ -54,7 +54,10 @@ export function PlaceCard({ place, hideMenu, actionSlot }: PlaceCardProps) {
   return (
     <div className={cn(styles.card, styles.cardInteractive, 'group relative')}>
       {!hideMenu && (
-        <div className="absolute right-1.5 top-1.5 z-10">
+        <div
+          className="absolute right-1.5 top-1.5 z-10"
+          onClick={(e) => e.stopPropagation()}
+        >
           <ItemMenu
             status={place.status}
             onEdit={() => router.push(`/places/${place.id}/edit`)}

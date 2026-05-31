@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
 import { Search, Filter } from 'lucide-react'
 import { ActivityCard } from './ActivityCard'
 import { PlaceCard } from './PlaceCard'
@@ -124,11 +125,27 @@ function FilterBar({
   )
 }
 
+/** 펼친 필터 안의 라벨 그룹 (카테고리 / 소요시간 / 시간대 등) */
+function FilterGroup({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <p className={cn('mb-1.5 text-xs', styles.faint)}>{label}</p>
+      <div className="flex flex-wrap gap-2">{children}</div>
+    </div>
+  )
+}
+
 const GRID = 'grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3'
 
 export function ListView() {
-  const [track, setTrack] = useState<Track>('activity')
-  const [status, setStatus] = useState<Status>('wishlist')
+  // 홈 통계 카드에서 넘어온 진입 지점(?tab=, ?status=)을 초기값으로만 사용 (이후 토글은 자유)
+  const searchParams = useSearchParams()
+  const [track, setTrack] = useState<Track>(
+    searchParams.get('tab') === 'place' ? 'place' : 'activity'
+  )
+  const [status, setStatus] = useState<Status>(
+    searchParams.get('status') === 'visited' ? 'visited' : 'wishlist'
+  )
   const [search, setSearch] = useState('')
   const [filtersOpen, setFiltersOpen] = useState(false)
 
@@ -232,34 +249,40 @@ export function ListView() {
             open={filtersOpen}
             onToggle={() => setFiltersOpen((v) => !v)}
           >
-            <div className="flex flex-wrap gap-2">
-              {activityCats.data?.map((c) => (
-                <Chip
-                  key={c.id}
-                  active={actCats.includes(c.id)}
-                  onClick={() => toggleCat(actCats, c.id, setActCats)}
-                >
-                  {c.icon} {c.name}
-                </Chip>
-              ))}
-              {DURATION_OPTIONS.map((o) => (
-                <Chip
-                  key={o.value}
-                  active={actDuration === o.value}
-                  onClick={() => setActDuration(actDuration === o.value ? '' : o.value)}
-                >
-                  {o.label}
-                </Chip>
-              ))}
-              {TIME_OPTIONS.map((o) => (
-                <Chip
-                  key={o.value}
-                  active={actTime === o.value}
-                  onClick={() => setActTime(actTime === o.value ? '' : o.value)}
-                >
-                  {o.label}
-                </Chip>
-              ))}
+            <div className="space-y-3">
+              <FilterGroup label="카테고리">
+                {activityCats.data?.map((c) => (
+                  <Chip
+                    key={c.id}
+                    active={actCats.includes(c.id)}
+                    onClick={() => toggleCat(actCats, c.id, setActCats)}
+                  >
+                    {c.icon} {c.name}
+                  </Chip>
+                ))}
+              </FilterGroup>
+              <FilterGroup label="소요시간">
+                {DURATION_OPTIONS.map((o) => (
+                  <Chip
+                    key={o.value}
+                    active={actDuration === o.value}
+                    onClick={() => setActDuration(actDuration === o.value ? '' : o.value)}
+                  >
+                    {o.label}
+                  </Chip>
+                ))}
+              </FilterGroup>
+              <FilterGroup label="시간대">
+                {TIME_OPTIONS.map((o) => (
+                  <Chip
+                    key={o.value}
+                    active={actTime === o.value}
+                    onClick={() => setActTime(actTime === o.value ? '' : o.value)}
+                  >
+                    {o.label}
+                  </Chip>
+                ))}
+              </FilterGroup>
             </div>
           </FilterBar>
 
@@ -307,32 +330,39 @@ export function ListView() {
             open={filtersOpen}
             onToggle={() => setFiltersOpen((v) => !v)}
           >
-            <div className="flex flex-wrap gap-2">
-              {placeCatsQuery.data?.map((c) => (
-                <Chip
-                  key={c.id}
-                  active={placeCats.includes(c.id)}
-                  onClick={() => toggleCat(placeCats, c.id, setPlaceCats)}
-                >
-                  {c.icon} {c.name}
-                </Chip>
-              ))}
-              {MEAL_OPTIONS.map((o) => (
-                <Chip
-                  key={o.value}
-                  active={placeMeal === o.value}
-                  onClick={() => setPlaceMeal(placeMeal === o.value ? '' : o.value)}
-                >
-                  {o.label}
-                </Chip>
-              ))}
+            <div className="space-y-3">
+              <FilterGroup label="카테고리">
+                {placeCatsQuery.data?.map((c) => (
+                  <Chip
+                    key={c.id}
+                    active={placeCats.includes(c.id)}
+                    onClick={() => toggleCat(placeCats, c.id, setPlaceCats)}
+                  >
+                    {c.icon} {c.name}
+                  </Chip>
+                ))}
+              </FilterGroup>
+              <FilterGroup label="식사시간">
+                {MEAL_OPTIONS.map((o) => (
+                  <Chip
+                    key={o.value}
+                    active={placeMeal === o.value}
+                    onClick={() => setPlaceMeal(placeMeal === o.value ? '' : o.value)}
+                  >
+                    {o.label}
+                  </Chip>
+                ))}
+              </FilterGroup>
+              <div>
+                <p className={cn('mb-1.5 text-xs', styles.faint)}>위치</p>
+                <input
+                  value={placeLocation}
+                  onChange={(e) => setPlaceLocation(e.target.value)}
+                  placeholder="위치로 검색 (예: 성수동)"
+                  className={cn(styles.plainInput, 'sm:max-w-xs')}
+                />
+              </div>
             </div>
-            <input
-              value={placeLocation}
-              onChange={(e) => setPlaceLocation(e.target.value)}
-              placeholder="위치로 검색 (예: 성수동)"
-              className={cn(styles.plainInput, 'mt-2 sm:max-w-xs')}
-            />
           </FilterBar>
 
           <div className="mt-4">

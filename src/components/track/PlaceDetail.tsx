@@ -13,7 +13,6 @@ import {
   MapPin,
   ExternalLink,
 } from 'lucide-react'
-import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { CategoryBadge } from './CategoryBadge'
@@ -22,6 +21,8 @@ import { DeleteConfirmDialog } from './DeleteConfirmDialog'
 import { VisitedDialog } from '@/components/VisitedDialog'
 import { usePlace, useDeletePlace, useUpdatePlace } from '@/hooks/usePlaces'
 import { MEAL_LABELS } from '@/lib/labels'
+import { cn } from '@/lib/utils'
+import styles from '@/components/screens.module.css'
 
 export function PlaceDetail({ id }: { id: string }) {
   const router = useRouter()
@@ -52,92 +53,85 @@ export function PlaceDetail({ id }: { id: string }) {
   }
 
   return (
-    <div className="mx-auto max-w-lg px-4 py-6">
-      <Link
-        href="/list"
-        className="mb-4 inline-flex items-center gap-1.5 text-sm text-violet-600 hover:text-violet-800"
-      >
+    <div className="mx-auto w-full max-w-lg px-5 pb-16 pt-6 lg:pt-10">
+      <Link href="/list" className={styles.backLink}>
         <ArrowLeft className="h-4 w-4" />
         목록으로
       </Link>
 
       {isLoading ? (
-        <Card className="shadow-xl border-violet-100">
-          <CardHeader>
-            <Skeleton className="h-7 w-2/3" />
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <Skeleton className="h-5 w-1/3" />
-            <Skeleton className="h-20 w-full" />
-          </CardContent>
-        </Card>
-      ) : isError || !place ? (
-        <div className="rounded-xl border border-dashed border-violet-200 bg-white/50 p-10 text-center text-gray-500">
-          장소를 찾을 수 없어요.
+        <div className={cn(styles.card, 'mt-4 p-5')}>
+          <Skeleton className="h-7 w-2/3" />
+          <Skeleton className="mt-3 h-5 w-1/3" />
+          <Skeleton className="mt-3 h-20 w-full" />
         </div>
+      ) : isError || !place ? (
+        <div className={cn(styles.empty, 'mt-4', styles.sub)}>장소를 찾을 수 없어요.</div>
       ) : (
         <>
-          <Card className="shadow-xl border-violet-100">
-            <CardHeader>
-              <div className="flex flex-wrap items-center gap-2">
-                {place.category && <CategoryBadge category={place.category} />}
-                {place.status === 'visited' && (
-                  <span className="rounded-full bg-violet-100 px-2 py-0.5 text-xs font-medium text-violet-700">
-                    다녀온 곳
-                  </span>
+          <div className={cn(styles.card, 'mt-4 p-5 lg:p-6')}>
+            <div className="flex flex-wrap items-center gap-2">
+              {place.category && <CategoryBadge category={place.category} />}
+              {place.status === 'visited' && <span className={styles.visitedTag}>다녀온 곳</span>}
+            </div>
+            <h1 className={cn('mt-2 text-2xl font-bold lg:text-3xl', styles.ink)}>{place.title}</h1>
+
+            <div
+              className={cn(
+                'mt-3 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-sm',
+                styles.sub
+              )}
+            >
+              {place.location && (
+                <span className="inline-flex items-center gap-1.5">
+                  <MapPin className="h-4 w-4" />
+                  {place.location}
+                </span>
+              )}
+              {place.meal_times?.map((m) => (
+                <span key={m} className={styles.mealBadge}>
+                  {MEAL_LABELS[m]}
+                </span>
+              ))}
+            </div>
+
+            {place.memo && (
+              <p className={cn('mt-4 whitespace-pre-wrap text-sm leading-relaxed', styles.ink)}>
+                {place.memo}
+              </p>
+            )}
+
+            {place.reference_url && (
+              <a
+                href={place.reference_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={cn('mt-4 inline-flex items-center gap-1.5 text-sm hover:underline', styles.accent)}
+              >
+                <ExternalLink className="h-4 w-4" />
+                참고 링크
+              </a>
+            )}
+
+            {place.status === 'visited' && (
+              <div className={cn(styles.visitBox, 'mt-4 p-4')}>
+                <p className={cn('text-xs font-medium', styles.faint)}>방문 기록</p>
+                {place.visited_at && (
+                  <p className={cn('mt-1.5 text-sm', styles.ink)}>방문일 · {place.visited_at}</p>
+                )}
+                {place.rating ? (
+                  <div className="mt-1.5">
+                    <RatingStars value={place.rating} size="sm" />
+                  </div>
+                ) : null}
+                {place.review_note && (
+                  <p className={cn('mt-1.5 whitespace-pre-wrap text-sm leading-relaxed', styles.sub)}>
+                    {place.review_note}
+                  </p>
                 )}
               </div>
-              <h1 className="mt-1 text-2xl font-bold text-violet-900">{place.title}</h1>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
-                {place.location && (
-                  <span className="inline-flex items-center gap-1.5">
-                    <MapPin className="h-4 w-4" />
-                    {place.location}
-                  </span>
-                )}
-                {place.meal_times?.map((m) => (
-                  <span
-                    key={m}
-                    className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground"
-                  >
-                    {MEAL_LABELS[m]}
-                  </span>
-                ))}
-              </div>
-
-              {place.memo && (
-                <p className="whitespace-pre-wrap text-sm text-foreground">{place.memo}</p>
-              )}
-
-              {place.reference_url && (
-                <a
-                  href={place.reference_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 text-sm text-violet-600 hover:underline"
-                >
-                  <ExternalLink className="h-4 w-4" />
-                  참고 링크
-                </a>
-              )}
-
-              {place.status === 'visited' && (
-                <div className="space-y-2 rounded-lg bg-violet-50/60 p-3">
-                  {place.visited_at && (
-                    <p className="text-sm text-violet-800">방문일: {place.visited_at}</p>
-                  )}
-                  {place.rating ? <RatingStars value={place.rating} size="sm" /> : null}
-                  {place.review_note && (
-                    <p className="whitespace-pre-wrap text-sm text-foreground">
-                      {place.review_note}
-                    </p>
-                  )}
-                </div>
-              )}
-            </CardContent>
-          </Card>
+            )}
+          </div>
 
           <div className="mt-4 flex flex-wrap gap-2">
             <Link href={`/places/${id}/edit`}>

@@ -1,7 +1,6 @@
 'use client'
 
 import { MoreVertical, Pencil, Trash2, CheckCircle2, Undo2 } from 'lucide-react'
-import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -10,6 +9,7 @@ import {
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu'
 import type { Status } from '@/types'
+import styles from '@/components/screens.module.css'
 
 interface ItemMenuProps {
   status: Status
@@ -23,15 +23,9 @@ export function ItemMenu({ status, onEdit, onDelete, onMarkVisited, onRevert }: 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
-        render={
-          <Button
-            variant="ghost"
-            className="h-9 w-9 rounded-full p-0 text-muted-foreground hover:text-foreground"
-            aria-label="더보기"
-          />
-        }
+        render={<button type="button" className={styles.iconBtn} aria-label="더보기" />}
       >
-        <MoreVertical className="h-5 w-5" />
+        <MoreVertical className="h-[18px] w-[18px]" />
       </DropdownMenuTrigger>
       <DropdownMenuContent>
         <DropdownMenuItem onClick={onEdit}>
@@ -41,7 +35,7 @@ export function ItemMenu({ status, onEdit, onDelete, onMarkVisited, onRevert }: 
         {status === 'visited' ? (
           <DropdownMenuItem onClick={onRevert}>
             <Undo2 />
-            위시리스트로 옮기기
+            위시리스트로
           </DropdownMenuItem>
         ) : (
           <DropdownMenuItem onClick={onMarkVisited}>

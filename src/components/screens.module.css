@@ -460,6 +460,20 @@
   background: var(--s-card-bg, rgba(255, 255, 255, 0.5));
 }
 
+/* 상세: "다녀온 곳" 태그 + 방문 기록 박스 */
+.visitedTag {
+  border-radius: 9999px;
+  padding: 0.125rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  background: var(--s-accent-soft-bg, #f6f1ff);
+  color: var(--s-accent-soft-text, #7c3aed);
+}
+.visitBox {
+  border-radius: 0.875rem;
+  background: var(--s-accent-soft-bg, #f6f1ff);
+}
+
 /* 로딩 스켈레톤 바 */
 .skelBar {
   background: var(--s-skeleton, #ece7f5);

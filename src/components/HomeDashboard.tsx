@@ -35,25 +35,33 @@ function CtaCard({
   )
 }
 
-/** 통계 카드 — CTA와 동일한 카드 토큰. 숫자 강조 + 라벨, 호버 없음(정보 전용) */
+/** 통계 카드 — /list 진입구. 숫자 강조 + 라벨, 탭 가능(약한 hover/active) */
 function StatCard({
+  href,
   label,
   value,
   loading,
 }: {
+  href: string
   label: string
   value: number | undefined
   loading: boolean
 }) {
   return (
-    <div className={cn(styles.card, 'flex flex-col p-4')}>
+    <Link
+      href={href}
+      className={cn(
+        styles.card,
+        'flex flex-col p-4 transition-transform duration-150 hover:-translate-y-0.5 active:scale-[0.98]'
+      )}
+    >
       {loading ? (
         <Skeleton className="h-7 w-10" />
       ) : (
         <span className={cn(styles.statNum, 'text-2xl lg:text-3xl')}>{value ?? 0}</span>
       )}
       <span className={cn('mt-1 text-sm', styles.sub)}>{label}</span>
-    </div>
+    </Link>
   )
 }
 
@@ -105,15 +113,35 @@ export function HomeDashboard() {
         <div>
           <p className={cn('mb-2 text-sm font-medium', styles.sub)}>위시리스트</p>
           <div className="grid grid-cols-2 gap-3 lg:gap-4">
-            <StatCard label="활동" value={data?.totalActivities} loading={isLoading} />
-            <StatCard label="장소" value={data?.totalPlaces} loading={isLoading} />
+            <StatCard
+              href="/list?tab=activity"
+              label="활동"
+              value={data?.totalActivities}
+              loading={isLoading}
+            />
+            <StatCard
+              href="/list?tab=place"
+              label="장소"
+              value={data?.totalPlaces}
+              loading={isLoading}
+            />
           </div>
         </div>
         <div className="mt-5">
           <p className={cn('mb-2 text-sm font-medium', styles.sub)}>함께한 기록</p>
           <div className="grid grid-cols-2 gap-3 lg:gap-4">
-            <StatCard label="다녀온 곳" value={data?.totalVisited} loading={isLoading} />
-            <StatCard label="이번 달" value={data?.visitedThisMonth} loading={isLoading} />
+            <StatCard
+              href="/list?status=visited"
+              label="다녀온 곳"
+              value={data?.totalVisited}
+              loading={isLoading}
+            />
+            <StatCard
+              href="/list?status=visited"
+              label="이번 달"
+              value={data?.visitedThisMonth}
+              loading={isLoading}
+            />
           </div>
         </div>
       </div>

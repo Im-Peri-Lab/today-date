@@ -72,9 +72,11 @@ function StatusToggle({
 function SearchBox({
   value,
   onChange,
+  placeholder,
 }: {
   value: string
   onChange: (v: string) => void
+  placeholder: string
 }) {
   return (
     <div className={styles.search}>
@@ -82,37 +84,42 @@ function SearchBox({
       <input
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        placeholder="제목·메모 검색"
+        placeholder={placeholder}
         className={styles.searchInput}
       />
     </div>
   )
 }
 
-/** 필터 칩 영역 접기/펼치기 — 기본 접힘, 활성 개수 뱃지 표시 */
+/** 필터 버튼 + 검색바를 한 줄에, 펼친 칩 패널은 아래 전체 폭으로 */
 function FilterBar({
   count,
   open,
   onToggle,
+  search,
   children,
 }: {
   count: number
   open: boolean
   onToggle: () => void
+  search: React.ReactNode
   children: React.ReactNode
 }) {
   return (
     <div className="mt-3">
-      <button
-        type="button"
-        onClick={onToggle}
-        aria-expanded={open}
-        className={cn(styles.filterToggle, (open || count > 0) && styles.filterToggleActive)}
-      >
-        <Filter className="h-4 w-4" />
-        필터
-        {count > 0 && <span className={styles.filterCount}>{count}</span>}
-      </button>
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          onClick={onToggle}
+          aria-expanded={open}
+          className={cn(styles.filterToggle, (open || count > 0) && styles.filterToggleActive)}
+        >
+          <Filter className="h-4 w-4" />
+          필터
+          {count > 0 && <span className={styles.filterCount}>{count}</span>}
+        </button>
+        {search}
+      </div>
       <div
         className={cn(
           'grid transition-all duration-300 ease-out',
@@ -135,7 +142,7 @@ function FilterGroup({ label, children }: { label: string; children: React.React
   )
 }
 
-const GRID = 'grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3'
+const GRID = 'grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3'
 
 export function ListView() {
   // 홈 통계 카드에서 넘어온 진입 지점(?tab=, ?status=)을 초기값으로만 사용 (이후 토글은 자유)
@@ -156,11 +163,9 @@ export function ListView() {
 
   // 장소 필터
   const [placeCats, setPlaceCats] = useState<string[]>([])
-  const [placeLocation, setPlaceLocation] = useState('')
   const [placeMeal, setPlaceMeal] = useState('')
 
   const debouncedSearch = useDebounced(search, 300)
-  const debouncedLocation = useDebounced(placeLocation, 300)
 
   const activityCats = useActivityCategories()
   const placeCatsQuery = usePlaceCategories()
@@ -180,7 +185,6 @@ export function ListView() {
     {
       status,
       categoryIds: placeCats,
-      location: debouncedLocation || undefined,
       meal_time: placeMeal || undefined,
       q: debouncedSearch || undefined,
     },
@@ -193,7 +197,7 @@ export function ListView() {
 
   // 활성 필터 개수 / 검색·필터 사용 여부 (빈 상태 카피 분기용)
   const activityFilterCount = actCats.length + (actDuration ? 1 : 0) + (actTime ? 1 : 0)
-  const placeFilterCount = placeCats.length + (placeMeal ? 1 : 0) + (placeLocation ? 1 : 0)
+  const placeFilterCount = placeCats.length + (placeMeal ? 1 : 0)
   const activityFiltering = Boolean(debouncedSearch) || activityFilterCount > 0
   const placeFiltering = Boolean(debouncedSearch) || placeFilterCount > 0
 
@@ -213,9 +217,16 @@ export function ListView() {
         </div>
       </header>
 
-      {/* 페이지 제목 — 홈과 동일한 타이포 위계 */}
-      <div className="mt-8 lg:mt-10">
-        <h1 className={cn(styles.greeting, 'text-2xl lg:text-4xl')}>우리의 위시리스트</h1>
+      {/* 페이지 제목 — 카드 제목보다 확실히 상위로 읽히게 (더 크고 무겁게) */}
+      <div className="mt-6 lg:mt-8">
+        <h1
+          className={cn(
+            'text-3xl font-bold leading-tight tracking-[-0.02em] lg:text-4xl',
+            styles.ink
+          )}
+        >
+          우리의 위시리스트
+        </h1>
         <p className={cn('mt-1 text-sm lg:mt-1.5 lg:text-lg', styles.sub)}>함께 쌓아온 곳들</p>
       </div>
 
@@ -244,15 +255,15 @@ export function ListView() {
       {/* ── 활동 탭 ── */}
       {track === 'activity' && (
         <div className="mt-4">
-          <div className="mb-3 flex items-center gap-2">
-            <StatusToggle value={status} onChange={setStatus} />
-            <SearchBox value={search} onChange={setSearch} />
-          </div>
+          <StatusToggle value={status} onChange={setStatus} />
 
           <FilterBar
             count={activityFilterCount}
             open={filtersOpen}
             onToggle={() => setFiltersOpen((v) => !v)}
+            search={
+              <SearchBox value={search} onChange={setSearch} placeholder="제목·메모 검색" />
+            }
           >
             <div className="space-y-3">
               <FilterGroup label="카테고리">
@@ -325,15 +336,15 @@ export function ListView() {
       {/* ── 장소 탭 ── */}
       {track === 'place' && (
         <div className="mt-4">
-          <div className="mb-3 flex items-center gap-2">
-            <StatusToggle value={status} onChange={setStatus} />
-            <SearchBox value={search} onChange={setSearch} />
-          </div>
+          <StatusToggle value={status} onChange={setStatus} />
 
           <FilterBar
             count={placeFilterCount}
             open={filtersOpen}
             onToggle={() => setFiltersOpen((v) => !v)}
+            search={
+              <SearchBox value={search} onChange={setSearch} placeholder="제목·메모·위치 검색" />
+            }
           >
             <div className="space-y-3">
               <FilterGroup label="카테고리">
@@ -358,15 +369,6 @@ export function ListView() {
                   </Chip>
                 ))}
               </FilterGroup>
-              <div>
-                <p className={cn('mb-1.5 text-xs', styles.faint)}>위치</p>
-                <input
-                  value={placeLocation}
-                  onChange={(e) => setPlaceLocation(e.target.value)}
-                  placeholder="위치로 검색 (예: 성수동)"
-                  className={cn(styles.plainInput, 'sm:max-w-xs')}
-                />
-              </div>
             </div>
           </FilterBar>
 

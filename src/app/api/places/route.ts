@@ -48,7 +48,7 @@ export async function GET(req: NextRequest) {
     if (meal_time) query = query.contains('meal_times', [meal_time])
     if (q) {
       const term = q.replace(/[%,]/g, ' ')
-      query = query.or(`title.ilike.%${term}%,memo.ilike.%${term}%`)
+      query = query.or(`title.ilike.%${term}%,memo.ilike.%${term}%,location.ilike.%${term}%`)
     }
 
     const { data, error } = await query

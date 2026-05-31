@@ -291,13 +291,11 @@
   border-bottom-color: var(--s-accent, #7c3aed);
 }
 
-/* 세그먼트 토글 (위시리스트/다녀온 곳) */
+/* 세그먼트 토글 (위시리스트/다녀온 곳) — 트랙 없이 활성만 보더+글로우로 강조 */
 .segment {
   display: inline-flex;
   flex-shrink: 0;
-  padding: 0.1875rem;
-  border-radius: 0.625rem;
-  background: var(--s-track, #f1ecfa);
+  gap: 0.25rem;
 }
 .segmentBtn {
   white-space: nowrap;

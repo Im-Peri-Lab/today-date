@@ -97,7 +97,10 @@ html.dark body {
   [data-slot='dropdown-menu-content'] {
     background-color: #1f1830;
     color: #f5f3fa;
-    --tw-ring-color: #2a1f3e;
+    /* 배경보다 한 단계 밝은 보더 + 진한 그림자로 카드 배경에서 띄운다 */
+    box-shadow:
+      0 0 0 1px #3a2f4e,
+      0 18px 44px -12px rgba(0, 0, 0, 0.75);
   }
   [data-slot='dropdown-menu-item'][data-highlighted] {
     background-color: #2d2540;

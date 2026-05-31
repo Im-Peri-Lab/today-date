@@ -6,6 +6,7 @@ import { useSearchParams } from 'next/navigation'
 import { Search, Filter, Home } from 'lucide-react'
 import { ActivityCard } from './ActivityCard'
 import { PlaceCard } from './PlaceCard'
+import { CategoryIcon } from './categoryIcon'
 import { EmptyState } from './EmptyState'
 import { CardGridSkeleton } from './CardGridSkeleton'
 import { MiniHeart } from '@/components/BrandMark'
@@ -107,19 +108,17 @@ function FilterBar({
 }) {
   return (
     <div className="mt-3">
-      <div className="flex items-center gap-2">
-        <button
-          type="button"
-          onClick={onToggle}
-          aria-expanded={open}
-          className={cn(styles.filterToggle, (open || count > 0) && styles.filterToggleActive)}
-        >
-          <Filter className="h-4 w-4" />
-          필터
-          {count > 0 && <span className={styles.filterCount}>{count}</span>}
-        </button>
-        {search}
-      </div>
+      {search}
+      <button
+        type="button"
+        onClick={onToggle}
+        aria-expanded={open}
+        className={cn('mt-2', styles.filterToggle, (open || count > 0) && styles.filterToggleActive)}
+      >
+        <Filter className="h-4 w-4" />
+        필터
+        {count > 0 && <span className={styles.filterCount}>{count}</span>}
+      </button>
       <div
         className={cn(
           'grid transition-all duration-300 ease-out',
@@ -273,7 +272,8 @@ export function ListView() {
                     active={actCats.includes(c.id)}
                     onClick={() => toggleCat(actCats, c.id, setActCats)}
                   >
-                    {c.icon} {c.name}
+                    <CategoryIcon name={c.name} className="h-3.5 w-3.5" />
+                    {c.name}
                   </Chip>
                 ))}
               </FilterGroup>
@@ -354,7 +354,8 @@ export function ListView() {
                     active={placeCats.includes(c.id)}
                     onClick={() => toggleCat(placeCats, c.id, setPlaceCats)}
                   >
-                    {c.icon} {c.name}
+                    <CategoryIcon name={c.name} className="h-3.5 w-3.5" />
+                    {c.name}
                   </Chip>
                 ))}
               </FilterGroup>

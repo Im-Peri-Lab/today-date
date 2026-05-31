@@ -1,3 +1,5 @@
+import { CategoryIcon } from './categoryIcon'
+
 interface CategoryLike {
   name: string
   icon: string | null
@@ -13,7 +15,7 @@ export function CategoryBadge({ category }: { category?: CategoryLike | null }) 
       className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium whitespace-nowrap"
       style={{ backgroundColor: `${color}1a`, color }}
     >
-      {category.icon && <span aria-hidden>{category.icon}</span>}
+      <CategoryIcon name={category.name} className="h-3.5 w-3.5" />
       {category.name}
     </span>
   )

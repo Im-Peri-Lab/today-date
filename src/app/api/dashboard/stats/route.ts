@@ -3,42 +3,24 @@ import { getSupabaseClient } from '@/lib/supabase/client'
 
 export const dynamic = 'force-dynamic'
 
-function startOfMonthISODate(): string {
-  const now = new Date()
-  const y = now.getFullYear()
-  const m = String(now.getMonth() + 1).padStart(2, '0')
-  return `${y}-${m}-01`
-}
-
 export async function GET() {
   try {
     const supabase = getSupabaseClient()
-    const monthStart = startOfMonthISODate()
 
     const countOpts = { count: 'exact' as const, head: true }
 
-    const [totalAct, totalPlc, visitedAct, visitedPlc, monthAct, monthPlc] = await Promise.all([
-      supabase.from('activities').select('*', countOpts),
-      supabase.from('places').select('*', countOpts),
+    const [wishAct, wishPlc, visitedAct, visitedPlc] = await Promise.all([
+      supabase.from('activities').select('*', countOpts).eq('status', 'wishlist'),
+      supabase.from('places').select('*', countOpts).eq('status', 'wishlist'),
       supabase.from('activities').select('*', countOpts).eq('status', 'visited'),
       supabase.from('places').select('*', countOpts).eq('status', 'visited'),
-      supabase
-        .from('activities')
-        .select('*', countOpts)
-        .eq('status', 'visited')
-        .gte('visited_at', monthStart),
-      supabase
-        .from('places')
-        .select('*', countOpts)
-        .eq('status', 'visited')
-        .gte('visited_at', monthStart),
     ])
 
     return NextResponse.json({
-      totalActivities: totalAct.count ?? 0,
-      totalPlaces: totalPlc.count ?? 0,
-      totalVisited: (visitedAct.count ?? 0) + (visitedPlc.count ?? 0),
-      visitedThisMonth: (monthAct.count ?? 0) + (monthPlc.count ?? 0),
+      wishlistActivities: wishAct.count ?? 0,
+      wishlistPlaces: wishPlc.count ?? 0,
+      visitedActivities: visitedAct.count ?? 0,
+      visitedPlaces: visitedPlc.count ?? 0,
     })
   } catch (err) {
     console.error('[GET /api/dashboard/stats]', err)

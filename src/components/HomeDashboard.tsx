@@ -108,38 +108,38 @@ export function HomeDashboard() {
         />
       </div>
 
-      {/* 통계 — CTA와 동일한 카드 언어, 더 컴팩트(보조 정보). 두 그룹 */}
+      {/* 통계 — 위시리스트 / 다녀온 곳, 각 [활동][장소]. 탭 시 해당 탭+토글로 진입 */}
       <div className="mt-6">
         <div>
           <p className={cn('mb-2 text-sm font-medium', styles.sub)}>위시리스트</p>
           <div className="grid grid-cols-2 gap-3 lg:gap-4">
             <StatCard
-              href="/list?tab=activity"
+              href="/list?tab=activity&status=wishlist"
               label="활동"
-              value={data?.totalActivities}
+              value={data?.wishlistActivities}
               loading={isLoading}
             />
             <StatCard
-              href="/list?tab=place"
+              href="/list?tab=place&status=wishlist"
               label="장소"
-              value={data?.totalPlaces}
+              value={data?.wishlistPlaces}
               loading={isLoading}
             />
           </div>
         </div>
         <div className="mt-5">
-          <p className={cn('mb-2 text-sm font-medium', styles.sub)}>함께한 기록</p>
+          <p className={cn('mb-2 text-sm font-medium', styles.sub)}>다녀온 곳</p>
           <div className="grid grid-cols-2 gap-3 lg:gap-4">
             <StatCard
-              href="/list?status=visited"
-              label="다녀온 곳"
-              value={data?.totalVisited}
+              href="/list?tab=activity&status=visited"
+              label="활동"
+              value={data?.visitedActivities}
               loading={isLoading}
             />
             <StatCard
-              href="/list?status=visited"
-              label="이번 달"
-              value={data?.visitedThisMonth}
+              href="/list?tab=place&status=visited"
+              label="장소"
+              value={data?.visitedPlaces}
               loading={isLoading}
             />
           </div>

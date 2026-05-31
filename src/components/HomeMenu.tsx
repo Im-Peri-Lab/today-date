@@ -2,18 +2,17 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Menu, List, LogOut } from 'lucide-react'
+import { Menu, LogOut } from 'lucide-react'
 import { toast } from 'sonner'
 import {
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu'
 import styles from '@/components/screens.module.css'
 
-/** 홈 우상단 미니멀 메뉴 — 햄버거 → 목록 보기 / 로그아웃 */
+/** 홈/목록 우상단 미니멀 메뉴 — 햄버거 → 로그아웃 */
 export function HomeMenu() {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
@@ -43,11 +42,6 @@ export function HomeMenu() {
         <Menu className="h-[18px] w-[18px]" />
       </DropdownMenuTrigger>
       <DropdownMenuContent>
-        <DropdownMenuItem onClick={() => router.push('/list')}>
-          <List />
-          목록 보기
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
         <DropdownMenuItem
           variant="destructive"
           disabled={isLoading}

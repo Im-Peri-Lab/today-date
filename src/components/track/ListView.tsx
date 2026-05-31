@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
-import { Search, Filter } from 'lucide-react'
+import { Search, Filter, Home } from 'lucide-react'
 import { ActivityCard } from './ActivityCard'
 import { PlaceCard } from './PlaceCard'
 import { EmptyState } from './EmptyState'
@@ -205,7 +205,12 @@ export function ListView() {
           <MiniHeart />
           <span className={cn(styles.brand, 'lg:text-lg')}>Today Date</span>
         </Link>
-        <HomeMenu />
+        <div className="flex items-center gap-1">
+          <Link href="/" className={styles.iconBtn} aria-label="홈으로">
+            <Home className="h-[18px] w-[18px]" />
+          </Link>
+          <HomeMenu />
+        </div>
       </header>
 
       {/* 페이지 제목 — 홈과 동일한 타이포 위계 */}

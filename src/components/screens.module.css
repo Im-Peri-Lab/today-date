@@ -11,15 +11,11 @@
  */
 
 .page {
+  position: relative;
   min-height: 100vh;
   min-height: 100dvh; /* iOS 주소창 동적 높이 */
   display: flex;
   flex-direction: column;
-  /* 베이스 그라데이션 + "있는 듯 없는 듯" 코너 글로우(인증 흐름 톤) */
-  background:
-    radial-gradient(50rem 32rem at 100% -8%, rgba(168, 85, 247, 0.05), transparent 62%),
-    radial-gradient(44rem 30rem at -6% 6%, rgba(236, 72, 153, 0.04), transparent 60%),
-    linear-gradient(180deg, #ffffff 0%, #f4f0fa 100%);
   /* 노치/홈 인디케이터 안전 영역 */
   padding-top: calc(env(safe-area-inset-top) + 0.5rem);
   padding-bottom: calc(env(safe-area-inset-bottom) + 0.5rem);
@@ -31,13 +27,30 @@
     'Segoe UI', Roboto, sans-serif;
 }
 
+/*
+ * 배경을 뷰포트에 고정된 레이어로 분리한다.
+ * 콘텐츠 높이에 종속되지 않으므로 탭 전환·스크롤로 콘텐츠 길이가 달라져도
+ * 그라데이션 끝점이 움직이지 않는다. (베이스 그라데이션 + 코너 글로우)
+ */
+.page::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(50rem 32rem at 100% -8%, rgba(168, 85, 247, 0.05), transparent 62%),
+    radial-gradient(44rem 30rem at -6% 6%, rgba(236, 72, 153, 0.04), transparent 60%),
+    linear-gradient(180deg, #ffffff 0%, #f4f0fa 100%);
+}
+
 @media (prefers-color-scheme: dark) {
-  .page {
+  .page::before {
     background:
       radial-gradient(50rem 32rem at 100% -8%, rgba(192, 132, 252, 0.12), transparent 62%),
       radial-gradient(44rem 30rem at -6% 6%, rgba(244, 114, 182, 0.07), transparent 60%),
       linear-gradient(180deg, #0a0712 0%, #120c1e 100%);
-
+  }
+  .page {
     --s-ink: #f5f3fa; /* 제목/주요 텍스트 */
     --s-sub: #a8a0b8; /* 서브카피 */
     --s-faint: #8c84a0; /* 더 옅은 보조 */

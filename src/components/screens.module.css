@@ -16,6 +16,17 @@
   min-height: 100dvh; /* iOS 주소창 동적 높이 */
   display: flex;
   flex-direction: column;
+
+  /*
+   * ── 활성 상태 단일 토큰 ──────────────────────────
+   * 토글·검색 포커스·필터 버튼·필터 칩의 "활성/선택/포커스"는 모두 아래 토큰만 참조한다.
+   * 활성색을 바꾸려면 여기 한 곳만 수정. (요소별 하드코딩 금지)
+   */
+  --s-active-fill: linear-gradient(135deg, #a855f7 0%, #ec4899 100%); /* 채움(칩) */
+  --s-active-on: #ffffff; /* 채움 위 글씨/아이콘 */
+  --s-active-line: #7c3aed; /* 활성/포커스 보더·링 */
+  --s-active-glow: rgba(124, 58, 237, 0.2); /* 옅은 포커스 링/글로우 */
+
   /* 노치/홈 인디케이터 안전 영역 */
   padding-top: calc(env(safe-area-inset-top) + 0.5rem);
   padding-bottom: calc(env(safe-area-inset-bottom) + 0.5rem);
@@ -51,6 +62,7 @@
       linear-gradient(180deg, #0a0712 0%, #120c1e 100%);
   }
   .page {
+    --s-active-fill: linear-gradient(135deg, #c084fc 0%, #f472b6 100%); /* 다크는 한 톤 밝게 */
     --s-ink: #f5f3fa; /* 제목/주요 텍스트 */
     --s-sub: #a8a0b8; /* 서브카피 */
     --s-faint: #8c84a0; /* 더 옅은 보조 */
@@ -316,11 +328,11 @@
     box-shadow 140ms ease;
 }
 .segmentBtnActive {
-  color: var(--s-accent, #7c3aed);
+  color: var(--s-active-line, #7c3aed);
   background: var(--s-card-bg, #ffffff);
   box-shadow:
-    0 0 0 1px rgba(168, 85, 247, 0.35),
-    0 4px 12px -4px rgba(168, 85, 247, 0.3);
+    0 0 0 1px var(--s-active-line, #7c3aed),
+    0 4px 12px -4px var(--s-active-glow, rgba(124, 58, 237, 0.2));
 }
 
 /* 검색 / 텍스트 입력 */
@@ -369,8 +381,8 @@
 .filterToggle:focus-visible,
 .chip:focus-visible {
   outline: none;
-  border-color: #7c3aed;
-  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.18);
+  border-color: var(--s-active-line, #7c3aed);
+  box-shadow: 0 0 0 3px var(--s-active-glow, rgba(124, 58, 237, 0.2));
 }
 
 /* 필터 칩 */
@@ -397,19 +409,21 @@
   color: var(--s-accent, #7c3aed);
   flex-shrink: 0;
 }
-.chip:hover {
-  border-color: var(--s-accent, #c4b5fd);
-  color: var(--s-accent, #7c3aed);
+/* 호버는 미선택 칩에만 — 활성 칩의 흰 글씨를 덮어쓰지 않도록 :not 으로 제외 */
+.chip:hover:not(.chipActive) {
+  border-color: var(--s-active-line, #c4b5fd);
+  color: var(--s-active-line, #7c3aed);
 }
-.chipActive {
+/* 활성 칩: 단일 토큰만 참조 — 그라데이션 채움 + 흰 글씨/아이콘 (예외 없음) */
+.chipActive,
+.chipActive:hover {
   border-color: transparent;
-  background: var(--s-grad, linear-gradient(135deg, #a855f7 0%, #ec4899 100%));
-  color: #ffffff;
+  background: var(--s-active-fill, linear-gradient(135deg, #a855f7 0%, #ec4899 100%));
+  color: var(--s-active-on, #ffffff);
   font-weight: 500;
 }
-/* 선택된 칩 안의 카테고리 아이콘은 밝게(그라데이션 위 대비 확보) */
 .chipActive .catIcon {
-  color: #ffffff;
+  color: var(--s-active-on, #ffffff);
 }
 
 /* 필터 접기/펼치기 토글 버튼 */
@@ -431,12 +445,12 @@
     color 140ms ease;
 }
 .filterToggle:hover {
-  border-color: var(--s-accent, #c4b5fd);
-  color: var(--s-accent, #7c3aed);
+  border-color: var(--s-active-line, #c4b5fd);
+  color: var(--s-active-line, #7c3aed);
 }
 .filterToggleActive {
-  color: var(--s-accent, #7c3aed);
-  border-color: var(--s-accent, #c4b5fd);
+  color: var(--s-active-line, #7c3aed);
+  border-color: var(--s-active-line, #c4b5fd);
 }
 /* 활성 필터 개수 뱃지 (그라데이션) */
 .filterCount {
@@ -453,18 +467,27 @@
   color: #ffffff;
   background: var(--s-grad, linear-gradient(135deg, #a855f7 0%, #ec4899 100%));
 }
-/* 필터 초기화 텍스트 버튼 */
+/* 필터 초기화 — 필터 버튼과 같은 높이·결의 작은 pill (X 아이콘 + 텍스트) */
 .resetBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  height: 2.25rem;
+  padding: 0 0.75rem;
+  border-radius: 0.625rem;
   font-size: 0.8125rem;
   font-weight: 500;
   color: var(--s-sub, #6b7280);
-  background: none;
-  border: none;
+  background: var(--s-card-bg, #ffffff);
+  border: 1px solid var(--s-card-border-strong, #c9b8e4);
   cursor: pointer;
-  transition: color 140ms ease;
+  transition:
+    border-color 140ms ease,
+    color 140ms ease;
 }
 .resetBtn:hover {
-  color: var(--s-accent, #7c3aed);
+  border-color: var(--s-active-line, #c4b5fd);
+  color: var(--s-active-line, #7c3aed);
 }
 
 /* /list 하단 여백 — 콘텐츠가 짧아도 FAB·안전영역에 마지막 카드가 가리지 않게 */

@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
-import { Search, Filter, Home } from 'lucide-react'
+import { Search, Filter, Home, X } from 'lucide-react'
 import { ActivityCard } from './ActivityCard'
 import { PlaceCard } from './PlaceCard'
 import { CategoryIcon } from './categoryIcon'
@@ -125,6 +125,7 @@ function FilterBar({
         </button>
         {count > 0 && (
           <button type="button" onClick={onReset} className={styles.resetBtn}>
+            <X className="h-3.5 w-3.5" />
             초기화
           </button>
         )}

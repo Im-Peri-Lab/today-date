@@ -92,33 +92,43 @@ function SearchBox({
   )
 }
 
-/** 필터 버튼 + 검색바를 한 줄에, 펼친 칩 패널은 아래 전체 폭으로 */
+/** 필터 버튼(+초기화) 한 줄, 검색바 위 전체 폭, 펼친 칩 패널은 아래 */
 function FilterBar({
   count,
   open,
   onToggle,
+  onReset,
   search,
   children,
 }: {
   count: number
   open: boolean
   onToggle: () => void
+  onReset: () => void
   search: React.ReactNode
   children: React.ReactNode
 }) {
   return (
     <div className="mt-3">
       {search}
-      <button
-        type="button"
-        onClick={onToggle}
-        aria-expanded={open}
-        className={cn('mt-2', styles.filterToggle, (open || count > 0) && styles.filterToggleActive)}
-      >
-        <Filter className="h-4 w-4" />
-        필터
-        {count > 0 && <span className={styles.filterCount}>{count}</span>}
-      </button>
+      <div className="mt-2 flex items-center gap-3">
+        <button
+          type="button"
+          onClick={onToggle}
+          aria-expanded={open}
+          className={cn(styles.filterToggle, (open || count > 0) && styles.filterToggleActive)}
+        >
+          <Filter className="h-4 w-4" />
+          필터
+          {/* 접혔을 때만 개수 뱃지 (펼치면 칩 색으로 구분) */}
+          {count > 0 && !open && <span className={styles.filterCount}>{count}</span>}
+        </button>
+        {count > 0 && (
+          <button type="button" onClick={onReset} className={styles.resetBtn}>
+            초기화
+          </button>
+        )}
+      </div>
       <div
         className={cn(
           'grid transition-all duration-300 ease-out',
@@ -136,7 +146,7 @@ function FilterGroup({ label, children }: { label: string; children: React.React
   return (
     <div>
       <p className={cn('mb-1.5 text-xs', styles.faint)}>{label}</p>
-      <div className="flex flex-wrap gap-2">{children}</div>
+      <div className="flex flex-wrap gap-x-2 gap-y-2.5">{children}</div>
     </div>
   )
 }
@@ -194,6 +204,19 @@ export function ListView() {
     setter(list.includes(id) ? list.filter((c) => c !== id) : [...list, id])
   }
 
+  // 현재 탭의 모든 필터 + 검색 해제 (UI 상태만 초기화, 필터 로직은 그대로)
+  function resetActivityFilters() {
+    setActCats([])
+    setActDuration('')
+    setActTime('')
+    setSearch('')
+  }
+  function resetPlaceFilters() {
+    setPlaceCats([])
+    setPlaceMeal('')
+    setSearch('')
+  }
+
   // 활성 필터 개수 / 검색·필터 사용 여부 (빈 상태 카피 분기용)
   const activityFilterCount = actCats.length + (actDuration ? 1 : 0) + (actTime ? 1 : 0)
   const placeFilterCount = placeCats.length + (placeMeal ? 1 : 0)
@@ -201,7 +224,7 @@ export function ListView() {
   const placeFiltering = Boolean(debouncedSearch) || placeFilterCount > 0
 
   return (
-    <div className="mx-auto w-full max-w-4xl px-5 pb-28 pt-6 lg:px-8 lg:pt-10">
+    <div className={cn(styles.listBottom, 'mx-auto w-full max-w-4xl px-5 pt-6 lg:px-8 lg:pt-10')}>
       {/* 헤더: 브랜드(홈으로) + 미니멀 메뉴 — 홈과 동일 패턴 */}
       <header className="flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2.5" aria-label="홈으로">
@@ -210,7 +233,7 @@ export function ListView() {
         </Link>
         <div className="flex items-center gap-1">
           <Link href="/" className={styles.iconBtn} aria-label="홈으로">
-            <Home className="h-[18px] w-[18px]" />
+            <Home className="h-5 w-5" />
           </Link>
           <HomeMenu />
         </div>
@@ -260,6 +283,7 @@ export function ListView() {
             count={activityFilterCount}
             open={filtersOpen}
             onToggle={() => setFiltersOpen((v) => !v)}
+            onReset={resetActivityFilters}
             search={
               <SearchBox value={search} onChange={setSearch} placeholder="제목·메모 검색" />
             }
@@ -342,6 +366,7 @@ export function ListView() {
             count={placeFilterCount}
             open={filtersOpen}
             onToggle={() => setFiltersOpen((v) => !v)}
+            onReset={resetPlaceFilters}
             search={
               <SearchBox value={search} onChange={setSearch} placeholder="제목·메모·위치 검색" />
             }

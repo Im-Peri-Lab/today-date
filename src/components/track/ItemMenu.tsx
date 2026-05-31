@@ -25,7 +25,7 @@ export function ItemMenu({ status, onEdit, onDelete, onMarkVisited, onRevert }: 
       <DropdownMenuTrigger
         render={<button type="button" className={styles.iconBtn} aria-label="더보기" />}
       >
-        <MoreVertical className="h-[18px] w-[18px]" />
+        <MoreVertical className="h-5 w-5" />
       </DropdownMenuTrigger>
       <DropdownMenuContent>
         <DropdownMenuItem onClick={onEdit}>

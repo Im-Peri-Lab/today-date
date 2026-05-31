@@ -100,7 +100,7 @@ html.dark body {
 }
 @media (prefers-color-scheme: dark) {
   [data-slot='dropdown-menu-content'] {
-    background-color: #1f1830;
+    background-color: #241a36;
     color: #f5f3fa;
     /* 배경보다 한 단계 밝은 보더 + 진한 그림자로 카드 배경에서 띄운다 */
     box-shadow:

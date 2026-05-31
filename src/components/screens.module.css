@@ -58,7 +58,7 @@
     --s-accent-soft-bg: #2d2540; /* 활성 칩/소프트 배경 */
     --s-accent-soft-text: #d8b4fe;
 
-    --s-card-bg: #1f1830; /* 카드 표면 — 페이지 배경(#0a0712~#120c1e)보다 또렷이 밝게 */
+    --s-card-bg: #241a36; /* 카드 표면 — 페이지 배경(#0a0712~#120c1e)보다 또렷이 밝게 분리 */
     --s-card-border: #2a1f3e; /* 보더로 분리감 확보 */
     --s-card-border-strong: #3a2f4e; /* 검색/필터/팝업용 또렷한 보더(배경보다 한 단계 밝게) */
     --s-card-shadow: 0 8px 24px -16px rgba(0, 0, 0, 0.6);
@@ -202,14 +202,14 @@
   color: var(--s-accent, #7c3aed);
 }
 
-/* ── 아이콘 버튼 (헤더 목록/로그아웃) ───────────── */
+/* ── 아이콘 버튼 (헤더 홈/메뉴, 카드 더보기) — 최소 44x44 탭 타깃 ── */
 .iconBtn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2.25rem;
-  height: 2.25rem;
-  border-radius: 0.625rem;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 0.75rem;
   color: var(--s-sub, #6b7280);
   background: transparent;
   border: none;
@@ -360,10 +360,17 @@
 .plainInput::placeholder {
   color: var(--s-faint, #b0aabe);
 }
+/*
+ * 통일 포커스 — 차분한 보라 보더 한 톤 + 옅은 링(형광 X, 라이트/다크 동일 강도).
+ * 보더는 항상 1px 자리를 차지(색만 변경)하므로 포커스 시 레이아웃 점프가 없다.
+ */
 .searchInput:focus,
-.plainInput:focus {
-  border-color: var(--s-accent, #a855f7);
-  box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.15);
+.plainInput:focus,
+.filterToggle:focus-visible,
+.chip:focus-visible {
+  outline: none;
+  border-color: #7c3aed;
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.18);
 }
 
 /* 필터 칩 */
@@ -396,9 +403,13 @@
 }
 .chipActive {
   border-color: transparent;
-  background: var(--s-accent-soft-bg, #f5f0ff);
-  color: var(--s-accent-soft-text, #7c3aed);
+  background: var(--s-grad, linear-gradient(135deg, #a855f7 0%, #ec4899 100%));
+  color: #ffffff;
   font-weight: 500;
+}
+/* 선택된 칩 안의 카테고리 아이콘은 밝게(그라데이션 위 대비 확보) */
+.chipActive .catIcon {
+  color: #ffffff;
 }
 
 /* 필터 접기/펼치기 토글 버튼 */
@@ -441,6 +452,24 @@
   line-height: 1;
   color: #ffffff;
   background: var(--s-grad, linear-gradient(135deg, #a855f7 0%, #ec4899 100%));
+}
+/* 필터 초기화 텍스트 버튼 */
+.resetBtn {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--s-sub, #6b7280);
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color 140ms ease;
+}
+.resetBtn:hover {
+  color: var(--s-accent, #7c3aed);
+}
+
+/* /list 하단 여백 — 콘텐츠가 짧아도 FAB·안전영역에 마지막 카드가 가리지 않게 */
+.listBottom {
+  padding-bottom: calc(env(safe-area-inset-bottom) + 6.5rem);
 }
 
 /* FAB (추가) — 그라데이션 원형 */

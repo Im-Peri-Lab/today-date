@@ -48,5 +48,5 @@ const CATEGORY_ICONS: Record<string, LucideIcon> = {
 
 export function CategoryIcon({ name, className }: { name: string; className?: string }) {
   const Icon = CATEGORY_ICONS[name] ?? Tag
-  return <Icon className={cn(styles.catIcon, className)} strokeWidth={1.75} aria-hidden />
+  return <Icon className={cn(styles.catIcon, className)} strokeWidth={2} aria-hidden />
 }

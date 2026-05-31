@@ -29,11 +29,15 @@
   --s-active-glow: rgba(124, 58, 237, 0.2); /* 옅은 포커스 링/글로우 */
 
   /*
-   * 요소 표면(카드/검색/필터/토글/칩) 공통 배경 — 라이트는 흰색에 violet-pink 를 극소량 섞은
-   * 따뜻하고 화사한 연보라(앱 그라데이션 #a855f7→#ec4899 방향). 회색기 없이 "살짝 떠 보이는" 정도.
-   * (다크는 아래 @media 에서 #241a36 으로 오버라이드)
+   * 요소 표면/보더/그림자 (라이트 기본값) — 다크 구조를 미러링.
+   *  - 컨트롤(토글·검색·필터)·카드 표면: 깨끗한 흰색.
+   *  - 컨트롤 보더(--s-card-border-strong): 옅은 보라-그레이 한 톤(한 가족).
+   *  - 카드 그림자(--s-card-shadow): 중성 멀티레이어 → 컨트롤(보더)보다 한 단계 더 떠 보임.
+   * (다크는 아래 @media 에서 보라 톤으로 오버라이드 — 기존 유지)
    */
-  --s-card-bg: #fbf6fa;
+  --s-card-bg: #ffffff;
+  --s-card-border-strong: #eceaf3;
+  --s-card-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 4px 12px rgba(0, 0, 0, 0.05);
 
   /* 노치/홈 인디케이터 안전 영역 */
   padding-top: calc(env(safe-area-inset-top) + 0.5rem);
@@ -58,19 +62,16 @@
 }
 
 /*
- * 배경을 뷰포트에 고정된 레이어로 분리한다.
- * 콘텐츠 높이에 종속되지 않으므로 탭 전환·스크롤로 콘텐츠 길이가 달라져도
- * 그라데이션 끝점이 움직이지 않는다. (베이스 그라데이션 + 코너 글로우)
+ * 배경을 뷰포트에 고정된 레이어로 분리한다(콘텐츠 길이가 달라져도 안 움직임).
+ * 라이트: 순백보다 아주 살짝 누른 중성 톤(#fafafb) — 흰 카드/컨트롤과 미세 대비, 보라/핑크 색기 없음.
+ * (다크는 아래 @media 에서 보라/핑크 코너 글로우 + 다크 그라데이션 — 기존 유지)
  */
 .page::before {
   content: '';
   position: fixed;
   inset: 0;
   z-index: -1;
-  background:
-    radial-gradient(50rem 32rem at 100% -8%, rgba(168, 85, 247, 0.05), transparent 62%),
-    radial-gradient(44rem 30rem at -6% 6%, rgba(236, 72, 153, 0.04), transparent 60%),
-    linear-gradient(180deg, #ffffff 0%, #f4f0fa 100%);
+  background: #fafafb;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -104,6 +105,11 @@
     /* 그라데이션(주요 액션/아이콘/FAB) — 다크는 한 톤 밝게 */
     --s-grad: linear-gradient(135deg, #c084fc 0%, #f472b6 100%);
     --s-grad-shadow: 0 8px 20px -8px rgba(192, 132, 252, 0.45);
+  }
+  /* 다크 토글은 기존대로 — 트랙(눌린 면) 위 활성 강조, 보더 없음 (라이트만 흰면+보더) */
+  .segment {
+    background: var(--s-track, #1b1430);
+    border-color: transparent;
   }
 }
 
@@ -324,13 +330,14 @@
   border-bottom-color: var(--s-accent, #7c3aed);
 }
 
-/* 세그먼트 토글 (위시리스트/다녀온 곳) — 트랙 안에 활성만 떠오르는 스위치 형태 */
+/* 세그먼트 토글 (위시리스트/다녀온 곳) — 컨트롤 면(흰색)+연한 보더, 활성만 보라 강조 */
 .segment {
   display: inline-flex;
   flex-shrink: 0;
   padding: 0.1875rem;
   border-radius: 0.625rem;
-  background: var(--s-track, #f1ecfa);
+  background: #ffffff;
+  border: 1px solid var(--s-card-border-strong, #eceaf3);
 }
 .segmentBtn {
   white-space: nowrap;

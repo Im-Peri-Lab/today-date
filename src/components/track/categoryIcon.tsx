@@ -46,7 +46,22 @@ const CATEGORY_ICONS: Record<string, LucideIcon> = {
   미분류: Pin,
 }
 
-export function CategoryIcon({ name, className }: { name: string; className?: string }) {
+export function CategoryIcon({
+  name,
+  className,
+  color,
+}: {
+  name: string
+  className?: string
+  color?: string
+}) {
   const Icon = CATEGORY_ICONS[name] ?? Tag
-  return <Icon className={cn(styles.catIcon, className)} strokeWidth={2} aria-hidden />
+  return (
+    <Icon
+      className={cn(styles.catIcon, className)}
+      style={color ? { color } : undefined}
+      strokeWidth={2}
+      aria-hidden
+    />
+  )
 }

@@ -511,9 +511,9 @@
   color: var(--s-active-line, #7c3aed);
 }
 
-/* /list 하단 여백 — 콘텐츠가 짧아도 FAB·안전영역에 마지막 카드가 가리지 않게 */
+/* /list 하단 여백 — 마지막 카드가 FAB·안전영역에 가리지 않는 최소선(FAB 높이 + 약간) */
 .listBottom {
-  padding-bottom: calc(env(safe-area-inset-bottom) + 6.5rem);
+  padding-bottom: calc(env(safe-area-inset-bottom) + 5rem);
 }
 
 /* FAB (추가) — 그라데이션 원형 */

@@ -225,7 +225,12 @@ export function ListView() {
   const placeFiltering = Boolean(debouncedSearch) || placeFilterCount > 0
 
   return (
-    <div className={cn(styles.listBottom, 'mx-auto w-full max-w-4xl px-5 pt-6 lg:px-8 lg:pt-10')}>
+    <div
+      className={cn(
+        styles.listBottom,
+        'mx-auto flex w-full max-w-4xl flex-1 flex-col px-5 pt-6 lg:px-8 lg:pt-10'
+      )}
+    >
       {/* 헤더: 브랜드(홈으로) + 미니멀 메뉴 — 홈과 동일 패턴 */}
       <header className="flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2.5" aria-label="홈으로">
@@ -277,7 +282,7 @@ export function ListView() {
 
       {/* ── 활동 탭 ── */}
       {track === 'activity' && (
-        <div className="mt-4">
+        <div className="mt-4 flex flex-1 flex-col">
           <StatusToggle value={status} onChange={setStatus} />
 
           <FilterBar
@@ -327,7 +332,7 @@ export function ListView() {
             </div>
           </FilterBar>
 
-          <div className="mt-4">
+          <div className="my-auto">
             {activitiesQ.isLoading ? (
               <CardGridSkeleton />
             ) : activitiesQ.data && activitiesQ.data.length > 0 ? (
@@ -360,7 +365,7 @@ export function ListView() {
 
       {/* ── 장소 탭 ── */}
       {track === 'place' && (
-        <div className="mt-4">
+        <div className="mt-4 flex flex-1 flex-col">
           <StatusToggle value={status} onChange={setStatus} />
 
           <FilterBar
@@ -399,7 +404,7 @@ export function ListView() {
             </div>
           </FilterBar>
 
-          <div className="mt-4">
+          <div className="my-auto">
             {placesQ.isLoading ? (
               <CardGridSkeleton />
             ) : placesQ.data && placesQ.data.length > 0 ? (

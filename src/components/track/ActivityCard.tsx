@@ -54,7 +54,10 @@ export function ActivityCard({ activity, hideMenu, actionSlot }: ActivityCardPro
   return (
     <div className={cn(styles.card, styles.cardInteractive, 'group relative')}>
       {!hideMenu && (
-        <div className="absolute right-1.5 top-1.5 z-10">
+        <div
+          className="absolute right-1.5 top-1.5 z-10"
+          onClick={(e) => e.stopPropagation()}
+        >
           <ItemMenu
             status={activity.status}
             onEdit={() => router.push(`/activities/${activity.id}/edit`)}
@@ -67,7 +70,7 @@ export function ActivityCard({ activity, hideMenu, actionSlot }: ActivityCardPro
 
       <Link
         href={`/activities/${activity.id}`}
-        className={cn('block p-4', hideMenu ? 'pr-4' : 'pr-11')}
+        className={cn('block p-3.5', hideMenu ? 'pr-3.5' : 'pr-11')}
       >
         {activity.category && (
           <div className="mb-2">
@@ -75,7 +78,7 @@ export function ActivityCard({ activity, hideMenu, actionSlot }: ActivityCardPro
           </div>
         )}
 
-        <h3 className={cn('mb-1.5 line-clamp-1', styles.cardTitle)}>{activity.title}</h3>
+        <h3 className={cn('mb-1 line-clamp-1 text-lg font-semibold', styles.ink)}>{activity.title}</h3>
 
         <div className={cn('mb-2 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-xs', styles.sub)}>
           {activity.duration_bucket && (
@@ -97,7 +100,7 @@ export function ActivityCard({ activity, hideMenu, actionSlot }: ActivityCardPro
         </div>
 
         {activity.memo && (
-          <p className={cn('line-clamp-2 text-[13px] leading-relaxed', styles.sub)}>{activity.memo}</p>
+          <p className={cn('line-clamp-1 text-sm', styles.faint)}>{activity.memo}</p>
         )}
 
         {isVisited && (

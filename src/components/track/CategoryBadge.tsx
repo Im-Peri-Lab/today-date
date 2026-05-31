@@ -1,3 +1,6 @@
+import { CategoryIcon } from './categoryIcon'
+import styles from '@/components/screens.module.css'
+
 interface CategoryLike {
   name: string
   icon: string | null
@@ -6,14 +9,15 @@ interface CategoryLike {
 
 export function CategoryBadge({ category }: { category?: CategoryLike | null }) {
   if (!category) return null
-  const color = category.color ?? '#9E9E9E'
 
+  // 배경/글씨는 중성(라벨), 카테고리 구분은 아이콘 색으로만.
   return (
-    <span
-      className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium whitespace-nowrap"
-      style={{ backgroundColor: `${color}1a`, color }}
-    >
-      {category.icon && <span aria-hidden>{category.icon}</span>}
+    <span className={styles.labelBadge}>
+      <CategoryIcon
+        name={category.name}
+        className="h-3.5 w-3.5"
+        color={category.color ?? undefined}
+      />
       {category.name}
     </span>
   )

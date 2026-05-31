@@ -11,15 +11,23 @@
  */
 
 .page {
+  position: relative;
   min-height: 100vh;
   min-height: 100dvh; /* iOS 주소창 동적 높이 */
   display: flex;
   flex-direction: column;
-  /* 베이스 그라데이션 + "있는 듯 없는 듯" 코너 글로우(인증 흐름 톤) */
-  background:
-    radial-gradient(50rem 32rem at 100% -8%, rgba(168, 85, 247, 0.05), transparent 62%),
-    radial-gradient(44rem 30rem at -6% 6%, rgba(236, 72, 153, 0.04), transparent 60%),
-    linear-gradient(180deg, #ffffff 0%, #f4f0fa 100%);
+
+  /*
+   * ── 활성 상태 단일 토큰 ──────────────────────────
+   * 토글·검색 포커스·필터 버튼·필터 칩의 "활성/선택/포커스"는 모두 아래 토큰만 참조한다.
+   * 활성색을 바꾸려면 여기 한 곳만 수정. (요소별 하드코딩 금지)
+   */
+  --s-active-fill: linear-gradient(135deg, #a855f7 0%, #ec4899 100%); /* 채움(칩) */
+  --s-active-on: #ffffff; /* 채움 위 글씨/아이콘 */
+  --s-active-line: #7c3aed; /* 활성/포커스 보더·링 */
+  --s-active-text: #7c3aed; /* 외곽선형 활성(토글/필터버튼)의 글씨·아이콘 — 다크에선 밝게 */
+  --s-active-glow: rgba(124, 58, 237, 0.2); /* 옅은 포커스 링/글로우 */
+
   /* 노치/홈 인디케이터 안전 영역 */
   padding-top: calc(env(safe-area-inset-top) + 0.5rem);
   padding-bottom: calc(env(safe-area-inset-bottom) + 0.5rem);
@@ -31,13 +39,42 @@
     'Segoe UI', Roboto, sans-serif;
 }
 
+/*
+ * 스크롤이 긴 페이지(/list)용 — dvh 추적 제거.
+ * dvh 는 모바일 주소창 접힘/펼침에 따라 실시간으로 변해 스크롤 중 하단 여백이 출렁인다.
+ * svh(없으면 vh)는 스크롤 중 값이 고정되므로 출렁임이 없다. (콘텐츠가 짧아도 화면을 채움)
+ */
+.pageStatic {
+  min-height: 100vh;
+  min-height: 100svh;
+}
+
+/*
+ * 배경을 뷰포트에 고정된 레이어로 분리한다.
+ * 콘텐츠 높이에 종속되지 않으므로 탭 전환·스크롤로 콘텐츠 길이가 달라져도
+ * 그라데이션 끝점이 움직이지 않는다. (베이스 그라데이션 + 코너 글로우)
+ */
+.page::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(50rem 32rem at 100% -8%, rgba(168, 85, 247, 0.05), transparent 62%),
+    radial-gradient(44rem 30rem at -6% 6%, rgba(236, 72, 153, 0.04), transparent 60%),
+    linear-gradient(180deg, #ffffff 0%, #f4f0fa 100%);
+}
+
 @media (prefers-color-scheme: dark) {
-  .page {
+  .page::before {
     background:
       radial-gradient(50rem 32rem at 100% -8%, rgba(192, 132, 252, 0.12), transparent 62%),
       radial-gradient(44rem 30rem at -6% 6%, rgba(244, 114, 182, 0.07), transparent 60%),
       linear-gradient(180deg, #0a0712 0%, #120c1e 100%);
-
+  }
+  .page {
+    --s-active-fill: linear-gradient(135deg, #c084fc 0%, #f472b6 100%); /* 다크는 한 톤 밝게 */
+    --s-active-text: #d8b4fe; /* 다크: 외곽선형 활성 글씨/아이콘을 밝은 라벤더로 */
     --s-ink: #f5f3fa; /* 제목/주요 텍스트 */
     --s-sub: #a8a0b8; /* 서브카피 */
     --s-faint: #8c84a0; /* 더 옅은 보조 */
@@ -45,8 +82,9 @@
     --s-accent-soft-bg: #2d2540; /* 활성 칩/소프트 배경 */
     --s-accent-soft-text: #d8b4fe;
 
-    --s-card-bg: #1f1830; /* 카드 표면 — 페이지 배경(#0a0712~#120c1e)보다 또렷이 밝게 */
+    --s-card-bg: #241a36; /* 카드 표면 — 페이지 배경(#0a0712~#120c1e)보다 또렷이 밝게 분리 */
     --s-card-border: #2a1f3e; /* 보더로 분리감 확보 */
+    --s-card-border-strong: #3a2f4e; /* 검색/필터/팝업용 또렷한 보더(배경보다 한 단계 밝게) */
     --s-card-shadow: 0 8px 24px -16px rgba(0, 0, 0, 0.6);
     --s-card-shadow-hover: 0 16px 40px -16px rgba(0, 0, 0, 0.72), 0 4px 22px -10px rgba(192, 132, 252, 0.3);
     --s-card-hover-border: rgba(192, 132, 252, 0.5); /* 호버 시 라벤더 보더 */
@@ -188,14 +226,14 @@
   color: var(--s-accent, #7c3aed);
 }
 
-/* ── 아이콘 버튼 (헤더 목록/로그아웃) ───────────── */
+/* ── 아이콘 버튼 (헤더 홈/메뉴, 카드 더보기) — 최소 44x44 탭 타깃 ── */
 .iconBtn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2.25rem;
-  height: 2.25rem;
-  border-radius: 0.625rem;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 0.75rem;
   color: var(--s-sub, #6b7280);
   background: transparent;
   border: none;
@@ -278,7 +316,7 @@
   border-bottom-color: var(--s-accent, #7c3aed);
 }
 
-/* 세그먼트 토글 (위시리스트/다녀온 곳) */
+/* 세그먼트 토글 (위시리스트/다녀온 곳) — 트랙 안에 활성만 떠오르는 스위치 형태 */
 .segment {
   display: inline-flex;
   flex-shrink: 0;
@@ -302,9 +340,11 @@
     box-shadow 140ms ease;
 }
 .segmentBtnActive {
-  color: var(--s-accent, #7c3aed);
-  background: var(--s-raised, #ffffff);
-  box-shadow: 0 1px 3px rgba(20, 10, 40, 0.1);
+  color: var(--s-active-text, #7c3aed);
+  background: var(--s-card-bg, #ffffff);
+  box-shadow:
+    0 0 0 1px var(--s-active-line, #7c3aed),
+    0 4px 12px -4px var(--s-active-glow, rgba(124, 58, 237, 0.2));
 }
 
 /* 검색 / 텍스트 입력 */
@@ -325,7 +365,7 @@
   width: 100%;
   height: 2.5rem;
   border-radius: 0.75rem;
-  border: 1px solid var(--s-card-border, #e3dcef);
+  border: 1px solid var(--s-card-border-strong, #c9b8e4);
   background: var(--s-card-bg, #ffffff);
   color: var(--s-ink, #1a1033);
   font-size: 0.875rem;
@@ -344,14 +384,29 @@
 .plainInput::placeholder {
   color: var(--s-faint, #b0aabe);
 }
+/*
+ * 포커스 역할 분리:
+ *  - 텍스트 입력(검색/위치): 연보라 포커스 링 + 활성 보더 (입력 필드 관례)
+ *  - 버튼류(필터/칩): 링 없이 활성 보더만
+ * 보더는 항상 1px 자리를 차지(색만 변경)하므로 포커스 시 레이아웃 점프가 없다.
+ */
 .searchInput:focus,
 .plainInput:focus {
-  border-color: var(--s-accent, #a855f7);
-  box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.15);
+  outline: none;
+  border-color: var(--s-active-line, #7c3aed);
+  box-shadow: 0 0 0 3px var(--s-active-glow, rgba(124, 58, 237, 0.2));
+}
+.filterToggle:focus-visible,
+.chip:focus-visible {
+  outline: none;
+  border-color: var(--s-active-line, #7c3aed);
 }
 
 /* 필터 칩 */
 .chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
   white-space: nowrap;
   border-radius: 9999px;
   padding: 0.375rem 0.75rem;
@@ -365,15 +420,114 @@
     color 140ms ease,
     background 140ms ease;
 }
-.chip:hover {
-  border-color: var(--s-accent, #c4b5fd);
+
+/* 카테고리 아이콘 — 단색 선, 보라 톤 통일(텍스트 보조) */
+.catIcon {
   color: var(--s-accent, #7c3aed);
+  flex-shrink: 0;
 }
-.chipActive {
+/* 호버는 미선택 칩에만 — 활성 칩의 흰 글씨를 덮어쓰지 않도록 :not 으로 제외 */
+.chip:hover:not(.chipActive) {
+  border-color: var(--s-active-line, #c4b5fd);
+  color: var(--s-active-line, #7c3aed);
+}
+/* 활성 칩: 단일 토큰만 참조 — 그라데이션 채움 + 흰 글씨/아이콘 (예외 없음) */
+.chipActive,
+.chipActive:hover {
   border-color: transparent;
-  background: var(--s-accent-soft-bg, #f5f0ff);
-  color: var(--s-accent-soft-text, #7c3aed);
+  background: var(--s-active-fill, linear-gradient(135deg, #a855f7 0%, #ec4899 100%));
+  color: var(--s-active-on, #ffffff);
   font-weight: 500;
+}
+.chipActive .catIcon {
+  color: var(--s-active-on, #ffffff);
+}
+
+/*
+ * 카드 카테고리 뱃지(분류 라벨) — 배경 pill 없이 아이콘 + 텍스트만 인라인.
+ * 카테고리 구분은 아이콘 색으로만, 텍스트는 차분한 톤.
+ */
+.labelBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  white-space: nowrap;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--s-sub, #6b7280);
+}
+
+/* 필터 접기/펼치기 토글 버튼 */
+.filterToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  height: 2.25rem;
+  padding: 0 0.875rem;
+  border-radius: 0.625rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--s-sub, #6b7280);
+  background: var(--s-card-bg, #ffffff);
+  border: 1px solid var(--s-card-border-strong, #c9b8e4);
+  cursor: pointer;
+  transition:
+    border-color 140ms ease,
+    color 140ms ease;
+}
+.filterToggle:hover {
+  border-color: var(--s-active-line, #c4b5fd);
+  color: var(--s-active-text, #7c3aed);
+}
+.filterToggleActive {
+  color: var(--s-active-text, #7c3aed);
+  border-color: var(--s-active-line, #c4b5fd);
+}
+/* 활성 필터 개수 뱃지 (그라데이션) */
+.filterCount {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.125rem;
+  height: 1.125rem;
+  padding: 0 0.3rem;
+  border-radius: 9999px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  line-height: 1;
+  color: #ffffff;
+  background: var(--s-grad, linear-gradient(135deg, #a855f7 0%, #ec4899 100%));
+}
+/* 필터 초기화 — 필터 버튼과 같은 높이·결의 작은 pill (X 아이콘 + 텍스트) */
+.resetBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  height: 2.25rem;
+  padding: 0 0.75rem;
+  border-radius: 0.625rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--s-sub, #6b7280);
+  background: var(--s-card-bg, #ffffff);
+  border: 1px solid var(--s-card-border-strong, #c9b8e4);
+  cursor: pointer;
+  transition:
+    border-color 140ms ease,
+    color 140ms ease;
+}
+.resetBtn:hover {
+  border-color: var(--s-active-line, #c4b5fd);
+  color: var(--s-active-line, #7c3aed);
+}
+
+/*
+ * /list 하단 여백 — FAB 가림 방지 고정값(스크롤과 무관하게 일정).
+ * 안전영역은 .page 의 padding-bottom 이 이미 처리하고, FAB 위치도 같은 env() 를 쓰므로
+ * 여기서는 env() 없이 고정 5rem 만 둬야 스크롤 중 여백이 출렁이지 않는다.
+ */
+.listBottom {
+  padding-bottom: 5rem;
 }
 
 /* FAB (추가) — 그라데이션 원형 */
@@ -414,6 +568,20 @@
   border-radius: 1rem;
   border: 1px dashed var(--s-card-border, #d9cdf0);
   background: var(--s-card-bg, rgba(255, 255, 255, 0.5));
+}
+
+/* 상세: "다녀온 곳" 태그 + 방문 기록 박스 */
+.visitedTag {
+  border-radius: 9999px;
+  padding: 0.125rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  background: var(--s-accent-soft-bg, #f6f1ff);
+  color: var(--s-accent-soft-text, #7c3aed);
+}
+.visitBox {
+  border-radius: 0.875rem;
+  background: var(--s-accent-soft-bg, #f6f1ff);
 }
 
 /* 로딩 스켈레톤 바 */

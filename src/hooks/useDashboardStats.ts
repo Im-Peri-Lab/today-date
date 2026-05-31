@@ -4,10 +4,10 @@ import { useQuery } from '@tanstack/react-query'
 import { fetchJson } from './fetcher'
 
 export interface DashboardStats {
-  totalActivities: number
-  totalPlaces: number
-  totalVisited: number
-  visitedThisMonth: number
+  wishlistActivities: number
+  wishlistPlaces: number
+  visitedActivities: number
+  visitedPlaces: number
 }
 
 export function useDashboardStats() {

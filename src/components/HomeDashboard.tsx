@@ -5,32 +5,10 @@ import { Sparkles, MapPin } from 'lucide-react'
 import { Skeleton } from '@/components/ui/skeleton'
 import { HomeMenu } from '@/components/HomeMenu'
 import { HomeFab } from '@/components/HomeFab'
+import { MiniHeart } from '@/components/BrandMark'
 import { useDashboardStats } from '@/hooks/useDashboardStats'
 import { cn } from '@/lib/utils'
 import styles from '@/components/screens.module.css'
-
-/** 보라→핑크 그라데이션 하트 (auth BrandHeader 와 동일 모티프) */
-function MiniHeart() {
-  return (
-    <svg
-      className={cn(styles.miniHeart, 'h-6 w-6 lg:h-7 lg:w-7')}
-      viewBox="0 0 24 24"
-      role="img"
-      aria-label="Today Date"
-    >
-      <defs>
-        <linearGradient id="homeHeartGradient" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#a855f7" />
-          <stop offset="100%" stopColor="#ec4899" />
-        </linearGradient>
-      </defs>
-      <path
-        fill="url(#homeHeartGradient)"
-        d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
-      />
-    </svg>
-  )
-}
 
 function CtaCard({
   href,
@@ -57,25 +35,33 @@ function CtaCard({
   )
 }
 
-/** 통계 카드 — CTA와 동일한 카드 토큰. 숫자 강조 + 라벨, 호버 없음(정보 전용) */
+/** 통계 카드 — /list 진입구. 숫자 강조 + 라벨, 탭 가능(약한 hover/active) */
 function StatCard({
+  href,
   label,
   value,
   loading,
 }: {
+  href: string
   label: string
   value: number | undefined
   loading: boolean
 }) {
   return (
-    <div className={cn(styles.card, 'flex flex-col p-4')}>
+    <Link
+      href={href}
+      className={cn(
+        styles.card,
+        'flex flex-col p-4 transition-transform duration-150 hover:-translate-y-0.5 active:scale-[0.98]'
+      )}
+    >
       {loading ? (
         <Skeleton className="h-7 w-10" />
       ) : (
         <span className={cn(styles.statNum, 'text-2xl lg:text-3xl')}>{value ?? 0}</span>
       )}
       <span className={cn('mt-1 text-sm', styles.sub)}>{label}</span>
-    </div>
+    </Link>
   )
 }
 
@@ -122,20 +108,40 @@ export function HomeDashboard() {
         />
       </div>
 
-      {/* 통계 — CTA와 동일한 카드 언어, 더 컴팩트(보조 정보). 두 그룹 */}
+      {/* 통계 — 위시리스트 / 다녀온 곳, 각 [활동][장소]. 탭 시 해당 탭+토글로 진입 */}
       <div className="mt-6">
         <div>
           <p className={cn('mb-2 text-sm font-medium', styles.sub)}>위시리스트</p>
           <div className="grid grid-cols-2 gap-3 lg:gap-4">
-            <StatCard label="활동" value={data?.totalActivities} loading={isLoading} />
-            <StatCard label="장소" value={data?.totalPlaces} loading={isLoading} />
+            <StatCard
+              href="/list?tab=activity&status=wishlist"
+              label="활동"
+              value={data?.wishlistActivities}
+              loading={isLoading}
+            />
+            <StatCard
+              href="/list?tab=place&status=wishlist"
+              label="장소"
+              value={data?.wishlistPlaces}
+              loading={isLoading}
+            />
           </div>
         </div>
         <div className="mt-5">
-          <p className={cn('mb-2 text-sm font-medium', styles.sub)}>함께한 기록</p>
+          <p className={cn('mb-2 text-sm font-medium', styles.sub)}>다녀온 곳</p>
           <div className="grid grid-cols-2 gap-3 lg:gap-4">
-            <StatCard label="다녀온 곳" value={data?.totalVisited} loading={isLoading} />
-            <StatCard label="이번 달" value={data?.visitedThisMonth} loading={isLoading} />
+            <StatCard
+              href="/list?tab=activity&status=visited"
+              label="활동"
+              value={data?.visitedActivities}
+              loading={isLoading}
+            />
+            <StatCard
+              href="/list?tab=place&status=visited"
+              label="장소"
+              value={data?.visitedPlaces}
+              loading={isLoading}
+            />
           </div>
         </div>
       </div>

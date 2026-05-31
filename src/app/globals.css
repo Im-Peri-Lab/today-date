@@ -86,3 +86,32 @@ html.dark body {
     background-color: #0a0712;
   }
 }
+
+/*
+ * 드롭다운 메뉴(⋮ / 햄버거 / FAB) 보더·입체감.
+ * 메뉴는 body 로 portal 되어 .page 의 --s-* 토큰을 받지 못하므로 직접 지정한다.
+ * 보더는 검색바·필터 버튼과 동일한 톤(라이트 #c9b8e4 / 다크 #3a2f4e)으로 또렷하게,
+ * 그림자로 카드 배경에서 띄운다.
+ */
+[data-slot='dropdown-menu-content'] {
+  box-shadow:
+    0 0 0 1px #c9b8e4,
+    0 14px 32px -12px rgba(80, 40, 120, 0.22);
+}
+@media (prefers-color-scheme: dark) {
+  [data-slot='dropdown-menu-content'] {
+    background-color: #241a36;
+    color: #f5f3fa;
+    /* 배경보다 한 단계 밝은 보더 + 진한 그림자로 카드 배경에서 띄운다 */
+    box-shadow:
+      0 0 0 1px #3a2f4e,
+      0 18px 44px -12px rgba(0, 0, 0, 0.75);
+  }
+  [data-slot='dropdown-menu-item'][data-highlighted] {
+    background-color: #2d2540;
+  }
+  [data-slot='dropdown-menu-separator'] {
+    background-color: #2c2442;
+  }
+}
+

@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { getSession } from '@/lib/auth/session'
 import { ActivityDetail } from '@/components/track/ActivityDetail'
+import styles from '@/components/screens.module.css'
 
 export default async function ActivityDetailPage({
   params,
@@ -12,7 +13,7 @@ export default async function ActivityDetailPage({
   const { id } = await params
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-violet-50 to-purple-100">
+    <main className={styles.page}>
       <ActivityDetail id={id} />
     </main>
   )

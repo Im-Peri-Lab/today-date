@@ -54,7 +54,10 @@ export function PlaceCard({ place, hideMenu, actionSlot }: PlaceCardProps) {
   return (
     <div className={cn(styles.card, styles.cardInteractive, 'group relative')}>
       {!hideMenu && (
-        <div className="absolute right-1.5 top-1.5 z-10">
+        <div
+          className="absolute right-1.5 top-1.5 z-10"
+          onClick={(e) => e.stopPropagation()}
+        >
           <ItemMenu
             status={place.status}
             onEdit={() => router.push(`/places/${place.id}/edit`)}
@@ -65,14 +68,14 @@ export function PlaceCard({ place, hideMenu, actionSlot }: PlaceCardProps) {
         </div>
       )}
 
-      <Link href={`/places/${place.id}`} className={cn('block p-4', hideMenu ? 'pr-4' : 'pr-11')}>
+      <Link href={`/places/${place.id}`} className={cn('block p-3.5', hideMenu ? 'pr-3.5' : 'pr-11')}>
         {place.category && (
           <div className="mb-2">
             <CategoryBadge category={place.category} />
           </div>
         )}
 
-        <h3 className={cn('mb-1.5 line-clamp-1', styles.cardTitle)}>{place.title}</h3>
+        <h3 className={cn('mb-1 line-clamp-1 text-lg font-semibold', styles.ink)}>{place.title}</h3>
 
         <div className={cn('mb-2 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-xs', styles.sub)}>
           {place.location && (
@@ -89,7 +92,7 @@ export function PlaceCard({ place, hideMenu, actionSlot }: PlaceCardProps) {
         </div>
 
         {place.memo && (
-          <p className={cn('line-clamp-2 text-[13px] leading-relaxed', styles.sub)}>{place.memo}</p>
+          <p className={cn('line-clamp-1 text-sm', styles.faint)}>{place.memo}</p>
         )}
 
         {isVisited && (

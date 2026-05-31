@@ -40,13 +40,12 @@
 }
 
 /*
- * 스크롤이 긴 페이지(/list)용 — dvh 추적 제거.
- * dvh 는 모바일 주소창 접힘/펼침에 따라 실시간으로 변해 스크롤 중 하단 여백이 출렁인다.
- * svh(없으면 vh)는 스크롤 중 값이 고정되므로 출렁임이 없다. (콘텐츠가 짧아도 화면을 채움)
+ * 스크롤이 긴 페이지(/list)용 — .page 의 min-height(dvh)를 해제해 높이를 콘텐츠가 결정하게 한다.
+ * dvh 추적이 사라져 주소창 토글로 인한 하단 여백 출렁임이 없고, 카드가 적어도 baseline 빈 공간이 없다.
+ * 전체 배경은 캔버스(html background-color)와 뷰포트 고정 .page::before 가 덮으므로 빈 영역 노출 없음.
  */
 .pageStatic {
-  min-height: 100vh;
-  min-height: 100svh;
+  min-height: auto;
 }
 
 /*

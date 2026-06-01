@@ -258,7 +258,13 @@
   font-weight: 600;
   letter-spacing: -0.02em;
   line-height: 1;
-  color: var(--s-accent, #7c3aed);
+  /* 라이트: 보라(#7c3aed) 대신 기본 텍스트(중성). 다크는 아래 @media 에서 강조색 유지 */
+  color: var(--s-ink, #1a1033);
+}
+@media (prefers-color-scheme: dark) {
+  .statNum {
+    color: var(--s-accent, #7c3aed);
+  }
 }
 
 /* ── 아이콘 버튼 (헤더 홈/메뉴, 카드 더보기) — 최소 44x44 탭 타깃 ── */
@@ -278,8 +284,16 @@
     color 140ms ease;
 }
 .iconBtn:hover:not(:disabled) {
-  background: var(--s-accent-soft-bg, #f5f0ff);
-  color: var(--s-accent, #7c3aed);
+  /* 라이트: 보라 소프트(#f5f0ff) 대신 컨트롤 보더와 같은 결의 연한 중성 면 + 기본 텍스트 */
+  background: var(--s-card-border-strong, #eceaf3);
+  color: var(--s-ink, #1a1033);
+}
+@media (prefers-color-scheme: dark) {
+  .iconBtn:hover:not(:disabled) {
+    /* 다크 현행 유지 */
+    background: var(--s-accent-soft-bg, #f5f0ff);
+    color: var(--s-accent, #7c3aed);
+  }
 }
 .iconBtn:disabled {
   opacity: 0.5;

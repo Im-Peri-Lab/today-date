@@ -106,11 +106,6 @@
     --s-grad: linear-gradient(135deg, #c084fc 0%, #f472b6 100%);
     --s-grad-shadow: 0 8px 20px -8px rgba(192, 132, 252, 0.45);
   }
-  /* 다크 토글은 기존대로 — 트랙(눌린 면) 위 활성 강조, 보더 없음 (라이트만 흰면+보더) */
-  .segment {
-    background: var(--s-track, #1b1430);
-    border-color: transparent;
-  }
 }
 
 /* ── 텍스트 톤 (라이트 폴백 내장) ───────────────── */
@@ -360,6 +355,16 @@
   box-shadow:
     0 0 0 1px var(--s-active-line, #7c3aed),
     0 4px 12px -4px var(--s-active-glow, rgba(124, 58, 237, 0.2));
+}
+/*
+ * 다크 토글은 기존대로 — 어두운 트랙(눌린 면) + 보더 없음.
+ * (라이트의 흰 면+보더가 다크로 새지 않도록, 베이스 .segment 보다 뒤에 둬서 우선순위 확보)
+ */
+@media (prefers-color-scheme: dark) {
+  .segment {
+    background: var(--s-track, #1b1430);
+    border-color: transparent;
+  }
 }
 
 /* 검색 / 텍스트 입력 */

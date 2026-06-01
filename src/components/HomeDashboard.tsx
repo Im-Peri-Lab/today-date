@@ -86,8 +86,8 @@ export function HomeDashboard() {
 
       {/* Hero */}
       <div className="mt-8 lg:mt-10">
-        <h1 className={cn(styles.greeting, 'text-2xl lg:text-4xl')}>오늘, 우리 어떻게 보낼까?</h1>
-        <p className={cn('mt-1 text-sm lg:mt-1.5 lg:text-lg', styles.sub)}>
+        <h1 className={styles.pageTitle}>오늘, 우리 어떻게 보낼까?</h1>
+        <p className={styles.pageSubtitle}>
           위시리스트에서 골라드릴게요 💜
         </p>
       </div>

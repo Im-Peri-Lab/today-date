@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState, type ReactNode } from 'react'
 import { toast } from 'sonner'
-import { MapPin } from 'lucide-react'
+import { MapPin, Utensils } from 'lucide-react'
 import { CategoryBadge } from './CategoryBadge'
 import { ItemMenu } from './ItemMenu'
 import { RatingStars } from './RatingStars'
@@ -84,11 +84,12 @@ export function PlaceCard({ place, hideMenu, actionSlot }: PlaceCardProps) {
               {place.location}
             </span>
           )}
-          {place.meal_times?.map((m) => (
-            <span key={m} className={styles.mealBadge}>
-              {MEAL_LABELS[m]}
+          {place.meal_times && place.meal_times.length > 0 && (
+            <span className="inline-flex items-center gap-1 whitespace-nowrap">
+              <Utensils className="h-3 w-3 shrink-0" />
+              {place.meal_times.map((m) => MEAL_LABELS[m]).join(', ')}
             </span>
-          ))}
+          )}
         </div>
 
         {place.memo && (

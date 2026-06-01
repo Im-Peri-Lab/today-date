@@ -3,9 +3,8 @@
 import Link from 'next/link'
 import { Sparkles, MapPin } from 'lucide-react'
 import { Skeleton } from '@/components/ui/skeleton'
-import { HomeMenu } from '@/components/HomeMenu'
 import { HomeFab } from '@/components/HomeFab'
-import { MiniHeart } from '@/components/BrandMark'
+import { PageHeader } from '@/components/PageHeader'
 import { useDashboardStats } from '@/hooks/useDashboardStats'
 import { cn } from '@/lib/utils'
 import styles from '@/components/screens.module.css'
@@ -75,22 +74,8 @@ export function HomeDashboard() {
         'mx-auto w-full max-w-xl px-5 pb-16 pt-6 lg:max-w-3xl lg:px-8 lg:pb-24 lg:pt-12'
       )}
     >
-      {/* 헤더: 브랜드 + 미니멀 메뉴 */}
-      <header className="flex items-center justify-between">
-        <div className="flex items-center gap-2.5">
-          <MiniHeart />
-          <span className={cn(styles.brand, 'lg:text-lg')}>Today Date</span>
-        </div>
-        <HomeMenu />
-      </header>
-
-      {/* Hero */}
-      <div className="mt-8 lg:mt-10">
-        <h1 className={styles.pageTitle}>오늘, 우리 어떻게 보낼까?</h1>
-        <p className={styles.pageSubtitle}>
-          위시리스트에서 골라드릴게요 💜
-        </p>
-      </div>
+      {/* 헤더 + 제목/서브카피 (공용 PageHeader) */}
+      <PageHeader title="오늘, 우리 어떻게 보낼까?" subtitle="위시리스트에서 골라드릴게요 💜" />
 
       {/* 메인 CTA — 정사각 통통 카드 2열, 아이콘 상단 + 텍스트 하단 */}
       <div className="mt-8 grid grid-cols-2 gap-3 lg:mt-8 lg:gap-4">

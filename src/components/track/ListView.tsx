@@ -1,17 +1,15 @@
 'use client'
 
 import { useState } from 'react'
-import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
-import { Search, Filter, Home, X } from 'lucide-react'
+import { Search, Filter, X } from 'lucide-react'
 import { ActivityCard } from './ActivityCard'
 import { PlaceCard } from './PlaceCard'
 import { CategoryIcon } from './categoryIcon'
 import { EmptyState } from './EmptyState'
 import { CardGridSkeleton } from './CardGridSkeleton'
-import { MiniHeart } from '@/components/BrandMark'
-import { HomeMenu } from '@/components/HomeMenu'
 import { HomeFab } from '@/components/HomeFab'
+import { PageHeader } from '@/components/PageHeader'
 import { useActivities } from '@/hooks/useActivities'
 import { usePlaces } from '@/hooks/usePlaces'
 import { useActivityCategories, usePlaceCategories } from '@/hooks/useCategories'
@@ -225,26 +223,9 @@ export function ListView() {
   const placeFiltering = Boolean(debouncedSearch) || placeFilterCount > 0
 
   return (
-    <div className={cn(styles.listBottom, 'mx-auto w-full max-w-4xl px-5 pt-6 lg:px-8 lg:pt-10')}>
-      {/* 헤더: 브랜드(홈으로) + 미니멀 메뉴 — 홈과 동일 패턴 */}
-      <header className="flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2.5" aria-label="홈으로">
-          <MiniHeart />
-          <span className={cn(styles.brand, 'lg:text-lg')}>Today Date</span>
-        </Link>
-        <div className="flex items-center gap-1">
-          <Link href="/" className={styles.iconBtn} aria-label="홈으로">
-            <Home className="h-5 w-5" />
-          </Link>
-          <HomeMenu />
-        </div>
-      </header>
-
-      {/* 페이지 제목 — 홈과 공용 토큰(중간 톤) */}
-      <div className="mt-6 lg:mt-8">
-        <h1 className={styles.pageTitle}>우리의 위시리스트</h1>
-        <p className={styles.pageSubtitle}>함께 쌓아온 곳들</p>
-      </div>
+    <div className={cn(styles.listBottom, 'mx-auto w-full max-w-4xl px-5 pt-6 lg:px-8 lg:pt-12')}>
+      {/* 헤더 + 제목/서브카피 (공용 PageHeader — 홈과 동일 간격) */}
+      <PageHeader title="우리의 위시리스트" subtitle="함께 쌓아온 곳들" homeNav />
 
       {/* 탭 */}
       <div className={cn(styles.tabBar, 'mt-8')} role="tablist">

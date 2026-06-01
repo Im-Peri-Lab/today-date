@@ -240,17 +240,10 @@ export function ListView() {
         </div>
       </header>
 
-      {/* 페이지 제목 — 카드 제목보다 확실히 상위로 읽히게 (더 크고 무겁게) */}
+      {/* 페이지 제목 — 홈과 공용 토큰(중간 톤) */}
       <div className="mt-6 lg:mt-8">
-        <h1
-          className={cn(
-            'text-3xl font-bold leading-tight tracking-[-0.02em] lg:text-4xl',
-            styles.ink
-          )}
-        >
-          우리의 위시리스트
-        </h1>
-        <p className={cn('mt-1 text-sm lg:mt-1.5 lg:text-lg', styles.sub)}>함께 쌓아온 곳들</p>
+        <h1 className={styles.pageTitle}>우리의 위시리스트</h1>
+        <p className={styles.pageSubtitle}>함께 쌓아온 곳들</p>
       </div>
 
       {/* 탭 */}

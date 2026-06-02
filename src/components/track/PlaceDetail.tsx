@@ -157,7 +157,8 @@ export function PlaceDetail({ id }: { id: string }) {
               </>
             ) : (
               <Button
-                className="gap-1.5 bg-violet-600 hover:bg-violet-700 text-white"
+                className="gap-1.5 text-white hover:brightness-105"
+                style={{ background: 'var(--s-active-fill, linear-gradient(135deg,#a855f7 0%,#ec4899 100%))' }}
                 onClick={() => setVisitedOpen(true)}
               >
                 <CheckCircle2 className="h-4 w-4" />

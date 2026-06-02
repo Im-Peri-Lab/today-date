@@ -248,7 +248,9 @@
   border-radius: 9999px;
   padding: 0.0625rem 0.5rem;
   font-size: 11px;
-  background: var(--s-track, #f1ecfa);
+  /* 라이트: --s-track 미정의 → --s-card-border-strong(#eceaf3) 중성 폴백.
+     다크: --s-track: #1b1430 정상 동작. */
+  background: var(--s-track, var(--s-card-border-strong, #eceaf3));
   color: var(--s-sub, #6b7280);
 }
 
@@ -648,12 +650,14 @@
   padding: 0.125rem 0.5rem;
   font-size: 0.75rem;
   font-weight: 500;
-  background: var(--s-accent-soft-bg, #f6f1ff);
-  color: var(--s-accent-soft-text, #7c3aed);
+  /* 라이트: --s-accent-soft-bg 미정의 → --s-card-border-strong(#eceaf3) 중성 폴백.
+     다크: --s-accent-soft-bg: #2d2540 정상 동작. statCardAccent 폴백 별도 유지. */
+  background: var(--s-accent-soft-bg, var(--s-card-border-strong, #eceaf3));
+  color: var(--s-accent-soft-text, var(--s-sub, #6b7280));
 }
 .visitBox {
   border-radius: 0.875rem;
-  background: var(--s-accent-soft-bg, #f6f1ff);
+  background: var(--s-accent-soft-bg, var(--s-card-border-strong, #eceaf3));
 }
 
 /* 로딩 스켈레톤 바 */

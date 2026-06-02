@@ -512,6 +512,39 @@
 }
 
 /*
+ * 폼 선택형 옵션(소요시간/시간대 라디오) — 칩/세그먼트와 한 결.
+ * 활성은 외곽선형(라이트 보라 배경 금지): 활성 보더 + 중성 흰 면 + 활성 텍스트(단일 토큰).
+ * 라이트 폴백 내장 → 다크는 .page 토큰으로 자동 적응.
+ */
+.option {
+  flex: 1 1 0%;
+  cursor: pointer;
+  border-radius: 0.5rem;
+  border: 1px solid var(--s-card-border, #e3dcef);
+  background: var(--s-card-bg, #ffffff);
+  padding: 0.625rem 0.75rem;
+  text-align: center;
+  font-size: 0.875rem;
+  color: var(--s-sub, #6b7280);
+  transition:
+    border-color 140ms ease,
+    color 140ms ease,
+    box-shadow 140ms ease;
+}
+@media (hover: hover) {
+  .option:hover:not(.optionActive) {
+    border-color: var(--s-active-line, #c4b5fd);
+    color: var(--s-active-text, #7c3aed);
+  }
+}
+.optionActive {
+  border-color: var(--s-active-line, #7c3aed);
+  color: var(--s-active-text, #7c3aed);
+  font-weight: 500;
+  box-shadow: inset 0 0 0 1px var(--s-active-line, #7c3aed);
+}
+
+/*
  * 카드 카테고리 뱃지(분류 라벨) — 배경 pill 없이 아이콘 + 텍스트만 인라인.
  * 카테고리 구분은 아이콘 색으로만, 텍스트는 차분한 톤.
  */

@@ -75,7 +75,10 @@ export function ActivityForm({ activity }: { activity?: Activity }) {
       <Button
         type="submit"
         disabled={isSubmitting}
-        className="w-full bg-violet-600 hover:bg-violet-700 text-white"
+        className="w-full text-white hover:brightness-105"
+        style={{
+          background: 'var(--s-active-fill, linear-gradient(135deg,#a855f7 0%,#ec4899 100%))',
+        }}
       >
         {isSubmitting ? '저장 중...' : isEdit ? '수정 저장하기' : '활동 등록하기'}
       </Button>

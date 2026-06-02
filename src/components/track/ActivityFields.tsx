@@ -10,6 +10,8 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { CategorySelect } from '@/components/CategorySelect'
+import { cn } from '@/lib/utils'
+import styles from '@/components/screens.module.css'
 import type { ActivityFormValues } from '@/lib/schemas/activitySchema'
 
 const DURATION_OPTIONS = [
@@ -72,12 +74,7 @@ export function ActivityFields({ register, errors, watch, setValue }: ActivityFi
           {DURATION_OPTIONS.map((opt) => (
             <label
               key={opt.value}
-              className={[
-                'flex-1 cursor-pointer rounded-lg border px-3 py-2.5 text-sm text-center transition-colors',
-                durationValue === opt.value
-                  ? 'border-violet-500 bg-violet-50 text-violet-700 font-medium'
-                  : 'border-input text-muted-foreground hover:border-violet-300',
-              ].join(' ')}
+              className={cn(styles.option, durationValue === opt.value && styles.optionActive)}
             >
               <input
                 type="radio"
@@ -101,12 +98,7 @@ export function ActivityFields({ register, errors, watch, setValue }: ActivityFi
           {TIME_OPTIONS.map((opt) => (
             <label
               key={opt.value}
-              className={[
-                'flex-1 cursor-pointer rounded-lg border px-3 py-2.5 text-sm text-center transition-colors',
-                timeValue === opt.value
-                  ? 'border-violet-500 bg-violet-50 text-violet-700 font-medium'
-                  : 'border-input text-muted-foreground hover:border-violet-300',
-              ].join(' ')}
+              className={cn(styles.option, timeValue === opt.value && styles.optionActive)}
             >
               <input
                 type="radio"

@@ -36,7 +36,7 @@ export function CategorySelect({ track, value, onChange, disabled, error }: Cate
         disabled={disabled || loading}
         className={[
           'h-9 w-full rounded-lg border bg-transparent px-3 py-1 text-sm transition-colors outline-none',
-          'focus-visible:border-violet-500 focus-visible:ring-2 focus-visible:ring-violet-500/30',
+          'focus-visible:border-[var(--s-active-line,#7c3aed)] focus-visible:ring-2 focus-visible:ring-[var(--s-active-line,#7c3aed)]/30',
           'disabled:cursor-not-allowed disabled:opacity-50',
           error ? 'border-red-500' : 'border-input',
         ].join(' ')}

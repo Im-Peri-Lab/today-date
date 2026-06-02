@@ -666,6 +666,32 @@
   border-radius: 0.5rem;
 }
 
+/* ── 인라인 편집: 라디오 옵션 버튼 ────────────────── */
+.editRadioOption {
+  flex: 1;
+  cursor: pointer;
+  border-radius: 0.5rem;
+  border: 1px solid var(--s-card-border-strong, #eceaf3);
+  padding: 0.5rem 0.75rem;
+  text-align: center;
+  font-size: 0.875rem;
+  color: var(--s-sub, #6b7280);
+  background: var(--s-card-bg, #ffffff);
+  transition:
+    border-color 140ms ease,
+    color 140ms ease;
+}
+@media (hover: hover) {
+  .editRadioOption:hover {
+    border-color: var(--s-active-line, #7c3aed);
+  }
+}
+.editRadioOptionActive {
+  border-color: var(--s-active-line, #7c3aed);
+  color: var(--s-active-text, #7c3aed);
+  font-weight: 500;
+}
+
 /* ── 정의형 시트 행 (상세 화면 본문) ─────────────────
  * 카드 없이 라벨+내용을 세로로 나열. 행마다 얇은 상단 구분선.
  * 첫 행의 구분선은 제목과 시트 사이의 경계 역할을 하므로 예외 없이 동일 적용.

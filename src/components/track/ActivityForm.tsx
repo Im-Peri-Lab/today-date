@@ -3,34 +3,17 @@
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
 import { toast } from 'sonner'
-import { useQueryClient } from '@tanstack/react-query'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { CategorySelect } from '@/components/CategorySelect'
+import { useUpdateActivity } from '@/hooks/useActivities'
+import { activityFormSchema, type ActivityFormValues } from '@/lib/schemas/activitySchema'
 import type { Activity } from '@/types'
 
-const schema = z.object({
-  title: z.string().min(1, '제목을 입력해 주세요.').max(100, '제목은 100자 이하로 입력해 주세요.'),
-  category_id: z.string().optional(),
-  duration_bucket: z.enum(['half', 'full', 'overnight'], {
-    error: '소요시간을 선택해 주세요.',
-  }),
-  time_of_day: z.enum(['day', 'night', 'any']),
-  memo: z.string().max(1000, '메모는 1000자 이하로 입력해 주세요.').optional(),
-  reference_url: z
-    .string()
-    .optional()
-    .refine((v) => !v || v === '' || /^https?:\/\/.+/.test(v), {
-      message: '올바른 URL 형식이 아닙니다. (http:// 또는 https://로 시작)',
-    }),
-  added_by: z.string().optional(),
-})
-
-type FormValues = z.infer<typeof schema>
+type FormValues = ActivityFormValues
 
 const DURATION_OPTIONS = [
   { value: 'half', label: '반나절' },
@@ -46,7 +29,7 @@ const TIME_OPTIONS = [
 
 export function ActivityForm({ activity }: { activity?: Activity }) {
   const router = useRouter()
-  const queryClient = useQueryClient()
+  const update = useUpdateActivity()
   const isEdit = !!activity
   const {
     register,
@@ -55,7 +38,7 @@ export function ActivityForm({ activity }: { activity?: Activity }) {
     watch,
     formState: { errors, isSubmitting },
   } = useForm<FormValues>({
-    resolver: zodResolver(schema),
+    resolver: zodResolver(activityFormSchema),
     defaultValues: activity
       ? {
           title: activity.title,
@@ -81,24 +64,27 @@ export function ActivityForm({ activity }: { activity?: Activity }) {
       added_by: values.added_by || null,
     }
 
-    const res = await fetch(isEdit ? `/api/activities/${activity!.id}` : '/api/activities', {
-      method: isEdit ? 'PATCH' : 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    })
-
-    const json = await res.json()
-    if (!res.ok) {
-      toast.error(json.error ?? '저장 중 오류가 발생했습니다.')
-      return
-    }
-
     if (isEdit) {
-      queryClient.invalidateQueries({ queryKey: ['activities'] })
-      queryClient.invalidateQueries({ queryKey: ['activity', activity!.id] })
-      toast.success('수정되었습니다! ✏️')
-      router.push(`/activities/${activity!.id}`)
+      // 수정: useUpdateActivity 훅 사용 (캐시 무효화는 훅 내부에서 처리)
+      try {
+        await update.mutateAsync({ id: activity!.id, patch: payload })
+        toast.success('수정되었습니다! ✏️')
+        router.push(`/activities/${activity!.id}`)
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : '저장 중 오류가 발생했습니다.')
+      }
     } else {
+      // 신규 생성: 기존 fetch 방식 유지
+      const res = await fetch('/api/activities', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+      const json = await res.json()
+      if (!res.ok) {
+        toast.error(json.error ?? '저장 중 오류가 발생했습니다.')
+        return
+      }
       toast.success('활동이 등록되었습니다! 🎉')
       router.push('/list')
     }

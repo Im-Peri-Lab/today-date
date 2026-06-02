@@ -27,6 +27,22 @@ description: >
 
 ---
 
+## 적용 현황 (이 기준이 어디까지 반영됐나)
+
+이 문서의 기준값은 **이미 반영된 화면(홈·`/list`)에서 추출**한 것이다. 아래 미반영 화면을 옮길 때 이 문서를 그대로 복붙 레퍼런스로 쓴다.
+
+| 화면 | 상태 | 비고 |
+|---|---|---|
+| `/` (홈) | ✅ 기준 반영 | `styles.page` + `PageHeader` + `--s-*` 토큰 |
+| `/list` (목록) | ✅ 기준 반영 | 기준의 레퍼런스 구현 (`ListView`) |
+| `/activities/[id]`, `/places/[id]` (상세) | ◐ 래퍼만 반영 | `<main className={styles.page}>`로 전환됨. 안쪽 카드/컨트롤 디테일은 점검 필요 |
+| `/activities/[id]/edit` (수정) | ❌ 미반영 | 옛 `bg-gradient-to-br from-violet-50 to-purple-100` 사용 → 금지 규칙 위반 |
+| `/recommend/activity`, `/recommend/place` (추천) | ❌ 미반영 | 동일하게 옛 보라 그라데이션 사용 |
+
+미반영 화면 마이그레이션 순서: ① `<main>` 래퍼를 `styles.page`(또는 `cn(styles.page, styles.pageStatic)`)로 교체 → ② 보라 그라데이션 배경 제거 → ③ 카드/컨트롤/헤더를 아래 1~9 섹션 클래스로 치환.
+
+---
+
 ## 1. 배경색 (페이지 / 카드 / 컨트롤)
 
 왜: 흰·검은 여백 노출을 막고(전역 배경), 라이트는 보라색기 없는 중성, 다크는 보라/핑크 코너 글로우로 무드를 준다.

@@ -667,14 +667,10 @@
 }
 
 /* ── 정의형 시트 행 (상세 화면 본문) ─────────────────
- * 카드 없이 라벨+내용을 세로로 나열. 행 사이 얇은 구분선.
- * :first-child 에서만 상단 보더 제거(헤더 카드와의 경계 확보).
+ * 카드 없이 라벨+내용을 세로로 나열. 행마다 얇은 상단 구분선.
+ * 첫 행의 구분선은 제목과 시트 사이의 경계 역할을 하므로 예외 없이 동일 적용.
  */
 .sheetRow {
   padding: 1rem 0;
   border-top: 1px solid var(--s-divider, rgba(0, 0, 0, 0.06));
-}
-.sheetRow:first-child {
-  border-top: none;
-  padding-top: 0.25rem;
 }

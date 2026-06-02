@@ -60,7 +60,7 @@ export function ActivityCard({ activity, hideMenu, actionSlot }: ActivityCardPro
         >
           <ItemMenu
             status={activity.status}
-            onEdit={() => router.push(`/activities/${activity.id}/edit`)}
+            onEdit={() => router.push(`/activities/${activity.id}?mode=edit`)}
             onDelete={() => setDeleteOpen(true)}
             onMarkVisited={() => setVisitedOpen(true)}
             onRevert={handleRevert}

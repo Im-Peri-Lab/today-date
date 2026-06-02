@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
@@ -17,9 +17,6 @@ import {
   Undo2,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
-import { Label } from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
 import {
   Dialog,
@@ -31,29 +28,22 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { CategoryBadge } from './CategoryBadge'
+import { ActivityFields } from './ActivityFields'
 import { RatingStars } from './RatingStars'
 import { DeleteConfirmDialog } from './DeleteConfirmDialog'
 import { VisitedDialog } from '@/components/VisitedDialog'
-import { CategorySelect } from '@/components/CategorySelect'
 import { useActivity, useDeleteActivity, useUpdateActivity } from '@/hooks/useActivities'
 import { activityFormSchema, type ActivityFormValues } from '@/lib/schemas/activitySchema'
 import { DURATION_LABELS, TIME_OF_DAY_LABELS } from '@/lib/labels'
 import { cn } from '@/lib/utils'
 import styles from '@/components/screens.module.css'
 
-const DURATION_OPTIONS = [
-  { value: 'half' as const, label: '반나절' },
-  { value: 'full' as const, label: '하루' },
-  { value: 'overnight' as const, label: '1박 이상' },
-]
+interface Props {
+  id: string
+  initialMode?: 'view' | 'edit'
+}
 
-const TIME_OPTIONS = [
-  { value: 'day' as const, label: '주간' },
-  { value: 'night' as const, label: '야간' },
-  { value: 'any' as const, label: '상관없음' },
-]
-
-export function ActivityDetail({ id }: { id: string }) {
+export function ActivityDetail({ id, initialMode = 'view' }: Props) {
   const router = useRouter()
   const { data: activity, isLoading, isError } = useActivity(id)
   const del = useDeleteActivity()
@@ -76,9 +66,22 @@ export function ActivityDetail({ id }: { id: string }) {
     defaultValues: { title: '', time_of_day: 'any', memo: '', reference_url: '', category_id: '' },
   })
 
-  const durationValue = watch('duration_bucket')
-  const timeValue = watch('time_of_day')
-  const categoryValue = watch('category_id') ?? ''
+  // initialMode='edit'일 때 activity가 로드되면 폼을 초기화하고 편집 모드로 진입
+  const didInitEdit = useRef(false)
+  useEffect(() => {
+    if (didInitEdit.current || !activity || initialMode !== 'edit') return
+    didInitEdit.current = true
+    reset({
+      title: activity.title,
+      category_id: activity.category_id ?? '',
+      duration_bucket: activity.duration_bucket ?? undefined,
+      time_of_day: activity.time_of_day,
+      memo: activity.memo ?? '',
+      reference_url: activity.reference_url ?? '',
+    })
+    setMode('edit')
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activity?.id, initialMode])
 
   /* ── 핸들러 ── */
 
@@ -112,8 +115,12 @@ export function ActivityDetail({ id }: { id: string }) {
     setMode('edit')
   }
 
-  function handleCancel() {
+  function exitEditMode() {
     setMode('view')
+    // URL에서 ?mode=edit 제거 (재내비게이션 없이 히스토리만 교체)
+    if (typeof window !== 'undefined') {
+      window.history.replaceState(null, '', `/activities/${id}`)
+    }
   }
 
   const onSave = handleSubmit(async (values) => {
@@ -128,7 +135,7 @@ export function ActivityDetail({ id }: { id: string }) {
     try {
       await update.mutateAsync({ id: activity.id, patch: payload })
       toast.success('수정되었습니다!')
-      setMode('view')
+      exitEditMode()
     } catch (err) {
       toast.error(err instanceof Error ? err.message : '저장 중 오류가 발생했습니다.')
     }
@@ -246,7 +253,7 @@ export function ActivityDetail({ id }: { id: string }) {
               </div>
             )}
 
-            {/* 편집 모드 — 인라인 폼 */}
+            {/* 편집 모드 — ActivityFields 공유 컴포넌트 */}
             {mode === 'edit' && (
               <form
                 onSubmit={onSave}
@@ -255,123 +262,12 @@ export function ActivityDetail({ id }: { id: string }) {
                   'border-[var(--s-divider,rgba(0,0,0,0.06))]'
                 )}
               >
-                {/* 제목 */}
-                <div className="space-y-1.5">
-                  <Label htmlFor="title" className={cn('text-xs font-medium uppercase tracking-wide', styles.sub)}>
-                    제목 <span className="text-destructive">*</span>
-                  </Label>
-                  <Input
-                    id="title"
-                    placeholder="활동 이름을 입력해 주세요"
-                    {...register('title')}
-                    aria-invalid={!!errors.title}
-                  />
-                  {errors.title && (
-                    <p className="text-xs text-destructive">{errors.title.message}</p>
-                  )}
-                </div>
-
-                {/* 카테고리 */}
-                <div className="space-y-1.5">
-                  <Label className={cn('text-xs font-medium uppercase tracking-wide', styles.sub)}>
-                    카테고리
-                  </Label>
-                  <CategorySelect
-                    track="activity"
-                    value={categoryValue}
-                    onChange={(v) => setValue('category_id', v)}
-                    error={errors.category_id?.message}
-                  />
-                </div>
-
-                {/* 소요시간 */}
-                <div className="space-y-2">
-                  <Label className={cn('text-xs font-medium uppercase tracking-wide', styles.sub)}>
-                    소요시간 <span className="text-destructive">*</span>
-                  </Label>
-                  <div className="flex gap-2">
-                    {DURATION_OPTIONS.map((opt) => (
-                      <label
-                        key={opt.value}
-                        className={cn(
-                          styles.editRadioOption,
-                          durationValue === opt.value && styles.editRadioOptionActive
-                        )}
-                      >
-                        <input
-                          type="radio"
-                          value={opt.value}
-                          {...register('duration_bucket')}
-                          className="sr-only"
-                        />
-                        {opt.label}
-                      </label>
-                    ))}
-                  </div>
-                  {errors.duration_bucket && (
-                    <p className="text-xs text-destructive">{errors.duration_bucket.message}</p>
-                  )}
-                </div>
-
-                {/* 시간대 */}
-                <div className="space-y-2">
-                  <Label className={cn('text-xs font-medium uppercase tracking-wide', styles.sub)}>
-                    시간대
-                  </Label>
-                  <div className="flex gap-2">
-                    {TIME_OPTIONS.map((opt) => (
-                      <label
-                        key={opt.value}
-                        className={cn(
-                          styles.editRadioOption,
-                          timeValue === opt.value && styles.editRadioOptionActive
-                        )}
-                      >
-                        <input
-                          type="radio"
-                          value={opt.value}
-                          {...register('time_of_day')}
-                          className="sr-only"
-                        />
-                        {opt.label}
-                      </label>
-                    ))}
-                  </div>
-                </div>
-
-                {/* 메모 */}
-                <div className="space-y-1.5">
-                  <Label htmlFor="memo" className={cn('text-xs font-medium uppercase tracking-wide', styles.sub)}>
-                    메모
-                  </Label>
-                  <Textarea
-                    id="memo"
-                    placeholder="활동에 대한 메모를 남겨보세요"
-                    rows={3}
-                    {...register('memo')}
-                    aria-invalid={!!errors.memo}
-                  />
-                  {errors.memo && (
-                    <p className="text-xs text-destructive">{errors.memo.message}</p>
-                  )}
-                </div>
-
-                {/* 참고 링크 */}
-                <div className="space-y-1.5">
-                  <Label htmlFor="reference_url" className={cn('text-xs font-medium uppercase tracking-wide', styles.sub)}>
-                    참고 링크
-                  </Label>
-                  <Input
-                    id="reference_url"
-                    type="url"
-                    placeholder="https://..."
-                    {...register('reference_url')}
-                    aria-invalid={!!errors.reference_url}
-                  />
-                  {errors.reference_url && (
-                    <p className="text-xs text-destructive">{errors.reference_url.message}</p>
-                  )}
-                </div>
+                <ActivityFields
+                  register={register}
+                  errors={errors}
+                  watch={watch}
+                  setValue={setValue}
+                />
 
                 {/* 저장 / 취소 */}
                 <div className="flex gap-2">
@@ -390,7 +286,7 @@ export function ActivityDetail({ id }: { id: string }) {
                     type="button"
                     variant="outline"
                     disabled={isSubmitting}
-                    onClick={handleCancel}
+                    onClick={exitEditMode}
                   >
                     취소
                   </Button>
@@ -450,18 +346,10 @@ export function ActivityDetail({ id }: { id: string }) {
             </div>
           )}
 
-          {/* ── 하단 액션 버튼 ── */}
-          <div className="mt-6 flex flex-wrap gap-2">
-            {activity.status === 'visited' ? (
-              <>
-                <Button
-                  variant="outline"
-                  className="gap-1.5"
-                  onClick={() => setVisitedOpen(true)}
-                >
-                  <Pencil className="h-4 w-4" />
-                  기록 수정
-                </Button>
+          {/* ── 하단 액션 버튼 — 편집 모드에서는 숨김 ── */}
+          {mode === 'view' && (
+            <div className="mt-6 flex flex-wrap gap-2">
+              {activity.status === 'visited' ? (
                 <Button
                   variant="outline"
                   className="gap-1.5"
@@ -470,29 +358,29 @@ export function ActivityDetail({ id }: { id: string }) {
                   <Undo2 className="h-4 w-4" />
                   위시리스트로 되돌리기
                 </Button>
-              </>
-            ) : (
+              ) : (
+                <Button
+                  className="gap-1.5 text-white hover:brightness-105"
+                  style={{
+                    background:
+                      'var(--s-active-fill, linear-gradient(135deg,#a855f7 0%,#ec4899 100%))',
+                  }}
+                  onClick={() => setVisitedOpen(true)}
+                >
+                  <CheckCircle2 className="h-4 w-4" />
+                  다녀왔어요
+                </Button>
+              )}
               <Button
-                className="gap-1.5 text-white hover:brightness-105"
-                style={{
-                  background:
-                    'var(--s-active-fill, linear-gradient(135deg,#a855f7 0%,#ec4899 100%))',
-                }}
-                onClick={() => setVisitedOpen(true)}
+                variant="destructive"
+                className="gap-1.5"
+                onClick={() => setDeleteOpen(true)}
               >
-                <CheckCircle2 className="h-4 w-4" />
-                다녀왔어요
+                <Trash2 className="h-4 w-4" />
+                삭제
               </Button>
-            )}
-            <Button
-              variant="destructive"
-              className="gap-1.5"
-              onClick={() => setDeleteOpen(true)}
-            >
-              <Trash2 className="h-4 w-4" />
-              삭제
-            </Button>
-          </div>
+            </div>
+          )}
 
           {/* ── 다이얼로그 ── */}
           <DeleteConfirmDialog

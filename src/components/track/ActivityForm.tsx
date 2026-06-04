@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
-import { Button } from '@/components/ui/button'
+import { FormLayout } from '@/components/forms/FormLayout'
 import { ActivityFields } from './ActivityFields'
 import { useUpdateActivity } from '@/hooks/useActivities'
 import { activityFormSchema, type ActivityFormValues } from '@/lib/schemas/activitySchema'
@@ -44,7 +44,6 @@ export function ActivityForm({ activity }: { activity?: Activity }) {
     }
 
     if (isEdit) {
-      // 수정: useUpdateActivity 훅 사용 (캐시 무효화는 훅 내부에서 처리)
       try {
         await update.mutateAsync({ id: activity!.id, patch: payload })
         toast.success('수정되었습니다! ✏️')
@@ -53,7 +52,6 @@ export function ActivityForm({ activity }: { activity?: Activity }) {
         toast.error(err instanceof Error ? err.message : '저장 중 오류가 발생했습니다.')
       }
     } else {
-      // 신규 생성: 기존 fetch 방식 유지
       const res = await fetch('/api/activities', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -70,18 +68,12 @@ export function ActivityForm({ activity }: { activity?: Activity }) {
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+    <FormLayout
+      onSubmit={handleSubmit(onSubmit)}
+      isSubmitting={isSubmitting}
+      submitLabel={isEdit ? '수정 저장하기' : '활동 등록하기'}
+    >
       <ActivityFields register={register} errors={errors} watch={watch} setValue={setValue} />
-      <Button
-        type="submit"
-        disabled={isSubmitting}
-        className="w-full text-white hover:brightness-105"
-        style={{
-          background: 'var(--s-active-fill, linear-gradient(135deg,#a855f7 0%,#ec4899 100%))',
-        }}
-      >
-        {isSubmitting ? '저장 중...' : isEdit ? '수정 저장하기' : '활동 등록하기'}
-      </Button>
-    </form>
+    </FormLayout>
   )
 }

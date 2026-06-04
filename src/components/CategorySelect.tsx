@@ -1,7 +1,10 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { ActivityCategory, PlaceCategory } from '@/types'
+import { cn } from '@/lib/utils'
+import { getCategoryIcon } from '@/components/forms/categoryIcons'
+import styles from '@/components/screens.module.css'
+import type { ActivityCategory, PlaceCategory } from '@/types'
 
 type Category = ActivityCategory | PlaceCategory
 
@@ -28,26 +31,43 @@ export function CategorySelect({ track, value, onChange, disabled, error }: Cate
       .finally(() => setLoading(false))
   }, [track])
 
-  return (
-    <div className="flex flex-col gap-1">
-      <select
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        disabled={disabled || loading}
-        className={[
-          'h-9 w-full rounded-lg border bg-transparent px-3 py-1 text-sm transition-colors outline-none',
-          'focus-visible:border-[var(--s-active-line,#7c3aed)] focus-visible:ring-2 focus-visible:ring-[var(--s-active-line,#7c3aed)]/30',
-          'disabled:cursor-not-allowed disabled:opacity-50',
-          error ? 'border-red-500' : 'border-input',
-        ].join(' ')}
-      >
-        <option value="">카테고리 선택 (선택사항)</option>
-        {categories.map((cat) => (
-          <option key={cat.id} value={cat.id}>
-            {cat.icon} {cat.name}
-          </option>
+  if (loading) {
+    return (
+      <div className="flex flex-wrap gap-2">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div
+            key={i}
+            className={cn(styles.skelBar, 'h-8 w-16 animate-pulse rounded-full')}
+          />
         ))}
-      </select>
+      </div>
+    )
+  }
+
+  return (
+    <div className="flex flex-col gap-1.5">
+      <div className="flex flex-wrap gap-2">
+        {categories.map((cat) => {
+          const Icon = getCategoryIcon(track, cat.name)
+          const active = value === cat.id
+          return (
+            <button
+              key={cat.id}
+              type="button"
+              disabled={disabled}
+              onClick={() => onChange(active ? '' : cat.id)}
+              className={cn(
+                styles.chip,
+                active && styles.chipActive,
+                'disabled:cursor-not-allowed disabled:opacity-50'
+              )}
+            >
+              <Icon className={cn('h-3.5 w-3.5', styles.catIcon)} />
+              {cat.name}
+            </button>
+          )
+        })}
+      </div>
       {error && <p className="text-xs text-red-500">{error}</p>}
     </div>
   )

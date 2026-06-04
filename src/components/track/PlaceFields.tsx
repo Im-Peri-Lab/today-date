@@ -11,38 +11,31 @@ import { Textarea } from '@/components/ui/textarea'
 import { FormField } from '@/components/forms/FormField'
 import { SegmentedControl } from '@/components/forms/SegmentedControl'
 import { CategorySelect } from '@/components/CategorySelect'
-import type { ActivityFormValues } from '@/lib/schemas/activitySchema'
+import type { PlaceFormValues } from '@/lib/schemas/placeSchema'
+import type { MealTime } from '@/types'
 
-const DURATION_OPTIONS = [
-  { value: 'half' as const, label: '반나절' },
-  { value: 'full' as const, label: '하루' },
-  { value: 'overnight' as const, label: '1박 이상' },
+const MEAL_OPTIONS = [
+  { value: 'lunch' as MealTime, label: '점심' },
+  { value: 'dinner' as MealTime, label: '저녁' },
 ]
 
-const TIME_OPTIONS = [
-  { value: 'day' as const, label: '주간' },
-  { value: 'night' as const, label: '야간' },
-  { value: 'any' as const, label: '상관없음' },
-]
-
-interface ActivityFieldsProps {
-  register: UseFormRegister<ActivityFormValues>
-  errors: FieldErrors<ActivityFormValues>
-  watch: UseFormWatch<ActivityFormValues>
-  setValue: UseFormSetValue<ActivityFormValues>
+interface PlaceFieldsProps {
+  register: UseFormRegister<PlaceFormValues>
+  errors: FieldErrors<PlaceFormValues>
+  watch: UseFormWatch<PlaceFormValues>
+  setValue: UseFormSetValue<PlaceFormValues>
 }
 
-export function ActivityFields({ register, errors, watch, setValue }: ActivityFieldsProps) {
-  const durationValue = watch('duration_bucket')
-  const timeValue = watch('time_of_day')
+export function PlaceFields({ register, errors, watch, setValue }: PlaceFieldsProps) {
   const categoryValue = watch('category_id') ?? ''
+  const mealTimesValue = watch('meal_times') ?? []
 
   return (
     <>
       <FormField label="제목" htmlFor="title" required error={errors.title?.message}>
         <Input
           id="title"
-          placeholder="활동 이름을 입력해 주세요"
+          placeholder="장소 이름을 입력해 주세요"
           {...register('title')}
           aria-invalid={!!errors.title}
         />
@@ -50,34 +43,34 @@ export function ActivityFields({ register, errors, watch, setValue }: ActivityFi
 
       <FormField label="카테고리" error={errors.category_id?.message}>
         <CategorySelect
-          track="activity"
+          track="place"
           value={categoryValue}
           onChange={(v) => setValue('category_id', v)}
         />
       </FormField>
 
-      <FormField label="소요시간" required error={errors.duration_bucket?.message}>
-        <SegmentedControl
-          mode="single"
-          options={DURATION_OPTIONS}
-          value={durationValue}
-          onChange={(v) => setValue('duration_bucket', v, { shouldValidate: true })}
+      <FormField label="위치" htmlFor="location" required error={errors.location?.message}>
+        <Input
+          id="location"
+          placeholder="예: 서울 성수동, 홍대 근처"
+          {...register('location')}
+          aria-invalid={!!errors.location}
         />
       </FormField>
 
-      <FormField label="시간대" error={errors.time_of_day?.message}>
+      <FormField label="식사 시간" required error={errors.meal_times?.message as string | undefined}>
         <SegmentedControl
-          mode="single"
-          options={TIME_OPTIONS}
-          value={timeValue}
-          onChange={(v) => setValue('time_of_day', v, { shouldValidate: true })}
+          mode="multi"
+          options={MEAL_OPTIONS}
+          value={mealTimesValue as MealTime[]}
+          onChange={(v) => setValue('meal_times', v as MealTime[], { shouldValidate: true })}
         />
       </FormField>
 
       <FormField label="메모" htmlFor="memo" error={errors.memo?.message}>
         <Textarea
           id="memo"
-          placeholder="활동에 대한 메모를 남겨보세요"
+          placeholder="장소에 대한 메모를 남겨보세요"
           rows={3}
           {...register('memo')}
           aria-invalid={!!errors.memo}

@@ -8,11 +8,9 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
 import {
   ArrowLeft,
-  Pencil,
   Trash2,
   CheckCircle2,
   ExternalLink,
-  Calendar,
   User,
   Undo2,
 } from 'lucide-react'
@@ -29,7 +27,9 @@ import {
 } from '@/components/ui/dialog'
 import { CategoryBadge } from './CategoryBadge'
 import { ActivityFields } from './ActivityFields'
-import { RatingStars } from './RatingStars'
+import { DetailBlock } from './DetailBlock'
+import { DetailRow } from './DetailRow'
+import { VisitRecordBlock } from './VisitRecordBlock'
 import { DeleteConfirmDialog } from './DeleteConfirmDialog'
 import { VisitedDialog } from '@/components/VisitedDialog'
 import { useActivity, useDeleteActivity, useUpdateActivity } from '@/hooks/useActivities'
@@ -49,7 +49,7 @@ export function ActivityDetail({ id, initialMode = 'view' }: Props) {
   const del = useDeleteActivity()
   const update = useUpdateActivity()
 
-  const [mode, setMode] = useState<'view' | 'edit'>('view')
+  const [editingInfo, setEditingInfo] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [visitedOpen, setVisitedOpen] = useState(false)
   const [revertOpen, setRevertOpen] = useState(false)
@@ -66,43 +66,7 @@ export function ActivityDetail({ id, initialMode = 'view' }: Props) {
     defaultValues: { title: '', time_of_day: 'any', memo: '', reference_url: '', category_id: '' },
   })
 
-  // initialMode='edit'일 때 activity가 로드되면 폼을 초기화하고 편집 모드로 진입
-  const didInitEdit = useRef(false)
-  useEffect(() => {
-    if (didInitEdit.current || !activity || initialMode !== 'edit') return
-    didInitEdit.current = true
-    reset({
-      title: activity.title,
-      category_id: activity.category_id ?? '',
-      duration_bucket: activity.duration_bucket ?? undefined,
-      time_of_day: activity.time_of_day,
-      memo: activity.memo ?? '',
-      reference_url: activity.reference_url ?? '',
-    })
-    setMode('edit')
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activity?.id, initialMode])
-
-  /* ── 핸들러 ── */
-
-  function handleDelete() {
-    del.mutate(id, {
-      onSuccess: () => { toast.success('삭제했어요'); router.push('/list') },
-      onError: () => toast.error('삭제 중 오류가 발생했습니다.'),
-    })
-  }
-
-  function handleRevert() {
-    update.mutate(
-      { id, patch: { status: 'wishlist', visited_at: null, rating: null, review_note: null } },
-      {
-        onSuccess: () => { setRevertOpen(false); toast.success('위시리스트로 옮겼어요') },
-        onError: () => toast.error('변경 중 오류가 발생했습니다.'),
-      }
-    )
-  }
-
-  function handleStartEdit() {
+  function fillForm() {
     if (!activity) return
     reset({
       title: activity.title,
@@ -112,18 +76,57 @@ export function ActivityDetail({ id, initialMode = 'view' }: Props) {
       memo: activity.memo ?? '',
       reference_url: activity.reference_url ?? '',
     })
-    setMode('edit')
   }
 
-  function exitEditMode() {
-    setMode('view')
+  // initialMode='edit'(?mode=edit)일 때 activity 로드 후 등록 정보 블록을 편집 모드로 연다.
+  const didInitEdit = useRef(false)
+  useEffect(() => {
+    if (didInitEdit.current || !activity || initialMode !== 'edit') return
+    didInitEdit.current = true
+    fillForm()
+    setEditingInfo(true)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activity?.id, initialMode])
+
+  /* ── 핸들러 ── */
+
+  function handleDelete() {
+    del.mutate(id, {
+      onSuccess: () => {
+        toast.success('삭제했어요')
+        router.push('/list')
+      },
+      onError: () => toast.error('삭제 중 오류가 발생했습니다.'),
+    })
+  }
+
+  function handleRevert() {
+    update.mutate(
+      { id, patch: { status: 'wishlist', visited_at: null, rating: null, review_note: null } },
+      {
+        onSuccess: () => {
+          setRevertOpen(false)
+          toast.success('위시리스트로 옮겼어요')
+        },
+        onError: () => toast.error('변경 중 오류가 발생했습니다.'),
+      }
+    )
+  }
+
+  function startEditInfo() {
+    fillForm()
+    setEditingInfo(true)
+  }
+
+  function exitEditInfo() {
+    setEditingInfo(false)
     // URL에서 ?mode=edit 제거 (재내비게이션 없이 히스토리만 교체)
     if (typeof window !== 'undefined') {
       window.history.replaceState(null, '', `/activities/${id}`)
     }
   }
 
-  const onSave = handleSubmit(async (values) => {
+  const onSaveInfo = handleSubmit(async (values) => {
     if (!activity) return
     const payload = {
       ...values,
@@ -135,226 +138,138 @@ export function ActivityDetail({ id, initialMode = 'view' }: Props) {
     try {
       await update.mutateAsync({ id: activity.id, patch: payload })
       toast.success('수정되었습니다!')
-      exitEditMode()
+      exitEditInfo()
     } catch (err) {
       toast.error(err instanceof Error ? err.message : '저장 중 오류가 발생했습니다.')
     }
   })
 
-  const labelCls = cn('mb-1.5 text-xs font-medium uppercase tracking-wide', styles.sub)
-
   /* ── 렌더 ── */
 
   return (
     <div className="mx-auto w-full max-w-lg px-5 pb-16 pt-6 lg:pt-10">
-      {/* 백링크 */}
       <Link href="/list" className={styles.backLink}>
         <ArrowLeft className="h-4 w-4" />
         목록으로
       </Link>
 
-      {/* 로딩 */}
       {isLoading ? (
-        <div className="mt-4">
-          <Skeleton className="h-4 w-20" />
-          <Skeleton className="mt-2 h-8 w-3/4" />
-          <div className="mt-5 space-y-px">
-            {([56, 14, 56, 14] as number[]).map((h, i) => (
-              <div key={i} className="border-t border-[var(--s-divider,rgba(0,0,0,0.06))] py-4">
-                <Skeleton className="mb-2 h-2.5 w-12" />
-                <Skeleton style={{ height: `${h}px` }} className="w-full" />
-              </div>
-            ))}
-          </div>
+        <div className="mt-4 space-y-4">
+          <Skeleton className="h-7 w-3/4" />
+          <Skeleton className={cn(styles.card, 'h-40 w-full')} />
+          <Skeleton className={cn(styles.card, 'h-28 w-full')} />
         </div>
       ) : isError || !activity ? (
         <div className={cn(styles.empty, 'mt-4', styles.sub)}>활동을 찾을 수 없어요.</div>
       ) : (
         <>
-          {/* ══════════════════════════════════
-              기본 정보 영역
-          ══════════════════════════════════ */}
-          <section className="mt-4">
-
-            {/* 제목 행 + 수정 버튼 */}
-            <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0 flex-1">
-                <div className="flex flex-wrap items-center gap-2">
-                  {activity.category && <CategoryBadge category={activity.category} />}
-                  {activity.status === 'visited' && (
-                    <span className={styles.visitedTag}>다녀온 곳</span>
-                  )}
-                </div>
-                {mode === 'view' && (
-                  <h1 className={cn('mt-2', styles.pageTitle)}>{activity.title}</h1>
+          {/* 제목 영역 — 편집 중에는 폼 안에 제목 입력이 있으므로 숨김 */}
+          {!editingInfo && (
+            <div className="mt-4">
+              <div className="flex flex-wrap items-center gap-2">
+                {activity.category && <CategoryBadge category={activity.category} />}
+                {activity.status === 'visited' && (
+                  <span className={styles.visitedTag}>다녀온 곳</span>
                 )}
               </div>
-              {mode === 'view' && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="mt-1 shrink-0 gap-1.5"
-                  onClick={handleStartEdit}
-                >
-                  <Pencil className="h-3.5 w-3.5" />
-                  수정
-                </Button>
-              )}
+              <h1 className={cn('mt-2', styles.pageTitle)}>{activity.title}</h1>
             </div>
+          )}
 
-            {/* 보기 모드 — 정의형 시트 */}
-            {mode === 'view' && (
-              <div className="mt-3">
-                {activity.duration_bucket && (
-                  <div className={styles.sheetRow}>
-                    <p className={labelCls}>소요시간</p>
-                    <p className={cn('text-sm', styles.ink)}>
-                      {DURATION_LABELS[activity.duration_bucket]}
-                    </p>
-                  </div>
-                )}
-                {activity.time_of_day && activity.time_of_day !== 'any' && (
-                  <div className={styles.sheetRow}>
-                    <p className={labelCls}>시간대</p>
-                    <p className={cn('text-sm', styles.ink)}>
-                      {TIME_OF_DAY_LABELS[activity.time_of_day]}
-                    </p>
-                  </div>
-                )}
-                <div className={styles.sheetRow}>
-                  <p className={labelCls}>메모</p>
-                  {activity.memo ? (
-                    <p className={cn('whitespace-pre-wrap text-sm leading-relaxed', styles.ink)}>
-                      {activity.memo}
-                    </p>
-                  ) : (
-                    <p className={cn('text-sm', styles.faint)}>아직 메모가 없어요</p>
-                  )}
-                </div>
-                <div className={styles.sheetRow}>
-                  <p className={labelCls}>참고 링크</p>
-                  {activity.reference_url ? (
-                    <a
-                      href={activity.reference_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={cn(
-                        'inline-flex items-center gap-1.5 text-sm hover:underline',
-                        styles.accent
-                      )}
-                    >
-                      <ExternalLink className="h-3.5 w-3.5 shrink-0" />
-                      참고 링크 열기
-                    </a>
-                  ) : (
-                    <p className={cn('text-sm', styles.faint)}>참고 링크가 없어요</p>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* 편집 모드 — ActivityFields 공유 컴포넌트 */}
-            {mode === 'edit' && (
-              <form
-                onSubmit={onSave}
-                className={cn(
-                  'mt-4 space-y-5 border-t pt-5',
-                  'border-[var(--s-divider,rgba(0,0,0,0.06))]'
-                )}
-              >
+          <div className="mt-5 space-y-4">
+            {/* ── 등록 정보 블록 ── */}
+            <DetailBlock
+              title="등록 정보"
+              editing={editingInfo}
+              onEdit={startEditInfo}
+              onCancel={exitEditInfo}
+              onSave={onSaveInfo}
+              saving={isSubmitting || update.isPending}
+            >
+              {editingInfo ? (
                 <ActivityFields
                   register={register}
                   errors={errors}
                   watch={watch}
                   setValue={setValue}
                 />
-
-                {/* 저장 / 취소 */}
-                <div className="flex gap-2">
-                  <Button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="gap-1.5 text-white hover:brightness-105"
-                    style={{
-                      background:
-                        'var(--s-active-fill, linear-gradient(135deg,#a855f7 0%,#ec4899 100%))',
-                    }}
-                  >
-                    {isSubmitting ? '저장 중...' : '저장'}
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    disabled={isSubmitting}
-                    onClick={exitEditMode}
-                  >
-                    취소
-                  </Button>
+              ) : (
+                <div>
+                  {activity.duration_bucket && (
+                    <DetailRow label="소요시간">
+                      {DURATION_LABELS[activity.duration_bucket]}
+                    </DetailRow>
+                  )}
+                  {activity.time_of_day && activity.time_of_day !== 'any' && (
+                    <DetailRow label="시간대">
+                      {TIME_OF_DAY_LABELS[activity.time_of_day]}
+                    </DetailRow>
+                  )}
+                  <DetailRow label="메모">
+                    {activity.memo ? (
+                      <p className="whitespace-pre-wrap leading-relaxed">{activity.memo}</p>
+                    ) : (
+                      <span className={styles.faint}>아직 메모가 없어요</span>
+                    )}
+                  </DetailRow>
+                  <DetailRow label="참고 링크">
+                    {activity.reference_url ? (
+                      <a
+                        href={activity.reference_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={cn('inline-flex items-center gap-1.5 hover:underline', styles.accent)}
+                      >
+                        <ExternalLink className="h-3.5 w-3.5 shrink-0" />
+                        참고 링크 열기
+                      </a>
+                    ) : (
+                      <span className={styles.faint}>참고 링크가 없어요</span>
+                    )}
+                  </DetailRow>
                 </div>
-              </form>
+              )}
+            </DetailBlock>
+
+            {/* ── 방문 기록 블록 (미방문이면 렌더 안 함) ── */}
+            {activity.status === 'visited' && (
+              <VisitRecordBlock
+                track="activity"
+                id={id}
+                visitedAt={activity.visited_at}
+                rating={activity.rating}
+                reviewNote={activity.review_note}
+              />
             )}
-          </section>
+          </div>
 
-          {/* ══════════════════════════════════
-              방문 기록 영역 (보기 전용, visited만)
-          ══════════════════════════════════ */}
-          {activity.status === 'visited' && (
-            <div className="mt-6">
-              <div className={styles.sheetRow}>
-                <p className={labelCls}>방문 기록</p>
-                <div className="space-y-2">
-                  {activity.visited_at && (
-                    <div className={cn('flex items-center gap-1.5 text-sm', styles.ink)}>
-                      <Calendar className={cn('h-3.5 w-3.5 shrink-0', styles.faint)} />
-                      {activity.visited_at}
-                    </div>
-                  )}
-                  {activity.rating ? (
-                    <RatingStars value={activity.rating} size="sm" />
-                  ) : null}
-                  {activity.review_note && (
-                    <p className={cn('whitespace-pre-wrap text-sm leading-relaxed', styles.sub)}>
-                      {activity.review_note}
-                    </p>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* ── 등록 정보 ── */}
+          {/* ── 등록 메타 (누가/언제 등록) ── */}
           {(activity.added_by || activity.created_at) && (
-            <div className={styles.sheetRow}>
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
-                {activity.added_by && (
-                  <span className={cn('inline-flex items-center gap-1 text-xs', styles.faint)}>
-                    <User className="h-3 w-3 shrink-0" />
-                    {activity.added_by}
-                  </span>
-                )}
-                {activity.created_at && (
-                  <span className={cn('text-xs', styles.faint)}>
-                    {new Date(activity.created_at).toLocaleDateString('ko-KR', {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric',
-                    })}
-                    에 등록
-                  </span>
-                )}
-              </div>
+            <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1">
+              {activity.added_by && (
+                <span className={cn('inline-flex items-center gap-1 text-xs', styles.faint)}>
+                  <User className="h-3 w-3 shrink-0" />
+                  {activity.added_by}
+                </span>
+              )}
+              {activity.created_at && (
+                <span className={cn('text-xs', styles.faint)}>
+                  {new Date(activity.created_at).toLocaleDateString('ko-KR', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                  })}
+                  에 등록
+                </span>
+              )}
             </div>
           )}
 
-          {/* ── 하단 액션 버튼 — 편집 모드에서는 숨김 ── */}
-          {mode === 'view' && (
+          {/* ── 하단 액션 버튼 (버튼 위계 정리는 다음 단계 — 이번엔 유지) ── */}
+          {!editingInfo && (
             <div className="mt-6 flex flex-wrap gap-2">
               {activity.status === 'visited' ? (
-                <Button
-                  variant="outline"
-                  className="gap-1.5"
-                  onClick={() => setRevertOpen(true)}
-                >
+                <Button variant="outline" className="gap-1.5" onClick={() => setRevertOpen(true)}>
                   <Undo2 className="h-4 w-4" />
                   위시리스트로 되돌리기
                 </Button>
@@ -371,11 +286,7 @@ export function ActivityDetail({ id, initialMode = 'view' }: Props) {
                   다녀왔어요
                 </Button>
               )}
-              <Button
-                variant="destructive"
-                className="gap-1.5"
-                onClick={() => setDeleteOpen(true)}
-              >
+              <Button variant="destructive" className="gap-1.5" onClick={() => setDeleteOpen(true)}>
                 <Trash2 className="h-4 w-4" />
                 삭제
               </Button>

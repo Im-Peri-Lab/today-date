@@ -3,23 +3,21 @@
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
-import {
-  ArrowLeft,
-  Pencil,
-  Trash2,
-  CheckCircle2,
-  Undo2,
-  MapPin,
-  ExternalLink,
-} from 'lucide-react'
+import { ArrowLeft, Trash2, CheckCircle2, Undo2, MapPin, ExternalLink } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { CategoryBadge } from './CategoryBadge'
-import { RatingStars } from './RatingStars'
+import { PlaceFields } from './PlaceFields'
+import { DetailBlock } from './DetailBlock'
+import { DetailRow } from './DetailRow'
+import { VisitRecordBlock } from './VisitRecordBlock'
 import { DeleteConfirmDialog } from './DeleteConfirmDialog'
 import { VisitedDialog } from '@/components/VisitedDialog'
 import { usePlace, useDeletePlace, useUpdatePlace } from '@/hooks/usePlaces'
+import { placeFormSchema, type PlaceFormValues } from '@/lib/schemas/placeSchema'
 import { MEAL_LABELS } from '@/lib/labels'
 import { cn } from '@/lib/utils'
 import styles from '@/components/screens.module.css'
@@ -29,8 +27,34 @@ export function PlaceDetail({ id }: { id: string }) {
   const { data: place, isLoading, isError } = usePlace(id)
   const del = useDeletePlace()
   const update = useUpdatePlace()
+
+  const [editingInfo, setEditingInfo] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [visitedOpen, setVisitedOpen] = useState(false)
+
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<PlaceFormValues>({
+    resolver: zodResolver(placeFormSchema),
+    defaultValues: { title: '', location: '', meal_times: [], memo: '', reference_url: '', category_id: '' },
+  })
+
+  function fillForm() {
+    if (!place) return
+    reset({
+      title: place.title,
+      category_id: place.category_id ?? '',
+      location: place.location,
+      meal_times: place.meal_times,
+      memo: place.memo ?? '',
+      reference_url: place.reference_url ?? '',
+    })
+  }
 
   function handleDelete() {
     del.mutate(id, {
@@ -52,6 +76,29 @@ export function PlaceDetail({ id }: { id: string }) {
     )
   }
 
+  function startEditInfo() {
+    fillForm()
+    setEditingInfo(true)
+  }
+
+  const onSaveInfo = handleSubmit(async (values) => {
+    if (!place) return
+    const payload = {
+      ...values,
+      category_id: values.category_id || null,
+      reference_url: values.reference_url || null,
+      memo: values.memo || null,
+      added_by: values.added_by || null,
+    }
+    try {
+      await update.mutateAsync({ id: place.id, patch: payload })
+      toast.success('수정되었습니다!')
+      setEditingInfo(false)
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : '저장 중 오류가 발생했습니다.')
+    }
+  })
+
   return (
     <div className="mx-auto w-full max-w-lg px-5 pb-16 pt-6 lg:pt-10">
       <Link href="/list" className={styles.backLink}>
@@ -60,116 +107,129 @@ export function PlaceDetail({ id }: { id: string }) {
       </Link>
 
       {isLoading ? (
-        <div className={cn(styles.card, 'mt-4 p-5')}>
-          <Skeleton className="h-7 w-2/3" />
-          <Skeleton className="mt-3 h-5 w-1/3" />
-          <Skeleton className="mt-3 h-20 w-full" />
+        <div className="mt-4 space-y-4">
+          <Skeleton className="h-7 w-3/4" />
+          <Skeleton className={cn(styles.card, 'h-40 w-full')} />
+          <Skeleton className={cn(styles.card, 'h-28 w-full')} />
         </div>
       ) : isError || !place ? (
         <div className={cn(styles.empty, 'mt-4', styles.sub)}>장소를 찾을 수 없어요.</div>
       ) : (
         <>
-          <div className={cn(styles.card, 'mt-4 p-5 lg:p-6')}>
-            <div className="flex flex-wrap items-center gap-2">
-              {place.category && <CategoryBadge category={place.category} />}
-              {place.status === 'visited' && <span className={styles.visitedTag}>다녀온 곳</span>}
-            </div>
-            <h1 className={cn('mt-2 text-2xl font-bold lg:text-3xl', styles.ink)}>{place.title}</h1>
-
-            <div
-              className={cn(
-                'mt-3 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-sm',
-                styles.sub
-              )}
-            >
-              {place.location && (
-                <span className="inline-flex items-center gap-1.5">
-                  <MapPin className="h-4 w-4" />
-                  {place.location}
-                </span>
-              )}
-              {place.meal_times?.map((m) => (
-                <span key={m} className={styles.mealBadge}>
-                  {MEAL_LABELS[m]}
-                </span>
-              ))}
-            </div>
-
-            {place.memo && (
-              <p className={cn('mt-4 whitespace-pre-wrap text-sm leading-relaxed', styles.ink)}>
-                {place.memo}
-              </p>
-            )}
-
-            {place.reference_url && (
-              <a
-                href={place.reference_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={cn('mt-4 inline-flex items-center gap-1.5 text-sm hover:underline', styles.accent)}
-              >
-                <ExternalLink className="h-4 w-4" />
-                참고 링크
-              </a>
-            )}
-
-            {place.status === 'visited' && (
-              <div className={cn(styles.visitBox, 'mt-4 p-4')}>
-                <p className={cn('text-xs font-medium', styles.faint)}>방문 기록</p>
-                {place.visited_at && (
-                  <p className={cn('mt-1.5 text-sm', styles.ink)}>방문일 · {place.visited_at}</p>
-                )}
-                {place.rating ? (
-                  <div className="mt-1.5">
-                    <RatingStars value={place.rating} size="sm" />
-                  </div>
-                ) : null}
-                {place.review_note && (
-                  <p className={cn('mt-1.5 whitespace-pre-wrap text-sm leading-relaxed', styles.sub)}>
-                    {place.review_note}
-                  </p>
-                )}
+          {/* 제목 영역 — 편집 중에는 폼 안에 제목 입력이 있으므로 숨김 */}
+          {!editingInfo && (
+            <div className="mt-4">
+              <div className="flex flex-wrap items-center gap-2">
+                {place.category && <CategoryBadge category={place.category} />}
+                {place.status === 'visited' && <span className={styles.visitedTag}>다녀온 곳</span>}
               </div>
+              <h1 className={cn('mt-2', styles.pageTitle)}>{place.title}</h1>
+            </div>
+          )}
+
+          <div className="mt-5 space-y-4">
+            {/* ── 등록 정보 블록 ── */}
+            <DetailBlock
+              title="등록 정보"
+              editing={editingInfo}
+              onEdit={startEditInfo}
+              onCancel={() => setEditingInfo(false)}
+              onSave={onSaveInfo}
+              saving={isSubmitting || update.isPending}
+            >
+              {editingInfo ? (
+                <PlaceFields
+                  register={register}
+                  errors={errors}
+                  watch={watch}
+                  setValue={setValue}
+                />
+              ) : (
+                <div>
+                  {place.location && (
+                    <DetailRow label="위치">
+                      <span className="inline-flex items-center gap-1.5">
+                        <MapPin className={cn('h-3.5 w-3.5 shrink-0', styles.faint)} />
+                        {place.location}
+                      </span>
+                    </DetailRow>
+                  )}
+                  {place.meal_times?.length > 0 && (
+                    <DetailRow label="식사 시간">
+                      <span className="flex flex-wrap gap-1.5">
+                        {place.meal_times.map((m) => (
+                          <span key={m} className={styles.mealBadge}>
+                            {MEAL_LABELS[m]}
+                          </span>
+                        ))}
+                      </span>
+                    </DetailRow>
+                  )}
+                  <DetailRow label="메모">
+                    {place.memo ? (
+                      <p className="whitespace-pre-wrap leading-relaxed">{place.memo}</p>
+                    ) : (
+                      <span className={styles.faint}>아직 메모가 없어요</span>
+                    )}
+                  </DetailRow>
+                  <DetailRow label="참고 링크">
+                    {place.reference_url ? (
+                      <a
+                        href={place.reference_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={cn('inline-flex items-center gap-1.5 hover:underline', styles.accent)}
+                      >
+                        <ExternalLink className="h-3.5 w-3.5 shrink-0" />
+                        참고 링크 열기
+                      </a>
+                    ) : (
+                      <span className={styles.faint}>참고 링크가 없어요</span>
+                    )}
+                  </DetailRow>
+                </div>
+              )}
+            </DetailBlock>
+
+            {/* ── 방문 기록 블록 (미방문이면 렌더 안 함) ── */}
+            {place.status === 'visited' && (
+              <VisitRecordBlock
+                track="place"
+                id={id}
+                visitedAt={place.visited_at}
+                rating={place.rating}
+                reviewNote={place.review_note}
+              />
             )}
           </div>
 
-          <div className="mt-4 flex flex-wrap gap-2">
-            <Link href={`/places/${id}/edit`}>
-              <Button variant="outline" className="gap-1.5">
-                <Pencil className="h-4 w-4" />
-                수정
-              </Button>
-            </Link>
-            {place.status === 'visited' ? (
-              <>
-                <Button
-                  variant="outline"
-                  className="gap-1.5"
-                  onClick={() => setVisitedOpen(true)}
-                >
-                  <Pencil className="h-4 w-4" />
-                  방문 정보 수정
-                </Button>
+          {/* ── 하단 액션 버튼 (버튼 위계 정리는 다음 단계 — 이번엔 유지) ── */}
+          {!editingInfo && (
+            <div className="mt-6 flex flex-wrap gap-2">
+              {place.status === 'visited' ? (
                 <Button variant="outline" className="gap-1.5" onClick={handleRevert}>
                   <Undo2 className="h-4 w-4" />
-                  위시리스트로
+                  위시리스트로 되돌리기
                 </Button>
-              </>
-            ) : (
-              <Button
-                className="gap-1.5 text-white hover:brightness-105"
-                style={{ background: 'var(--s-active-fill, linear-gradient(135deg,#a855f7 0%,#ec4899 100%))' }}
-                onClick={() => setVisitedOpen(true)}
-              >
-                <CheckCircle2 className="h-4 w-4" />
-                다녀왔어요
+              ) : (
+                <Button
+                  className="gap-1.5 text-white hover:brightness-105"
+                  style={{
+                    background:
+                      'var(--s-active-fill, linear-gradient(135deg,#a855f7 0%,#ec4899 100%))',
+                  }}
+                  onClick={() => setVisitedOpen(true)}
+                >
+                  <CheckCircle2 className="h-4 w-4" />
+                  다녀왔어요
+                </Button>
+              )}
+              <Button variant="destructive" className="gap-1.5" onClick={() => setDeleteOpen(true)}>
+                <Trash2 className="h-4 w-4" />
+                삭제
               </Button>
-            )}
-            <Button variant="destructive" className="gap-1.5" onClick={() => setDeleteOpen(true)}>
-              <Trash2 className="h-4 w-4" />
-              삭제
-            </Button>
-          </div>
+            </div>
+          )}
 
           <DeleteConfirmDialog
             open={deleteOpen}

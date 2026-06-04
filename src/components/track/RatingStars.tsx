@@ -1,5 +1,6 @@
 import { Star } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import styles from '@/components/screens.module.css'
 
 interface RatingStarsProps {
   value: number
@@ -20,7 +21,9 @@ export function RatingStars({ value, onChange, size = 'md', className }: RatingS
           <Star
             className={cn(
               starSize,
-              filled ? 'fill-amber-400 text-amber-400' : 'fill-transparent text-gray-300'
+              // 스킬에 별점 전용 색 토큰이 없어 강조색(--s-accent)으로 통일.
+              // 채움 별은 accent, 빈 별은 faint 톤(둘 다 토큰 기반, 임의 색 없음).
+              filled ? cn('fill-current', styles.accent) : cn('fill-transparent', styles.faint)
             )}
           />
         )

@@ -121,6 +121,34 @@ description: >
 
 ---
 
+## 4-A. 폼 입력/선택 컨트롤 표준 (추가/수정 화면 + 상세 인라인 편집 공통)
+
+왜: `/activities/new`·`/places/new`·상세 인라인 편집은 같은 프리미티브를 쓴다. 컨트롤 높이·radius·라벨 색을 아래 표준으로 고정해 한 화면 안에서 정렬되게 한다. (이 값들은 실제 코드에 반영됨 — 임의 변경 금지)
+
+**높이 표준** (한 화면 안에서 정렬):
+| 컨트롤 | 높이 | radius | 출처 |
+|---|---|---|---|
+| 텍스트 입력바 (`Input`) | **40px** (`h-10`) | 10px (`rounded-lg`=`var(--radius)`) | `src/components/ui/input.tsx` |
+| textarea (`Textarea`) | min **64px** (`min-h-16`) | 10px | `src/components/ui/textarea.tsx` |
+| 세그먼트 (`styles.option`) | **40px** (`height:2.5rem`) | 10px (`0.625rem`) | `screens.module.css .option` |
+| 카테고리 칩 (`styles.chip`) | **36px** (`height:2.25rem`) | pill (`9999px`) | `screens.module.css .chip` |
+| 인라인 편집 취소 버튼 (`variant="outline"`) | **40px** (`h-10`) | 10px | `DetailBlock.tsx` |
+| 하단 Primary (제출·저장) | **48px** (`h-12`) | 10px | `FormLayout.tsx` / `DetailBlock.tsx` |
+
+→ 일반 컨트롤 40px로 정렬, 칩만 약간 작게(36px), Primary는 크게(48px)로 위계. 컨트롤 가로 패딩은 `px-3`(0.75rem)로 통일.
+
+**폰트:**
+- 입력 본문(`Input`/`Textarea`): **16px** (`text-base`, `md:text-sm` 쓰지 않음 → iOS 포커스 자동 줌인 방지).
+- 라벨(`Label`): **14px** (`text-sm`) + `font-medium`.
+
+**색 토큰 (shadcn 의존 금지, `--s-*`만):**
+- 이 앱은 `.dark` 클래스를 붙이지 않고 `@media (prefers-color-scheme: dark)` + `--s-*` 토큰으로만 다크를 처리한다. 따라서 폼 컨트롤은 shadcn HSL 토큰(`--foreground`/`--input`/`--muted-foreground`)을 쓰면 다크에서 라이트값에 고정되어 안 보인다(대비 ~1:1).
+- 라벨 색: `--s-ink` (`text-[color:var(--s-ink,#1a1033)]`) — `ui/label.tsx`에 적용 → `FormField`·`VisitRecordBlock` 라벨 모두 적용됨.
+- 입력/textarea 본문 색: `--s-ink`, placeholder: `--s-faint`, 보더(컨트롤): `--s-card-border-strong`.
+- 활성 채움(칩·세그먼트): `--s-active-fill` 단색(§5). Primary 버튼: `styles.detailPrimaryBtn`(`--s-active-line`).
+
+---
+
 ## 5. 활성화 상태 규칙 (활성 칩 색 · 글씨 · 포커스링 분리)
 
 왜: 활성/선택/포커스 색을 **단일 토큰 세트**로만 참조해, 활성색 변경 시 한 곳(`screens.module.css` `.page`)만 고친다. 요소별 하드코딩 금지.
@@ -435,6 +463,8 @@ export const STATUS_LABELS: Record<Status, string> = {
 9. **하단 액션 버튼(Primary/삭제)에 그라데이션 금지** — `--s-active-fill`, `--s-grad`는 FAB·`gradIcon`·`filterCount` 등 소형 액센트 전용. 버튼 채움은 `--s-active-line` 단색.
 10. **Primary 버튼에 `--s-accent` 사용 금지** — 다크에서 `#c084fc` (L=65%)로 오버라이드되어 카드면 위에서 부상. `--s-active-line` (`#7c3aed`, 다크 재정의 없음) 사용.
 11. **Primary 버튼 배경에 inline `style={}` 사용 금지** — CSS 클래스를 항상 이겨 다크 모드 보정 불가. `styles.detailPrimaryBtn` CSS module 클래스로 제어.
+12. **폼 컨트롤(라벨·입력 텍스트·보더·placeholder)에 shadcn `--foreground`/`--input`/`--muted-foreground` 의존 금지** — 이 앱은 `.dark` 클래스를 안 붙이고 `@media (prefers-color-scheme: dark)` + `--s-*`로만 다크를 처리하므로, shadcn HSL 토큰은 다크에서 라이트값에 고정되어 안 보인다(대비 ~1:1). 라벨/본문 `--s-ink`, placeholder `--s-faint`, 보더 `--s-card-border-strong` 사용(§4-A). `.dark` 클래스 신규 도입도 금지.
+13. **입력바/textarea 본문 폰트에 `md:text-sm`(14px↓) 금지** — `text-base`(16px) 고정. 모바일 14px 이하면 iOS 포커스 시 자동 줌인 발생.
 
 ---
 

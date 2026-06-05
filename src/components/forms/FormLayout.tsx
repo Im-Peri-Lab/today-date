@@ -19,7 +19,7 @@ export function FormLayout({ onSubmit, isSubmitting, submitLabel, children }: Fo
       <Button
         type="submit"
         disabled={isSubmitting}
-        className={cn(styles.detailPrimaryBtn, 'w-full text-white hover:brightness-105')}
+        className={cn(styles.detailPrimaryBtn, 'h-12 w-full text-white hover:brightness-105')}
       >
         {isSubmitting ? '저장 중...' : submitLabel}
       </Button>

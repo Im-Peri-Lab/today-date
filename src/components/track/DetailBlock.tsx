@@ -112,11 +112,11 @@ export function DetailBlock({
             type="button"
             onClick={onSave}
             disabled={saving}
-            className={cn(styles.detailPrimaryBtn, 'gap-1.5 text-white hover:brightness-105')}
+            className={cn(styles.detailPrimaryBtn, 'h-12 gap-1.5 text-white hover:brightness-105')}
           >
             {saving ? '저장 중...' : '저장'}
           </Button>
-          <Button type="button" variant="outline" onClick={onCancel} disabled={saving}>
+          <Button type="button" variant="outline" onClick={onCancel} disabled={saving} className="h-10">
             취소
           </Button>
         </div>

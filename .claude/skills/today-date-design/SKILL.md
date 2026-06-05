@@ -35,7 +35,7 @@ description: >
 |---|---|---|
 | `/` (홈) | ✅ 기준 반영 | `styles.page` + `PageHeader` + `--s-*` 토큰 |
 | `/list` (목록) | ✅ 기준 반영 | 기준의 레퍼런스 구현 (`ListView`) |
-| `/activities/[id]`, `/places/[id]` (상세) | ◐ 래퍼만 반영 | `<main className={styles.page}>`로 전환됨. 안쪽 카드/컨트롤 디테일은 점검 필요 |
+| `/activities/[id]`, `/places/[id]` (상세) | ✅ 기준 반영 | DetailBlock 카드·인라인 편집·버튼 위계·상태 태그·메타 아이콘 확정. § 10 참고 |
 | `/activities/[id]/edit` (수정) | ❌ 미반영 | 옛 `bg-gradient-to-br from-violet-50 to-purple-100` 사용 → 금지 규칙 위반 |
 | `/recommend/activity`, `/recommend/place` (추천) | ❌ 미반영 | 동일하게 옛 보라 그라데이션 사용 |
 
@@ -167,10 +167,12 @@ description: >
 - 카테고리 아이콘은 이름→lucide 매핑(`src/components/track/categoryIcon.tsx`)으로만 고른다. DB `category.icon`(이모지)은 렌더하지 않는다.
 - **아이콘 색 기준**:
   - 카테고리 아이콘 `styles.catIcon`: `--s-accent`(라이트 `#7c3aed` / 다크 `#c084fc`). 활성 칩 안에서는 `--s-active-on`(흰)으로 전환.
-  - 메타 줄 아이콘(Clock/Sun/Moon/MapPin/Utensils 등): 색 지정 없이 부모 텍스트색(`sub`) 상속.
+  - 메타 줄 아이콘(Clock/Sun/Moon/MapPin/Utensils 등):
+    - **리스트 카드(ActivityCard/PlaceCard)**: 아이콘 색 지정 없이 부모 div(`styles.sub`) 상속.
+    - **상세 화면(DetailRow 안)**: `styles.faint`(`--s-faint`) 명시 → 카테고리 아이콘(`styles.accent`)보다 한 단계 약한 위계. `className={cn('h-3.5 w-3.5 shrink-0', styles.faint)}` 패턴 사용.
   - 헤더 아이콘 버튼(`styles.iconBtn`): `sub`, hover 시 라이트는 중성 면 `#eceaf3`+`ink`, 다크는 보라 소프트.
 - strokeWidth: 카테고리 `2`, CTA 그라데이션 배지 내부 아이콘 `1.75`.
-- 크기 관례: 메타/뱃지 아이콘 `h-3 w-3`~`h-3.5 w-3.5`, 헤더/검색 `h-4~5`.
+- 크기 관례: 리스트 카드 메타 `h-3 w-3`, 상세 화면 DetailRow 메타 `h-3.5 w-3.5`, 헤더/검색 `h-4~5`.
 - 참고: 장식용 하트/💜는 카피(서브카피·빈 상태 문구)에만 등장 — 기능 아이콘 자리에는 절대 넣지 않는다.
 
 ---
@@ -213,6 +215,210 @@ description: >
 
 ---
 
+## 10. 상세 화면 (`/activities/[id]`, `/places/[id]`)
+
+### 10-A. 카드 블록 구조
+
+상세 화면은 **두 개의 카드 블록**으로 구성된다. 공용 셸: `DetailBlock` (`src/components/track/DetailBlock.tsx`).
+
+| 블록 | 섹션 라벨 | 근거 |
+|---|---|---|
+| 등록 정보 | 숨김(`blockTitle` 있으면 렌더 안 함) | 제목·카테고리·상태 태그가 자체 식별 |
+| 방문 기록 | `<h2>` 유지 ("방문 기록") | 스크린리더 섹션 탐색 보장 |
+
+카드 클래스: `styles.card` + `styles.detailCard`
+- `styles.card`: `border-radius: 1rem`, 보더, 그림자 (공용)
+- `styles.detailCard`: `border-radius: 1.5rem` (24px) — `.card` 위에 덮어씀, 상세 전용
+- 패딩: `px-5 pt-5 pb-4` / lg `px-6 pt-6 pb-5`
+
+편집 모드 진입 시: `blockTitle` 있는 블록(등록 정보)은 헤더 전체 숨김 → 폼이 카드 최상단에서 즉시 시작.
+
+복붙(등록 정보 블록):
+```tsx
+<DetailBlock
+  title="등록 정보"
+  blockTitle={item.title}
+  blockCategory={item.category ? <CategoryBadge category={item.category} /> : undefined}
+  headerExtra={
+    <span className={cn(styles.visitedTag,
+      item.status === 'visited' ? styles.visitedTagVisited : styles.visitedTagWishlist)}>
+      {STATUS_LABELS[item.status]}
+    </span>
+  }
+  editing={editingInfo}
+  onEdit={startEditInfo} onCancel={exitEditInfo} onSave={onSaveInfo} saving={isSubmitting}
+>
+  {/* 필드 그리드 */}
+</DetailBlock>
+```
+
+---
+
+### 10-B. 연필(고스트) 편집 버튼
+
+카드 우상단 절대 위치. 카드 `<section>`에 `relative` 필수. 편집 중에는 렌더 안 함.
+
+```tsx
+<button
+  type="button"
+  className={cn(styles.editGhostBtn, 'absolute top-3.5 right-3.5')}
+  onClick={onEdit}
+  aria-label={`${title} 수정`}
+>
+  <Pencil className="h-4 w-4" />
+</button>
+```
+
+`styles.editGhostBtn` 상태별 색:
+
+| 상태 | 배경 | 색상 |
+|---|---|---|
+| 기본 | 투명 | `--s-faint` (`#9ca3af` / `#8c84a0`) |
+| hover 라이트 | `--s-card-border-strong` (`#eceaf3`) | `--s-ink` (`#1a1033`) |
+| hover 다크 | `--s-accent-soft-bg` (`#2d2540`) | `--s-accent` (`#c084fc`) |
+
+헤더 콘텐츠 영역에 `pr-10` 추가해 버튼과 텍스트 겹침 방지.
+
+---
+
+### 10-C. 필드 레이아웃 (DetailRow)
+
+```tsx
+// 부모 그리드
+<div className="grid grid-cols-1 sm:grid-cols-2">
+  <DetailRow label="소요시간">…</DetailRow>          {/* 짧은 값: 1열 */}
+  <DetailRow label="시간대">…</DetailRow>
+  <DetailRow label="메모" wide>…</DetailRow>          {/* 긴 값: wide → sm:col-span-2 */}
+  <DetailRow label="참고 링크" wide>…</DetailRow>
+</div>
+```
+
+`styles.sheetRow`: `padding-top: 0.875rem` — 구분선(border-top) 없이 여백만으로 행 구분.  
+라벨: `text-xs font-normal uppercase tracking-wide` + `styles.faint` (값보다 약한 캡션 톤)  
+값: `text-sm` + `styles.ink`
+
+등록 메타(추가자·등록일) 캡션: `styles.sheetRow` 제외, `mt-3.5` + `sm:col-span-2`, `text-xs` + `styles.faint`.
+
+---
+
+### 10-D. 메타 값 아이콘 (상세 화면 DetailRow)
+
+모두 `lucide-react`. 카테고리 아이콘(`styles.accent`) 보다 한 단계 약한 `styles.faint` 색.
+
+| 필드 | 아이콘 | 색 | 크기 | 비고 |
+|---|---|---|---|---|
+| 소요시간 | `Clock` | `styles.faint` | `h-3.5 w-3.5 shrink-0` | |
+| 시간대 주간 | `Sun` | `styles.faint` | `h-3.5 w-3.5 shrink-0` | |
+| 시간대 야간 | `Moon` | `styles.faint` | `h-3.5 w-3.5 shrink-0` | |
+| 위치 | `MapPin` | `styles.faint` | `h-3.5 w-3.5 shrink-0` | |
+| 식사시간 | `Utensils` | `styles.faint` | `h-3.5 w-3.5 shrink-0 mt-0.5` | 뱃지 그룹 앞 |
+
+복붙:
+```tsx
+<span className="inline-flex items-center gap-1.5">
+  <Clock className={cn('h-3.5 w-3.5 shrink-0', styles.faint)} />
+  {DURATION_LABELS[item.duration_bucket]}
+</span>
+```
+
+---
+
+### 10-E. 상태 라벨·태그
+
+**문구 단일 출처**: `src/lib/labels.ts`의 `STATUS_LABELS`. 문구 직접 기재 금지.
+
+```ts
+export const STATUS_LABELS: Record<Status, string> = {
+  wishlist: '가보고 싶은 곳',
+  visited:  '다녀온 곳',
+  archived: '보관됨',
+}
+```
+
+상태 토글 라벨(`ListView`), 상세 태그(`headerExtra`), 홈 통계 헤더(`HomeDashboard`) 모두 이 상수 참조.
+
+**태그 클래스 조합** (크기·패딩·radius 동일, 색만 다름):
+```tsx
+<span className={cn(
+  styles.visitedTag,        // 공용 레이아웃: radius 9999px / padding 0.125rem 0.5rem / 0.75rem/500
+  item.status === 'visited'
+    ? styles.visitedTagVisited    // 다녀온 곳
+    : styles.visitedTagWishlist,  // 가보고 싶은 곳
+)}>
+  {STATUS_LABELS[item.status]}
+</span>
+```
+
+| 클래스 | 배경 | 텍스트 | 다크 배경 | 다크 텍스트 |
+|---|---|---|---|---|
+| `visitedTagVisited` | `--s-card-border-strong` (`#eceaf3`) | `--s-sub` (`#6b7280`) | `#3a2f4e` (cascade) | `#a8a0b8` (cascade) |
+| `visitedTagWishlist` | `rgba(124,58,237,0.08)` (`--s-accent` 8%) | `--s-accent` (`#7c3aed`) | `--s-accent-soft-bg` (`#2d2540`) | `#c084fc` (cascade) |
+
+---
+
+### 10-F. 하단 액션 버튼 위계
+
+```tsx
+<div className="mt-6 flex items-center justify-between gap-3">
+  {/* 좌: 삭제 — 약한 중립 면 */}
+  <Button variant="ghost" className={cn(styles.detailDeleteBtn, 'gap-1.5')}
+    onClick={() => setDeleteOpen(true)}>
+    <Trash2 className="h-4 w-4" />삭제
+  </Button>
+
+  {/* 우: Primary — 단색 보라 채움 */}
+  <Button className={cn(styles.detailPrimaryBtn, 'gap-1.5 text-white hover:brightness-105')}
+    onClick={…}>
+    <CheckCircle2 className="h-4 w-4" />다녀왔어요   {/* or 가보고 싶은 곳으로 되돌리기 */}
+  </Button>
+</div>
+```
+
+**Primary 버튼** (`styles.detailPrimaryBtn`):
+- 배경: `var(--s-active-line, #7c3aed)` — 라이트·다크 동일 (`--s-active-line` 다크 블록에서 재정의 없음)
+- ⚠️ `--s-accent` 사용 금지: 다크에서 `#c084fc` (L=65%)로 오버라이드 → 카드면 위 부상 현상
+- ⚠️ `inline style={{ background: ... }}` 사용 금지: CSS 클래스를 항상 이겨 다크 보정 불가
+- 텍스트: `text-white` (대비 ~5.4:1, WCAG AA ✓)
+- 그라데이션(`--s-active-fill`, `--s-grad`) 사용 금지 — FAB·로고 등 소형 액센트 전용
+- 라벨: 미방문 `"다녀왔어요"` / 방문완료 `"가보고 싶은 곳으로 되돌리기"`
+
+**삭제 버튼** (`styles.detailDeleteBtn`):
+- 기본: `--s-card-border-strong` 배경 + `--s-faint` 텍스트 (중립 면, 빨강 배경 금지)
+- hover: `hsl(var(--destructive) / 0.15)` 배경 + destructive 텍스트
+- active: `hsl(var(--destructive) / 0.2)`
+- 위치: 좌측 끝(오삭제 방지). Primary와 최대한 분리.
+
+---
+
+### 10-G. 인라인 편집 라디오 옵션
+
+```tsx
+<label className={cn(styles.editRadioOption, isActive && styles.editRadioOptionActive)}>
+```
+
+- `editRadioOption`: `--s-card-bg` 배경, `--s-card-border-strong` 보더, `--s-sub` 색
+- `editRadioOptionActive`: `--s-active-line` 보더, `--s-active-text` 색, `font-weight: 500`
+
+---
+
+### 10-H. 날짜 표시·별점·토스트
+
+**날짜**: 저장은 ISO(`YYYY-MM-DD`). 화면 표시는 `toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })` → `"2026년 4월 6일"`.
+
+**방문일 아이콘**: `Calendar` (`lucide-react`) + `styles.accent` 색 — 완료 이벤트 강조.
+
+**별점 뷰**: `<RatingStars value={rating} size="sm" />` (16px). 편집: `size` 생략(기본 28px).
+
+**토스트 문구**:
+```
+되돌리기 성공:     "가보고 싶은 곳으로 옮겼어요"
+삭제 성공:         "삭제했어요"
+저장 성공:         "수정되었습니다!"
+활동 되돌리기 확인 다이얼로그 제목: "가보고 싶은 곳으로 되돌릴까요?"
+```
+
+---
+
 ## 🚫 금지 규칙 (별도 섹션)
 
 라이트모드에서 절대 하지 말 것:
@@ -224,6 +430,9 @@ description: >
 6. 기능 아이콘에 **이모지 금지** — `lucide-react` 단색 선만.
 7. 화면마다 헤더 직접 작성 금지 — **`PageHeader` 공용 컴포넌트만** 사용.
 8. FAB/하단 여백에 `env(safe-area-inset-bottom)` 의존 금지 — 고정 rem 사용.
+9. **하단 액션 버튼(Primary/삭제)에 그라데이션 금지** — `--s-active-fill`, `--s-grad`는 FAB·`gradIcon`·`filterCount` 등 소형 액센트 전용. 버튼 채움은 `--s-active-line` 단색.
+10. **Primary 버튼에 `--s-accent` 사용 금지** — 다크에서 `#c084fc` (L=65%)로 오버라이드되어 카드면 위에서 부상. `--s-active-line` (`#7c3aed`, 다크 재정의 없음) 사용.
+11. **Primary 버튼 배경에 inline `style={}` 사용 금지** — CSS 클래스를 항상 이겨 다크 모드 보정 불가. `styles.detailPrimaryBtn` CSS module 클래스로 제어.
 
 ---
 

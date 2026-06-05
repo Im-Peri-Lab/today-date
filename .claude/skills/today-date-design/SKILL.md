@@ -132,10 +132,10 @@ description: >
 | textarea (`Textarea`) | min **64px** (`min-h-16`) | 10px | `src/components/ui/textarea.tsx` |
 | 세그먼트 (`styles.option`) | **40px** (`height:2.5rem`) | 10px (`0.625rem`) | `screens.module.css .option` |
 | 카테고리 칩 (`styles.chip`) | **36px** (`height:2.25rem`) | pill (`9999px`) | `screens.module.css .chip` |
-| 인라인 편집 취소 버튼 (`variant="outline"`) | **40px** (`h-10`) | 10px | `DetailBlock.tsx` |
-| 하단 Primary (제출·저장) | **48px** (`h-12`) | 10px | `FormLayout.tsx` / `DetailBlock.tsx` |
+| 추가 화면 하단 Primary (제출) | **48px** (`h-12`) | 10px | `FormLayout.tsx` |
+| 인라인 편집 Save·Cancel (`DetailBlock`) | **40px** (`h-10`) | 10px | `DetailBlock.tsx` |
 
-→ 일반 컨트롤 40px로 정렬, 칩만 약간 작게(36px), Primary는 크게(48px)로 위계. 컨트롤 가로 패딩은 `px-3`(0.75rem)로 통일.
+→ 사이즈 위계: 추가 화면 Primary **48px**(전체폭 강조) / 인라인 편집 Save·Cancel **40px**(카드 안에서 일반 컨트롤과 정렬) / 그 외 일반 컨트롤 **40px** / 칩만 **36px**. 인라인 Save·Cancel은 같은 40px로 맞춰 한 쌍으로 정렬하고, **추가 화면 Primary 48px을 인라인에 쓰지 않는다**. Save 채움은 단색 액센트(`styles.detailPrimaryBtn`) 유지. 컨트롤 가로 패딩은 `px-3`(0.75rem)로 통일.
 
 **폰트:**
 - 입력 본문(`Input`/`Textarea`): **16px** (`text-base`, `md:text-sm` 쓰지 않음 → iOS 포커스 자동 줌인 방지).
@@ -146,6 +146,11 @@ description: >
 - 라벨 색: `--s-ink` (`text-[color:var(--s-ink,#1a1033)]`) — `ui/label.tsx`에 적용 → `FormField`·`VisitRecordBlock` 라벨 모두 적용됨.
 - 입력/textarea 본문 색: `--s-ink`, placeholder: `--s-faint`, 보더(컨트롤): `--s-card-border-strong`.
 - 활성 채움(칩·세그먼트): `--s-active-fill` 단색(§5). Primary 버튼: `styles.detailPrimaryBtn`(`--s-active-line`).
+- **outline 버튼(`variant="outline"`, 인라인 편집 취소 등)도 `--s-*` 기반**: 보더 `--s-card-border-strong`, 면 `bg-transparent`, 글씨 `--s-ink`, hover 면 `--s-card-border-strong`. shadcn `border-border`/`bg-background`/`text-foreground` 및 `dark:` 프리픽스 사용 금지(`.dark` 미적용 → 다크에서 흰 칩으로 뜸). `src/components/ui/button.tsx` outline variant에 반영.
+
+**인라인 편집 컨텍스트 규칙 (`DetailBlock`):**
+- `DetailBlock` 안의 편집 폼(`ActivityFields`/`PlaceFields` 등)은 추가 화면 `FormLayout`(`space-y-5`)과 동일한 필드 간 리듬을 직접 제공해야 한다 → `DetailBlock`이 editing 모드 children 래퍼에 `space-y-5` 부여(읽기 모드는 영향 없음). `FormField` 내부 `space-y-1.5`(라벨↔컨트롤)만으로는 필드↔필드 간격이 0이 되어 어긋난다.
+- 인라인 폼 카드는 페이지 패딩 + 카드 `px-5`로 추가 화면보다 좌우 각 20px 좁다(카드 정체상 정상, 오버플로 아님).
 
 ---
 

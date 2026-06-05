@@ -106,7 +106,9 @@ export function DetailBlock({
       {/* children — showHeader가 있을 때 mt-3으로 헤더와 분리.
           editing 시 space-y-5: 추가 화면 FormLayout(space-y-5)과 동일한 필드 간 리듬을
           인라인 편집에도 부여(읽기 모드는 영향 없음). */}
-      <div className={cn(showHeader && 'mt-3', editing && 'space-y-5')}>{children}</div>
+      <div className={cn(showHeader && (editing ? 'mt-5' : 'mt-3'), editing && 'space-y-5')}>
+        {children}
+      </div>
 
       {editing && (
         <div className="mt-5 flex gap-2">

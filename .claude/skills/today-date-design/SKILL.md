@@ -149,8 +149,13 @@ description: >
 - **outline 버튼(`variant="outline"`, 인라인 편집 취소 등)도 `--s-*` 기반**: 보더 `--s-card-border-strong`, 면 `bg-transparent`, 글씨 `--s-ink`, hover 면 `--s-card-border-strong`. shadcn `border-border`/`bg-background`/`text-foreground` 및 `dark:` 프리픽스 사용 금지(`.dark` 미적용 → 다크에서 흰 칩으로 뜸). `src/components/ui/button.tsx` outline variant에 반영.
 
 **인라인 편집 컨텍스트 규칙 (`DetailBlock`):**
-- `DetailBlock` 안의 편집 폼(`ActivityFields`/`PlaceFields` 등)은 추가 화면 `FormLayout`(`space-y-5`)과 동일한 필드 간 리듬을 직접 제공해야 한다 → `DetailBlock`이 editing 모드 children 래퍼에 `space-y-5` 부여(읽기 모드는 영향 없음). `FormField` 내부 `space-y-1.5`(라벨↔컨트롤)만으로는 필드↔필드 간격이 0이 되어 어긋난다.
+- `DetailBlock` 안의 편집 폼(`ActivityFields`/`PlaceFields`/`VisitRecordBlock`)은 추가 화면 `FormLayout`(`space-y-5`)과 동일한 필드 간 리듬을 직접 제공해야 한다 → `DetailBlock`이 editing 모드 children 래퍼에 `space-y-5` 부여(읽기 모드는 영향 없음), `VisitRecordBlock`의 편집 폼 래퍼도 `space-y-5`. `FormField`/필드 묶음 내부 `space-y-1.5`(라벨↔컨트롤)만으로는 필드↔필드 간격이 0이 되어 어긋난다.
+- 섹션 라벨(`<h2>`)이 보이는 블록(방문 기록)은 editing 시 헤더↔폼 간격을 `mt-5`(읽기 모드는 `mt-3` 유지)로 둔다. 상세 두 블록 사이 간격도 `space-y-5`(`ActivityDetail`/`PlaceDetail` 래퍼)로 폼 리듬과 통일.
 - 인라인 폼 카드는 페이지 패딩 + 카드 `px-5`로 추가 화면보다 좌우 각 20px 좁다(카드 정체상 정상, 오버플로 아님).
+
+**날짜 입력(native `<input type="date">`):**
+- 저장값은 ISO(`YYYY-MM-DD`) 그대로 유지(표시만 가공). native input은 표시 포맷을 못 바꾸므로 입력 아래에 `formatKoreanDate()` 한글 캡션("2026년 6월 5일")을 `--s-faint` 톤으로 보조 노출(값 없으면 미표시).
+- 다크에서 캘린더 아이콘이 묻히지 않도록 `color-scheme: light dark`(`styles.dateInput`)만 부여 — `::-webkit-calendar-picker-indicator`가 OS 스킴에 맞춰 밝은 글리프로 그려진다. `appearance: none`(아이콘 제거됨)·하드코딩 `filter` 금지. 높이/보더/radius는 `ui/input.tsx` 표준 그대로.
 
 ---
 
@@ -267,6 +272,8 @@ description: >
 - 패딩: `px-5 pt-5 pb-4` / lg `px-6 pt-6 pb-5`
 
 편집 모드 진입 시: `blockTitle` 있는 블록(등록 정보)은 헤더 전체 숨김 → 폼이 카드 최상단에서 즉시 시작.
+
+페이지 높이: 상세 페이지(`/activities/[id]`·`/places/[id]`)의 `<main>`은 `cn(styles.page, styles.pageStatic)`를 쓴다(`/list`와 동일). 순수 `styles.page`(`min-height:100dvh`)만 쓰면 콘텐츠가 짧을 때(특히 편집 모드로 하단 버튼이 숨겨질 때) 카드 아래 큰 빈 여백이 남으므로, `pageStatic`(`min-height:auto`)로 콘텐츠 주도 높이를 쓴다. 배경은 `.page::before`(fixed)가 채우므로 영향 없음.
 
 복붙(등록 정보 블록):
 ```tsx

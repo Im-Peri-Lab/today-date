@@ -140,7 +140,7 @@ export function PlaceDetail({ id, initialEdit }: Props) {
         <div className={cn(styles.empty, 'mt-4', styles.sub)}>장소를 찾을 수 없어요.</div>
       ) : (
         <>
-          <div className="mt-5 space-y-4">
+          <div className="mt-5 space-y-5">
             {/* ── 등록 정보 블록 ──
                 제목·카테고리를 블록 헤더 안으로 통합: 연필 수정 범위가 제목·카테고리까지
                 포함됨이 자연스럽게 드러난다. */}

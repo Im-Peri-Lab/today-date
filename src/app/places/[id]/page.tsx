@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { getSession } from '@/lib/auth/session'
 import { PlaceDetail } from '@/components/track/PlaceDetail'
+import { cn } from '@/lib/utils'
 import styles from '@/components/screens.module.css'
 
 export default async function PlaceDetailPage({
@@ -16,7 +17,7 @@ export default async function PlaceDetailPage({
   const { edit } = await searchParams
 
   return (
-    <main className={styles.page}>
+    <main className={cn(styles.page, styles.pageStatic)}>
       <PlaceDetail id={id} initialEdit={edit === 'info' || edit === 'visit' ? edit : undefined} />
     </main>
   )

@@ -559,6 +559,16 @@
 }
 
 /*
+ * 방문 기록 날짜 입력 — native <input type="date">.
+ * 높이·보더·radius·텍스트색은 ui/input.tsx 표준(h-10 / rounded-lg / --s-*)을 그대로 받고,
+ * color-scheme 로 OS 스킴에 맞춰 그려 다크에서 ::-webkit-calendar-picker-indicator 가
+ * 밝은 글리프로 또렷이 보이게 한다(라이트엔 영향 없음, 새 색 추가 아님).
+ */
+.dateInput {
+  color-scheme: light dark;
+}
+
+/*
  * 카드 카테고리 뱃지(분류 라벨) — 배경 pill 없이 아이콘 + 텍스트만 인라인.
  * 카테고리 구분은 아이콘 색으로만, 텍스트는 차분한 톤.
  */

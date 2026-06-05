@@ -8,7 +8,7 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu'
-import { STATUS_LABELS } from '@/lib/labels'
+import { STATUS_MENU_LABELS } from '@/lib/labels'
 import type { Status } from '@/types'
 import styles from '@/components/screens.module.css'
 
@@ -54,12 +54,12 @@ export function ItemMenu({
         {isVisited ? (
           <DropdownMenuItem onClick={onRevert}>
             <Undo2 />
-            {`${STATUS_LABELS.wishlist}으로 되돌리기`}
+            {STATUS_MENU_LABELS.wishlist}
           </DropdownMenuItem>
         ) : (
           <DropdownMenuItem onClick={onMarkVisited}>
             <CheckCircle2 />
-            {`${STATUS_LABELS.visited}으로`}
+            {STATUS_MENU_LABELS.visited}
           </DropdownMenuItem>
         )}
         <DropdownMenuSeparator />

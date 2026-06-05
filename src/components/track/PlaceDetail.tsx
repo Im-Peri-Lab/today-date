@@ -6,7 +6,7 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
-import { ArrowLeft, Trash2, CheckCircle2, Undo2, MapPin, ExternalLink, User } from 'lucide-react'
+import { ArrowLeft, Trash2, CheckCircle2, Undo2, MapPin, ExternalLink, User, Utensils } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { CategoryBadge } from './CategoryBadge'
@@ -131,9 +131,10 @@ export function PlaceDetail({ id }: { id: string }) {
                 place.category ? <CategoryBadge category={place.category} /> : undefined
               }
               headerExtra={
-                place.status === 'visited' ? (
-                  <span className={styles.visitedTag}>다녀온 곳</span>
-                ) : undefined
+                /* 방문 완료/미방문 모두 동일한 visitedTag 스타일로 짝맞춤 */
+                <span className={styles.visitedTag}>
+                  {place.status === 'visited' ? '다녀온 곳' : '가보고 싶은 곳'}
+                </span>
               }
             >
               {editingInfo ? (
@@ -156,12 +157,16 @@ export function PlaceDetail({ id }: { id: string }) {
                   )}
                   {place.meal_times?.length > 0 && (
                     <DetailRow label="식사 시간">
-                      <span className="flex flex-wrap gap-1.5">
-                        {place.meal_times.map((m) => (
-                          <span key={m} className={styles.mealBadge}>
-                            {MEAL_LABELS[m]}
-                          </span>
-                        ))}
+                      {/* Utensils 아이콘 — faint 톤, 뱃지 그룹 앞에 위치 */}
+                      <span className="inline-flex items-start gap-1.5">
+                        <Utensils className={cn('h-3.5 w-3.5 shrink-0 mt-0.5', styles.faint)} />
+                        <span className="flex flex-wrap gap-1.5">
+                          {place.meal_times.map((m) => (
+                            <span key={m} className={styles.mealBadge}>
+                              {MEAL_LABELS[m]}
+                            </span>
+                          ))}
+                        </span>
                       </span>
                     </DetailRow>
                   )}

@@ -13,6 +13,9 @@ import {
   ExternalLink,
   User,
   Undo2,
+  Clock,
+  Sun,
+  Moon,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -178,9 +181,10 @@ export function ActivityDetail({ id, initialMode = 'view' }: Props) {
                 activity.category ? <CategoryBadge category={activity.category} /> : undefined
               }
               headerExtra={
-                activity.status === 'visited' ? (
-                  <span className={styles.visitedTag}>다녀온 곳</span>
-                ) : undefined
+                /* 방문 완료/미방문 모두 동일한 visitedTag 스타일로 짝맞춤 */
+                <span className={styles.visitedTag}>
+                  {activity.status === 'visited' ? '다녀온 곳' : '가보고 싶은 곳'}
+                </span>
               }
             >
               {editingInfo ? (
@@ -195,12 +199,24 @@ export function ActivityDetail({ id, initialMode = 'view' }: Props) {
                 <div className="grid grid-cols-1 sm:grid-cols-2">
                   {activity.duration_bucket && (
                     <DetailRow label="소요시간">
-                      {DURATION_LABELS[activity.duration_bucket]}
+                      {/* Clock 아이콘 — faint 톤(카테고리 보라보다 약하게, 위계 유지) */}
+                      <span className="inline-flex items-center gap-1.5">
+                        <Clock className={cn('h-3.5 w-3.5 shrink-0', styles.faint)} />
+                        {DURATION_LABELS[activity.duration_bucket]}
+                      </span>
                     </DetailRow>
                   )}
                   {activity.time_of_day && activity.time_of_day !== 'any' && (
                     <DetailRow label="시간대">
-                      {TIME_OF_DAY_LABELS[activity.time_of_day]}
+                      {/* Sun(주간) / Moon(야간) — faint 톤 */}
+                      <span className="inline-flex items-center gap-1.5">
+                        {activity.time_of_day === 'day' ? (
+                          <Sun className={cn('h-3.5 w-3.5 shrink-0', styles.faint)} />
+                        ) : (
+                          <Moon className={cn('h-3.5 w-3.5 shrink-0', styles.faint)} />
+                        )}
+                        {TIME_OF_DAY_LABELS[activity.time_of_day]}
+                      </span>
                     </DetailRow>
                   )}
                   <DetailRow label="메모" wide>

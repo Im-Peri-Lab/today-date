@@ -7,38 +7,38 @@ import { cn } from '@/lib/utils'
 import styles from '@/components/screens.module.css'
 
 interface DetailBlockProps {
-  /** 섹션 라벨 (예: "등록 정보", "방문 기록") */
+  /** 섹션 라벨 (예: "방문 기록") — blockTitle이 있으면 렌더하지 않음 */
   title: string
-  /** 이 블록이 인라인 편집 모드인지 */
   editing: boolean
-  /** 연필 클릭 → 편집 시작 */
   onEdit: () => void
-  /** 편집 취소 */
   onCancel: () => void
-  /** 편집 저장 */
   onSave: () => void
-  /** 저장 진행 중 (버튼 비활성/문구) */
   saving: boolean
   /**
    * 블록 헤더에 표시할 아이템 제목 (보기 모드 전용).
-   * 편집 모드에서는 폼 내부의 제목 필드가 대신 표시되므로 숨겨진다.
+   * 제공되면 섹션 라벨(title)을 숨기고 이 제목을 h1으로 표시한다.
+   * 편집 모드에서는 폼 내부의 제목 필드가 대신 표시되므로 헤더 전체 숨김.
    */
   blockTitle?: string
   /** 블록 헤더에 표시할 카테고리 뱃지 (보기 모드 전용) */
   blockCategory?: ReactNode
-  /**
-   * 카테고리 옆 보조 노드 (예: "다녀온 곳" 상태 태그) — 선택.
-   */
+  /** 카테고리 옆 보조 노드 (예: "다녀온 곳" / "가보고 싶은 곳" 상태 태그) */
   headerExtra?: ReactNode
   children: ReactNode
 }
 
 /**
  * 상세 화면의 카드 블록 공용 셸.
- * - detailCard(radius 1.5rem) + card surface 토큰으로 부드러운 블록 표현.
- * - 연필 버튼: 카드 relative + absolute top/right 로 모서리에 밀착.
- *   editGhostBtn 이 --s-* 토큰만 참조하므로 라이트/다크 모두 카드면과 조화됨.
- * - blockTitle/blockCategory: 보기 모드에서 카드 헤더 안에 카테고리+제목 표시.
+ *
+ * 섹션 라벨 표시 규칙:
+ *  - blockTitle 있음(등록 정보 블록): 라벨 숨김. 카테고리+상태태그+제목이 자체 식별.
+ *  - blockTitle 없음(방문 기록 등): 라벨(h2) 표시 → 스크린리더 섹션 탐색 보장.
+ *
+ * 헤더 영역 렌더 조건(showHeader):
+ *  - !blockTitle: 섹션 라벨을 항상 보여야 하므로 헤더 표시.
+ *  - hasHeaderContent: 카테고리/제목/상태 태그가 있을 때 헤더 표시.
+ *  - editing+blockTitle: hasHeaderContent=false, !blockTitle=false → 헤더 숨김.
+ *    (폼이 카드 최상단에서 바로 시작 → 불필요한 여백 없음)
  */
 export function DetailBlock({
   title,
@@ -53,12 +53,9 @@ export function DetailBlock({
   children,
 }: DetailBlockProps) {
   const hasHeaderContent = !editing && (blockCategory || blockTitle || headerExtra)
-  // blockTitle(h1) 아래에 올 때 h2→h1 역순을 피하기 위해 <p>로 강등.
-  // blockTitle 없는 블록(방문 기록 등)은 <h2>를 유지해 스크린리더 섹션 탐색 보장.
-  const SectionLabel = blockTitle ? 'p' : 'h2'
+  const showHeader = !blockTitle || !!hasHeaderContent
 
   return (
-    /* detailCard: .card보다 한 단계 더 둥근 1.5rem. relative: 연필 버튼 절대위치 기준 */
     <section
       className={cn(
         styles.card,
@@ -79,32 +76,35 @@ export function DetailBlock({
         </button>
       )}
 
-      {/* ── 블록 헤더 — 편집 중엔 pr 불필요(버튼 없음), 보기 모드엔 버튼 영역 확보 */}
-      <div className={cn(!editing && 'pr-10')}>
-        <SectionLabel
-          className={cn('text-xs font-medium uppercase tracking-wide', styles.sub)}
-        >
-          {title}
-        </SectionLabel>
+      {/* 블록 헤더 — showHeader 일 때만 렌더 */}
+      {showHeader && (
+        <div className={cn(!editing && 'pr-10')}>
+          {/* 섹션 라벨: blockTitle이 없는 블록(방문 기록 등)에서만 표시 */}
+          {!blockTitle && (
+            <h2 className={cn('text-xs font-medium uppercase tracking-wide', styles.sub)}>
+              {title}
+            </h2>
+          )}
 
-        {/* 카테고리 뱃지 + 상태 태그 + 아이템 제목 (보기 모드 전용) */}
-        {hasHeaderContent && (
-          <div className="mt-2">
-            {(blockCategory || headerExtra) && (
-              <div className="flex flex-wrap items-center gap-2">
-                {blockCategory}
-                {headerExtra}
-              </div>
-            )}
-            {/* 칩↔제목 간격: mt-3(12px) — 이전 mt-1.5(6px)에서 넓혀 숨 쉬게 */}
-            {blockTitle && (
-              <h1 className={cn('mt-3', styles.pageTitle)}>{blockTitle}</h1>
-            )}
-          </div>
-        )}
-      </div>
+          {/* 카테고리 뱃지 + 상태 태그 + 아이템 제목 (보기 모드 전용) */}
+          {hasHeaderContent && (
+            <div>
+              {(blockCategory || headerExtra) && (
+                <div className="flex flex-wrap items-center gap-2">
+                  {blockCategory}
+                  {headerExtra}
+                </div>
+              )}
+              {blockTitle && (
+                <h1 className={cn('mt-3', styles.pageTitle)}>{blockTitle}</h1>
+              )}
+            </div>
+          )}
+        </div>
+      )}
 
-      <div className="mt-3">{children}</div>
+      {/* children — showHeader가 있을 때 mt-3으로 헤더와 분리 */}
+      <div className={cn(showHeader && 'mt-3')}>{children}</div>
 
       {editing && (
         <div className="mt-5 flex gap-2">

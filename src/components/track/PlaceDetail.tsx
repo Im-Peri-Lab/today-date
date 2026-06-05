@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
@@ -22,7 +22,13 @@ import { MEAL_LABELS, STATUS_LABELS } from '@/lib/labels'
 import { cn } from '@/lib/utils'
 import styles from '@/components/screens.module.css'
 
-export function PlaceDetail({ id }: { id: string }) {
+interface Props {
+  id: string
+  /** 'info' = 등록 정보 블록 / 'visit' = 방문 기록 블록을 편집모드로 열고 진입 */
+  initialEdit?: 'info' | 'visit'
+}
+
+export function PlaceDetail({ id, initialEdit }: Props) {
   const router = useRouter()
   const { data: place, isLoading, isError } = usePlace(id)
   const del = useDeletePlace()
@@ -56,6 +62,17 @@ export function PlaceDetail({ id }: { id: string }) {
     })
   }
 
+  // initialEdit='info'(?edit=info)일 때 place 로드 후 등록 정보 블록을 편집 모드로 연다.
+  // ('visit'은 VisitRecordBlock이 initialEditing으로 직접 처리)
+  const didInitEdit = useRef(false)
+  useEffect(() => {
+    if (didInitEdit.current || !place || initialEdit !== 'info') return
+    didInitEdit.current = true
+    fillForm()
+    setEditingInfo(true)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [place?.id, initialEdit])
+
   function handleDelete() {
     del.mutate(id, {
       onSuccess: () => {
@@ -81,6 +98,14 @@ export function PlaceDetail({ id }: { id: string }) {
     setEditingInfo(true)
   }
 
+  function exitEditInfo() {
+    setEditingInfo(false)
+    // URL에서 ?edit= 제거 (재내비게이션 없이 히스토리만 교체)
+    if (typeof window !== 'undefined') {
+      window.history.replaceState(null, '', `/places/${id}`)
+    }
+  }
+
   const onSaveInfo = handleSubmit(async (values) => {
     if (!place) return
     const payload = {
@@ -93,7 +118,7 @@ export function PlaceDetail({ id }: { id: string }) {
     try {
       await update.mutateAsync({ id: place.id, patch: payload })
       toast.success('수정되었습니다!')
-      setEditingInfo(false)
+      exitEditInfo()
     } catch (err) {
       toast.error(err instanceof Error ? err.message : '저장 중 오류가 발생했습니다.')
     }
@@ -123,7 +148,7 @@ export function PlaceDetail({ id }: { id: string }) {
               title="등록 정보"
               editing={editingInfo}
               onEdit={startEditInfo}
-              onCancel={() => setEditingInfo(false)}
+              onCancel={exitEditInfo}
               onSave={onSaveInfo}
               saving={isSubmitting || update.isPending}
               blockTitle={place.title}
@@ -239,6 +264,7 @@ export function PlaceDetail({ id }: { id: string }) {
                 visitedAt={place.visited_at}
                 rating={place.rating}
                 reviewNote={place.review_note}
+                initialEditing={initialEdit === 'visit'}
               />
             )}
           </div>

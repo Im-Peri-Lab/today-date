@@ -43,10 +43,11 @@ import styles from '@/components/screens.module.css'
 
 interface Props {
   id: string
-  initialMode?: 'view' | 'edit'
+  /** 'info' = 등록 정보 블록 / 'visit' = 방문 기록 블록을 편집모드로 열고 진입 */
+  initialEdit?: 'info' | 'visit'
 }
 
-export function ActivityDetail({ id, initialMode = 'view' }: Props) {
+export function ActivityDetail({ id, initialEdit }: Props) {
   const router = useRouter()
   const { data: activity, isLoading, isError } = useActivity(id)
   const del = useDeleteActivity()
@@ -81,15 +82,16 @@ export function ActivityDetail({ id, initialMode = 'view' }: Props) {
     })
   }
 
-  // initialMode='edit'(?mode=edit)일 때 activity 로드 후 등록 정보 블록을 편집 모드로 연다.
+  // initialEdit='info'(?edit=info)일 때 activity 로드 후 등록 정보 블록을 편집 모드로 연다.
+  // ('visit'은 VisitRecordBlock이 initialEditing으로 직접 처리)
   const didInitEdit = useRef(false)
   useEffect(() => {
-    if (didInitEdit.current || !activity || initialMode !== 'edit') return
+    if (didInitEdit.current || !activity || initialEdit !== 'info') return
     didInitEdit.current = true
     fillForm()
     setEditingInfo(true)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activity?.id, initialMode])
+  }, [activity?.id, initialEdit])
 
   /* ── 핸들러 ── */
 
@@ -123,7 +125,7 @@ export function ActivityDetail({ id, initialMode = 'view' }: Props) {
 
   function exitEditInfo() {
     setEditingInfo(false)
-    // URL에서 ?mode=edit 제거 (재내비게이션 없이 히스토리만 교체)
+    // URL에서 ?edit= 제거 (재내비게이션 없이 히스토리만 교체)
     if (typeof window !== 'undefined') {
       window.history.replaceState(null, '', `/activities/${id}`)
     }
@@ -288,6 +290,7 @@ export function ActivityDetail({ id, initialMode = 'view' }: Props) {
                 visitedAt={activity.visited_at}
                 rating={activity.rating}
                 reviewNote={activity.review_note}
+                initialEditing={initialEdit === 'visit'}
               />
             )}
           </div>

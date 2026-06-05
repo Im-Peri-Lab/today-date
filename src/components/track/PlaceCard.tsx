@@ -11,7 +11,7 @@ import { RatingStars } from './RatingStars'
 import { DeleteConfirmDialog } from './DeleteConfirmDialog'
 import { VisitedDialog } from '@/components/VisitedDialog'
 import { useDeletePlace, useUpdatePlace } from '@/hooks/usePlaces'
-import { MEAL_LABELS } from '@/lib/labels'
+import { MEAL_LABELS, STATUS_LABELS } from '@/lib/labels'
 import { cn } from '@/lib/utils'
 import type { Place } from '@/types'
 import styles from '@/components/screens.module.css'
@@ -33,7 +33,7 @@ export function PlaceCard({ place, hideMenu, actionSlot }: PlaceCardProps) {
     update.mutate(
       { id: place.id, patch: { status: 'wishlist' } },
       {
-        onSuccess: () => toast.success('위시리스트로 옮겼어요'),
+        onSuccess: () => toast.success(`${STATUS_LABELS.wishlist}으로 옮겼어요`),
         onError: () => toast.error('변경 중 오류가 발생했습니다.'),
       }
     )
@@ -60,7 +60,8 @@ export function PlaceCard({ place, hideMenu, actionSlot }: PlaceCardProps) {
         >
           <ItemMenu
             status={place.status}
-            onEdit={() => router.push(`/places/${place.id}/edit`)}
+            onEditInfo={() => router.push(`/places/${place.id}?edit=info`)}
+            onEditVisit={() => router.push(`/places/${place.id}?edit=visit`)}
             onDelete={() => setDeleteOpen(true)}
             onMarkVisited={() => setVisitedOpen(true)}
             onRevert={handleRevert}

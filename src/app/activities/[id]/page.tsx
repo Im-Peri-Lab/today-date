@@ -8,16 +8,16 @@ export default async function ActivityDetailPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>
-  searchParams: Promise<{ mode?: string }>
+  searchParams: Promise<{ edit?: string }>
 }) {
   const session = await getSession()
   if (!session.authenticated) redirect('/lock')
   const { id } = await params
-  const { mode } = await searchParams
+  const { edit } = await searchParams
 
   return (
     <main className={styles.page}>
-      <ActivityDetail id={id} initialMode={mode === 'edit' ? 'edit' : 'view'} />
+      <ActivityDetail id={id} initialEdit={edit === 'info' || edit === 'visit' ? edit : undefined} />
     </main>
   )
 }

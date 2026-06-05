@@ -753,6 +753,25 @@
   }
 }
 
+/*
+ * 상세 하단 삭제 버튼 — 평소엔 faint 톤으로 조용하게, hover/press 시 destructive 살짝.
+ * variant="ghost" 와 조합: ghost 의 hover:bg-muted/hover:text-foreground 를 @media 없이도 덮어씀
+ * (CSS Module 은 Tailwind utilities 뒤에 오므로 동일 specificity 기준 CSS Module 이 승리).
+ */
+.detailDeleteBtn {
+  color: var(--s-faint, #9ca3af);
+}
+@media (hover: hover) {
+  .detailDeleteBtn:hover {
+    color: hsl(var(--destructive));
+    background: hsl(var(--destructive) / 0.08);
+  }
+}
+.detailDeleteBtn:active {
+  color: hsl(var(--destructive));
+  background: hsl(var(--destructive) / 0.12);
+}
+
 /* ── 인라인 편집: 라디오 옵션 버튼 ────────────────── */
 .editRadioOption {
   flex: 1;

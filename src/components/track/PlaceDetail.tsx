@@ -70,7 +70,7 @@ export function PlaceDetail({ id }: { id: string }) {
     update.mutate(
       { id, patch: { status: 'wishlist' } },
       {
-        onSuccess: () => toast.success('위시리스트로 옮겼어요'),
+        onSuccess: () => toast.success('가보고 싶은 곳으로 옮겼어요'),
         onError: () => toast.error('변경 중 오류가 발생했습니다.'),
       }
     )
@@ -238,31 +238,39 @@ export function PlaceDetail({ id }: { id: string }) {
             )}
           </div>
 
-          {/* ── 하단 액션 버튼 (버튼 위계 정리는 다음 단계 — 이번엔 유지) ── */}
+          {/* ── 하단 액션 버튼 — 좌: 삭제(약한 톤) / 우: Primary(단색 액센트) ── */}
           {!editingInfo && (
-            <div className="mt-6 flex flex-wrap gap-2">
+            <div className="mt-6 flex items-center justify-between gap-3">
+              {/* 좌: 삭제 — 평소 faint, hover 시 destructive 노출 */}
+              <Button
+                variant="ghost"
+                className={cn(styles.detailDeleteBtn, 'gap-1.5')}
+                onClick={() => setDeleteOpen(true)}
+              >
+                <Trash2 className="h-4 w-4" />
+                삭제
+              </Button>
+
+              {/* 우: Primary — 단색 --s-accent, 그라데이션 제거 */}
               {place.status === 'visited' ? (
-                <Button variant="outline" className="gap-1.5" onClick={handleRevert}>
+                <Button
+                  className="gap-1.5 text-white hover:brightness-105"
+                  style={{ background: 'var(--s-accent, #7c3aed)' }}
+                  onClick={handleRevert}
+                >
                   <Undo2 className="h-4 w-4" />
-                  위시리스트로 되돌리기
+                  가보고 싶은 곳으로 되돌리기
                 </Button>
               ) : (
                 <Button
                   className="gap-1.5 text-white hover:brightness-105"
-                  style={{
-                    background:
-                      'var(--s-active-fill, linear-gradient(135deg,#a855f7 0%,#ec4899 100%))',
-                  }}
+                  style={{ background: 'var(--s-accent, #7c3aed)' }}
                   onClick={() => setVisitedOpen(true)}
                 >
                   <CheckCircle2 className="h-4 w-4" />
                   다녀왔어요
                 </Button>
               )}
-              <Button variant="destructive" className={cn(styles.destructiveBtn, 'gap-1.5')} onClick={() => setDeleteOpen(true)}>
-                <Trash2 className="h-4 w-4" />
-                삭제
-              </Button>
             </div>
           )}
 

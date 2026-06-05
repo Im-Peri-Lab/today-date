@@ -155,29 +155,17 @@ export function ActivityDetail({ id, initialMode = 'view' }: Props) {
 
       {isLoading ? (
         <div className="mt-4 space-y-4">
-          <Skeleton className="h-7 w-3/4" />
-          <Skeleton className={cn(styles.card, 'h-40 w-full')} />
+          <Skeleton className={cn(styles.card, 'h-48 w-full')} />
           <Skeleton className={cn(styles.card, 'h-28 w-full')} />
         </div>
       ) : isError || !activity ? (
         <div className={cn(styles.empty, 'mt-4', styles.sub)}>활동을 찾을 수 없어요.</div>
       ) : (
         <>
-          {/* 제목 영역 — 편집 중에는 폼 안에 제목 입력이 있으므로 숨김 */}
-          {!editingInfo && (
-            <div className="mt-4">
-              <div className="flex flex-wrap items-center gap-2">
-                {activity.category && <CategoryBadge category={activity.category} />}
-                {activity.status === 'visited' && (
-                  <span className={styles.visitedTag}>다녀온 곳</span>
-                )}
-              </div>
-              <h1 className={cn('mt-2', styles.pageTitle)}>{activity.title}</h1>
-            </div>
-          )}
-
           <div className="mt-5 space-y-4">
-            {/* ── 등록 정보 블록 ── */}
+            {/* ── 등록 정보 블록 ──
+                제목·카테고리를 블록 헤더 안으로 통합: 연필 수정 범위가 제목·카테고리까지
+                포함됨이 자연스럽게 드러난다. */}
             <DetailBlock
               title="등록 정보"
               editing={editingInfo}
@@ -185,6 +173,15 @@ export function ActivityDetail({ id, initialMode = 'view' }: Props) {
               onCancel={exitEditInfo}
               onSave={onSaveInfo}
               saving={isSubmitting || update.isPending}
+              blockTitle={activity.title}
+              blockCategory={
+                activity.category ? <CategoryBadge category={activity.category} /> : undefined
+              }
+              headerExtra={
+                activity.status === 'visited' ? (
+                  <span className={styles.visitedTag}>다녀온 곳</span>
+                ) : undefined
+              }
             >
               {editingInfo ? (
                 <ActivityFields
@@ -194,7 +191,8 @@ export function ActivityDetail({ id, initialMode = 'view' }: Props) {
                   setValue={setValue}
                 />
               ) : (
-                <div>
+                /* 짧은 값: 2열 그리드 / 긴 텍스트(메모·링크): wide로 전체폭 / 모바일: 1열 */
+                <div className="grid grid-cols-1 sm:grid-cols-2">
                   {activity.duration_bucket && (
                     <DetailRow label="소요시간">
                       {DURATION_LABELS[activity.duration_bucket]}
@@ -205,14 +203,14 @@ export function ActivityDetail({ id, initialMode = 'view' }: Props) {
                       {TIME_OF_DAY_LABELS[activity.time_of_day]}
                     </DetailRow>
                   )}
-                  <DetailRow label="메모">
+                  <DetailRow label="메모" wide>
                     {activity.memo ? (
                       <p className="whitespace-pre-wrap leading-relaxed">{activity.memo}</p>
                     ) : (
                       <span className={styles.faint}>아직 메모가 없어요</span>
                     )}
                   </DetailRow>
-                  <DetailRow label="참고 링크">
+                  <DetailRow label="참고 링크" wide>
                     {activity.reference_url ? (
                       <a
                         href={activity.reference_url}
@@ -227,6 +225,36 @@ export function ActivityDetail({ id, initialMode = 'view' }: Props) {
                       <span className={styles.faint}>참고 링크가 없어요</span>
                     )}
                   </DetailRow>
+
+                  {/* 등록 메타 캡션 — 블록 맨 마지막, faint 톤 */}
+                  {(activity.added_by || activity.created_at) && (
+                    <div
+                      className={cn(
+                        styles.sheetRow,
+                        'sm:col-span-2 pb-0',
+                        'flex flex-wrap items-center gap-x-3 gap-y-0.5',
+                        'text-xs',
+                        styles.faint,
+                      )}
+                    >
+                      {activity.added_by && (
+                        <span className="inline-flex items-center gap-1">
+                          <User className="h-3 w-3 shrink-0" />
+                          {activity.added_by}
+                        </span>
+                      )}
+                      {activity.created_at && (
+                        <span>
+                          {new Date(activity.created_at).toLocaleDateString('ko-KR', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric',
+                          })}
+                          에 등록
+                        </span>
+                      )}
+                    </div>
+                  )}
                 </div>
               )}
             </DetailBlock>
@@ -242,28 +270,6 @@ export function ActivityDetail({ id, initialMode = 'view' }: Props) {
               />
             )}
           </div>
-
-          {/* ── 등록 메타 (누가/언제 등록) ── */}
-          {(activity.added_by || activity.created_at) && (
-            <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1">
-              {activity.added_by && (
-                <span className={cn('inline-flex items-center gap-1 text-xs', styles.faint)}>
-                  <User className="h-3 w-3 shrink-0" />
-                  {activity.added_by}
-                </span>
-              )}
-              {activity.created_at && (
-                <span className={cn('text-xs', styles.faint)}>
-                  {new Date(activity.created_at).toLocaleDateString('ko-KR', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric',
-                  })}
-                  에 등록
-                </span>
-              )}
-            </div>
-          )}
 
           {/* ── 하단 액션 버튼 (버튼 위계 정리는 다음 단계 — 이번엔 유지) ── */}
           {!editingInfo && (

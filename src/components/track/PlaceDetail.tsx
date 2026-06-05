@@ -6,7 +6,7 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
-import { ArrowLeft, Trash2, CheckCircle2, Undo2, MapPin, ExternalLink } from 'lucide-react'
+import { ArrowLeft, Trash2, CheckCircle2, Undo2, MapPin, ExternalLink, User } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { CategoryBadge } from './CategoryBadge'
@@ -108,27 +108,17 @@ export function PlaceDetail({ id }: { id: string }) {
 
       {isLoading ? (
         <div className="mt-4 space-y-4">
-          <Skeleton className="h-7 w-3/4" />
-          <Skeleton className={cn(styles.card, 'h-40 w-full')} />
+          <Skeleton className={cn(styles.card, 'h-48 w-full')} />
           <Skeleton className={cn(styles.card, 'h-28 w-full')} />
         </div>
       ) : isError || !place ? (
         <div className={cn(styles.empty, 'mt-4', styles.sub)}>장소를 찾을 수 없어요.</div>
       ) : (
         <>
-          {/* 제목 영역 — 편집 중에는 폼 안에 제목 입력이 있으므로 숨김 */}
-          {!editingInfo && (
-            <div className="mt-4">
-              <div className="flex flex-wrap items-center gap-2">
-                {place.category && <CategoryBadge category={place.category} />}
-                {place.status === 'visited' && <span className={styles.visitedTag}>다녀온 곳</span>}
-              </div>
-              <h1 className={cn('mt-2', styles.pageTitle)}>{place.title}</h1>
-            </div>
-          )}
-
           <div className="mt-5 space-y-4">
-            {/* ── 등록 정보 블록 ── */}
+            {/* ── 등록 정보 블록 ──
+                제목·카테고리를 블록 헤더 안으로 통합: 연필 수정 범위가 제목·카테고리까지
+                포함됨이 자연스럽게 드러난다. */}
             <DetailBlock
               title="등록 정보"
               editing={editingInfo}
@@ -136,6 +126,15 @@ export function PlaceDetail({ id }: { id: string }) {
               onCancel={() => setEditingInfo(false)}
               onSave={onSaveInfo}
               saving={isSubmitting || update.isPending}
+              blockTitle={place.title}
+              blockCategory={
+                place.category ? <CategoryBadge category={place.category} /> : undefined
+              }
+              headerExtra={
+                place.status === 'visited' ? (
+                  <span className={styles.visitedTag}>다녀온 곳</span>
+                ) : undefined
+              }
             >
               {editingInfo ? (
                 <PlaceFields
@@ -145,7 +144,8 @@ export function PlaceDetail({ id }: { id: string }) {
                   setValue={setValue}
                 />
               ) : (
-                <div>
+                /* 짧은 값: 2열 그리드 / 긴 텍스트(메모·링크): wide로 전체폭 / 모바일: 1열 */
+                <div className="grid grid-cols-1 sm:grid-cols-2">
                   {place.location && (
                     <DetailRow label="위치">
                       <span className="inline-flex items-center gap-1.5">
@@ -165,14 +165,14 @@ export function PlaceDetail({ id }: { id: string }) {
                       </span>
                     </DetailRow>
                   )}
-                  <DetailRow label="메모">
+                  <DetailRow label="메모" wide>
                     {place.memo ? (
                       <p className="whitespace-pre-wrap leading-relaxed">{place.memo}</p>
                     ) : (
                       <span className={styles.faint}>아직 메모가 없어요</span>
                     )}
                   </DetailRow>
-                  <DetailRow label="참고 링크">
+                  <DetailRow label="참고 링크" wide>
                     {place.reference_url ? (
                       <a
                         href={place.reference_url}
@@ -187,6 +187,36 @@ export function PlaceDetail({ id }: { id: string }) {
                       <span className={styles.faint}>참고 링크가 없어요</span>
                     )}
                   </DetailRow>
+
+                  {/* 등록 메타 캡션 — 블록 맨 마지막, faint 톤 */}
+                  {(place.added_by || place.created_at) && (
+                    <div
+                      className={cn(
+                        styles.sheetRow,
+                        'sm:col-span-2 pb-0',
+                        'flex flex-wrap items-center gap-x-3 gap-y-0.5',
+                        'text-xs',
+                        styles.faint,
+                      )}
+                    >
+                      {place.added_by && (
+                        <span className="inline-flex items-center gap-1">
+                          <User className="h-3 w-3 shrink-0" />
+                          {place.added_by}
+                        </span>
+                      )}
+                      {place.created_at && (
+                        <span>
+                          {new Date(place.created_at).toLocaleDateString('ko-KR', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric',
+                          })}
+                          에 등록
+                        </span>
+                      )}
+                    </div>
+                  )}
                 </div>
               )}
             </DetailBlock>

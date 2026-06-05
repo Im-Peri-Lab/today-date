@@ -107,19 +107,15 @@ export function VisitRecordBlock({
           </div>
         </div>
       ) : (
-        <div className="space-y-3">
-          {/* 하이라이트: 방문일 + 별점을 또렷하게 */}
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-            {visitedAt && (
-              <span
-                className={cn('inline-flex items-center gap-1.5 text-base font-medium', styles.ink)}
-              >
-                <Calendar className={cn('h-4 w-4 shrink-0', styles.accent)} />
-                {formatKoreanDate(visitedAt)}
-              </span>
-            )}
-            {rating ? <RatingStars value={rating} size="md" /> : null}
-          </div>
+        <div className="space-y-2">
+          {/* 방문일과 별점을 두 줄로 분리 — 날짜 위, 별점 아래 */}
+          {visitedAt && (
+            <div className={cn('inline-flex items-center gap-1.5 text-base font-medium', styles.ink)}>
+              <Calendar className={cn('h-4 w-4 shrink-0', styles.accent)} />
+              {formatKoreanDate(visitedAt)}
+            </div>
+          )}
+          {rating ? <RatingStars value={rating} size="sm" /> : null}
           {reviewNote && (
             <p className={cn('whitespace-pre-wrap text-sm leading-relaxed', styles.sub)}>
               {reviewNote}

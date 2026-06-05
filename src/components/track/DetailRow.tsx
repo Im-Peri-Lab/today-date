@@ -5,15 +5,21 @@ import styles from '@/components/screens.module.css'
 interface DetailRowProps {
   label: string
   children: ReactNode
+  /**
+   * true: sm 브레이크포인트 이상에서 2열 그리드의 전체폭(col-span-2).
+   * 메모·참고 링크처럼 긴 텍스트에 사용. 기본 false.
+   */
+  wide?: boolean
 }
 
 /**
- * 등록 정보 블록의 라벨-값 행. 행마다 얇은 상단 구분선(sheetRow)으로 나누되,
- * 카드 헤더 바로 아래 첫 행은 구분선/상단 여백을 없앤다.
+ * 등록 정보 블록의 라벨-값 셀.
+ * 부모 컨테이너가 grid-cols-2 일 때 wide=false 는 1열, wide=true 는 2열을 점유.
+ * 각 셀 상단 구분선(sheetRow)으로 행을 시각적으로 분리한다.
  */
-export function DetailRow({ label, children }: DetailRowProps) {
+export function DetailRow({ label, children, wide }: DetailRowProps) {
   return (
-    <div className={cn(styles.sheetRow, 'first:border-t-0 first:pt-0')}>
+    <div className={cn(styles.sheetRow, wide && 'sm:col-span-2')}>
       <p className={cn('mb-1.5 text-xs font-medium uppercase tracking-wide', styles.sub)}>{label}</p>
       <div className={cn('text-sm', styles.ink)}>{children}</div>
     </div>

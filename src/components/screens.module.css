@@ -699,6 +699,39 @@
   border-radius: 0.5rem;
 }
 
+/*
+ * 고스트 편집 버튼 — 상세 카드 헤더 우상단 연필(아이콘 전용).
+ * shadcn Button의 dark: 클래스 방식이 아닌 --s-* 토큰 직접 참조:
+ *   라이트 → 폴백값, 다크 → .page 가 재정의한 변수값을 자동 상속.
+ * 기본: 투명 배경(카드면과 동화) / 호버: 카드 보더 색 배경.
+ */
+.editGhostBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  flex-shrink: 0;
+  border-radius: 0.5rem;
+  color: var(--s-faint, #9ca3af);
+  background: transparent;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition:
+    background 140ms ease,
+    color 140ms ease;
+}
+.editGhostBtn:hover {
+  background: var(--s-card-border-strong, #eceaf3);
+  color: var(--s-ink, #1a1033);
+}
+@media (prefers-color-scheme: dark) {
+  .editGhostBtn:hover {
+    background: var(--s-accent-soft-bg, #2d2540);
+    color: var(--s-accent, #c084fc);
+  }
+}
+
 /* ── 인라인 편집: 라디오 옵션 버튼 ────────────────── */
 .editRadioOption {
   flex: 1;

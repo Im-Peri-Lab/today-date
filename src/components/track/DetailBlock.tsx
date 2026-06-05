@@ -56,6 +56,9 @@ export function DetailBlock({
   children,
 }: DetailBlockProps) {
   const hasHeaderContent = !editing && (blockCategory || blockTitle || headerExtra)
+  // blockTitle(h1)이 아래에 렌더될 때 h2→h1 역순을 피하기 위해 <p>로 강등.
+  // blockTitle 없는 블록(예: 방문 기록)은 <h2>를 유지해 스크린리더 섹션 탐색 보장.
+  const SectionLabel = blockTitle ? 'p' : 'h2'
 
   return (
     <section className={cn(styles.card, 'p-5 lg:p-6')}>
@@ -63,7 +66,7 @@ export function DetailBlock({
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           {/* 섹션 라벨 */}
-          <p className={cn('text-xs font-medium uppercase tracking-wide', styles.sub)}>{title}</p>
+          <SectionLabel className={cn('text-xs font-medium uppercase tracking-wide', styles.sub)}>{title}</SectionLabel>
 
           {/* 카테고리 뱃지 + 상태 태그 + 아이템 제목 (보기 모드 전용) */}
           {hasHeaderContent && (

@@ -226,12 +226,12 @@ export function ActivityDetail({ id, initialMode = 'view' }: Props) {
                     )}
                   </DetailRow>
 
-                  {/* 등록 메타 캡션 — 블록 맨 마지막, faint 톤 */}
+                  {/* 등록 메타 캡션 — 블록 맨 마지막, faint 톤.
+                      sheetRow(border+padding) 대신 mt-3.5만 사용해 하단 여백 최소화 */}
                   {(activity.added_by || activity.created_at) && (
                     <div
                       className={cn(
-                        styles.sheetRow,
-                        'sm:col-span-2 pb-0',
+                        'sm:col-span-2 mt-3.5',
                         'flex flex-wrap items-center gap-x-3 gap-y-0.5',
                         'text-xs',
                         styles.faint,

@@ -24,13 +24,10 @@ interface DetailBlockProps {
    * 편집 모드에서는 폼 내부의 제목 필드가 대신 표시되므로 숨겨진다.
    */
   blockTitle?: string
-  /**
-   * 블록 헤더에 표시할 카테고리 뱃지 (보기 모드 전용).
-   */
+  /** 블록 헤더에 표시할 카테고리 뱃지 (보기 모드 전용) */
   blockCategory?: ReactNode
   /**
-   * 헤더 카테고리 옆에 함께 표시할 보조 노드
-   * (예: "다녀온 곳" 상태 태그) — 선택.
+   * 카테고리 옆 보조 노드 (예: "다녀온 곳" 상태 태그) — 선택.
    */
   headerExtra?: ReactNode
   children: ReactNode
@@ -38,10 +35,10 @@ interface DetailBlockProps {
 
 /**
  * 상세 화면의 카드 블록 공용 셸.
- * - 스킬 카드 surface 토큰(styles.card)으로 별개 영역임을 보여준다.
- * - blockTitle / blockCategory: 보기 모드에서 카드 헤더 안에 카테고리+제목 표시.
- * - 우상단 고스트 연필 버튼(아이콘 전용) → 블록 전체 인라인 편집 전환.
- *   editGhostBtn 은 --s-* 토큰만 참조하므로 라이트/다크 모두 카드면과 조화됨.
+ * - detailCard(radius 1.5rem) + card surface 토큰으로 부드러운 블록 표현.
+ * - 연필 버튼: 카드 relative + absolute top/right 로 모서리에 밀착.
+ *   editGhostBtn 이 --s-* 토큰만 참조하므로 라이트/다크 모두 카드면과 조화됨.
+ * - blockTitle/blockCategory: 보기 모드에서 카드 헤더 안에 카테고리+제목 표시.
  */
 export function DetailBlock({
   title,
@@ -56,44 +53,54 @@ export function DetailBlock({
   children,
 }: DetailBlockProps) {
   const hasHeaderContent = !editing && (blockCategory || blockTitle || headerExtra)
-  // blockTitle(h1)이 아래에 렌더될 때 h2→h1 역순을 피하기 위해 <p>로 강등.
-  // blockTitle 없는 블록(예: 방문 기록)은 <h2>를 유지해 스크린리더 섹션 탐색 보장.
+  // blockTitle(h1) 아래에 올 때 h2→h1 역순을 피하기 위해 <p>로 강등.
+  // blockTitle 없는 블록(방문 기록 등)은 <h2>를 유지해 스크린리더 섹션 탐색 보장.
   const SectionLabel = blockTitle ? 'p' : 'h2'
 
   return (
-    <section className={cn(styles.card, 'p-5 lg:p-6')}>
-      {/* ── 블록 헤더 ── */}
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0 flex-1">
-          {/* 섹션 라벨 */}
-          <SectionLabel className={cn('text-xs font-medium uppercase tracking-wide', styles.sub)}>{title}</SectionLabel>
+    /* detailCard: .card보다 한 단계 더 둥근 1.5rem. relative: 연필 버튼 절대위치 기준 */
+    <section
+      className={cn(
+        styles.card,
+        styles.detailCard,
+        'relative',
+        'px-5 pt-5 pb-4 lg:px-6 lg:pt-6 lg:pb-5',
+      )}
+    >
+      {/* 고스트 연필 버튼 — absolute로 카드 우상단 모서리에 밀착 */}
+      {!editing && (
+        <button
+          type="button"
+          className={cn(styles.editGhostBtn, 'absolute top-3.5 right-3.5')}
+          onClick={onEdit}
+          aria-label={`${title} 수정`}
+        >
+          <Pencil className="h-4 w-4" />
+        </button>
+      )}
 
-          {/* 카테고리 뱃지 + 상태 태그 + 아이템 제목 (보기 모드 전용) */}
-          {hasHeaderContent && (
-            <div className="mt-2">
-              {(blockCategory || headerExtra) && (
-                <div className="flex flex-wrap items-center gap-2">
-                  {blockCategory}
-                  {headerExtra}
-                </div>
-              )}
-              {blockTitle && (
-                <h1 className={cn('mt-1.5', styles.pageTitle)}>{blockTitle}</h1>
-              )}
-            </div>
-          )}
-        </div>
+      {/* ── 블록 헤더 — 편집 중엔 pr 불필요(버튼 없음), 보기 모드엔 버튼 영역 확보 */}
+      <div className={cn(!editing && 'pr-10')}>
+        <SectionLabel
+          className={cn('text-xs font-medium uppercase tracking-wide', styles.sub)}
+        >
+          {title}
+        </SectionLabel>
 
-        {/* 고스트 연필 버튼 — editGhostBtn 이 --s-* 토큰 직접 참조 → 다크모드 자동 적응 */}
-        {!editing && (
-          <button
-            type="button"
-            className={styles.editGhostBtn}
-            onClick={onEdit}
-            aria-label={`${title} 수정`}
-          >
-            <Pencil className="h-4 w-4" />
-          </button>
+        {/* 카테고리 뱃지 + 상태 태그 + 아이템 제목 (보기 모드 전용) */}
+        {hasHeaderContent && (
+          <div className="mt-2">
+            {(blockCategory || headerExtra) && (
+              <div className="flex flex-wrap items-center gap-2">
+                {blockCategory}
+                {headerExtra}
+              </div>
+            )}
+            {/* 칩↔제목 간격: mt-3(12px) — 이전 mt-1.5(6px)에서 넓혀 숨 쉬게 */}
+            {blockTitle && (
+              <h1 className={cn('mt-3', styles.pageTitle)}>{blockTitle}</h1>
+            )}
+          </div>
         )}
       </div>
 

@@ -14,13 +14,17 @@ interface DetailRowProps {
 
 /**
  * 등록 정보 블록의 라벨-값 셀.
- * 부모 컨테이너가 grid-cols-2 일 때 wide=false 는 1열, wide=true 는 2열을 점유.
- * 각 셀 상단 구분선(sheetRow)으로 행을 시각적으로 분리한다.
+ * - 부모가 grid-cols-2 일 때 wide=false 는 1열, wide=true 는 2열 점유.
+ * - 구분선 없이 sheetRow의 padding-top만으로 필드 간 여백을 만든다.
+ * - 라벨: faint + font-normal(캡션 톤) — 값이 라벨보다 또렷하게.
  */
 export function DetailRow({ label, children, wide }: DetailRowProps) {
   return (
     <div className={cn(styles.sheetRow, wide && 'sm:col-span-2')}>
-      <p className={cn('mb-1.5 text-xs font-medium uppercase tracking-wide', styles.sub)}>{label}</p>
+      {/* 라벨: faint 톤 + 일반 굵기 — 값(ink/기본)보다 약하게 */}
+      <p className={cn('mb-1.5 text-xs font-normal uppercase tracking-wide', styles.faint)}>
+        {label}
+      </p>
       <div className={cn('text-sm', styles.ink)}>{children}</div>
     </div>
   )

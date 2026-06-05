@@ -684,16 +684,32 @@
   background: var(--s-card-bg, rgba(255, 255, 255, 0.5));
 }
 
-/* 상세: "다녀온 곳" 태그 + 방문 기록 박스 */
+/* 상세: 상태 태그 공용 레이아웃 — 색은 modifier 클래스(.visitedTagVisited / .visitedTagWishlist)로 분리 */
 .visitedTag {
   border-radius: 9999px;
   padding: 0.125rem 0.5rem;
   font-size: 0.75rem;
   font-weight: 500;
-  /* 라이트: --s-accent-soft-bg 미정의 → --s-card-border-strong(#eceaf3) 중성 폴백.
-     다크: --s-accent-soft-bg: #2d2540 정상 동작. statCardAccent 폴백 별도 유지. */
-  background: var(--s-accent-soft-bg, var(--s-card-border-strong, #eceaf3));
-  color: var(--s-accent-soft-text, var(--s-sub, #6b7280));
+}
+
+/* "다녀온 곳" — 중립 회색 면. --s-card-border-strong 이 .page 다크 미디어에서 #3a2f4e 로 자동 전환 */
+.visitedTagVisited {
+  background: var(--s-card-border-strong, #eceaf3);
+  color: var(--s-sub, #6b7280);
+}
+
+/* "가보고 싶은 곳" — 아주 연한 보라 면.
+   라이트: --s-accent(#7c3aed) 를 8% 불투명도로(스킬 지침: "accent를 아주 낮은 불투명도로").
+   다크:   --s-accent-soft-bg(#2d2540) / text --s-accent(#c084fc) — .page 미디어 cascade. */
+.visitedTagWishlist {
+  background: rgba(124, 58, 237, 0.08);
+  color: var(--s-accent, #7c3aed);
+}
+@media (prefers-color-scheme: dark) {
+  .visitedTagWishlist {
+    background: var(--s-accent-soft-bg, #2d2540);
+    /* color: var(--s-accent) → .page 다크 미디어에서 #c084fc 로 자동 cascade */
+  }
 }
 .visitBox {
   border-radius: 0.875rem;
@@ -754,22 +770,23 @@
 }
 
 /*
- * 상세 하단 삭제 버튼 — 평소엔 faint 톤으로 조용하게, hover/press 시 destructive 살짝.
- * variant="ghost" 와 조합: ghost 의 hover:bg-muted/hover:text-foreground 를 @media 없이도 덮어씀
- * (CSS Module 은 Tailwind utilities 뒤에 오므로 동일 specificity 기준 CSS Module 이 승리).
+ * 상세 하단 삭제 버튼 — 약한 중립 면 + faint 텍스트. hover/press 시 destructive 살짝.
+ * --s-card-border-strong 이 다크 .page 미디어에서 #3a2f4e 로 자동 cascade → @media 불필요.
+ * ghost variant 의 hover:bg-muted/hover:text-foreground 는 CSS Module 이 나중에 로드되므로 덮어씀.
  */
 .detailDeleteBtn {
+  background: var(--s-card-border-strong, #eceaf3);
   color: var(--s-faint, #9ca3af);
 }
 @media (hover: hover) {
   .detailDeleteBtn:hover {
     color: hsl(var(--destructive));
-    background: hsl(var(--destructive) / 0.08);
+    background: hsl(var(--destructive) / 0.15);
   }
 }
 .detailDeleteBtn:active {
   color: hsl(var(--destructive));
-  background: hsl(var(--destructive) / 0.12);
+  background: hsl(var(--destructive) / 0.2);
 }
 
 /* ── 인라인 편집: 라디오 옵션 버튼 ────────────────── */

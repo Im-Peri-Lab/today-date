@@ -181,8 +181,13 @@ export function ActivityDetail({ id, initialMode = 'view' }: Props) {
                 activity.category ? <CategoryBadge category={activity.category} /> : undefined
               }
               headerExtra={
-                /* 방문 완료/미방문 모두 동일한 visitedTag 스타일로 짝맞춤 */
-                <span className={styles.visitedTag}>
+                /* 방문완료=회색(visitedTagVisited), 위시리스트=연보라(visitedTagWishlist) */
+                <span className={cn(
+                  styles.visitedTag,
+                  activity.status === 'visited'
+                    ? styles.visitedTagVisited
+                    : styles.visitedTagWishlist,
+                )}>
                   {STATUS_LABELS[activity.status]}
                 </span>
               }

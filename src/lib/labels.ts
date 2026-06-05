@@ -1,4 +1,10 @@
-import type { DurationBucket, TimeOfDay, MealTime } from '@/types'
+import type { DurationBucket, TimeOfDay, MealTime, Status } from '@/types'
+
+export const STATUS_LABELS: Record<Status, string> = {
+  wishlist: '가보고 싶은 곳',
+  visited: '다녀온 곳',
+  archived: '보관됨',
+}
 
 export const DURATION_LABELS: Record<DurationBucket, string> = {
   half: '반나절',

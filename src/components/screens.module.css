@@ -739,6 +739,20 @@
   }
 }
 
+/*
+ * 삭제(destructive) 버튼 다크모드 보정 — shadcn dark: 클래스 방식은 OS 다크에서 비활성.
+ * @media 기반으로 dark:bg-destructive/20 과 동일 효과를 재현.
+ * (새 색 추가 아님 — globals.css .dark 에 정의된 동일 값을 @media 로 활성화)
+ */
+@media (prefers-color-scheme: dark) {
+  .destructiveBtn {
+    background: hsl(var(--destructive) / 0.2);
+  }
+  .destructiveBtn:hover {
+    background: hsl(var(--destructive) / 0.3);
+  }
+}
+
 /* ── 인라인 편집: 라디오 옵션 버튼 ────────────────── */
 .editRadioOption {
   flex: 1;

@@ -14,7 +14,7 @@ import { useActivities } from '@/hooks/useActivities'
 import { usePlaces } from '@/hooks/usePlaces'
 import { useActivityCategories, usePlaceCategories } from '@/hooks/useCategories'
 import { useDebounced } from '@/hooks/useDebounced'
-import { DURATION_OPTIONS, TIME_OPTIONS, MEAL_OPTIONS } from '@/lib/labels'
+import { DURATION_OPTIONS, TIME_OPTIONS, MEAL_OPTIONS, STATUS_LABELS } from '@/lib/labels'
 import { cn } from '@/lib/utils'
 import type { Status } from '@/types'
 import styles from '@/components/screens.module.css'
@@ -49,8 +49,8 @@ function StatusToggle({
   onChange: (s: Status) => void
 }) {
   const options: { value: Status; label: string }[] = [
-    { value: 'wishlist', label: '위시리스트' },
-    { value: 'visited', label: '다녀온 곳' },
+    { value: 'wishlist', label: STATUS_LABELS.wishlist },
+    { value: 'visited', label: STATUS_LABELS.visited },
   ]
   return (
     <div className={styles.segment}>
@@ -320,7 +320,7 @@ export function ListView() {
               <EmptyState
                 message={
                   status === 'wishlist'
-                    ? '아직 위시리스트가 비어있어요'
+                    ? '아직 가보고 싶은 활동이 없어요'
                     : '아직 다녀온 활동이 없어요'
                 }
                 hint="함께 하고 싶은 활동을 추가해 보세요"

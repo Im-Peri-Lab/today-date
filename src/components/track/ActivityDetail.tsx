@@ -37,7 +37,7 @@ import { DeleteConfirmDialog } from './DeleteConfirmDialog'
 import { VisitedDialog } from '@/components/VisitedDialog'
 import { useActivity, useDeleteActivity, useUpdateActivity } from '@/hooks/useActivities'
 import { activityFormSchema, type ActivityFormValues } from '@/lib/schemas/activitySchema'
-import { DURATION_LABELS, TIME_OF_DAY_LABELS } from '@/lib/labels'
+import { DURATION_LABELS, TIME_OF_DAY_LABELS, STATUS_LABELS } from '@/lib/labels'
 import { cn } from '@/lib/utils'
 import styles from '@/components/screens.module.css'
 
@@ -183,7 +183,7 @@ export function ActivityDetail({ id, initialMode = 'view' }: Props) {
               headerExtra={
                 /* 방문 완료/미방문 모두 동일한 visitedTag 스타일로 짝맞춤 */
                 <span className={styles.visitedTag}>
-                  {activity.status === 'visited' ? '다녀온 곳' : '가보고 싶은 곳'}
+                  {STATUS_LABELS[activity.status]}
                 </span>
               }
             >
@@ -308,7 +308,7 @@ export function ActivityDetail({ id, initialMode = 'view' }: Props) {
                   다녀왔어요
                 </Button>
               )}
-              <Button variant="destructive" className="gap-1.5" onClick={() => setDeleteOpen(true)}>
+              <Button variant="destructive" className={cn(styles.destructiveBtn, 'gap-1.5')} onClick={() => setDeleteOpen(true)}>
                 <Trash2 className="h-4 w-4" />
                 삭제
               </Button>

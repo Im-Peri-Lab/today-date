@@ -18,7 +18,7 @@ import { DeleteConfirmDialog } from './DeleteConfirmDialog'
 import { VisitedDialog } from '@/components/VisitedDialog'
 import { usePlace, useDeletePlace, useUpdatePlace } from '@/hooks/usePlaces'
 import { placeFormSchema, type PlaceFormValues } from '@/lib/schemas/placeSchema'
-import { MEAL_LABELS } from '@/lib/labels'
+import { MEAL_LABELS, STATUS_LABELS } from '@/lib/labels'
 import { cn } from '@/lib/utils'
 import styles from '@/components/screens.module.css'
 
@@ -133,7 +133,7 @@ export function PlaceDetail({ id }: { id: string }) {
               headerExtra={
                 /* 방문 완료/미방문 모두 동일한 visitedTag 스타일로 짝맞춤 */
                 <span className={styles.visitedTag}>
-                  {place.status === 'visited' ? '다녀온 곳' : '가보고 싶은 곳'}
+                  {STATUS_LABELS[place.status]}
                 </span>
               }
             >
@@ -259,7 +259,7 @@ export function PlaceDetail({ id }: { id: string }) {
                   다녀왔어요
                 </Button>
               )}
-              <Button variant="destructive" className="gap-1.5" onClick={() => setDeleteOpen(true)}>
+              <Button variant="destructive" className={cn(styles.destructiveBtn, 'gap-1.5')} onClick={() => setDeleteOpen(true)}>
                 <Trash2 className="h-4 w-4" />
                 삭제
               </Button>

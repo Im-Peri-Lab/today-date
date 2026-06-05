@@ -6,6 +6,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { HomeFab } from '@/components/HomeFab'
 import { PageHeader } from '@/components/PageHeader'
 import { useDashboardStats } from '@/hooks/useDashboardStats'
+import { STATUS_LABELS } from '@/lib/labels'
 import { cn } from '@/lib/utils'
 import styles from '@/components/screens.module.css'
 
@@ -96,7 +97,7 @@ export function HomeDashboard() {
       {/* 통계 — 위시리스트 / 다녀온 곳, 각 [활동][장소]. 탭 시 해당 탭+토글로 진입 */}
       <div className="mt-6">
         <div>
-          <p className={cn('mb-2 text-sm font-medium', styles.sub)}>위시리스트</p>
+          <p className={cn('mb-2 text-sm font-medium', styles.sub)}>{STATUS_LABELS.wishlist}</p>
           <div className="grid grid-cols-2 gap-3 lg:gap-4">
             <StatCard
               href="/list?tab=activity&status=wishlist"

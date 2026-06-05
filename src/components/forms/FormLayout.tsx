@@ -2,6 +2,8 @@
 
 import { FormEvent, ReactNode } from 'react'
 import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
+import styles from '@/components/screens.module.css'
 
 interface FormLayoutProps {
   onSubmit: (e: FormEvent) => void
@@ -17,10 +19,7 @@ export function FormLayout({ onSubmit, isSubmitting, submitLabel, children }: Fo
       <Button
         type="submit"
         disabled={isSubmitting}
-        className="w-full text-white hover:brightness-105"
-        style={{
-          background: 'var(--s-active-fill, linear-gradient(135deg,#a855f7 0%,#ec4899 100%))',
-        }}
+        className={cn(styles.detailPrimaryBtn, 'w-full text-white hover:brightness-105')}
       >
         {isSubmitting ? '저장 중...' : submitLabel}
       </Button>

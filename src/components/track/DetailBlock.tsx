@@ -112,10 +112,7 @@ export function DetailBlock({
             type="button"
             onClick={onSave}
             disabled={saving}
-            className="gap-1.5 text-white hover:brightness-105"
-            style={{
-              background: 'var(--s-active-fill, linear-gradient(135deg,#a855f7 0%,#ec4899 100%))',
-            }}
+            className={cn(styles.detailPrimaryBtn, 'gap-1.5 text-white hover:brightness-105')}
           >
             {saving ? '저장 중...' : '저장'}
           </Button>

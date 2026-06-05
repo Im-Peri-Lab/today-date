@@ -22,7 +22,7 @@
    * 토글·검색 포커스·필터 버튼·필터 칩의 "활성/선택/포커스"는 모두 아래 토큰만 참조한다.
    * 활성색을 바꾸려면 여기 한 곳만 수정. (요소별 하드코딩 금지)
    */
-  --s-active-fill: linear-gradient(135deg, #a855f7 0%, #ec4899 100%); /* 채움(칩) */
+  --s-active-fill: #7c3aed; /* 활성 채움(칩·세그먼트·Primary 버튼) — 단색. 그라데이션은 FAB·로고(--s-grad) 전용 */
   --s-active-on: #ffffff; /* 채움 위 글씨/아이콘 */
   --s-active-line: #7c3aed; /* 활성/포커스 보더·링 */
   --s-active-text: #7c3aed; /* 외곽선형 활성(토글/필터버튼)의 글씨·아이콘 — 다크에선 밝게 */
@@ -82,7 +82,8 @@
       linear-gradient(180deg, #0a0712 0%, #120c1e 100%);
   }
   .page {
-    --s-active-fill: linear-gradient(135deg, #c084fc 0%, #f472b6 100%); /* 다크는 한 톤 밝게 */
+    /* --s-active-fill 은 다크에서 재정의하지 않는다(라이트와 동일 #7c3aed) →
+       상세 Primary(--s-active-line)와 같은 기준: 다크에서 밝게 떠 보이지 않게 고정 */
     --s-active-text: #d8b4fe; /* 다크: 외곽선형 활성 글씨/아이콘을 밝은 라벤더로 */
     --s-ink: #f5f3fa; /* 제목/주요 텍스트 */
     --s-sub: #a8a0b8; /* 서브카피 */
@@ -506,11 +507,11 @@
     color: var(--s-active-line, #7c3aed);
   }
 }
-/* 활성 칩: 단일 토큰만 참조 — 그라데이션 채움 + 흰 글씨/아이콘 (예외 없음) */
+/* 활성 칩: 단일 토큰만 참조 — 단색 액센트 채움 + 흰 글씨/아이콘 (예외 없음) */
 .chipActive,
 .chipActive:hover {
   border-color: transparent;
-  background: var(--s-active-fill, linear-gradient(135deg, #a855f7 0%, #ec4899 100%));
+  background: var(--s-active-fill, #7c3aed);
   color: var(--s-active-on, #ffffff);
   font-weight: 500;
 }
@@ -519,8 +520,8 @@
 }
 
 /*
- * 폼 선택형 옵션(소요시간/시간대 라디오) — 칩/세그먼트와 한 결.
- * 활성은 외곽선형(라이트 보라 배경 금지): 활성 보더 + 중성 흰 면 + 활성 텍스트(단일 토큰).
+ * 폼 선택형 옵션(소요시간/시간대/식사시간) — 칩과 동일한 활성 규칙.
+ * 활성 = 단색 액센트 채움(--s-active-fill) + 흰 글씨. 필터 칩·상세 Primary와 일치.
  * 라이트 폴백 내장 → 다크는 .page 토큰으로 자동 적응.
  */
 .option {
@@ -544,11 +545,12 @@
     color: var(--s-active-text, #7c3aed);
   }
 }
-.optionActive {
-  border-color: var(--s-active-line, #7c3aed);
-  color: var(--s-active-text, #7c3aed);
+.optionActive,
+.optionActive:hover {
+  border-color: transparent;
+  background: var(--s-active-fill, #7c3aed);
+  color: var(--s-active-on, #ffffff);
   font-weight: 500;
-  box-shadow: inset 0 0 0 1px var(--s-active-line, #7c3aed);
 }
 
 /*
@@ -770,7 +772,7 @@
 }
 
 /*
- * 상세 하단 Primary 버튼 채움색.
+ * Primary 버튼 채움색 — 상세 하단 버튼 + 폼(추가/수정) 제출·저장 버튼 공용.
  *
  * 문제: inline style={{ background: 'var(--s-accent)' }} 사용 시 다크에서 --s-accent 가
  *   #c084fc(라벤더, L=65%)로 오버라이드되어 카드면 위에 둥둥 뜨는 현상 발생.

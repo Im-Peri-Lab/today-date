@@ -128,17 +128,19 @@ description: >
 활성 토큰 (라이트 / 다크):
 | 토큰 | 라이트 | 다크 | 의미 |
 |---|---|---|---|
-| `--s-active-fill` | `linear-gradient(135deg,#a855f7,#ec4899)` | `linear-gradient(135deg,#c084fc,#f472b6)` | 채움형 칩 배경 |
+| `--s-active-fill` | `#7c3aed` (단색) | `#7c3aed` (재정의 안 함) | 활성 **채움**: 칩·세그먼트 |
 | `--s-active-on` | `#ffffff` | `#ffffff` | 채움 위 글씨/아이콘 |
 | `--s-active-line` | `#7c3aed` | `#7c3aed` | 활성/포커스 보더·링 |
 | `--s-active-text` | `#7c3aed` | `#d8b4fe` | 외곽선형 활성(토글/필터버튼) 글씨·아이콘 |
 | `--s-active-glow` | `rgba(124,58,237,0.2)` | 동일 | 옅은 포커스 글로우 |
 
+> **선택 컨트롤 활성 = 단색 채움 통일 (확정 규칙).** 카테고리 칩·소요시간/시간대/식사시간 세그먼트(`styles.option`)·필터 칩(`styles.chip`)의 활성은 **모두** `--s-active-fill`(단색 `#7c3aed`) 채움 + `--s-active-on`(흰) 글씨/아이콘. 폼(추가/수정) 제출·저장 Primary 버튼은 상세 Primary와 동일하게 `styles.detailPrimaryBtn`(`--s-active-line` `#7c3aed`) 단색 채움. **그라데이션 채움 금지** — 그라데이션은 FAB·로고(`--s-grad`)·`filterCount` 전용. `--s-active-fill`·`--s-active-line` 모두 다크에서 재정의하지 않아(`#7c3aed` 고정) 다크에서 밝게 떠 보이지 않는다.
+
 **포커스 역할 분리 규칙 (중요):**
 - 텍스트 입력(검색/위치): `:focus` → 활성 보더(`--s-active-line`) **+ 링** `box-shadow: 0 0 0 3px var(--s-active-glow)`.
 - 버튼류(필터 토글/칩): `:focus-visible` → 활성 **보더만**, 링 없음.
 
-활성 칩 규칙: `styles.chipActive`는 예외 없이 `--s-active-fill` 채움 + `--s-active-on`(흰) 글씨/아이콘. 세그먼트/필터버튼 같은 외곽선형 활성은 `--s-active-text` + `--s-active-line` 보더.
+활성 칩/세그먼트 규칙: `styles.chipActive` / `styles.optionActive`는 예외 없이 `--s-active-fill` 단색 채움 + `--s-active-on`(흰) 글씨/아이콘. 필터버튼(`styles.filterToggle`)·`/list` 상태 토글(`styles.segmentBtnActive`) 같은 외곽선형 활성만 `--s-active-text` + `--s-active-line` 보더(채움 없음).
 
 ---
 

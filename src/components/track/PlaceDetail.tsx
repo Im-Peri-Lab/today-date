@@ -256,11 +256,10 @@ export function PlaceDetail({ id }: { id: string }) {
                 삭제
               </Button>
 
-              {/* 우: Primary — 단색 --s-accent, 그라데이션 제거 */}
+              {/* 우: Primary — --s-active-line(#7c3aed): 라이트·다크 동일, 다크 #c084fc 역전 방지 */}
               {place.status === 'visited' ? (
                 <Button
-                  className="gap-1.5 text-white hover:brightness-105"
-                  style={{ background: 'var(--s-accent, #7c3aed)' }}
+                  className={cn(styles.detailPrimaryBtn, 'gap-1.5 text-white hover:brightness-105')}
                   onClick={handleRevert}
                 >
                   <Undo2 className="h-4 w-4" />
@@ -268,8 +267,7 @@ export function PlaceDetail({ id }: { id: string }) {
                 </Button>
               ) : (
                 <Button
-                  className="gap-1.5 text-white hover:brightness-105"
-                  style={{ background: 'var(--s-accent, #7c3aed)' }}
+                  className={cn(styles.detailPrimaryBtn, 'gap-1.5 text-white hover:brightness-105')}
                   onClick={() => setVisitedOpen(true)}
                 >
                   <CheckCircle2 className="h-4 w-4" />

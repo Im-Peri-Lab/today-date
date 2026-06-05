@@ -770,6 +770,22 @@
 }
 
 /*
+ * 상세 하단 Primary 버튼 채움색.
+ *
+ * 문제: inline style={{ background: 'var(--s-accent)' }} 사용 시 다크에서 --s-accent 가
+ *   #c084fc(라벤더, L=65%)로 오버라이드되어 카드면 위에 둥둥 뜨는 현상 발생.
+ *
+ * 해결: --s-active-line(#7c3aed) 사용. 이 토큰은 다크 @media 블록에서 재정의되지 않아
+ *   라이트·다크 모두 #7c3aed(L≈51%)로 고정 → 라이트는 기존과 동일, 다크는 안정적.
+ *   흰색 텍스트 대비: ~5.4:1 (WCAG AA ✓).
+ *
+ * inline style 은 CSS 클래스를 항상 이기므로 style= 제거 후 이 클래스로 대체.
+ */
+.detailPrimaryBtn {
+  background: var(--s-active-line, #7c3aed);
+}
+
+/*
  * 상세 하단 삭제 버튼 — 약한 중립 면 + faint 텍스트. hover/press 시 destructive 살짝.
  * --s-card-border-strong 이 다크 .page 미디어에서 #3a2f4e 로 자동 cascade → @media 불필요.
  * ghost variant 의 hover:bg-muted/hover:text-foreground 는 CSS Module 이 나중에 로드되므로 덮어씀.

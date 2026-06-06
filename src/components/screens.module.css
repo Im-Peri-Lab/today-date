@@ -725,20 +725,28 @@
   color: var(--s-active-on, #ffffff);
   font-weight: 500;
 }
-/* 우하단 "오늘" — 약한 neutral 박스(엄지 도달 영역). 표시 월만 이동(선택 불변) */
-.dpFooter {
+/* 헤더 우측 클러스터 — 다음 달 화살표 + "오늘" */
+.dpHeaderRight {
   display: flex;
-  justify-content: flex-end;
-  margin-top: 0.75rem; /* 12px — 날짜 그리드(B) ↔ "오늘"(C). 멀지 않게 */
+  align-items: center;
+  gap: 0.125rem;
 }
+/*
+ * 헤더 우측 "오늘" — 작은 텍스트 트리거(화살표와 같은 높이/radius).
+ * 평상시 배경 없음(투명) + --s-sub 글씨 → 좌우 화살표 hover surface(--s-card-border-strong)와
+ * 절대 같지 않아 "이미 눌린 듯한" 잔상 충돌이 없다. hover/active 시에만 화살표와 동일 surface.
+ * 표시 월만 오늘로 이동(선택값 불변).
+ */
 .dpToday {
-  padding: 0.375rem 0.75rem; /* px-3 py-1.5 */
-  border-radius: 0.625rem; /* 10px — 폼 컨트롤 표준 */
+  display: inline-flex;
+  align-items: center;
+  height: 2rem; /* 좌우 화살표(dpNav)와 동일 */
+  padding: 0 0.5rem;
+  border-radius: 0.5rem; /* 8px — dpNav와 동일 */
   font-size: 0.8125rem;
   font-weight: 500;
-  color: var(--s-ink, #1a1033);
-  /* 옅은 neutral surface: 라이트 #eceaf3 / 다크 #3a2f4e(카드면보다 살짝 밝게) — 액션색 아님 */
-  background: var(--s-card-border-strong, #eceaf3);
+  color: var(--s-sub, #6b7280);
+  background: transparent;
   border: 1px solid transparent;
   cursor: pointer;
   transition:
@@ -746,8 +754,8 @@
     color 140ms ease;
 }
 .dpToday:hover {
-  background: var(--s-accent-soft-bg, #f6f1ff);
-  color: var(--s-accent, #7c3aed);
+  background: var(--s-card-border-strong, #eceaf3);
+  color: var(--s-ink, #1a1033);
 }
 
 /*

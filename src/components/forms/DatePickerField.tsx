@@ -123,9 +123,16 @@ export function DatePickerField({ id, value, onChange, placeholder = '날짜 선
                   <ChevronsUpDown className={cn('h-4 w-4', styles.dpSelectIcon)} />
                 </span>
               </div>
-              <button type="button" className={styles.dpNav} onClick={nextMonth} aria-label="다음 달">
-                <ChevronRight className="h-4 w-4" />
-              </button>
+              {/* 우측 클러스터: 다음 달 화살표 + "오늘"(헤더 우측 트리거, 표준 패턴) */}
+              <div className={styles.dpHeaderRight}>
+                <button type="button" className={styles.dpNav} onClick={nextMonth} aria-label="다음 달">
+                  <ChevronRight className="h-4 w-4" />
+                </button>
+                {/* "오늘" — 평상시 투명(텍스트만), hover/active 시에만 surface. 표시 월만 이동(선택 불변) */}
+                <button type="button" className={styles.dpToday} onClick={goToday}>
+                  오늘
+                </button>
+              </div>
             </div>
             <div className={styles.dpWeekRow}>
               {WEEKDAYS.map((w) => (
@@ -155,12 +162,6 @@ export function DatePickerField({ id, value, onChange, placeholder = '날짜 선
                   </button>
                 )
               })}
-            </div>
-            {/* 좌하단 "오늘" — 표시 월을 현재로 이동(선택값 불변) */}
-            <div className={styles.dpFooter}>
-              <button type="button" className={styles.dpToday} onClick={goToday}>
-                오늘
-              </button>
             </div>
           </Popover.Popup>
         </Popover.Positioner>

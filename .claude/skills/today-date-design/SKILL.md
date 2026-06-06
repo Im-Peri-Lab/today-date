@@ -145,6 +145,25 @@ description: >
 
 **페이지 높이/하단 여백**: 상세 페이지는 `cn(styles.page, styles.pageStatic)`로 `min-height:auto`(100dvh spacer 없음) → 콘텐츠 자연 높이. 짧은 콘텐츠 아래는 고정 배경(`.page::before`)이 채워 흰 빈칸이 없다(별도 spacer 금지).
 
+### 액션 버튼 2종 패턴 (거버넌스)
+
+이 앱의 액션 버튼은 **두 가지 패턴만** 사용한다. 새 화면을 추가할 때도 아래 두 패턴 외 **새 사이즈 도입 금지**.
+
+**1) 풀폭 Primary CTA** — **48px / `w-full` / radius 10px / 단색 채움(`--s-active-fill` via `styles.detailPrimaryBtn`)**
+- 용도: "새 항목 생성 완료" — 데이터 추가가 발생하는 마무리 액션.
+- 적용처: `/activities/new` "활동 등록하기" · `/places/new` "장소 등록하기" · (향후) 추천 위저드 결과 저장, CSV 가져오기 완료 등.
+
+**2) 콘텐츠폭 액션** — **32px / 자연폭(`w-auto`, Button 기본 `h-8`) / radius 10px**
+- 용도: "기존 항목에 작용" — 수정·전환·삭제 등 데이터 가공 액션.
+- 적용처: 인라인 편집 Save/Cancel(`DetailBlock` 내부) · 상세 하단 전환 액션("다녀왔어요"/"가보고 싶은 곳으로 되돌리기") · 상세 하단 삭제(ghost variant + destructive 톤) · 카드 메뉴 액션 · (향후) 다중 선택 액션 등.
+
+**판단 기준 — "이 행위가 새 데이터를 만드는가?"**
+- YES → 풀폭 Primary (48px)
+- NO (수정·전환·삭제·취소) → 콘텐츠폭 액션 (32px)
+
+일반 컨트롤(입력바·세그먼트 등 **40px**)·카테고리 칩(**36px**)은 위 액션 버튼과 별개의 표준으로 유지한다(위 §4-A 높이 표 참조).
+
+
 **폰트:**
 - 입력 본문(`Input`/`Textarea`): **16px** (`text-base`, `md:text-sm` 쓰지 않음 → iOS 포커스 자동 줌인 방지).
 - 라벨(`Label`): **14px** (`text-sm`) + `font-medium`.

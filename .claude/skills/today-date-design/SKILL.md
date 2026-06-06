@@ -161,8 +161,9 @@ description: >
 - 달력 팝업(`styles.dpPopup`/`dpHeader`/`dpNav`/`dpGrid`/`dpWeekday`/`dpDay`)은 전부 `--s-*` 토큰(라이트/다크 동일 토큰 시스템): 카드면 `--s-card-bg`, 보더 `--s-input`, 텍스트 `--s-ink`/`--s-sub`/`--s-faint`.
 - **팝업은 `Popover.Portal`로 `.page` 밖(body)에 렌더되어 `.page`의 다크 `--s-*`를 못 받는다** → 다크에서 흰 박스가 됨. **`.dpPopup`에 `@media (prefers-color-scheme: dark)`로 `--s-*` 토큰을 재선언**(값은 `.page` 다크 블록과 동일, 새 색 아님)해 내부 모든 `var(--s-*)`가 다크로 해석되게 한다. 라이트는 각 클래스 라이트 폴백 사용. (`.page` 밖 portal 컴포넌트의 공통 패턴)
 - **선택일 = `--s-active-fill` 단색 채움 + 흰 글씨**(`--s-active-on`), `font-weight:500` — 칩·세그먼트와 동일. **오늘(today)은 보더만**(`--s-active-line`) + `--s-active-text` 글씨로 선택과 구분(선택과 같은 채움 금지).
-- 헤더 네비게이션은 **두 방식 공존**: 좌우 화살표(`dpNav`)=한 달 단위, 연/월 **드롭다운**(`dpCaption`/`dpSelect`)=큰 점프(연도 `2000 ~ 올해+10`). select는 `appearance:none` + lucide `ChevronsUpDown`(`dpSelectIcon`, `--s-sub`)로 **chevron을 토큰 색으로 직접 그려 다크에서도 또렷·"탭 가능" 표시**, 옵션 목록은 `color-scheme:light dark`로 다크 톤.
-- **"오늘" 단축**(`dpFooter`/`dpToday`): 팝업 좌하단 약한 텍스트 버튼(`--s-accent` 글씨 + `--s-accent-soft-bg` hover). 클릭 시 **표시 월만** 오늘로 이동(선택값은 불변 — 사용자가 직접 날짜 클릭).
+- 헤더 네비게이션은 **두 방식 공존**: 좌우 화살표(`dpNav`, 아이콘 16px)=한 달 단위, 연/월 **드롭다운**(`dpCaption`/`dpSelect`)=큰 점프(연도 `2000 ~ 올해+10`). select는 `appearance:none` + lucide `ChevronsUpDown`(`dpSelectIcon`, `--s-sub`)로 **chevron을 토큰 색으로 직접 그려 다크에서도 또렷·"탭 가능" 표시**, 옵션 목록은 `color-scheme:light dark`로 다크 톤.
+- **헤더 텍스트 위계**: 캡션(연/월) 폰트는 **16px**(`font-medium`)으로 본문 그리드 숫자(`dpDay` 14px)보다 한 단계 크게 — 헤더가 본문보다 약해 보이지 않게. chevron(16px)·화살표(16px)도 같은 결로 균형.
+- **"오늘" 단축**(`dpFooter`/`dpToday`): 팝업 **우하단**(엄지 도달 영역)의 **약한 neutral 박스 버튼** — `padding:px-3 py-1.5`, radius 10px(폼 컨트롤 표준), 면 `--s-card-border-strong`(라이트 #eceaf3 / 다크 #3a2f4e), 글씨 `--s-ink`, hover만 `--s-accent-soft-bg`+`--s-accent`. 단순 텍스트 단독이 아니라 약한 박스(단, 액션 버튼처럼 튀지 않게 차분하게). 클릭 시 **표시 월만** 오늘로 이동(선택값은 불변 — 사용자가 직접 날짜 클릭).
 - 저장값은 ISO(`YYYY-MM-DD`) 그대로. 날짜 비교·생성·요일은 문자열/숫자 + 연/월/일 인자 `Date`로만(`new Date(iso)` 문자열 파싱 금지 — UTC 자정 밀림 방지, `lib/date.ts`와 동일 원칙).
 
 ---

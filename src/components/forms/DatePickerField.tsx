@@ -105,7 +105,7 @@ export function DatePickerField({ id, value, onChange, placeholder = '날짜 선
                       </option>
                     ))}
                   </select>
-                  <ChevronsUpDown className={cn('h-3.5 w-3.5', styles.dpSelectIcon)} />
+                  <ChevronsUpDown className={cn('h-4 w-4', styles.dpSelectIcon)} />
                 </span>
                 <span className={styles.dpSelectWrap}>
                   <select
@@ -120,7 +120,7 @@ export function DatePickerField({ id, value, onChange, placeholder = '날짜 선
                       </option>
                     ))}
                   </select>
-                  <ChevronsUpDown className={cn('h-3.5 w-3.5', styles.dpSelectIcon)} />
+                  <ChevronsUpDown className={cn('h-4 w-4', styles.dpSelectIcon)} />
                 </span>
               </div>
               <button type="button" className={styles.dpNav} onClick={nextMonth} aria-label="다음 달">

@@ -90,7 +90,7 @@ export function ActivityCard({ activity, hideMenu, actionSlot }: ActivityCardPro
             </span>
           )}
           <span className="inline-flex items-center gap-1 whitespace-nowrap">
-            <TimeOfDayIcon className="h-3 w-3 shrink-0" />
+            {TimeOfDayIcon && <TimeOfDayIcon className="h-3 w-3 shrink-0" />}
             {TIME_OF_DAY_LABELS[activity.time_of_day]}
           </span>
         </div>

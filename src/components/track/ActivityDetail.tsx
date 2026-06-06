@@ -213,7 +213,7 @@ export function ActivityDetail({ id, initialEdit }: Props) {
                     </DetailRow>
                   )}
                   <DetailRow label="시간대">
-                    {/* Sun(주간) / Moon(야간) / SunMoon(상관없음) — faint 톤, 공용 매핑 */}
+                    {/* Sun(주간) / Moon(야간) — faint 톤, 공용 매핑. 상관없음(any)은 아이콘 없이 라벨만 */}
                     <span className="inline-flex items-center gap-1.5">
                       {TimeOfDayIcon && (
                         <TimeOfDayIcon className={cn('h-3.5 w-3.5 shrink-0', styles.faint)} />

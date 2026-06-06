@@ -74,12 +74,12 @@ export function ActivityCard({ activity, hideMenu, actionSlot }: ActivityCardPro
         className={cn('block p-3.5', hideMenu ? 'pr-3.5' : 'pr-11')}
       >
         {activity.category && (
-          <div className="mb-2">
+          <div className="mb-1.5">
             <CategoryBadge category={activity.category} />
           </div>
         )}
 
-        <h3 className={cn('mb-1 line-clamp-1 text-lg font-semibold', styles.ink)}>{activity.title}</h3>
+        <h3 className={cn('mb-1.5 line-clamp-1 text-lg font-semibold', styles.ink)}>{activity.title}</h3>
 
         <div className={cn('mb-2 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-xs', styles.sub)}>
           {activity.duration_bucket && (

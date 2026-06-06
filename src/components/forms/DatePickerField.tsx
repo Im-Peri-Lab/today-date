@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Popover } from '@base-ui/react/popover'
-import { Calendar, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Calendar, ChevronLeft, ChevronRight, ChevronsUpDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { formatKoreanDateWithWeekday } from '@/lib/date'
 import styles from '@/components/screens.module.css'
@@ -68,6 +68,11 @@ export function DatePickerField({ id, value, onChange, placeholder = '날짜 선
     onChange(toISO(viewY, viewM, d))
     setOpen(false)
   }
+  // 표시 월만 오늘로 이동(선택값은 바꾸지 않음 — 사용자가 직접 날짜 클릭)
+  function goToday() {
+    setViewY(todayY)
+    setViewM(todayM)
+  }
 
   return (
     <Popover.Root open={open} onOpenChange={setOpen}>
@@ -85,32 +90,38 @@ export function DatePickerField({ id, value, onChange, placeholder = '날짜 선
               <button type="button" className={styles.dpNav} onClick={prevMonth} aria-label="이전 달">
                 <ChevronLeft className="h-4 w-4" />
               </button>
-              {/* 연/월 드롭다운 — 큰 점프(화살표는 한 달 단위로 공존) */}
+              {/* 연/월 드롭다운 — 큰 점프(화살표는 한 달 단위로 공존). chevron 으로 탭 가능 표시 */}
               <div className={styles.dpCaption}>
-                <select
-                  className={styles.dpSelect}
-                  value={viewY}
-                  onChange={(e) => setViewY(Number(e.target.value))}
-                  aria-label="연도 선택"
-                >
-                  {YEARS.map((y) => (
-                    <option key={y} value={y}>
-                      {y}년
-                    </option>
-                  ))}
-                </select>
-                <select
-                  className={styles.dpSelect}
-                  value={viewM}
-                  onChange={(e) => setViewM(Number(e.target.value))}
-                  aria-label="월 선택"
-                >
-                  {MONTHS.map((m) => (
-                    <option key={m} value={m}>
-                      {m}월
-                    </option>
-                  ))}
-                </select>
+                <span className={styles.dpSelectWrap}>
+                  <select
+                    className={styles.dpSelect}
+                    value={viewY}
+                    onChange={(e) => setViewY(Number(e.target.value))}
+                    aria-label="연도 선택"
+                  >
+                    {YEARS.map((y) => (
+                      <option key={y} value={y}>
+                        {y}년
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronsUpDown className={cn('h-3.5 w-3.5', styles.dpSelectIcon)} />
+                </span>
+                <span className={styles.dpSelectWrap}>
+                  <select
+                    className={styles.dpSelect}
+                    value={viewM}
+                    onChange={(e) => setViewM(Number(e.target.value))}
+                    aria-label="월 선택"
+                  >
+                    {MONTHS.map((m) => (
+                      <option key={m} value={m}>
+                        {m}월
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronsUpDown className={cn('h-3.5 w-3.5', styles.dpSelectIcon)} />
+                </span>
               </div>
               <button type="button" className={styles.dpNav} onClick={nextMonth} aria-label="다음 달">
                 <ChevronRight className="h-4 w-4" />
@@ -142,6 +153,12 @@ export function DatePickerField({ id, value, onChange, placeholder = '날짜 선
                   </button>
                 )
               })}
+            </div>
+            {/* 좌하단 "오늘" — 표시 월을 현재로 이동(선택값 불변) */}
+            <div className={styles.dpFooter}>
+              <button type="button" className={styles.dpToday} onClick={goToday}>
+                오늘
+              </button>
             </div>
           </Popover.Popup>
         </Popover.Positioner>

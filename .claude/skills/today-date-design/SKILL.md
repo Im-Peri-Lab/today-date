@@ -158,8 +158,11 @@ description: >
 - native `<input type="date">`는 쓰지 않는다(박스 크기/아이콘/포맷이 OS·브라우저마다 제각각 + 다크 아이콘 묻힘). base-ui `Popover` + 자체 월 그리드로 대체.
 - 트리거 박스(`styles.dateTrigger`)는 다른 입력바와 **동일한 외형**: 40px / radius 10px / `--s-input` 보더 / `px-3`. 단 "선택 트리거" 성격이라 **[lucide `Calendar`(흐린 톤) + gap + 날짜 텍스트]를 한 묶음으로 박스 가운데 정렬**(`justify-content:center`). 빈 값이면 placeholder "날짜 선택"(`--s-faint`). 박스 아래 별도 캡션 없음. **다른 입력바(제목/메모/URL/위치)는 좌측 정렬 유지** — 날짜 박스만 가운데.
 - 표시 포맷은 **요일 포함**: `formatKoreanDateWithWeekday()` → `"2026년 7월 7일 (화)"`(요일도 본문과 한 흐름, 별도 색 없음). 요일이 무의미한 "등록일" 캡션은 `formatKoreanDate()`(요일 없음) 유지.
-- 달력 팝업(`styles.dpPopup`/`dpHeader`/`dpNav`/`dpGrid`/`dpWeekday`/`dpDay`)은 전부 `--s-*` 토큰: 카드면 `--s-card-bg`, 보더 `--s-input`, 오늘=외곽선(`--s-active-line`), 선택일=단색 채움(`--s-active-fill` + `--s-active-on`).
-- 헤더 네비게이션은 **두 방식 공존**: 좌우 화살표(`dpNav`)=한 달 단위, 연/월 **드롭다운**(`dpCaption`/`dpSelect`, native `select` + `color-scheme:light dark`)=큰 점프(연도 범위 `2000 ~ 올해+10`).
+- 달력 팝업(`styles.dpPopup`/`dpHeader`/`dpNav`/`dpGrid`/`dpWeekday`/`dpDay`)은 전부 `--s-*` 토큰(라이트/다크 동일 토큰 시스템): 카드면 `--s-card-bg`, 보더 `--s-input`, 텍스트 `--s-ink`/`--s-sub`/`--s-faint`.
+- **팝업은 `Popover.Portal`로 `.page` 밖(body)에 렌더되어 `.page`의 다크 `--s-*`를 못 받는다** → 다크에서 흰 박스가 됨. **`.dpPopup`에 `@media (prefers-color-scheme: dark)`로 `--s-*` 토큰을 재선언**(값은 `.page` 다크 블록과 동일, 새 색 아님)해 내부 모든 `var(--s-*)`가 다크로 해석되게 한다. 라이트는 각 클래스 라이트 폴백 사용. (`.page` 밖 portal 컴포넌트의 공통 패턴)
+- **선택일 = `--s-active-fill` 단색 채움 + 흰 글씨**(`--s-active-on`), `font-weight:500` — 칩·세그먼트와 동일. **오늘(today)은 보더만**(`--s-active-line`) + `--s-active-text` 글씨로 선택과 구분(선택과 같은 채움 금지).
+- 헤더 네비게이션은 **두 방식 공존**: 좌우 화살표(`dpNav`)=한 달 단위, 연/월 **드롭다운**(`dpCaption`/`dpSelect`)=큰 점프(연도 `2000 ~ 올해+10`). select는 `appearance:none` + lucide `ChevronsUpDown`(`dpSelectIcon`, `--s-sub`)로 **chevron을 토큰 색으로 직접 그려 다크에서도 또렷·"탭 가능" 표시**, 옵션 목록은 `color-scheme:light dark`로 다크 톤.
+- **"오늘" 단축**(`dpFooter`/`dpToday`): 팝업 좌하단 약한 텍스트 버튼(`--s-accent` 글씨 + `--s-accent-soft-bg` hover). 클릭 시 **표시 월만** 오늘로 이동(선택값은 불변 — 사용자가 직접 날짜 클릭).
 - 저장값은 ISO(`YYYY-MM-DD`) 그대로. 날짜 비교·생성·요일은 문자열/숫자 + 연/월/일 인자 `Date`로만(`new Date(iso)` 문자열 파싱 금지 — UTC 자정 밀림 방지, `lib/date.ts`와 동일 원칙).
 
 ---

@@ -133,9 +133,17 @@ description: >
 | 세그먼트 (`styles.option`) | **40px** (`height:2.5rem`) | 10px (`0.625rem`) | `screens.module.css .option` |
 | 카테고리 칩 (`styles.chip`) | **36px** (`height:2.25rem`) | pill (`9999px`) | `screens.module.css .chip` |
 | 추가 화면 하단 Primary (제출) | **48px** (`h-12`) | 10px | `FormLayout.tsx` |
-| 인라인 편집 Save·Cancel (`DetailBlock`) | **40px** (`h-10`) | 10px | `DetailBlock.tsx` |
+| 상세 하단 Primary("다녀왔어요"/"되돌리기")·삭제 | **32px** (Button 기본 `h-8`) | 10px | `ActivityDetail`/`PlaceDetail` |
+| 인라인 편집 Save·Cancel (`DetailBlock`) | **32px** (Button 기본 `h-8`) | 10px | `DetailBlock.tsx` |
 
-→ 사이즈 위계: 추가 화면 Primary **48px**(전체폭 강조) / 인라인 편집 Save·Cancel **40px**(카드 안에서 일반 컨트롤과 정렬) / 그 외 일반 컨트롤 **40px** / 칩만 **36px**. 인라인 Save·Cancel은 같은 40px로 맞춰 한 쌍으로 정렬하고, **추가 화면 Primary 48px을 인라인에 쓰지 않는다**. Save 채움은 단색 액센트(`styles.detailPrimaryBtn`) 유지. 컨트롤 가로 패딩은 `px-3`(0.75rem)로 통일.
+→ **액션·컨트롤 사이즈 위계** (한 화면 안에서 정렬):
+- **48px** — 신규 생성 마무리 CTA(추가 화면 Primary `h-12` **전용**). 인라인엔 쓰지 않는다.
+- **40px** — 일반 입력/선택 컨트롤(`Input`·`Textarea`·세그먼트·카테고리 외 컨트롤·날짜 박스 `dateTrigger`).
+- **36px** — 카테고리 칩.
+- **32px** — 보조 액션(상세 하단 Primary/삭제 + 인라인 Save/Cancel). Button 기본 `h-8`을 그대로 쓰고 **height 클래스를 주지 않는다**(예전 인라인 `h-10`은 제거). 한 화면(인라인 편집)에서 인라인 Save/Cancel과 하단 Primary/삭제가 같은 32px로 정렬.
+- 인라인 Save/Cancel은 카드 안 일반 컨트롤(40px)보다 **한 단계 작은 "보조 액션"(32px)** 결로 둔다. Save 채움은 단색 액센트(`styles.detailPrimaryBtn`) 유지. 컨트롤 가로 패딩은 `px-3`(0.75rem)로 통일.
+
+**페이지 높이/하단 여백**: 상세 페이지는 `cn(styles.page, styles.pageStatic)`로 `min-height:auto`(100dvh spacer 없음) → 콘텐츠 자연 높이. 짧은 콘텐츠 아래는 고정 배경(`.page::before`)이 채워 흰 빈칸이 없다(별도 spacer 금지).
 
 **폰트:**
 - 입력 본문(`Input`/`Textarea`): **16px** (`text-base`, `md:text-sm` 쓰지 않음 → iOS 포커스 자동 줌인 방지).

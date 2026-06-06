@@ -81,7 +81,7 @@ export function DetailBlock({
         <div className={cn(!editing && 'pr-10')}>
           {/* 섹션 라벨: blockTitle이 없는 블록(방문 기록 등)에서만 표시 */}
           {!blockTitle && (
-            <h2 className={cn('text-xs font-medium uppercase tracking-wide', styles.sub)}>
+            <h2 className={cn('text-sm font-medium', styles.ink)}>
               {title}
             </h2>
           )}

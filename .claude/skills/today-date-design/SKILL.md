@@ -144,7 +144,8 @@ description: >
 **색 토큰 (shadcn 의존 금지, `--s-*`만):**
 - 이 앱은 `.dark` 클래스를 붙이지 않고 `@media (prefers-color-scheme: dark)` + `--s-*` 토큰으로만 다크를 처리한다. 따라서 폼 컨트롤은 shadcn HSL 토큰(`--foreground`/`--input`/`--muted-foreground`)을 쓰면 다크에서 라이트값에 고정되어 안 보인다(대비 ~1:1).
 - 라벨 색: `--s-ink` (`text-[color:var(--s-ink,#1a1033)]`) — `ui/label.tsx`에 적용 → `FormField`·`VisitRecordBlock` 라벨 모두 적용됨.
-- 입력/textarea 본문 색: `--s-ink`, placeholder: `--s-faint`, 보더(컨트롤): `--s-card-border-strong`.
+- 입력/textarea 본문 색: `--s-ink`, placeholder: `--s-faint`.
+- **폼 컨트롤 보더는 `--s-input` 전용 토큰**(입력·textarea·세그먼트·칩·날짜 트리거/팝업). 라이트 `#eceaf3`(= `--s-card-border-strong`와 동일), **다크 `#4a3f63`** — 카드면(`#241a36`)·`--s-card-border-strong`(`#3a2f4e`)보다 한 단계 밝아 다크에서 보더가 또렷이 보인다. `--s-card-border-strong`은 뱃지·삭제버튼 등 **채움**으로도 쓰이므로 보더만 분리(채움 면엔 영향 없음). 라이트 값 동일 → 라이트 무변화.
 - 활성 채움(칩·세그먼트): `--s-active-fill` 단색(§5). Primary 버튼: `styles.detailPrimaryBtn`(`--s-active-line`).
 - **outline 버튼(`variant="outline"`, 인라인 편집 취소 등)도 `--s-*` 기반**: 보더 `--s-card-border-strong`, 면 `bg-transparent`, 글씨 `--s-ink`, hover 면 `--s-card-border-strong`. shadcn `border-border`/`bg-background`/`text-foreground` 및 `dark:` 프리픽스 사용 금지(`.dark` 미적용 → 다크에서 흰 칩으로 뜸). `src/components/ui/button.tsx` outline variant에 반영.
 
@@ -153,9 +154,11 @@ description: >
 - 섹션 라벨(`<h2>`)이 보이는 블록(방문 기록)은 editing 시 헤더↔폼 간격을 `mt-5`(읽기 모드는 `mt-3` 유지)로 둔다. 상세 두 블록 사이 간격도 `space-y-5`(`ActivityDetail`/`PlaceDetail` 래퍼)로 폼 리듬과 통일.
 - 인라인 폼 카드는 페이지 패딩 + 카드 `px-5`로 추가 화면보다 좌우 각 20px 좁다(카드 정체상 정상, 오버플로 아님).
 
-**날짜 입력(native `<input type="date">`):**
-- 저장값은 ISO(`YYYY-MM-DD`) 그대로 유지(표시만 가공). native input은 표시 포맷을 못 바꾸므로 입력 아래에 `formatKoreanDate()` 한글 캡션("2026년 6월 5일")을 `--s-faint` 톤으로 보조 노출(값 없으면 미표시).
-- 다크에서 캘린더 아이콘이 묻히지 않도록 `color-scheme: light dark`(`styles.dateInput`)만 부여 — `::-webkit-calendar-picker-indicator`가 OS 스킴에 맞춰 밝은 글리프로 그려진다. `appearance: none`(아이콘 제거됨)·하드코딩 `filter` 금지. 높이/보더/radius는 `ui/input.tsx` 표준 그대로.
+**날짜 입력(커스텀 date picker — `src/components/forms/DatePickerField.tsx`):**
+- native `<input type="date">`는 쓰지 않는다(박스 크기/아이콘/포맷이 OS·브라우저마다 제각각 + 다크 아이콘 묻힘). base-ui `Popover` + 자체 월 그리드로 대체.
+- 트리거 박스(`styles.dateTrigger`)는 다른 입력바와 **완전히 동일한 외형**: 40px / radius 10px / `--s-input` 보더 / `px-3`. 좌측에 한글 날짜 텍스트(`formatKoreanDate()`, 빈 값이면 placeholder "날짜 선택" `--s-faint`), 우측 끝 lucide `Calendar` 아이콘(흐린 톤). 박스 아래 별도 캡션 없음(중복 제거).
+- 달력 팝업(`styles.dpPopup`/`dpHeader`/`dpNav`/`dpGrid`/`dpWeekday`/`dpDay`)은 전부 `--s-*` 토큰: 카드면 `--s-card-bg`, 보더 `--s-input`, 오늘=외곽선(`--s-active-line`), 선택일=단색 채움(`--s-active-fill` + `--s-active-on`).
+- 저장값은 ISO(`YYYY-MM-DD`) 그대로. 날짜 비교·생성은 문자열/숫자로만(`new Date(iso)` 금지 — UTC 자정 밀림 방지, `lib/date.ts`와 동일 원칙).
 
 ---
 
@@ -264,7 +267,9 @@ description: >
 | 블록 | 섹션 라벨 | 근거 |
 |---|---|---|
 | 등록 정보 | 숨김(`blockTitle` 있으면 렌더 안 함) | 제목·카테고리·상태 태그가 자체 식별 |
-| 방문 기록 | `<h2>` 유지 ("방문 기록") | 스크린리더 섹션 탐색 보장 |
+| 방문 기록 | `<h2>` 유지 ("방문 기록"), 톤은 필드 라벨과 동일 | 스크린리더 섹션 탐색 보장 |
+
+블록 헤더 라벨 톤: 시멘틱은 `<h2>` 유지하되 스타일은 폼 필드 라벨("제목"·"메모" 등)과 같은 결 — `text-sm font-medium` + `styles.ink`(`--s-ink`). 예전 `text-xs uppercase` + `sub`는 쓰지 않는다(`DetailBlock` showHeader 경로에 반영).
 
 카드 클래스: `styles.card` + `styles.detailCard`
 - `styles.card`: `border-radius: 1rem`, 보더, 그림자 (공용)
@@ -445,11 +450,11 @@ export const STATUS_LABELS: Record<Status, string> = {
 
 ### 10-H. 날짜 표시·별점·토스트
 
-**날짜**: 저장은 ISO(`YYYY-MM-DD`). 화면 표시는 `toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })` → `"2026년 4월 6일"`.
+**날짜**: 저장은 ISO(`YYYY-MM-DD`). 표시는 `formatKoreanDate()`(`lib/date.ts`, 문자열 분해로 타임존 안전) → `"2026년 4월 6일"`. 방문 기록 편집의 날짜 입력은 커스텀 date picker(§4-A) 사용 — native `<input type="date">` 금지.
 
 **방문일 아이콘**: `Calendar` (`lucide-react`) + `styles.accent` 색 — 완료 이벤트 강조.
 
-**별점 뷰**: `<RatingStars value={rating} size="sm" />` (16px). 편집: `size` 생략(기본 28px).
+**별점 사이즈 위계**: 뷰·편집 **모두 `size="sm"`(16px)**로 통일 — `<RatingStars value={...} size="sm" />`. 큰(28px) 별점은 사용하지 않는다(편집 모드에서도 `size` 생략 금지).
 
 **토스트 문구**:
 ```

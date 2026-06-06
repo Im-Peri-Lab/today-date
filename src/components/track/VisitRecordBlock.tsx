@@ -3,9 +3,9 @@
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { Calendar } from 'lucide-react'
-import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
+import { DatePickerField } from '@/components/forms/DatePickerField'
 import { RatingStars } from './RatingStars'
 import { DetailBlock } from './DetailBlock'
 import { useUpdateActivity } from '@/hooks/useActivities'
@@ -95,22 +95,11 @@ export function VisitRecordBlock({
         <div className="space-y-5">
           <div className="space-y-1.5">
             <Label htmlFor="visit_date">방문 날짜</Label>
-            <Input
-              id="visit_date"
-              type="date"
-              className={styles.dateInput}
-              value={dateValue}
-              onChange={(e) => setDateValue(e.target.value)}
-            />
-            {/* 한글 표시 캡션 — native input은 표시 포맷을 못 바꾸므로 저장값(ISO) 그대로 두고
-                흐린 톤 캡션으로 "2026년 6월 5일"을 보조 노출(값 없으면 미표시) */}
-            {dateValue && (
-              <p className={cn('text-xs', styles.faint)}>{formatKoreanDate(dateValue)}</p>
-            )}
+            <DatePickerField id="visit_date" value={dateValue} onChange={setDateValue} />
           </div>
           <div className="space-y-1.5">
             <Label>별점</Label>
-            <RatingStars value={ratingValue} onChange={setRatingValue} />
+            <RatingStars value={ratingValue} onChange={setRatingValue} size="sm" />
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="visit_note">후기</Label>

@@ -231,7 +231,11 @@ description: >
 ```
 
 - **브랜드 줄**: `MiniHeart`(보라→핑크 그라데이션 하트, `h-6 w-6` / lg `h-7 w-7`) + `Today Date` 텍스트(`styles.brand`: `1rem`/weight 500/letter-spacing `-0.01em`, lg `text-lg`), 둘 사이 `gap-2.5`. 우측에 홈 버튼(하위 화면) + 햄버거 메뉴(`HomeMenu`).
-- **제목 블록 간격**: 헤더 → 제목 블록 `mt-8 lg:mt-10`. 제목 블록 → 다음 콘텐츠(탭/CTA) `mt-8`.
+- **제목 블록 간격**: 헤더 → 제목 블록 `mt-6 lg:mt-8`(24/32px, 공용 `PageHeader`).
+- **서브카피 아래 간격(다음 요소에 맞춰 조정)**: 다음 요소의 **자체 패딩까지 고려**해 두 화면이 비슷한 시각적 공백으로 읽히게 한다.
+  - 홈(`/`)처럼 서브카피 바로 아래 **카드**(자체 상단 패딩 없음)가 오면 `mt-5`(20px) — `HomeDashboard` CTA 그리드(`lg:mt-5`).
+  - 리스트(`/list`)처럼 **자체 상하 패딩(~10px)이 있는 탭**이 오면 `mt-3`(12px) — `ListView` `tabBar`. (마진 12px + 탭 내부 패딩 ≈ 홈의 20px 공백과 같은 리듬)
+  - 원칙: 균등한 마진 숫자 맞추기가 아니라 **눈에 보이는 공백**을 두 화면에서 맞춘다.
 - **제목** `styles.pageTitle`: `font-size 1.7rem`(~27px), lg `1.875rem`(30px) / **weight 600 (semibold)** / letter-spacing `-0.01em` / line-height `1.2`. (bold 700 아님 — 중간 톤)
 - **서브카피** `styles.pageSubtitle`: `margin-top 0.25rem`(lg `0.375rem`), `font 0.875rem`(lg `1.125rem`), color `sub`.
 

@@ -14,8 +14,6 @@ import {
   User,
   Undo2,
   Clock,
-  Sun,
-  Moon,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -37,7 +35,7 @@ import { DeleteConfirmDialog } from './DeleteConfirmDialog'
 import { VisitedDialog } from '@/components/VisitedDialog'
 import { useActivity, useDeleteActivity, useUpdateActivity } from '@/hooks/useActivities'
 import { activityFormSchema, type ActivityFormValues } from '@/lib/schemas/activitySchema'
-import { DURATION_LABELS, TIME_OF_DAY_LABELS, STATUS_LABELS } from '@/lib/labels'
+import { DURATION_LABELS, TIME_OF_DAY_LABELS, TIME_OF_DAY_ICONS, STATUS_LABELS } from '@/lib/labels'
 import { cn } from '@/lib/utils'
 import styles from '@/components/screens.module.css'
 
@@ -150,6 +148,7 @@ export function ActivityDetail({ id, initialEdit }: Props) {
   })
 
   /* ── 렌더 ── */
+  const TimeOfDayIcon = activity ? TIME_OF_DAY_ICONS[activity.time_of_day] : null
 
   return (
     <div className="mx-auto w-full max-w-lg px-5 pb-16 pt-6 lg:pt-10">
@@ -213,19 +212,15 @@ export function ActivityDetail({ id, initialEdit }: Props) {
                       </span>
                     </DetailRow>
                   )}
-                  {activity.time_of_day && activity.time_of_day !== 'any' && (
-                    <DetailRow label="시간대">
-                      {/* Sun(주간) / Moon(야간) — faint 톤 */}
-                      <span className="inline-flex items-center gap-1.5">
-                        {activity.time_of_day === 'day' ? (
-                          <Sun className={cn('h-3.5 w-3.5 shrink-0', styles.faint)} />
-                        ) : (
-                          <Moon className={cn('h-3.5 w-3.5 shrink-0', styles.faint)} />
-                        )}
-                        {TIME_OF_DAY_LABELS[activity.time_of_day]}
-                      </span>
-                    </DetailRow>
-                  )}
+                  <DetailRow label="시간대">
+                    {/* Sun(주간) / Moon(야간) / SunMoon(상관없음) — faint 톤, 공용 매핑 */}
+                    <span className="inline-flex items-center gap-1.5">
+                      {TimeOfDayIcon && (
+                        <TimeOfDayIcon className={cn('h-3.5 w-3.5 shrink-0', styles.faint)} />
+                      )}
+                      {TIME_OF_DAY_LABELS[activity.time_of_day]}
+                    </span>
+                  </DetailRow>
                   <DetailRow label="메모" wide>
                     {activity.memo ? (
                       <p className="whitespace-pre-wrap leading-relaxed">{activity.memo}</p>

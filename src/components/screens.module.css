@@ -590,13 +590,16 @@
   border-color: var(--s-active-line, #7c3aed);
 }
 
-/* 달력 팝업 카드 — 외곽 padding은 유지, 내부는 flex-column + 균등 gap(헤더↔요일↔그리드↔오늘 동일 리듬) */
+/*
+ * 달력 팝업 카드 — 외곽 padding 보존. 내부는 "그룹 내부 좁게 / 그룹 사이 넓게":
+ *  A 헤더 ─16px─ B(요일 ─4px─ 날짜 그리드) ─12px─ C "오늘".
+ * (균등 gap 대신 블록별 margin 으로 시각 그룹을 분리. flex 아이템이라 margin 안 겹침)
+ */
 .dpPopup {
   width: 17rem;
   padding: 0.75rem;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem; /* 8px — 내부 블록 간 일정 리듬(요일 행도 동일 간격) */
   background: var(--s-card-bg, #ffffff);
   border: 1px solid var(--s-input, #eceaf3);
   border-radius: 0.75rem; /* 12px */
@@ -606,6 +609,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  margin-bottom: 1rem; /* 16px — 헤더(A) ↔ 요일(B) 그룹 분리 */
 }
 .dpNav {
   display: inline-flex;
@@ -670,11 +674,12 @@
   pointer-events: none;
   color: var(--s-sub, #6b7280);
 }
-/* 요일 라벨 행 — 날짜 그리드와 동일한 7열·gap 으로 열 정렬, 블록 간 간격은 dpPopup gap 이 담당 */
+/* 요일 라벨 행 — 날짜 그리드와 동일한 7열·gap 으로 열 정렬. 그리드 첫 줄과 4px 만 띄워 한 표처럼 묶음 */
 .dpWeekRow {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   gap: 0.125rem;
+  margin-bottom: 0.25rem; /* 4px — 요일 ↔ 날짜 그리드(그룹 B 내부, 밀착) */
 }
 .dpGrid {
   display: grid;
@@ -724,6 +729,7 @@
 .dpFooter {
   display: flex;
   justify-content: flex-end;
+  margin-top: 0.75rem; /* 12px — 날짜 그리드(B) ↔ "오늘"(C). 멀지 않게 */
 }
 .dpToday {
   padding: 0.375rem 0.75rem; /* px-3 py-1.5 */

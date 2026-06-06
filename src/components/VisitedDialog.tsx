@@ -113,7 +113,7 @@ export function VisitedDialog({
 
           <div className="space-y-1.5">
             <Label>별점</Label>
-            <RatingStars value={rating} onChange={setRating} />
+            <RatingStars value={rating} onChange={setRating} size="lg" />
           </div>
 
           <div className="space-y-1.5">

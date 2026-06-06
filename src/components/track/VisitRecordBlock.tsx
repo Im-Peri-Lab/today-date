@@ -99,7 +99,7 @@ export function VisitRecordBlock({
           </div>
           <div className="space-y-1.5">
             <Label>별점</Label>
-            <RatingStars value={ratingValue} onChange={setRatingValue} size="sm" />
+            <RatingStars value={ratingValue} onChange={setRatingValue} size="lg" />
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="visit_note">후기</Label>

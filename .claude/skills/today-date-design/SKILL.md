@@ -156,7 +156,7 @@ description: >
 
 **날짜 입력(커스텀 date picker — `src/components/forms/DatePickerField.tsx`):**
 - native `<input type="date">`는 쓰지 않는다(박스 크기/아이콘/포맷이 OS·브라우저마다 제각각 + 다크 아이콘 묻힘). base-ui `Popover` + 자체 월 그리드로 대체.
-- 트리거 박스(`styles.dateTrigger`)는 다른 입력바와 **완전히 동일한 외형**: 40px / radius 10px / `--s-input` 보더 / `px-3`. **아이콘 leading**: 박스 좌측 끝 lucide `Calendar`(흐린 톤) → gap → 날짜 텍스트. 빈 값이면 placeholder "날짜 선택"(`--s-faint`). 박스 아래 별도 캡션 없음.
+- 트리거 박스(`styles.dateTrigger`)는 다른 입력바와 **동일한 외형**: 40px / radius 10px / `--s-input` 보더 / `px-3`. 단 "선택 트리거" 성격이라 **[lucide `Calendar`(흐린 톤) + gap + 날짜 텍스트]를 한 묶음으로 박스 가운데 정렬**(`justify-content:center`). 빈 값이면 placeholder "날짜 선택"(`--s-faint`). 박스 아래 별도 캡션 없음. **다른 입력바(제목/메모/URL/위치)는 좌측 정렬 유지** — 날짜 박스만 가운데.
 - 표시 포맷은 **요일 포함**: `formatKoreanDateWithWeekday()` → `"2026년 7월 7일 (화)"`(요일도 본문과 한 흐름, 별도 색 없음). 요일이 무의미한 "등록일" 캡션은 `formatKoreanDate()`(요일 없음) 유지.
 - 달력 팝업(`styles.dpPopup`/`dpHeader`/`dpNav`/`dpGrid`/`dpWeekday`/`dpDay`)은 전부 `--s-*` 토큰: 카드면 `--s-card-bg`, 보더 `--s-input`, 오늘=외곽선(`--s-active-line`), 선택일=단색 채움(`--s-active-fill` + `--s-active-on`).
 - 헤더 네비게이션은 **두 방식 공존**: 좌우 화살표(`dpNav`)=한 달 단위, 연/월 **드롭다운**(`dpCaption`/`dpSelect`, native `select` + `color-scheme:light dark`)=큰 점프(연도 범위 `2000 ~ 올해+10`).
@@ -456,7 +456,7 @@ export const STATUS_LABELS: Record<Status, string> = {
 
 **방문일 아이콘**: `Calendar` (`lucide-react`) + `styles.accent` 색 — 완료 이벤트 강조.
 
-**별점 사이즈 위계**: 뷰·편집 **모두 `size="sm"`(16px)**로 통일 — `<RatingStars value={...} size="sm" />`. 큰(28px) 별점은 사용하지 않는다(편집 모드에서도 `size` 생략 금지).
+**별점 사이즈 위계**: 표시(읽기)는 **`size="sm"`(16px)** — 카드·상세 뷰의 `<RatingStars value={...} size="sm" />`. 편집(인터랙티브, `onChange` 있음)은 **`size="lg"`(32px)** + 넓은 간격(`gap-2`) — `VisitRecordBlock` 편집·`VisitedDialog`. 근거: 손가락 터치 타깃 확보(별 32px + 간격으로 인접 별 오터치 방지, HIG 44pt에 근사). 색은 채움 `--s-accent` / 빈 별 `--s-faint` 동일.
 
 **토스트 문구**:
 ```

@@ -564,13 +564,14 @@
 
 /*
  * 방문 기록 날짜 선택 — 커스텀 date picker(base-ui Popover + 자체 월 그리드).
- * 트리거 박스는 다른 입력바와 완전히 동일한 외형(40px / radius 10px / --s-input 보더 / px-3),
- * 박스 안 좌측 끝에 Calendar 아이콘(leading) → gap → 한글 날짜 텍스트. 달력 UI 는 모두 --s-* 토큰 기반.
+ * 트리거 박스는 다른 입력바와 완전히 동일한 외형(40px / radius 10px / --s-input 보더 / px-3).
+ * 단, "선택 트리거" 성격이라 [Calendar 아이콘 + gap + 날짜 텍스트]를 한 묶음으로 박스 가운데 정렬
+ * (다른 입력바는 좌측 정렬 유지). 달력 UI 는 모두 --s-* 토큰 기반.
  */
 .dateTrigger {
   display: flex;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: center;
   gap: 0.5rem;
   width: 100%;
   height: 2.5rem; /* 40px — 입력바 표준 */

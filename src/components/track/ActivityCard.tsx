@@ -74,7 +74,7 @@ export function ActivityCard({ activity, hideMenu, actionSlot }: ActivityCardPro
         className={cn('block p-3.5', hideMenu ? 'pr-3.5' : 'pr-11')}
       >
         {activity.category && (
-          <div className="mb-1">
+          <div className="mb-0.5">
             <CategoryBadge category={activity.category} />
           </div>
         )}

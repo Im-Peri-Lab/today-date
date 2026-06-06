@@ -156,9 +156,11 @@ description: >
 
 **날짜 입력(커스텀 date picker — `src/components/forms/DatePickerField.tsx`):**
 - native `<input type="date">`는 쓰지 않는다(박스 크기/아이콘/포맷이 OS·브라우저마다 제각각 + 다크 아이콘 묻힘). base-ui `Popover` + 자체 월 그리드로 대체.
-- 트리거 박스(`styles.dateTrigger`)는 다른 입력바와 **완전히 동일한 외형**: 40px / radius 10px / `--s-input` 보더 / `px-3`. 좌측에 한글 날짜 텍스트(`formatKoreanDate()`, 빈 값이면 placeholder "날짜 선택" `--s-faint`), 우측 끝 lucide `Calendar` 아이콘(흐린 톤). 박스 아래 별도 캡션 없음(중복 제거).
+- 트리거 박스(`styles.dateTrigger`)는 다른 입력바와 **완전히 동일한 외형**: 40px / radius 10px / `--s-input` 보더 / `px-3`. **아이콘 leading**: 박스 좌측 끝 lucide `Calendar`(흐린 톤) → gap → 날짜 텍스트. 빈 값이면 placeholder "날짜 선택"(`--s-faint`). 박스 아래 별도 캡션 없음.
+- 표시 포맷은 **요일 포함**: `formatKoreanDateWithWeekday()` → `"2026년 7월 7일 (화)"`(요일도 본문과 한 흐름, 별도 색 없음). 요일이 무의미한 "등록일" 캡션은 `formatKoreanDate()`(요일 없음) 유지.
 - 달력 팝업(`styles.dpPopup`/`dpHeader`/`dpNav`/`dpGrid`/`dpWeekday`/`dpDay`)은 전부 `--s-*` 토큰: 카드면 `--s-card-bg`, 보더 `--s-input`, 오늘=외곽선(`--s-active-line`), 선택일=단색 채움(`--s-active-fill` + `--s-active-on`).
-- 저장값은 ISO(`YYYY-MM-DD`) 그대로. 날짜 비교·생성은 문자열/숫자로만(`new Date(iso)` 금지 — UTC 자정 밀림 방지, `lib/date.ts`와 동일 원칙).
+- 헤더 네비게이션은 **두 방식 공존**: 좌우 화살표(`dpNav`)=한 달 단위, 연/월 **드롭다운**(`dpCaption`/`dpSelect`, native `select` + `color-scheme:light dark`)=큰 점프(연도 범위 `2000 ~ 올해+10`).
+- 저장값은 ISO(`YYYY-MM-DD`) 그대로. 날짜 비교·생성·요일은 문자열/숫자 + 연/월/일 인자 `Date`로만(`new Date(iso)` 문자열 파싱 금지 — UTC 자정 밀림 방지, `lib/date.ts`와 동일 원칙).
 
 ---
 

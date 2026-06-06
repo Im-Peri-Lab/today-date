@@ -4,10 +4,17 @@ import { useState } from 'react'
 import { Popover } from '@base-ui/react/popover'
 import { Calendar, ChevronLeft, ChevronRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { formatKoreanDate } from '@/lib/date'
+import { formatKoreanDateWithWeekday } from '@/lib/date'
 import styles from '@/components/screens.module.css'
 
 const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토']
+const MONTHS = Array.from({ length: 12 }, (_, i) => i + 1)
+// 연도 빠른 점프 범위: 2000 ~ 올해+10
+const FROM_YEAR = 2000
+const YEARS = Array.from(
+  { length: new Date().getFullYear() + 10 - FROM_YEAR + 1 },
+  (_, i) => FROM_YEAR + i
+)
 
 const pad = (n: number) => String(n).padStart(2, '0')
 const toISO = (y: number, m: number, d: number) => `${y}-${pad(m)}-${pad(d)}`
@@ -65,10 +72,11 @@ export function DatePickerField({ id, value, onChange, placeholder = '날짜 선
   return (
     <Popover.Root open={open} onOpenChange={setOpen}>
       <Popover.Trigger id={id} className={styles.dateTrigger}>
-        <span className={cn(!value && styles.faint)}>
-          {value ? formatKoreanDate(value) : placeholder}
-        </span>
+        {/* 아이콘 leading(좌측) — 흐린 톤, 박스 좌측 패딩 안 */}
         <Calendar className={cn('h-4 w-4 shrink-0', styles.faint)} />
+        <span className={cn(!value && styles.faint)}>
+          {value ? formatKoreanDateWithWeekday(value) : placeholder}
+        </span>
       </Popover.Trigger>
       <Popover.Portal>
         <Popover.Positioner sideOffset={6} align="start">
@@ -77,9 +85,33 @@ export function DatePickerField({ id, value, onChange, placeholder = '날짜 선
               <button type="button" className={styles.dpNav} onClick={prevMonth} aria-label="이전 달">
                 <ChevronLeft className="h-4 w-4" />
               </button>
-              <span className={cn('text-sm font-medium', styles.ink)}>
-                {viewY}년 {viewM}월
-              </span>
+              {/* 연/월 드롭다운 — 큰 점프(화살표는 한 달 단위로 공존) */}
+              <div className={styles.dpCaption}>
+                <select
+                  className={styles.dpSelect}
+                  value={viewY}
+                  onChange={(e) => setViewY(Number(e.target.value))}
+                  aria-label="연도 선택"
+                >
+                  {YEARS.map((y) => (
+                    <option key={y} value={y}>
+                      {y}년
+                    </option>
+                  ))}
+                </select>
+                <select
+                  className={styles.dpSelect}
+                  value={viewM}
+                  onChange={(e) => setViewM(Number(e.target.value))}
+                  aria-label="월 선택"
+                >
+                  {MONTHS.map((m) => (
+                    <option key={m} value={m}>
+                      {m}월
+                    </option>
+                  ))}
+                </select>
+              </div>
               <button type="button" className={styles.dpNav} onClick={nextMonth} aria-label="다음 달">
                 <ChevronRight className="h-4 w-4" />
               </button>

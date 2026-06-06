@@ -27,7 +27,7 @@ export const DURATION_LABELS: Record<DurationBucket, string> = {
 export const TIME_OF_DAY_LABELS: Record<TimeOfDay, string> = {
   day: '주간',
   night: '야간',
-  any: '상관없음',
+  any: '아무때나',
 }
 
 /** 시간대 → lucide 아이콘 (카드·상세 공용). day=Sun / night=Moon / any=아이콘 없음(라벨만) */

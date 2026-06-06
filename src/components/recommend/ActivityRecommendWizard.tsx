@@ -26,7 +26,7 @@ const DURATIONS: { value: DurationBucket; emoji: string; label: string; sub: str
 const TIMES: { value: TimeOfDay; emoji: string; label: string }[] = [
   { value: 'day', emoji: '🌞', label: '주간' },
   { value: 'night', emoji: '🌃', label: '야간' },
-  { value: 'any', emoji: '🤷', label: '상관없음' },
+  { value: 'any', emoji: '🤷', label: '아무때나' },
 ]
 
 function defaultTimeOfDay(): TimeOfDay {

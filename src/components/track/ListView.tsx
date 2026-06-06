@@ -228,7 +228,7 @@ export function ListView() {
       <PageHeader title="우리의 위시리스트" subtitle="함께 쌓아온 곳들" homeNav />
 
       {/* 탭 */}
-      <div className={cn(styles.tabBar, 'mt-8')} role="tablist">
+      <div className={cn(styles.tabBar, 'mt-3')} role="tablist">
         <button
           type="button"
           role="tab"

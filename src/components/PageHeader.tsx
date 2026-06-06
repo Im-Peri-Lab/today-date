@@ -48,7 +48,7 @@ export function PageHeader({
         </div>
       </header>
 
-      <div className="mt-8 lg:mt-10">
+      <div className="mt-6 lg:mt-8">
         <h1 className={styles.pageTitle}>{title}</h1>
         <p className={styles.pageSubtitle}>{subtitle}</p>
       </div>

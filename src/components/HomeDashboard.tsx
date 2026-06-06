@@ -79,7 +79,7 @@ export function HomeDashboard() {
       <PageHeader title="오늘, 우리 어떻게 보낼까?" subtitle="위시리스트에서 골라드릴게요 💜" />
 
       {/* 메인 CTA — 정사각 통통 카드 2열, 아이콘 상단 + 텍스트 하단 */}
-      <div className="mt-8 grid grid-cols-2 gap-3 lg:mt-8 lg:gap-4">
+      <div className="mt-5 grid grid-cols-2 gap-3 lg:mt-5 lg:gap-4">
         <CtaCard
           href="/recommend/activity"
           icon={<Sparkles className="h-5 w-5" strokeWidth={1.75} />}

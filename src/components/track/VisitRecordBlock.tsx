@@ -3,9 +3,9 @@
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { Calendar } from 'lucide-react'
-import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
+import { DatePickerField } from '@/components/forms/DatePickerField'
 import { RatingStars } from './RatingStars'
 import { DetailBlock } from './DetailBlock'
 import { useUpdateActivity } from '@/hooks/useActivities'
@@ -20,6 +20,8 @@ interface VisitRecordBlockProps {
   visitedAt: string | null
   rating: number | null
   reviewNote: string | null
+  /** ?edit=visit 진입 시 방문 기록 블록을 처음부터 편집모드로 연다 */
+  initialEditing?: boolean
 }
 
 /**
@@ -33,8 +35,9 @@ export function VisitRecordBlock({
   visitedAt,
   rating,
   reviewNote,
+  initialEditing = false,
 }: VisitRecordBlockProps) {
-  const [editing, setEditing] = useState(false)
+  const [editing, setEditing] = useState(initialEditing)
   // 방문 날짜 입력은 저장 값과 동일한 ISO('YYYY-MM-DD')를 그대로 바인딩(표시 변환은 보기 모드에서만).
   const [dateValue, setDateValue] = useState(visitedAt ?? '')
   const [ratingValue, setRatingValue] = useState(rating ?? 5)
@@ -51,6 +54,14 @@ export function VisitRecordBlock({
     setEditing(true)
   }
 
+  function exitEdit() {
+    setEditing(false)
+    // ?edit=visit로 진입했을 경우 URL에서 쿼리 제거 (재내비게이션 없이 히스토리만 교체)
+    if (typeof window !== 'undefined') {
+      window.history.replaceState(null, '', window.location.pathname)
+    }
+  }
+
   function handleSave() {
     const patch = {
       visited_at: dateValue || null,
@@ -62,7 +73,7 @@ export function VisitRecordBlock({
       { id, patch },
       {
         onSuccess: () => {
-          setEditing(false)
+          exitEdit()
           toast.success('방문 기록을 수정했어요')
         },
         onError: (err: unknown) =>
@@ -76,24 +87,19 @@ export function VisitRecordBlock({
       title="방문 기록"
       editing={editing}
       onEdit={startEdit}
-      onCancel={() => setEditing(false)}
+      onCancel={exitEdit}
       onSave={handleSave}
       saving={saving}
     >
       {editing ? (
-        <div className="space-y-4">
+        <div className="space-y-5">
           <div className="space-y-1.5">
             <Label htmlFor="visit_date">방문 날짜</Label>
-            <Input
-              id="visit_date"
-              type="date"
-              value={dateValue}
-              onChange={(e) => setDateValue(e.target.value)}
-            />
+            <DatePickerField id="visit_date" value={dateValue} onChange={setDateValue} />
           </div>
           <div className="space-y-1.5">
             <Label>별점</Label>
-            <RatingStars value={ratingValue} onChange={setRatingValue} />
+            <RatingStars value={ratingValue} onChange={setRatingValue} size="lg" />
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="visit_note">후기</Label>

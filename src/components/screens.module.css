@@ -22,7 +22,7 @@
    * 토글·검색 포커스·필터 버튼·필터 칩의 "활성/선택/포커스"는 모두 아래 토큰만 참조한다.
    * 활성색을 바꾸려면 여기 한 곳만 수정. (요소별 하드코딩 금지)
    */
-  --s-active-fill: linear-gradient(135deg, #a855f7 0%, #ec4899 100%); /* 채움(칩) */
+  --s-active-fill: #7c3aed; /* 활성 채움(칩·세그먼트·Primary 버튼) — 단색. 그라데이션은 FAB·로고(--s-grad) 전용 */
   --s-active-on: #ffffff; /* 채움 위 글씨/아이콘 */
   --s-active-line: #7c3aed; /* 활성/포커스 보더·링 */
   --s-active-text: #7c3aed; /* 외곽선형 활성(토글/필터버튼)의 글씨·아이콘 — 다크에선 밝게 */
@@ -37,6 +37,9 @@
    */
   --s-card-bg: #ffffff;
   --s-card-border-strong: #eceaf3;
+  /* 폼 컨트롤 보더 전용(입력/textarea/세그먼트/칩/날짜). 라이트는 card-border-strong과 동일,
+     다크에서만 한 단계 밝게 올려 카드면 대비 가시성 확보(채움 토큰과 분리해 뱃지·버튼 면 영향 없음) */
+  --s-input: #eceaf3;
   --s-card-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 4px 12px rgba(0, 0, 0, 0.05);
 
   /* 노치/홈 인디케이터 안전 영역 */
@@ -82,7 +85,8 @@
       linear-gradient(180deg, #0a0712 0%, #120c1e 100%);
   }
   .page {
-    --s-active-fill: linear-gradient(135deg, #c084fc 0%, #f472b6 100%); /* 다크는 한 톤 밝게 */
+    /* --s-active-fill 은 다크에서 재정의하지 않는다(라이트와 동일 #7c3aed) →
+       상세 Primary(--s-active-line)와 같은 기준: 다크에서 밝게 떠 보이지 않게 고정 */
     --s-active-text: #d8b4fe; /* 다크: 외곽선형 활성 글씨/아이콘을 밝은 라벤더로 */
     --s-ink: #f5f3fa; /* 제목/주요 텍스트 */
     --s-sub: #a8a0b8; /* 서브카피 */
@@ -94,6 +98,7 @@
     --s-card-bg: #241a36; /* 카드 표면 — 페이지 배경(#0a0712~#120c1e)보다 또렷이 밝게 분리 */
     --s-card-border: #2a1f3e; /* 보더로 분리감 확보 */
     --s-card-border-strong: #3a2f4e; /* 검색/필터/팝업용 또렷한 보더(배경보다 한 단계 밝게) */
+    --s-input: #4a3f63; /* 폼 컨트롤 보더 — 카드면(#241a36) 대비 또렷이 보이게 한 단계 더 밝게 */
     --s-card-shadow: 0 8px 24px -16px rgba(0, 0, 0, 0.6);
     --s-card-shadow-hover: 0 16px 40px -16px rgba(0, 0, 0, 0.72), 0 4px 22px -10px rgba(192, 132, 252, 0.3);
     --s-card-hover-border: rgba(192, 132, 252, 0.5); /* 호버 시 라벤더 보더 */
@@ -477,10 +482,11 @@
   align-items: center;
   gap: 0.3rem;
   white-space: nowrap;
-  border-radius: 9999px;
-  padding: 0.375rem 0.75rem;
+  height: 2.25rem; /* 폼 칩 표준: 36px */
+  border-radius: 9999px; /* pill 유지 */
+  padding: 0 0.75rem;
   font-size: 0.8125rem;
-  border: 1px solid var(--s-card-border, #e3dcef);
+  border: 1px solid var(--s-input, #eceaf3);
   background: var(--s-card-bg, #ffffff);
   color: var(--s-sub, #6b7280);
   cursor: pointer;
@@ -506,11 +512,11 @@
     color: var(--s-active-line, #7c3aed);
   }
 }
-/* 활성 칩: 단일 토큰만 참조 — 그라데이션 채움 + 흰 글씨/아이콘 (예외 없음) */
+/* 활성 칩: 단일 토큰만 참조 — 단색 액센트 채움 + 흰 글씨/아이콘 (예외 없음) */
 .chipActive,
 .chipActive:hover {
   border-color: transparent;
-  background: var(--s-active-fill, linear-gradient(135deg, #a855f7 0%, #ec4899 100%));
+  background: var(--s-active-fill, #7c3aed);
   color: var(--s-active-on, #ffffff);
   font-weight: 500;
 }
@@ -519,17 +525,21 @@
 }
 
 /*
- * 폼 선택형 옵션(소요시간/시간대 라디오) — 칩/세그먼트와 한 결.
- * 활성은 외곽선형(라이트 보라 배경 금지): 활성 보더 + 중성 흰 면 + 활성 텍스트(단일 토큰).
+ * 폼 선택형 옵션(소요시간/시간대/식사시간) — 칩과 동일한 활성 규칙.
+ * 활성 = 단색 액센트 채움(--s-active-fill) + 흰 글씨. 필터 칩·상세 Primary와 일치.
  * 라이트 폴백 내장 → 다크는 .page 토큰으로 자동 적응.
  */
 .option {
   flex: 1 1 0%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 2.5rem; /* 폼 일반 컨트롤 표준: 40px (입력바와 동일) */
   cursor: pointer;
-  border-radius: 0.5rem;
-  border: 1px solid var(--s-card-border, #e3dcef);
+  border-radius: 0.625rem; /* 10px = var(--radius), 입력바와 통일 */
+  border: 1px solid var(--s-input, #eceaf3);
   background: var(--s-card-bg, #ffffff);
-  padding: 0.625rem 0.75rem;
+  padding: 0 0.75rem; /* 가로 12px = 입력바 px-3 */
   text-align: center;
   font-size: 0.875rem;
   color: var(--s-sub, #6b7280);
@@ -544,11 +554,228 @@
     color: var(--s-active-text, #7c3aed);
   }
 }
-.optionActive {
+.optionActive,
+.optionActive:hover {
+  border-color: transparent;
+  background: var(--s-active-fill, #7c3aed);
+  color: var(--s-active-on, #ffffff);
+  font-weight: 500;
+}
+
+/*
+ * 방문 기록 날짜 선택 — 커스텀 date picker(base-ui Popover + 자체 월 그리드).
+ * 트리거 박스는 다른 입력바와 완전히 동일한 외형(40px / radius 10px / --s-input 보더 / px-3).
+ * 단, "선택 트리거" 성격이라 [Calendar 아이콘 + gap + 날짜 텍스트]를 한 묶음으로 박스 가운데 정렬
+ * (다른 입력바는 좌측 정렬 유지). 달력 UI 는 모두 --s-* 토큰 기반.
+ */
+.dateTrigger {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  height: 2.5rem; /* 40px — 입력바 표준 */
+  border-radius: 0.625rem; /* 10px = var(--radius) */
+  border: 1px solid var(--s-input, #eceaf3);
+  background: transparent;
+  padding: 0 0.75rem; /* px-3 */
+  font-size: 1rem; /* 16px — 입력바와 동일(iOS 줌인 방지) */
+  color: var(--s-ink, #1a1033);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 140ms ease;
+}
+.dateTrigger:focus-visible {
+  outline: none;
+  border-color: var(--s-active-line, #7c3aed);
+}
+
+/*
+ * 달력 팝업 카드 — 외곽 padding 보존. 내부는 "그룹 내부 좁게 / 그룹 사이 넓게":
+ *  A 헤더 ─16px─ B(요일 ─4px─ 날짜 그리드) ─12px─ C "오늘".
+ * (균등 gap 대신 블록별 margin 으로 시각 그룹을 분리. flex 아이템이라 margin 안 겹침)
+ */
+.dpPopup {
+  width: 17rem;
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  background: var(--s-card-bg, #ffffff);
+  border: 1px solid var(--s-input, #eceaf3);
+  border-radius: 0.75rem; /* 12px */
+  box-shadow: var(--s-card-shadow, 0 8px 24px -16px rgba(20, 10, 40, 0.18));
+}
+.dpHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem; /* 16px — 헤더(A) ↔ 요일(B) 그룹 분리 */
+}
+.dpNav {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.5rem; /* 8px */
+  color: var(--s-sub, #6b7280);
+  background: transparent;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition:
+    background 140ms ease,
+    color 140ms ease;
+}
+.dpNav:hover {
+  background: var(--s-card-border-strong, #eceaf3);
+  color: var(--s-ink, #1a1033);
+}
+/* 연/월 드롭다운 캡션 — 화살표(한 달)와 공존하는 큰 점프 */
+.dpCaption {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+/* select + chevron 묶음 — chevron 을 토큰 색으로 직접 그려 다크에서도 또렷 + "탭 가능" 표시 */
+.dpSelectWrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+.dpSelect {
+  /* native select — 옵션 목록이 다크에서 다크 톤으로 뜨도록 color-scheme 적용 */
+  color-scheme: light dark;
+  appearance: none;
+  -webkit-appearance: none;
+  height: 2rem;
+  padding: 0 1.5rem 0 0.5rem; /* 우측 chevron(16px) 자리 확보 */
+  border-radius: 0.5rem; /* 8px */
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--s-ink, #1a1033);
+  font-size: 1rem; /* 16px — 본문 그리드 숫자(14px)보다 한 단계 크게(위계) */
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    background 140ms ease,
+    border-color 140ms ease;
+}
+.dpSelect:hover {
+  background: var(--s-card-border-strong, #eceaf3);
+}
+.dpSelect:focus-visible {
+  outline: none;
+  border-color: var(--s-active-line, #7c3aed);
+}
+/* 드롭다운 chevron — sub 톤으로 명확히, 클릭은 select 로 통과 */
+.dpSelectIcon {
+  position: absolute;
+  right: 0.375rem;
+  pointer-events: none;
+  color: var(--s-sub, #6b7280);
+}
+/* 요일 라벨 행 — 날짜 그리드와 동일한 7열·gap 으로 열 정렬. 그리드 첫 줄과 4px 만 띄워 한 표처럼 묶음 */
+.dpWeekRow {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.125rem;
+  margin-bottom: 0.25rem; /* 4px — 요일 ↔ 날짜 그리드(그룹 B 내부, 밀착) */
+}
+.dpGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.125rem;
+}
+.dpWeekday {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 1.75rem;
+  font-size: 0.75rem;
+  color: var(--s-faint, #9ca3af);
+}
+.dpDay {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 2rem;
+  border-radius: 0.5rem; /* 8px */
+  font-size: 0.875rem;
+  color: var(--s-ink, #1a1033);
+  background: transparent;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition:
+    background 140ms ease,
+    color 140ms ease;
+}
+.dpDay:hover {
+  background: var(--s-accent-soft-bg, #f6f1ff);
+}
+/* 오늘: 외곽선만(선택과 구분) */
+.dpDayToday {
   border-color: var(--s-active-line, #7c3aed);
   color: var(--s-active-text, #7c3aed);
+}
+/* 선택일: 단색 액센트 채움 — 칩/세그먼트와 동일 규칙 */
+.dpDaySelected,
+.dpDaySelected:hover {
+  border-color: transparent;
+  background: var(--s-active-fill, #7c3aed);
+  color: var(--s-active-on, #ffffff);
   font-weight: 500;
-  box-shadow: inset 0 0 0 1px var(--s-active-line, #7c3aed);
+}
+/*
+ * 우하단 "오늘" — 그리드 마지막 행 바로 아래(헤더↔요일과 같은 결의 그룹 거리 12px).
+ * 약한 박스 텍스트 버튼: 평상시 배경 투명 + --s-sub 글씨 → 좌우 화살표 hover surface
+ * (--s-card-border-strong)와 평상시 톤이 겹치지 않아 "이미 눌린 듯한" 잔상 충돌이 없다.
+ * hover/active 시에만 약한 surface(화살표의 neutral 과 다른 accent-soft 톤). 표시 월만 이동(선택 불변).
+ */
+.dpFooter {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 0.75rem; /* 12px — 그리드(B) ↔ "오늘". 너무 멀지도 붙지도 않게 */
+}
+.dpToday {
+  padding: 0.375rem 0.75rem; /* px-3 py-1.5 */
+  border-radius: 0.625rem; /* 10px — 폼 컨트롤 표준 */
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--s-sub, #6b7280);
+  background: transparent;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition:
+    background 140ms ease,
+    color 140ms ease;
+}
+.dpToday:hover {
+  background: var(--s-accent-soft-bg, #f6f1ff);
+  color: var(--s-accent, #7c3aed);
+}
+
+/*
+ * 팝업은 Popover.Portal 로 .page 밖(body)에 렌더되어 .page 의 --s-* 다크 토큰을 못 받는다.
+ * → 다크에서 라이트 폴백(#fff 등)으로 떠 흰 박스가 된다. 팝업 루트(.dpPopup)에 다크 토큰을
+ *   재선언해 내부 모든 var(--s-*) 참조가 다크 값으로 해석되게 한다(값은 .page 다크 블록과 동일,
+ *   새 색 아님). 라이트는 각 클래스의 라이트 폴백을 그대로 사용.
+ */
+@media (prefers-color-scheme: dark) {
+  .dpPopup {
+    --s-card-bg: #241a36;
+    --s-input: #4a3f63;
+    --s-ink: #f5f3fa;
+    --s-sub: #a8a0b8;
+    --s-faint: #8c84a0;
+    --s-accent: #c084fc;
+    --s-accent-soft-bg: #2d2540;
+    --s-card-border-strong: #3a2f4e;
+    --s-active-line: #7c3aed;
+    --s-active-text: #d8b4fe;
+    --s-active-fill: #7c3aed;
+    --s-active-on: #ffffff;
+    --s-card-shadow: 0 8px 24px -16px rgba(0, 0, 0, 0.6);
+  }
 }
 
 /*
@@ -770,7 +997,7 @@
 }
 
 /*
- * 상세 하단 Primary 버튼 채움색.
+ * Primary 버튼 채움색 — 상세 하단 버튼 + 폼(추가/수정) 제출·저장 버튼 공용.
  *
  * 문제: inline style={{ background: 'var(--s-accent)' }} 사용 시 다크에서 --s-accent 가
  *   #c084fc(라벤더, L=65%)로 오버라이드되어 카드면 위에 둥둥 뜨는 현상 발생.

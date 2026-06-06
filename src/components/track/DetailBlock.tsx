@@ -81,7 +81,7 @@ export function DetailBlock({
         <div className={cn(!editing && 'pr-10')}>
           {/* 섹션 라벨: blockTitle이 없는 블록(방문 기록 등)에서만 표시 */}
           {!blockTitle && (
-            <h2 className={cn('text-xs font-medium uppercase tracking-wide', styles.sub)}>
+            <h2 className={cn('text-sm font-medium', styles.ink)}>
               {title}
             </h2>
           )}
@@ -103,8 +103,12 @@ export function DetailBlock({
         </div>
       )}
 
-      {/* children — showHeader가 있을 때 mt-3으로 헤더와 분리 */}
-      <div className={cn(showHeader && 'mt-3')}>{children}</div>
+      {/* children — showHeader가 있을 때 mt-3으로 헤더와 분리.
+          editing 시 space-y-5: 추가 화면 FormLayout(space-y-5)과 동일한 필드 간 리듬을
+          인라인 편집에도 부여(읽기 모드는 영향 없음). */}
+      <div className={cn(showHeader && (editing ? 'mt-5' : 'mt-3'), editing && 'space-y-5')}>
+        {children}
+      </div>
 
       {editing && (
         <div className="mt-5 flex gap-2">
@@ -112,10 +116,7 @@ export function DetailBlock({
             type="button"
             onClick={onSave}
             disabled={saving}
-            className="gap-1.5 text-white hover:brightness-105"
-            style={{
-              background: 'var(--s-active-fill, linear-gradient(135deg,#a855f7 0%,#ec4899 100%))',
-            }}
+            className={cn(styles.detailPrimaryBtn, 'gap-1.5 text-white hover:brightness-105')}
           >
             {saving ? '저장 중...' : '저장'}
           </Button>

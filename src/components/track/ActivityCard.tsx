@@ -11,7 +11,7 @@ import { RatingStars } from './RatingStars'
 import { DeleteConfirmDialog } from './DeleteConfirmDialog'
 import { VisitedDialog } from '@/components/VisitedDialog'
 import { useDeleteActivity, useUpdateActivity } from '@/hooks/useActivities'
-import { DURATION_LABELS, TIME_OF_DAY_LABELS } from '@/lib/labels'
+import { DURATION_LABELS, TIME_OF_DAY_LABELS, STATUS_LABELS } from '@/lib/labels'
 import { cn } from '@/lib/utils'
 import type { Activity } from '@/types'
 import styles from '@/components/screens.module.css'
@@ -33,7 +33,7 @@ export function ActivityCard({ activity, hideMenu, actionSlot }: ActivityCardPro
     update.mutate(
       { id: activity.id, patch: { status: 'wishlist' } },
       {
-        onSuccess: () => toast.success('위시리스트로 옮겼어요'),
+        onSuccess: () => toast.success(`${STATUS_LABELS.wishlist}으로 옮겼어요`),
         onError: () => toast.error('변경 중 오류가 발생했습니다.'),
       }
     )
@@ -60,7 +60,8 @@ export function ActivityCard({ activity, hideMenu, actionSlot }: ActivityCardPro
         >
           <ItemMenu
             status={activity.status}
-            onEdit={() => router.push(`/activities/${activity.id}?mode=edit`)}
+            onEditInfo={() => router.push(`/activities/${activity.id}?edit=info`)}
+            onEditVisit={() => router.push(`/activities/${activity.id}?edit=visit`)}
             onDelete={() => setDeleteOpen(true)}
             onMarkVisited={() => setVisitedOpen(true)}
             onRevert={handleRevert}

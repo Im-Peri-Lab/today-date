@@ -121,6 +121,82 @@ description: >
 
 ---
 
+## 4-A. 폼 입력/선택 컨트롤 표준 (추가/수정 화면 + 상세 인라인 편집 공통)
+
+왜: `/activities/new`·`/places/new`·상세 인라인 편집은 같은 프리미티브를 쓴다. 컨트롤 높이·radius·라벨 색을 아래 표준으로 고정해 한 화면 안에서 정렬되게 한다. (이 값들은 실제 코드에 반영됨 — 임의 변경 금지)
+
+**높이 표준** (한 화면 안에서 정렬):
+| 컨트롤 | 높이 | radius | 출처 |
+|---|---|---|---|
+| 텍스트 입력바 (`Input`) | **40px** (`h-10`) | 10px (`rounded-lg`=`var(--radius)`) | `src/components/ui/input.tsx` |
+| textarea (`Textarea`) | min **64px** (`min-h-16`) | 10px | `src/components/ui/textarea.tsx` |
+| 세그먼트 (`styles.option`) | **40px** (`height:2.5rem`) | 10px (`0.625rem`) | `screens.module.css .option` |
+| 카테고리 칩 (`styles.chip`) | **36px** (`height:2.25rem`) | pill (`9999px`) | `screens.module.css .chip` |
+| 추가 화면 하단 Primary (제출) | **48px** (`h-12`) | 10px | `FormLayout.tsx` |
+| 상세 하단 Primary("다녀왔어요"/"되돌리기")·삭제 | **32px** (Button 기본 `h-8`) | 10px | `ActivityDetail`/`PlaceDetail` |
+| 인라인 편집 Save·Cancel (`DetailBlock`) | **32px** (Button 기본 `h-8`) | 10px | `DetailBlock.tsx` |
+
+→ **액션·컨트롤 사이즈 위계** (한 화면 안에서 정렬):
+- **48px** — 신규 생성 마무리 CTA(추가 화면 Primary `h-12` **전용**). 인라인엔 쓰지 않는다.
+- **40px** — 일반 입력/선택 컨트롤(`Input`·`Textarea`·세그먼트·카테고리 외 컨트롤·날짜 박스 `dateTrigger`).
+- **36px** — 카테고리 칩.
+- **32px** — 보조 액션(상세 하단 Primary/삭제 + 인라인 Save/Cancel). Button 기본 `h-8`을 그대로 쓰고 **height 클래스를 주지 않는다**(예전 인라인 `h-10`은 제거). 한 화면(인라인 편집)에서 인라인 Save/Cancel과 하단 Primary/삭제가 같은 32px로 정렬.
+- 인라인 Save/Cancel은 카드 안 일반 컨트롤(40px)보다 **한 단계 작은 "보조 액션"(32px)** 결로 둔다. Save 채움은 단색 액센트(`styles.detailPrimaryBtn`) 유지. 컨트롤 가로 패딩은 `px-3`(0.75rem)로 통일.
+
+**페이지 높이/하단 여백**: 상세 페이지는 `cn(styles.page, styles.pageStatic)`로 `min-height:auto`(100dvh spacer 없음) → 콘텐츠 자연 높이. 짧은 콘텐츠 아래는 고정 배경(`.page::before`)이 채워 흰 빈칸이 없다(별도 spacer 금지).
+
+### 액션 버튼 2종 패턴 (거버넌스)
+
+이 앱의 액션 버튼은 **두 가지 패턴만** 사용한다. 새 화면을 추가할 때도 아래 두 패턴 외 **새 사이즈 도입 금지**.
+
+**1) 풀폭 Primary CTA** — **48px / `w-full` / radius 10px / 단색 채움(`--s-active-fill` via `styles.detailPrimaryBtn`)**
+- 용도: "새 항목 생성 완료" — 데이터 추가가 발생하는 마무리 액션.
+- 적용처: `/activities/new` "활동 등록하기" · `/places/new` "장소 등록하기" · (향후) 추천 위저드 결과 저장, CSV 가져오기 완료 등.
+
+**2) 콘텐츠폭 액션** — **32px / 자연폭(`w-auto`, Button 기본 `h-8`) / radius 10px**
+- 용도: "기존 항목에 작용" — 수정·전환·삭제 등 데이터 가공 액션.
+- 적용처: 인라인 편집 Save/Cancel(`DetailBlock` 내부) · 상세 하단 전환 액션("다녀왔어요"/"가보고 싶은 곳으로 되돌리기") · 상세 하단 삭제(ghost variant + destructive 톤) · 카드 메뉴 액션 · (향후) 다중 선택 액션 등.
+
+**판단 기준 — "이 행위가 새 데이터를 만드는가?"**
+- YES → 풀폭 Primary (48px)
+- NO (수정·전환·삭제·취소) → 콘텐츠폭 액션 (32px)
+
+일반 컨트롤(입력바·세그먼트 등 **40px**)·카테고리 칩(**36px**)은 위 액션 버튼과 별개의 표준으로 유지한다(위 §4-A 높이 표 참조).
+
+
+**폰트:**
+- 입력 본문(`Input`/`Textarea`): **16px** (`text-base`, `md:text-sm` 쓰지 않음 → iOS 포커스 자동 줌인 방지).
+- 라벨(`Label`): **14px** (`text-sm`) + `font-medium`.
+
+**색 토큰 (shadcn 의존 금지, `--s-*`만):**
+- 이 앱은 `.dark` 클래스를 붙이지 않고 `@media (prefers-color-scheme: dark)` + `--s-*` 토큰으로만 다크를 처리한다. 따라서 폼 컨트롤은 shadcn HSL 토큰(`--foreground`/`--input`/`--muted-foreground`)을 쓰면 다크에서 라이트값에 고정되어 안 보인다(대비 ~1:1).
+- 라벨 색: `--s-ink` (`text-[color:var(--s-ink,#1a1033)]`) — `ui/label.tsx`에 적용 → `FormField`·`VisitRecordBlock` 라벨 모두 적용됨.
+- 입력/textarea 본문 색: `--s-ink`, placeholder: `--s-faint`.
+- **폼 컨트롤 보더는 `--s-input` 전용 토큰**(입력·textarea·세그먼트·칩·날짜 트리거/팝업). 라이트 `#eceaf3`(= `--s-card-border-strong`와 동일), **다크 `#4a3f63`** — 카드면(`#241a36`)·`--s-card-border-strong`(`#3a2f4e`)보다 한 단계 밝아 다크에서 보더가 또렷이 보인다. `--s-card-border-strong`은 뱃지·삭제버튼 등 **채움**으로도 쓰이므로 보더만 분리(채움 면엔 영향 없음). 라이트 값 동일 → 라이트 무변화.
+- 활성 채움(칩·세그먼트): `--s-active-fill` 단색(§5). Primary 버튼: `styles.detailPrimaryBtn`(`--s-active-line`).
+- **outline 버튼(`variant="outline"`, 인라인 편집 취소 등)도 `--s-*` 기반**: 보더 `--s-card-border-strong`, 면 `bg-transparent`, 글씨 `--s-ink`, hover 면 `--s-card-border-strong`. shadcn `border-border`/`bg-background`/`text-foreground` 및 `dark:` 프리픽스 사용 금지(`.dark` 미적용 → 다크에서 흰 칩으로 뜸). `src/components/ui/button.tsx` outline variant에 반영.
+
+**인라인 편집 컨텍스트 규칙 (`DetailBlock`):**
+- `DetailBlock` 안의 편집 폼(`ActivityFields`/`PlaceFields`/`VisitRecordBlock`)은 추가 화면 `FormLayout`(`space-y-5`)과 동일한 필드 간 리듬을 직접 제공해야 한다 → `DetailBlock`이 editing 모드 children 래퍼에 `space-y-5` 부여(읽기 모드는 영향 없음), `VisitRecordBlock`의 편집 폼 래퍼도 `space-y-5`. `FormField`/필드 묶음 내부 `space-y-1.5`(라벨↔컨트롤)만으로는 필드↔필드 간격이 0이 되어 어긋난다.
+- 섹션 라벨(`<h2>`)이 보이는 블록(방문 기록)은 editing 시 헤더↔폼 간격을 `mt-5`(읽기 모드는 `mt-3` 유지)로 둔다. 상세 두 블록 사이 간격도 `space-y-5`(`ActivityDetail`/`PlaceDetail` 래퍼)로 폼 리듬과 통일.
+- 인라인 폼 카드는 페이지 패딩 + 카드 `px-5`로 추가 화면보다 좌우 각 20px 좁다(카드 정체상 정상, 오버플로 아님).
+
+**날짜 입력(커스텀 date picker — `src/components/forms/DatePickerField.tsx`):**
+- native `<input type="date">`는 쓰지 않는다(박스 크기/아이콘/포맷이 OS·브라우저마다 제각각 + 다크 아이콘 묻힘). base-ui `Popover` + 자체 월 그리드로 대체.
+- 트리거 박스(`styles.dateTrigger`)는 다른 입력바와 **동일한 외형**: 40px / radius 10px / `--s-input` 보더 / `px-3`. 단 "선택 트리거" 성격이라 **[lucide `Calendar`(흐린 톤) + gap + 날짜 텍스트]를 한 묶음으로 박스 가운데 정렬**(`justify-content:center`). 빈 값이면 placeholder "날짜 선택"(`--s-faint`). 박스 아래 별도 캡션 없음. **다른 입력바(제목/메모/URL/위치)는 좌측 정렬 유지** — 날짜 박스만 가운데.
+- 표시 포맷은 **요일 포함**: `formatKoreanDateWithWeekday()` → `"2026년 7월 7일 (화)"`(요일도 본문과 한 흐름, 별도 색 없음). 요일이 무의미한 "등록일" 캡션은 `formatKoreanDate()`(요일 없음) 유지.
+- 달력 팝업(`styles.dpPopup`/`dpHeader`/`dpNav`/`dpGrid`/`dpWeekday`/`dpDay`)은 전부 `--s-*` 토큰(라이트/다크 동일 토큰 시스템): 카드면 `--s-card-bg`, 보더 `--s-input`, 텍스트 `--s-ink`/`--s-sub`/`--s-faint`.
+- **팝업은 `Popover.Portal`로 `.page` 밖(body)에 렌더되어 `.page`의 다크 `--s-*`를 못 받는다** → 다크에서 흰 박스가 됨. **`.dpPopup`에 `@media (prefers-color-scheme: dark)`로 `--s-*` 토큰을 재선언**(값은 `.page` 다크 블록과 동일, 새 색 아님)해 내부 모든 `var(--s-*)`가 다크로 해석되게 한다. 라이트는 각 클래스 라이트 폴백 사용. (`.page` 밖 portal 컴포넌트의 공통 패턴)
+- **선택일 = `--s-active-fill` 단색 채움 + 흰 글씨**(`--s-active-on`), `font-weight:500` — 칩·세그먼트와 동일. **오늘(today)은 보더만**(`--s-active-line`) + `--s-active-text` 글씨로 선택과 구분(선택과 같은 채움 금지).
+- 헤더 네비게이션은 **두 방식 공존**: 좌우 화살표(`dpNav`, 아이콘 16px)=한 달 단위, 연/월 **드롭다운**(`dpCaption`/`dpSelect`)=큰 점프(연도 `2000 ~ 올해+10`). select는 `appearance:none` + lucide `ChevronsUpDown`(`dpSelectIcon`, `--s-sub`)로 **chevron을 토큰 색으로 직접 그려 다크에서도 또렷·"탭 가능" 표시**, 옵션 목록은 `color-scheme:light dark`로 다크 톤.
+- **헤더 텍스트 위계**: 캡션(연/월) 폰트는 **16px**(`font-medium`)으로 본문 그리드 숫자(`dpDay` 14px)보다 한 단계 크게 — 헤더가 본문보다 약해 보이지 않게. chevron(16px)·화살표(16px)도 같은 결로 균형.
+- **"오늘" 단축**(`dpFooter`/`dpToday`): **팝업 우하단**, 날짜 그리드 마지막 행 바로 아래(`dpFooter margin-top:0.75rem`=12px = 헤더↔요일과 같은 결의 그룹 거리, 너무 멀지도 붙지도 않게). 헤더에 두지 않는다 — 모바일 가로 폭에서 `← 연도▼ 월▼ → 오늘` 다섯 요소가 한 줄에 안 들어가 글자가 깨진다(헤더는 `← 연도▼ 월▼ →` 4요소만). 작은 박스 텍스트 버튼: `padding:px-3 py-1.5`, radius 10px. **평상시 배경 투명 + `--s-sub` 글씨**, hover/active 시에만 약한 surface(`--s-accent-soft-bg`+`--s-accent` — 좌우 화살표 hover의 neutral `--s-card-border-strong`과 **다른 톤**). 평상시 투명 이유: 화살표 hover 잔상 톤과 겹쳐 "이미 눌린 듯" 보이는 충돌 방지. 클릭 시 **표시 월만** 오늘로 이동(선택값 불변).
+- **빈 행 없음**: 커스텀 그리드는 `[선행 빈칸 + 그 달 실제 날짜]`만 렌더(고정 6행/trailing 빈칸 없음) → 6월=5행, 2월 평년=4행 등 필요한 행만. (react-day-picker의 `fixedWeeks` 개념 불필요 — 끝에 통째로 빈 줄이 생기지 않게 유지.)
+- **내부 세로 그룹("그룹 내부 좁게 / 그룹 사이 넓게")**: 균등 간격이 아니라 시각 그룹으로 분리한다. A 헤더(연/월 + 화살표) / B (요일 라벨 + 날짜 그리드, 한 덩어리) / C "오늘"(우하단). 간격: 헤더↔요일 **16px**(`dpHeader margin-bottom`, A↔B) / 요일↔그리드 첫 줄 **4px**(`dpWeekRow margin-bottom`, B 내부 밀착=한 표) / 그리드↔"오늘" **12px**(`dpFooter margin-top`, B↔C). 주차 간(날짜 행 사이)·열 간은 `dpGrid` gap **2px**(0.125rem)로 촘촘하게(표처럼 단단). 요일은 `dpWeekRow`(그리드와 같은 7열·gap)로 분리하되 4px만 띄워 그리드와 한 그룹으로. 팝업은 `flex-column`(균등 gap 없음, 블록별 margin), 외곽 `padding:0.75rem` 보존. 커스텀 그리드라 trailing 빈칸이 없어 31일/30일 달 모두 "오늘"이 마지막 행 바로 아래 12px에 붙는다.
+- 저장값은 ISO(`YYYY-MM-DD`) 그대로. 날짜 비교·생성·요일은 문자열/숫자 + 연/월/일 인자 `Date`로만(`new Date(iso)` 문자열 파싱 금지 — UTC 자정 밀림 방지, `lib/date.ts`와 동일 원칙).
+
+---
+
 ## 5. 활성화 상태 규칙 (활성 칩 색 · 글씨 · 포커스링 분리)
 
 왜: 활성/선택/포커스 색을 **단일 토큰 세트**로만 참조해, 활성색 변경 시 한 곳(`screens.module.css` `.page`)만 고친다. 요소별 하드코딩 금지.
@@ -128,17 +204,19 @@ description: >
 활성 토큰 (라이트 / 다크):
 | 토큰 | 라이트 | 다크 | 의미 |
 |---|---|---|---|
-| `--s-active-fill` | `linear-gradient(135deg,#a855f7,#ec4899)` | `linear-gradient(135deg,#c084fc,#f472b6)` | 채움형 칩 배경 |
+| `--s-active-fill` | `#7c3aed` (단색) | `#7c3aed` (재정의 안 함) | 활성 **채움**: 칩·세그먼트 |
 | `--s-active-on` | `#ffffff` | `#ffffff` | 채움 위 글씨/아이콘 |
 | `--s-active-line` | `#7c3aed` | `#7c3aed` | 활성/포커스 보더·링 |
 | `--s-active-text` | `#7c3aed` | `#d8b4fe` | 외곽선형 활성(토글/필터버튼) 글씨·아이콘 |
 | `--s-active-glow` | `rgba(124,58,237,0.2)` | 동일 | 옅은 포커스 글로우 |
 
+> **선택 컨트롤 활성 = 단색 채움 통일 (확정 규칙).** 카테고리 칩·소요시간/시간대/식사시간 세그먼트(`styles.option`)·필터 칩(`styles.chip`)의 활성은 **모두** `--s-active-fill`(단색 `#7c3aed`) 채움 + `--s-active-on`(흰) 글씨/아이콘. 폼(추가/수정) 제출·저장 Primary 버튼은 상세 Primary와 동일하게 `styles.detailPrimaryBtn`(`--s-active-line` `#7c3aed`) 단색 채움. **그라데이션 채움 금지** — 그라데이션은 FAB·로고(`--s-grad`)·`filterCount` 전용. `--s-active-fill`·`--s-active-line` 모두 다크에서 재정의하지 않아(`#7c3aed` 고정) 다크에서 밝게 떠 보이지 않는다.
+
 **포커스 역할 분리 규칙 (중요):**
 - 텍스트 입력(검색/위치): `:focus` → 활성 보더(`--s-active-line`) **+ 링** `box-shadow: 0 0 0 3px var(--s-active-glow)`.
 - 버튼류(필터 토글/칩): `:focus-visible` → 활성 **보더만**, 링 없음.
 
-활성 칩 규칙: `styles.chipActive`는 예외 없이 `--s-active-fill` 채움 + `--s-active-on`(흰) 글씨/아이콘. 세그먼트/필터버튼 같은 외곽선형 활성은 `--s-active-text` + `--s-active-line` 보더.
+활성 칩/세그먼트 규칙: `styles.chipActive` / `styles.optionActive`는 예외 없이 `--s-active-fill` 단색 채움 + `--s-active-on`(흰) 글씨/아이콘. 필터버튼(`styles.filterToggle`)·`/list` 상태 토글(`styles.segmentBtnActive`) 같은 외곽선형 활성만 `--s-active-text` + `--s-active-line` 보더(채움 없음).
 
 ---
 
@@ -224,7 +302,9 @@ description: >
 | 블록 | 섹션 라벨 | 근거 |
 |---|---|---|
 | 등록 정보 | 숨김(`blockTitle` 있으면 렌더 안 함) | 제목·카테고리·상태 태그가 자체 식별 |
-| 방문 기록 | `<h2>` 유지 ("방문 기록") | 스크린리더 섹션 탐색 보장 |
+| 방문 기록 | `<h2>` 유지 ("방문 기록"), 톤은 필드 라벨과 동일 | 스크린리더 섹션 탐색 보장 |
+
+블록 헤더 라벨 톤: 시멘틱은 `<h2>` 유지하되 스타일은 폼 필드 라벨("제목"·"메모" 등)과 같은 결 — `text-sm font-medium` + `styles.ink`(`--s-ink`). 예전 `text-xs uppercase` + `sub`는 쓰지 않는다(`DetailBlock` showHeader 경로에 반영).
 
 카드 클래스: `styles.card` + `styles.detailCard`
 - `styles.card`: `border-radius: 1rem`, 보더, 그림자 (공용)
@@ -232,6 +312,8 @@ description: >
 - 패딩: `px-5 pt-5 pb-4` / lg `px-6 pt-6 pb-5`
 
 편집 모드 진입 시: `blockTitle` 있는 블록(등록 정보)은 헤더 전체 숨김 → 폼이 카드 최상단에서 즉시 시작.
+
+페이지 높이: 상세 페이지(`/activities/[id]`·`/places/[id]`)의 `<main>`은 `cn(styles.page, styles.pageStatic)`를 쓴다(`/list`와 동일). 순수 `styles.page`(`min-height:100dvh`)만 쓰면 콘텐츠가 짧을 때(특히 편집 모드로 하단 버튼이 숨겨질 때) 카드 아래 큰 빈 여백이 남으므로, `pageStatic`(`min-height:auto`)로 콘텐츠 주도 높이를 쓴다. 배경은 `.page::before`(fixed)가 채우므로 영향 없음.
 
 복붙(등록 정보 블록):
 ```tsx
@@ -403,11 +485,11 @@ export const STATUS_LABELS: Record<Status, string> = {
 
 ### 10-H. 날짜 표시·별점·토스트
 
-**날짜**: 저장은 ISO(`YYYY-MM-DD`). 화면 표시는 `toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })` → `"2026년 4월 6일"`.
+**날짜**: 저장은 ISO(`YYYY-MM-DD`). 표시는 `formatKoreanDate()`(`lib/date.ts`, 문자열 분해로 타임존 안전) → `"2026년 4월 6일"`. 방문 기록 편집의 날짜 입력은 커스텀 date picker(§4-A) 사용 — native `<input type="date">` 금지.
 
 **방문일 아이콘**: `Calendar` (`lucide-react`) + `styles.accent` 색 — 완료 이벤트 강조.
 
-**별점 뷰**: `<RatingStars value={rating} size="sm" />` (16px). 편집: `size` 생략(기본 28px).
+**별점 사이즈 위계**: 표시(읽기)는 **`size="sm"`(16px)** — 카드·상세 뷰의 `<RatingStars value={...} size="sm" />`. 편집(인터랙티브, `onChange` 있음)은 **`size="lg"`(32px)** + 넓은 간격(`gap-2`) — `VisitRecordBlock` 편집·`VisitedDialog`. 근거: 손가락 터치 타깃 확보(별 32px + 간격으로 인접 별 오터치 방지, HIG 44pt에 근사). 색은 채움 `--s-accent` / 빈 별 `--s-faint` 동일.
 
 **토스트 문구**:
 ```
@@ -433,6 +515,8 @@ export const STATUS_LABELS: Record<Status, string> = {
 9. **하단 액션 버튼(Primary/삭제)에 그라데이션 금지** — `--s-active-fill`, `--s-grad`는 FAB·`gradIcon`·`filterCount` 등 소형 액센트 전용. 버튼 채움은 `--s-active-line` 단색.
 10. **Primary 버튼에 `--s-accent` 사용 금지** — 다크에서 `#c084fc` (L=65%)로 오버라이드되어 카드면 위에서 부상. `--s-active-line` (`#7c3aed`, 다크 재정의 없음) 사용.
 11. **Primary 버튼 배경에 inline `style={}` 사용 금지** — CSS 클래스를 항상 이겨 다크 모드 보정 불가. `styles.detailPrimaryBtn` CSS module 클래스로 제어.
+12. **폼 컨트롤(라벨·입력 텍스트·보더·placeholder)에 shadcn `--foreground`/`--input`/`--muted-foreground` 의존 금지** — 이 앱은 `.dark` 클래스를 안 붙이고 `@media (prefers-color-scheme: dark)` + `--s-*`로만 다크를 처리하므로, shadcn HSL 토큰은 다크에서 라이트값에 고정되어 안 보인다(대비 ~1:1). 라벨/본문 `--s-ink`, placeholder `--s-faint`, 보더 `--s-card-border-strong` 사용(§4-A). `.dark` 클래스 신규 도입도 금지.
+13. **입력바/textarea 본문 폰트에 `md:text-sm`(14px↓) 금지** — `text-base`(16px) 고정. 모바일 14px 이하면 iOS 포커스 시 자동 줌인 발생.
 
 ---
 

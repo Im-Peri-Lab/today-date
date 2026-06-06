@@ -286,6 +286,17 @@ description: >
 - **ActivityCard / PlaceCard 두 카드는 항상 정확히 같은 값**으로 동기화한다(한쪽만 바꾸지 말 것).
 - 이 간격 클래스에는 `dark:`·`sm:`·`lg:` 프리픽스를 붙이지 않는다 → 라이트/다크·모바일/데스크탑 동일.
 
+### 8-B. 시간대(time_of_day) 표시 규칙
+
+왜: 시간대(`day`/`night`/`any`)는 항상 값이 있는(널 불가, DB `not null default 'any'`) 사용자 선택값이다. 셋 다 표시해 정보 손실을 막되, 라벨·아이콘 출처를 한 곳으로 모아 카드·상세가 갈라지지 않게 한다.
+
+- **세 값 모두 표시**: `day`·`night`·`any` 전부 카드(`/list`)·상세(`/activities/[id]`)에 렌더한다. **`any`를 숨기지 않는다**(`=== 'any'`로 거르는 옛 분기 금지).
+- **라벨 단일 출처**: `TIME_OF_DAY_LABELS`(`src/lib/labels.ts`) — `day:'주간'` / `night:'야간'` / `any:'아무때나'`. 카드·상세·추가/수정 세그먼트·추천 위저드 모두 이 라벨을 쓴다(하드코딩 금지). `any`는 "상관없음"이 아니라 **"아무때나"**(시간대 축의 값으로 자족적으로 읽히게).
+- **아이콘 매핑 단일 출처**: `TIME_OF_DAY_ICONS`(`src/lib/labels.ts`) `Record<TimeOfDay, LucideIcon | null>` — `day: Sun` / `night: Moon` / **`any: null`(아이콘 없음)**. 카드·상세는 이 매핑을 공유한다. **파일별 인라인 삼항식(`day ? Sun : Moon`) 금지.**
+- **렌더 패턴**: 아이콘이 있으면 "아이콘 + 라벨", `null`(=`any`)이면 "라벨만". `{TimeOfDayIcon && <TimeOfDayIcon … />}` 가드로 처리 → `any`는 라벨만, 단일 자식이라 `gap` 선행 여백 없이 주간/야간과 정렬이 자연스럽다.
+- **아이콘 톤·크기**(§7 메타 규칙 준수, 임의 변경 금지): 카드 = 색 지정 없이 부모(`styles.sub`) 상속 + `h-3 w-3 shrink-0` / 상세 DetailRow = `styles.faint` + `h-3.5 w-3.5 shrink-0`.
+- **저장값 불변**: 표시 문구·아이콘만의 규칙이다. 저장값 `'any'`·스키마(`z.enum(['day','night','any'])`)·DB enum·필터 로직은 건드리지 않는다.
+
 ---
 
 ## 9. 화면 하단 여백 제거 방법 (html / body / main / FAB)

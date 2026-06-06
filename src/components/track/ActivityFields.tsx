@@ -22,7 +22,7 @@ const DURATION_OPTIONS = [
 const TIME_OPTIONS = [
   { value: 'day' as const, label: '주간' },
   { value: 'night' as const, label: '야간' },
-  { value: 'any' as const, label: '상관없음' },
+  { value: 'any' as const, label: '아무때나' },
 ]
 
 interface ActivityFieldsProps {

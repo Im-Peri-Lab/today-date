@@ -4,14 +4,14 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState, type ReactNode } from 'react'
 import { toast } from 'sonner'
-import { Clock, Sun, Moon } from 'lucide-react'
+import { Clock } from 'lucide-react'
 import { CategoryBadge } from './CategoryBadge'
 import { ItemMenu } from './ItemMenu'
 import { RatingStars } from './RatingStars'
 import { DeleteConfirmDialog } from './DeleteConfirmDialog'
 import { VisitedDialog } from '@/components/VisitedDialog'
 import { useDeleteActivity, useUpdateActivity } from '@/hooks/useActivities'
-import { DURATION_LABELS, TIME_OF_DAY_LABELS, STATUS_LABELS } from '@/lib/labels'
+import { DURATION_LABELS, TIME_OF_DAY_LABELS, TIME_OF_DAY_ICONS, STATUS_LABELS } from '@/lib/labels'
 import { cn } from '@/lib/utils'
 import type { Activity } from '@/types'
 import styles from '@/components/screens.module.css'
@@ -50,6 +50,7 @@ export function ActivityCard({ activity, hideMenu, actionSlot }: ActivityCardPro
   }
 
   const isVisited = activity.status === 'visited'
+  const TimeOfDayIcon = TIME_OF_DAY_ICONS[activity.time_of_day]
 
   return (
     <div className={cn(styles.card, styles.cardInteractive, 'group relative')}>
@@ -88,16 +89,10 @@ export function ActivityCard({ activity, hideMenu, actionSlot }: ActivityCardPro
               {DURATION_LABELS[activity.duration_bucket]}
             </span>
           )}
-          {activity.time_of_day && activity.time_of_day !== 'any' && (
-            <span className="inline-flex items-center gap-1 whitespace-nowrap">
-              {activity.time_of_day === 'day' ? (
-                <Sun className="h-3 w-3 shrink-0" />
-              ) : (
-                <Moon className="h-3 w-3 shrink-0" />
-              )}
-              {TIME_OF_DAY_LABELS[activity.time_of_day]}
-            </span>
-          )}
+          <span className="inline-flex items-center gap-1 whitespace-nowrap">
+            {TimeOfDayIcon && <TimeOfDayIcon className="h-3 w-3 shrink-0" />}
+            {TIME_OF_DAY_LABELS[activity.time_of_day]}
+          </span>
         </div>
 
         {activity.memo && (

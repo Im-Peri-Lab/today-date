@@ -164,6 +164,8 @@ description: >
 - 헤더 네비게이션은 **두 방식 공존**: 좌우 화살표(`dpNav`, 아이콘 16px)=한 달 단위, 연/월 **드롭다운**(`dpCaption`/`dpSelect`)=큰 점프(연도 `2000 ~ 올해+10`). select는 `appearance:none` + lucide `ChevronsUpDown`(`dpSelectIcon`, `--s-sub`)로 **chevron을 토큰 색으로 직접 그려 다크에서도 또렷·"탭 가능" 표시**, 옵션 목록은 `color-scheme:light dark`로 다크 톤.
 - **헤더 텍스트 위계**: 캡션(연/월) 폰트는 **16px**(`font-medium`)으로 본문 그리드 숫자(`dpDay` 14px)보다 한 단계 크게 — 헤더가 본문보다 약해 보이지 않게. chevron(16px)·화살표(16px)도 같은 결로 균형.
 - **"오늘" 단축**(`dpFooter`/`dpToday`): 팝업 **우하단**(엄지 도달 영역)의 **약한 neutral 박스 버튼** — `padding:px-3 py-1.5`, radius 10px(폼 컨트롤 표준), 면 `--s-card-border-strong`(라이트 #eceaf3 / 다크 #3a2f4e), 글씨 `--s-ink`, hover만 `--s-accent-soft-bg`+`--s-accent`. 단순 텍스트 단독이 아니라 약한 박스(단, 액션 버튼처럼 튀지 않게 차분하게). 클릭 시 **표시 월만** 오늘로 이동(선택값은 불변 — 사용자가 직접 날짜 클릭).
+- **빈 행 없음**: 커스텀 그리드는 `[선행 빈칸 + 그 달 실제 날짜]`만 렌더(고정 6행/trailing 빈칸 없음) → 6월=5행, 2월 평년=4행 등 필요한 행만. (react-day-picker의 `fixedWeeks` 개념 불필요 — 끝에 통째로 빈 줄이 생기지 않게 유지.)
+- **내부 세로 리듬 통일**: 팝업은 `display:flex; flex-direction:column; gap:0.5rem`(8px) → 헤더↔요일 행↔날짜 그리드↔"오늘" 간격이 모두 동일. 요일 라벨은 `dpWeekRow`(날짜 그리드와 같은 7열·gap)로 **그리드에서 분리**해 블록 리듬에 포함. 날짜 셀 사이 간격(`dpGrid` gap 0.125rem=2px=매트릭스)만 별도로 촘촘하게. 팝업 외곽 `padding:0.75rem`은 보존.
 - 저장값은 ISO(`YYYY-MM-DD`) 그대로. 날짜 비교·생성·요일은 문자열/숫자 + 연/월/일 인자 `Date`로만(`new Date(iso)` 문자열 파싱 금지 — UTC 자정 밀림 방지, `lib/date.ts`와 동일 원칙).
 
 ---

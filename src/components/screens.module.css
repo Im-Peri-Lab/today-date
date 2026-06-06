@@ -590,10 +590,13 @@
   border-color: var(--s-active-line, #7c3aed);
 }
 
-/* 달력 팝업 카드 */
+/* 달력 팝업 카드 — 외곽 padding은 유지, 내부는 flex-column + 균등 gap(헤더↔요일↔그리드↔오늘 동일 리듬) */
 .dpPopup {
   width: 17rem;
   padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem; /* 8px — 내부 블록 간 일정 리듬(요일 행도 동일 간격) */
   background: var(--s-card-bg, #ffffff);
   border: 1px solid var(--s-input, #eceaf3);
   border-radius: 0.75rem; /* 12px */
@@ -603,7 +606,6 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 0.5rem;
 }
 .dpNav {
   display: inline-flex;
@@ -668,6 +670,12 @@
   pointer-events: none;
   color: var(--s-sub, #6b7280);
 }
+/* 요일 라벨 행 — 날짜 그리드와 동일한 7열·gap 으로 열 정렬, 블록 간 간격은 dpPopup gap 이 담당 */
+.dpWeekRow {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.125rem;
+}
 .dpGrid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
@@ -716,7 +724,6 @@
 .dpFooter {
   display: flex;
   justify-content: flex-end;
-  margin-top: 0.5rem;
 }
 .dpToday {
   padding: 0.375rem 0.75rem; /* px-3 py-1.5 */

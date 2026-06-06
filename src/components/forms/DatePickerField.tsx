@@ -127,12 +127,14 @@ export function DatePickerField({ id, value, onChange, placeholder = '날짜 선
                 <ChevronRight className="h-4 w-4" />
               </button>
             </div>
-            <div className={styles.dpGrid}>
+            <div className={styles.dpWeekRow}>
               {WEEKDAYS.map((w) => (
                 <span key={w} className={styles.dpWeekday}>
                   {w}
                 </span>
               ))}
+            </div>
+            <div className={styles.dpGrid}>
               {cells.map((d, i) => {
                 if (d === null) return <span key={`e${i}`} />
                 const isSelected =

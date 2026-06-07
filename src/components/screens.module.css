@@ -12,8 +12,7 @@
 
 .page {
   position: relative;
-  min-height: 100vh;
-  min-height: 100dvh; /* iOS 주소창 동적 높이 */
+  min-height: 100svh; /* 주소창 보이는 정적 기준(svh)으로 통일 — body와 동일, 흰 여백/스크롤·토글 출렁임 방지 */
   display: flex;
   flex-direction: column;
 

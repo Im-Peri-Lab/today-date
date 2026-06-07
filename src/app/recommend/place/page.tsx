@@ -7,7 +7,7 @@ export default async function RecommendPlacePage() {
   if (!session.authenticated) redirect('/lock')
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-violet-50 to-purple-100">
+    <main className="min-h-svh bg-gradient-to-br from-violet-50 to-purple-100">
       <PlaceRecommendWizard />
     </main>
   )

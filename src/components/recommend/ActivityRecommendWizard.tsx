@@ -100,7 +100,7 @@ export function ActivityRecommendWizard() {
   // ── 결과 화면 ──
   if (showResult && result) {
     return (
-      <div className="mx-auto my-auto w-full max-w-4xl px-5 py-8 lg:px-8">
+      <div className="mx-auto w-full max-w-4xl px-5 py-10 lg:px-8 lg:py-14">
         <button
           onClick={reset}
           className={cn('mb-3 inline-flex items-center gap-1.5 text-sm', styles.accent)}
@@ -113,10 +113,9 @@ export function ActivityRecommendWizard() {
           <span className={cn(styles.gradIcon, 'h-8 w-8')}>
             <Sparkles className="h-5 w-5" strokeWidth={1.75} />
           </span>
-          <h1 className={cn('mt-3 text-xl font-semibold', styles.ink)}>오늘 뭐할까?</h1>
-          <p className={cn('mt-1 text-sm', styles.sub)}>
+          <h1 className={cn('mt-3 text-xl font-semibold', styles.ink)}>
             {result.reason.replace(/\s*💜\s*$/, '')}
-          </p>
+          </h1>
         </div>
 
         <div className="relative">
@@ -182,7 +181,7 @@ export function ActivityRecommendWizard() {
 
   // ── 마법사 화면 ──
   return (
-    <div className="mx-auto my-auto w-full max-w-lg px-5 py-8">
+    <div className="mx-auto w-full max-w-lg px-5 py-10 lg:py-14">
       <Link
         href="/"
         className={cn('mb-3 inline-flex items-center gap-1.5 text-sm', styles.accent)}

@@ -153,26 +153,40 @@ export function ActivityRecommendWizard() {
                     ? '더 짧은 일정까지 넓혀보거나, 새 활동을 추가해 보세요.'
                     : '위시리스트에 새 활동을 추가해 보세요.'}
                 </p>
-                <div className="mt-5 flex flex-col items-center gap-2">
-                  {canShorten && (
-                    <Button
-                      className={cn(
-                        'gap-1.5 text-white hover:brightness-105',
-                        styles.detailPrimaryBtn
-                      )}
-                      onClick={toggleShorter}
-                      disabled={recommend.isPending}
-                    >
-                      <Hourglass className="h-4 w-4" />
-                      더 짧은 일정 보기
-                    </Button>
+                <div className="mx-auto mt-5 flex w-full max-w-md flex-col gap-2">
+                  {canShorten ? (
+                    <>
+                      <Button
+                        className={cn(
+                          'h-10 w-full gap-1.5 text-white hover:brightness-105',
+                          styles.detailPrimaryBtn
+                        )}
+                        onClick={toggleShorter}
+                        disabled={recommend.isPending}
+                      >
+                        <Hourglass className="h-4 w-4" />
+                        더 짧은 일정도 볼까요?
+                      </Button>
+                      <Link href="/activities/new" className="block w-full">
+                        <Button variant="outline" className="h-10 w-full gap-1.5">
+                          <Plus className="h-4 w-4" />
+                          활동 추가하기
+                        </Button>
+                      </Link>
+                    </>
+                  ) : (
+                    <Link href="/activities/new" className="block w-full">
+                      <Button
+                        className={cn(
+                          'h-10 w-full gap-1.5 text-white hover:brightness-105',
+                          styles.detailPrimaryBtn
+                        )}
+                      >
+                        <Plus className="h-4 w-4" />
+                        활동 추가하기
+                      </Button>
+                    </Link>
                   )}
-                  <Link href="/activities/new">
-                    <Button variant="outline" className="gap-1.5">
-                      <Plus className="h-4 w-4" />
-                      활동 추가하기
-                    </Button>
-                  </Link>
                 </div>
               </div>
             ) : (
@@ -191,14 +205,26 @@ export function ActivityRecommendWizard() {
           )}
         </div>
 
-        {showResultToggle && (
-          <div className="mt-6 flex justify-center">
-            <button
-              type="button"
+        {/* 하단 액션: 전부 풀폭 세로 스택(동일 너비·높이). 위계는 색으로만 — 채움>outline>ghost */}
+        <div className="mx-auto mt-6 flex w-full max-w-md flex-col gap-2">
+          <Button
+            className={cn(
+              'h-10 w-full gap-1.5 text-white hover:brightness-105',
+              styles.detailPrimaryBtn
+            )}
+            onClick={() => run()}
+            disabled={recommend.isPending}
+          >
+            <RotateCcw className="h-4 w-4" />
+            다른 추천 보기
+          </Button>
+          {showResultToggle && (
+            <Button
+              variant="outline"
+              className="h-10 w-full gap-1.5"
               onClick={toggleShorter}
               aria-pressed={includeShorter}
               disabled={recommend.isPending}
-              className={cn(styles.filterToggle, includeShorter && styles.filterToggleActive)}
             >
               {includeShorter ? (
                 <>
@@ -211,30 +237,11 @@ export function ActivityRecommendWizard() {
                   더 짧은 일정도 볼까요?
                 </>
               )}
-            </button>
-          </div>
-        )}
-
-        <div
-          className={cn(
-            'flex flex-col items-center justify-center gap-2 sm:flex-row sm:gap-3',
-            showResultToggle ? 'mt-4' : 'mt-6'
+            </Button>
           )}
-        >
-          <Button
-            className={cn(
-              'h-10 w-full gap-1.5 text-white hover:brightness-105 sm:w-auto',
-              styles.detailPrimaryBtn
-            )}
-            onClick={() => run()}
-            disabled={recommend.isPending}
-          >
-            <RotateCcw className="h-4 w-4" />
-            다른 추천 보기
-          </Button>
           <Button
             variant="ghost"
-            className={cn('h-10 w-full sm:w-auto', styles.sub)}
+            className={cn('h-10 w-full', styles.sub)}
             onClick={reset}
             disabled={recommend.isPending}
           >

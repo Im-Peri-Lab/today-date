@@ -34,11 +34,6 @@ const DURATIONS: { value: DurationBucket; icon: LucideIcon; label: string; sub: 
   { value: 'overnight', icon: Moon, label: '1박 이상', sub: '멀리 떠나기' },
 ]
 
-function defaultTimeOfDay(): TimeOfDay {
-  const h = new Date().getHours()
-  return h >= 6 && h < 18 ? 'day' : 'night'
-}
-
 function StepDots({ step }: { step: number }) {
   return (
     <div className="mb-4 flex justify-center gap-1.5">
@@ -61,7 +56,7 @@ export function ActivityRecommendWizard() {
   const [step, setStep] = useState<1 | 2 | 3>(1)
   const [showResult, setShowResult] = useState(false)
   const [duration, setDuration] = useState<DurationBucket | null>(null)
-  const [timeOfDay, setTimeOfDay] = useState<TimeOfDay>(defaultTimeOfDay())
+  const [timeOfDay, setTimeOfDay] = useState<TimeOfDay | null>(null)
   const [categoryIds, setCategoryIds] = useState<string[]>([])
   const [result, setResult] = useState<ActivityRecommendResponse | null>(null)
 
@@ -74,7 +69,7 @@ export function ActivityRecommendWizard() {
     recommend.mutate(
       {
         duration_bucket: duration,
-        time_of_day: timeOfDay,
+        time_of_day: timeOfDay ?? undefined,
         category_ids: ids.length > 0 ? ids : undefined,
       },
       {
@@ -93,7 +88,7 @@ export function ActivityRecommendWizard() {
     setShowResult(false)
     setResult(null)
     setDuration(null)
-    setTimeOfDay(defaultTimeOfDay())
+    setTimeOfDay(null)
     setCategoryIds([])
   }
 
@@ -107,15 +102,16 @@ export function ActivityRecommendWizard() {
       <div className="mx-auto w-full max-w-4xl px-5 py-6 lg:px-8">
         <button
           onClick={reset}
-          className="mb-3 inline-flex items-center gap-1.5 text-sm text-violet-600 hover:text-violet-800"
+          className={cn('mb-3 inline-flex items-center gap-1.5 text-sm', styles.accent)}
         >
           <ArrowLeft className="h-4 w-4" />
           처음부터
         </button>
 
-        <div className="mb-5 flex items-center gap-2">
-          <Sparkles className="h-5 w-5 text-violet-500" />
-          <p className="text-lg font-medium text-violet-800">
+        <div className="mb-5 text-center">
+          <Sparkles className={cn('mx-auto mb-1 h-8 w-8', styles.accent)} strokeWidth={1.75} />
+          <h1 className={cn('text-xl font-semibold', styles.ink)}>오늘 뭐할까?</h1>
+          <p className={cn('mt-1 text-sm', styles.sub)}>
             {result.reason.replace(/\s*💜\s*$/, '')}
           </p>
         </div>

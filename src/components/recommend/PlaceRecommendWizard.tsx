@@ -32,10 +32,6 @@ const MEALS: { value: MealTime; icon: LucideIcon; label: string; sub: string }[]
   { value: 'dinner', icon: Sunset, label: '저녁', sub: '분위기 있게' },
 ]
 
-function defaultMeal(): MealTime {
-  return new Date().getHours() < 14 ? 'lunch' : 'dinner'
-}
-
 function StepDots({ step }: { step: number }) {
   return (
     <div className="mb-4 flex justify-center gap-1.5">
@@ -57,7 +53,7 @@ function StepDots({ step }: { step: number }) {
 export function PlaceRecommendWizard() {
   const [step, setStep] = useState<1 | 2 | 3>(1)
   const [showResult, setShowResult] = useState(false)
-  const [meal, setMeal] = useState<MealTime>(defaultMeal())
+  const [meal, setMeal] = useState<MealTime | null>(null)
   const [location, setLocation] = useState('')
   const [categoryIds, setCategoryIds] = useState<string[]>([])
   const [result, setResult] = useState<PlaceRecommendResponse | null>(null)
@@ -66,6 +62,7 @@ export function PlaceRecommendWizard() {
   const recommend = useRecommendPlace()
 
   function run(overrideCategories?: string[]) {
+    if (!meal) return
     const ids = overrideCategories ?? categoryIds
     recommend.mutate(
       {
@@ -88,7 +85,7 @@ export function PlaceRecommendWizard() {
     setStep(1)
     setShowResult(false)
     setResult(null)
-    setMeal(defaultMeal())
+    setMeal(null)
     setLocation('')
     setCategoryIds([])
   }
@@ -103,15 +100,16 @@ export function PlaceRecommendWizard() {
       <div className="mx-auto w-full max-w-4xl px-5 py-6 lg:px-8">
         <button
           onClick={reset}
-          className="mb-3 inline-flex items-center gap-1.5 text-sm text-violet-600 hover:text-violet-800"
+          className={cn('mb-3 inline-flex items-center gap-1.5 text-sm', styles.accent)}
         >
           <ArrowLeft className="h-4 w-4" />
           처음부터
         </button>
 
-        <div className="mb-5 flex items-center gap-2">
-          <Sparkles className="h-5 w-5 text-violet-500" />
-          <p className="text-lg font-medium text-violet-800">
+        <div className="mb-5 text-center">
+          <MapPin className={cn('mx-auto mb-1 h-8 w-8', styles.accent)} strokeWidth={1.75} />
+          <h1 className={cn('text-xl font-semibold', styles.ink)}>어디 갈까?</h1>
+          <p className={cn('mt-1 text-sm', styles.sub)}>
             {result.reason.replace(/\s*💜\s*$/, '')}
           </p>
         </div>

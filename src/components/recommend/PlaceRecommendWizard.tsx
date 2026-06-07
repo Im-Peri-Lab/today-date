@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { toast } from 'sonner'
 import { ArrowLeft, Sparkles, RotateCcw, Heart, Plus } from 'lucide-react'
@@ -12,7 +11,6 @@ import { PlaceCard } from '@/components/track/PlaceCard'
 import { usePlaceCategories } from '@/hooks/useCategories'
 import {
   useRecommendPlace,
-  useSelectRecommendation,
   type PlaceRecommendResponse,
 } from '@/hooks/useRecommend'
 import { cn } from '@/lib/utils'
@@ -44,7 +42,6 @@ function StepDots({ step }: { step: number }) {
 }
 
 export function PlaceRecommendWizard() {
-  const router = useRouter()
   const [step, setStep] = useState<1 | 2 | 3>(1)
   const [showResult, setShowResult] = useState(false)
   const [meal, setMeal] = useState<MealTime>(defaultMeal())
@@ -54,7 +51,6 @@ export function PlaceRecommendWizard() {
 
   const cats = usePlaceCategories()
   const recommend = useRecommendPlace()
-  const select = useSelectRecommendation()
 
   function run(overrideCategories?: string[]) {
     const ids = overrideCategories ?? categoryIds
@@ -88,11 +84,6 @@ export function PlaceRecommendWizard() {
     setCategoryIds((prev) => (prev.includes(id) ? prev.filter((c) => c !== id) : [...prev, id]))
   }
 
-  function handleLike(id: string) {
-    if (result?.log_id) select.mutate({ log_id: result.log_id, selected_id: id })
-    router.push(`/places/${id}`)
-  }
-
   // ── 결과 화면 ──
   if (showResult && result) {
     return (
@@ -107,7 +98,9 @@ export function PlaceRecommendWizard() {
 
         <div className="mb-5 flex items-center gap-2">
           <Sparkles className="h-5 w-5 text-violet-500" />
-          <p className="text-lg font-medium text-violet-800">{result.reason}</p>
+          <p className="text-lg font-medium text-violet-800">
+            {result.reason.replace(/\s*💜\s*$/, '')}
+          </p>
         </div>
 
         {result.recommendations.length === 0 ? (
@@ -125,35 +118,22 @@ export function PlaceRecommendWizard() {
         ) : (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {result.recommendations.map((p) => (
-              <PlaceCard
-                key={p.id}
-                place={p}
-                hideMenu
-                actionSlot={
-                  <Button
-                    onClick={() => handleLike(p.id)}
-                    className="w-full gap-1.5 bg-violet-600 text-white hover:bg-violet-700"
-                  >
-                    <Heart className="h-4 w-4" />
-                    이거 좋아 💜
-                  </Button>
-                }
-              />
+              <PlaceCard key={p.id} place={p} hideMenu />
             ))}
           </div>
         )}
 
-        <div className="mt-6 flex flex-col gap-2 sm:flex-row">
+        <div className="mt-6 flex items-center justify-center gap-3">
           <Button
             variant="outline"
-            className="flex-1 gap-1.5"
+            className="gap-1.5"
             onClick={() => run()}
             disabled={recommend.isPending}
           >
             <RotateCcw className="h-4 w-4" />
             {recommend.isPending ? '추천 받는 중...' : '다른 추천 보기'}
           </Button>
-          <Button variant="ghost" className="flex-1 text-violet-700" onClick={reset}>
+          <Button variant="outline" onClick={reset}>
             처음부터
           </Button>
         </div>

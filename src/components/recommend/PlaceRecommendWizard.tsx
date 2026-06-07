@@ -209,9 +209,8 @@ export function PlaceRecommendWizard() {
                     }}
                     className={cn(
                       'flex flex-col items-center gap-1 rounded-xl border p-5 transition-all',
-                      active
-                        ? 'border-transparent bg-[var(--s-active-fill,#7c3aed)] text-[color:var(--s-active-on,#fff)]'
-                        : 'border-[color:var(--s-input,#eceaf3)] bg-[var(--s-card-bg,#fff)] hover:border-[color:var(--s-active-line,#7c3aed)]'
+                      styles.optionCard,
+                      active && styles.optionCardActive
                     )}
                   >
                     <m.icon

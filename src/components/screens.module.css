@@ -223,13 +223,19 @@
     box-shadow 160ms ease,
     border-color 160ms ease;
 }
-.cardInteractive:hover {
-  transform: translateY(-2px);
-  border-color: var(--s-card-hover-border, rgba(168, 85, 247, 0.4));
-  box-shadow: var(
-    --s-card-shadow-hover,
-    0 12px 28px -12px rgba(168, 85, 247, 0.32)
-  );
+/*
+ * hover 효과는 hover 가능한 기기(마우스)에서만 — 터치 기기는 탭 후 :hover 가 들러붙어
+ * (sticky hover) 선택하지 않았는데도 보더/그림자/부상 잔상이 남는다(칩 .chip 과 동일 사유).
+ */
+@media (hover: hover) {
+  .cardInteractive:hover {
+    transform: translateY(-2px);
+    border-color: var(--s-card-hover-border, rgba(168, 85, 247, 0.4));
+    box-shadow: var(
+      --s-card-shadow-hover,
+      0 12px 28px -12px rgba(168, 85, 247, 0.32)
+    );
+  }
 }
 .cardInteractive:active {
   transform: translateY(0);
@@ -559,6 +565,28 @@
   background: var(--s-active-fill, #7c3aed);
   color: var(--s-active-on, #ffffff);
   font-weight: 500;
+}
+
+/*
+ * 추천 위저드 선택지 "리치 카드"(아이콘 + 라벨 + 설명) 표면.
+ * .option(고정 높이 세그먼트)과 달리 높이·패딩·정렬은 컴포넌트(Tailwind)가 정하고,
+ * 여기선 보더/표면/hover/선택만 담당한다(.option 과 동일 토큰 규칙).
+ * 비활성 hover 보더는 @media(hover) 로 감싸 — 터치 기기에서 탭 후 :hover 가 들러붙어
+ * (선택하지 않았는데 보라 보더가 남는) 잔상을 제거. 선택은 단색 채움 + 흰 글씨.
+ */
+.optionCard {
+  border: 1px solid var(--s-input, #eceaf3);
+  background: var(--s-card-bg, #ffffff);
+}
+@media (hover: hover) {
+  .optionCard:not(.optionCardActive):hover {
+    border-color: var(--s-active-line, #7c3aed);
+  }
+}
+.optionCardActive {
+  border-color: transparent;
+  background: var(--s-active-fill, #7c3aed);
+  color: var(--s-active-on, #ffffff);
 }
 
 /*

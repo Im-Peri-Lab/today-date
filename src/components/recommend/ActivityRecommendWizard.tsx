@@ -35,10 +35,10 @@ const DURATIONS: { value: DurationBucket; icon: LucideIcon; label: string; sub: 
   { value: 'overnight', icon: Moon, label: '1박 이상', sub: '멀리 떠나기' },
 ]
 
-function StepDots({ step }: { step: number }) {
+function StepDots({ step, steps }: { step: number; steps: number[] }) {
   return (
     <div className="mb-6 flex justify-center gap-1.5">
-      {[1, 2, 3].map((n) => (
+      {steps.map((n) => (
         <span
           key={n}
           className={cn(
@@ -59,19 +59,25 @@ export function ActivityRecommendWizard() {
   const [duration, setDuration] = useState<DurationBucket | null>(null)
   const [timeOfDay, setTimeOfDay] = useState<TimeOfDay | null>(null)
   const [categoryIds, setCategoryIds] = useState<string[]>([])
+  const [includeShorter, setIncludeShorter] = useState(false)
   const [result, setResult] = useState<ActivityRecommendResponse | null>(null)
 
   const cats = useActivityCategories()
   const recommend = useRecommendActivity()
 
-  function run(overrideCategories?: string[]) {
+  // overnight(1박 이상)은 시간대 단계를 건너뛴다 → 표시 단계도 2개([1,3])
+  const steps = duration === 'overnight' ? [1, 3] : [1, 2, 3]
+
+  function run(overrideCategories?: string[], overrideShorter?: boolean) {
     if (!duration) return
     const ids = overrideCategories ?? categoryIds
+    const shorter = overrideShorter ?? includeShorter
     recommend.mutate(
       {
         duration_bucket: duration,
         time_of_day: timeOfDay ?? undefined,
         category_ids: ids.length > 0 ? ids : undefined,
+        include_shorter: shorter || undefined,
       },
       {
         onSuccess: (data) => {
@@ -84,6 +90,13 @@ export function ActivityRecommendWizard() {
     )
   }
 
+  // 결과 화면 토글: 상태를 바꾸고 새 값으로 즉시 재호출(기존 "다른 추천 보기" 재호출 구조 활용)
+  function toggleShorter() {
+    const next = !includeShorter
+    setIncludeShorter(next)
+    run(undefined, next)
+  }
+
   function reset() {
     setStep(1)
     setShowResult(false)
@@ -91,6 +104,7 @@ export function ActivityRecommendWizard() {
     setDuration(null)
     setTimeOfDay(null)
     setCategoryIds([])
+    setIncludeShorter(false)
   }
 
   function toggleCat(id: string) {
@@ -154,7 +168,27 @@ export function ActivityRecommendWizard() {
           )}
         </div>
 
-        <div className="mt-6 flex flex-col items-center justify-center gap-2 sm:flex-row sm:gap-3">
+        {duration !== 'half' && (
+          <div className="mt-6 flex justify-center">
+            <button
+              type="button"
+              onClick={toggleShorter}
+              aria-pressed={includeShorter}
+              disabled={recommend.isPending}
+              className={cn(styles.filterToggle, includeShorter && styles.filterToggleActive)}
+            >
+              <Hourglass className="h-4 w-4" />
+              더 짧은 일정도 볼까요?
+            </button>
+          </div>
+        )}
+
+        <div
+          className={cn(
+            'flex flex-col items-center justify-center gap-2 sm:flex-row sm:gap-3',
+            duration === 'half' ? 'mt-6' : 'mt-4'
+          )}
+        >
           <Button
             className={cn(
               'h-10 w-full gap-1.5 text-white hover:brightness-105 sm:w-auto',
@@ -198,7 +232,7 @@ export function ActivityRecommendWizard() {
           <h1 className={cn('mt-3 text-xl font-semibold', styles.ink)}>오늘 뭐할까?</h1>
         </div>
 
-        <StepDots step={step} />
+        <StepDots step={step} steps={steps} />
 
         {step === 1 && (
           <div className="space-y-4">
@@ -214,7 +248,13 @@ export function ActivityRecommendWizard() {
                     type="button"
                     onClick={() => {
                       setDuration(d.value)
-                      setStep(2)
+                      if (d.value === 'overnight') {
+                        // 1박 이상은 낮/밤 구분이 무의미 → 시간대 단계 건너뛰고 바로 카테고리로
+                        setTimeOfDay(null)
+                        setStep(3)
+                      } else {
+                        setStep(2)
+                      }
                     }}
                     className={cn(
                       'flex w-full items-center gap-3 rounded-xl border p-4 text-left transition-all',
@@ -313,7 +353,11 @@ export function ActivityRecommendWizard() {
                 <Sparkles className="h-4 w-4" />
                 {recommend.isPending ? '추천 받는 중...' : '추천 받기'}
               </Button>
-              <Button variant="outline" className="h-10 w-full" onClick={() => setStep(2)}>
+              <Button
+                variant="outline"
+                className="h-10 w-full"
+                onClick={() => setStep(duration === 'overnight' ? 1 : 2)}
+              >
                 이전
               </Button>
             </div>

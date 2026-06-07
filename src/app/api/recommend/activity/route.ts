@@ -12,6 +12,7 @@ const schema = z.object({
   time_of_day: z.enum(['day', 'night', 'any']).optional(),
   category_ids: z.array(z.string().uuid()).optional(),
   include_visited: z.boolean().optional(),
+  include_shorter: z.boolean().optional(),
 })
 
 export async function POST(req: NextRequest) {

@@ -24,6 +24,13 @@ export const DURATION_LABELS: Record<DurationBucket, string> = {
   overnight: '1박 이상',
 }
 
+/** duration 위계(짧음 0 → 김 2). "더 짧은 일정 포함" 비교용. */
+export const DURATION_RANK: Record<DurationBucket, number> = {
+  half: 0,
+  full: 1,
+  overnight: 2,
+}
+
 export const TIME_OF_DAY_LABELS: Record<TimeOfDay, string> = {
   day: '주간',
   night: '야간',

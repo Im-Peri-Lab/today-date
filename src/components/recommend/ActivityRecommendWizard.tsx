@@ -119,8 +119,6 @@ export function ActivityRecommendWizard() {
     const showResultToggle = hasResults && duration !== 'half'
     // 빈 상태에서 조건 넓히기 여지가 남아 있을 때만 "더 짧은 일정 보기" 제공.
     const canShorten = duration !== 'half' && !includeShorter
-    // 결과가 적을 때(1~2개)는 같은 조건 재추천이 덜 유용 → 더 짧은 일정 토글을 위로 올림.
-    const fewResults = hasResults && result.recommendations.length < 3
     return (
       <div className="mx-auto w-full max-w-4xl px-5 py-10 lg:px-8 lg:py-14">
         <button
@@ -224,28 +222,13 @@ export function ActivityRecommendWizard() {
           )}
         </div>
 
-        {/* 하단 액션: 전부 풀폭 세로 스택(동일 너비·높이). 위계는 색으로만 — 채움>outline>ghost */}
+        {/* 하단 액션: 풀폭 세로 스택(동일 높이 40px). 순서 고정 — 더 짧은 일정 → 다른 추천 보기 → 처음부터 */}
         <div className="mx-auto mt-6 flex w-full max-w-md flex-col gap-2">
-          {hasResults && (
-            <Button
-              className={cn(
-                'h-10 w-full gap-1.5 text-white hover:brightness-105',
-                styles.detailPrimaryBtn
-              )}
-              onClick={() => run()}
-              disabled={recommend.isPending}
-            >
-              <RotateCcw className="h-4 w-4" />
-              다른 추천 보기
-            </Button>
-          )}
           {showResultToggle && (
             <Button
               variant="outline"
               className={cn(
                 'h-10 w-full gap-1.5',
-                // 결과 1~2개면 토글을 "다른 추천 보기"보다 위로(flex order만, 높이·DOM 불변)
-                fewResults && 'order-first',
                 // 색은 오직 include_shorter 상태로만 결정 — OFF=outline / ON=연한 accent 틴트
                 // (단색 채움 CTA보다 한 단계 약하게: soft 배경 + accent 보더/글자)
                 includeShorter &&
@@ -266,6 +249,19 @@ export function ActivityRecommendWizard() {
                   더 짧은 일정도 볼까요?
                 </>
               )}
+            </Button>
+          )}
+          {hasResults && (
+            <Button
+              className={cn(
+                'h-10 w-full gap-1.5 text-white hover:brightness-105',
+                styles.detailPrimaryBtn
+              )}
+              onClick={() => run()}
+              disabled={recommend.isPending}
+            >
+              <RotateCcw className="h-4 w-4" />
+              다른 추천 보기
             </Button>
           )}
           <Button

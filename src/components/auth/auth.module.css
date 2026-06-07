@@ -17,9 +17,9 @@
   background: linear-gradient(180deg, #ffffff 0%, #f4f0fa 100%);
 
   /* 상단 노치 / 하단 브라우저 바와 분리 */
-  padding-top: calc(env(safe-area-inset-top) + 1.5rem);
+  padding-top: calc(env(safe-area-inset-top) + 1rem);
   padding-right: 1.5rem;
-  padding-bottom: calc(env(safe-area-inset-bottom) + 1.5rem);
+  padding-bottom: calc(env(safe-area-inset-bottom) + 1rem);
   padding-left: 1.5rem;
 
   font-family:
@@ -66,8 +66,9 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 2rem; /* 헤더 ↔ 본문(카드): 32px */
+  /* safe: 콘텐츠가 svh 를 넘으면 가운데 정렬 대신 상단부터 보이게(위 잘림 방지). 평상시·큰 화면은 중앙 정렬 유지 */
+  justify-content: safe center;
+  gap: 1.25rem; /* 헤더 ↔ 본문(카드): 20px */
   width: 100%;
 }
 

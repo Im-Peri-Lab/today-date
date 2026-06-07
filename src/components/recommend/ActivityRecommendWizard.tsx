@@ -145,48 +145,65 @@ export function ActivityRecommendWizard() {
             )}
           >
             {result.recommendations.length === 0 ? (
-              <div className="flex flex-col items-center rounded-xl border border-dashed border-violet-200 bg-white/50 px-6 py-14 text-center">
-                <Heart className="mb-3 h-10 w-10 fill-violet-100 text-violet-300" />
-                <p className="font-medium text-violet-800">조건에 맞는 항목이 없어요</p>
-                <p className="mt-1 text-sm text-gray-500">
-                  {canShorten
-                    ? '더 짧은 일정까지 넓혀보거나, 새 활동을 추가해 보세요.'
-                    : '위시리스트에 새 활동을 추가해 보세요.'}
-                </p>
-                <div className="mx-auto mt-5 flex w-full max-w-md flex-col gap-2">
-                  {canShorten ? (
-                    <>
-                      <Button
-                        className={cn(
-                          'h-10 w-full gap-1.5 text-white hover:brightness-105',
-                          styles.detailPrimaryBtn
-                        )}
-                        onClick={toggleShorter}
-                        disabled={recommend.isPending}
-                      >
-                        <Hourglass className="h-4 w-4" />
-                        더 짧은 일정도 볼까요?
-                      </Button>
+              <div
+                className={cn(
+                  'flex flex-col items-center rounded-xl border border-dashed px-6 py-16 text-center',
+                  'border-[var(--s-card-border-strong,#eceaf3)] bg-[var(--s-card-bg,#ffffff)]'
+                )}
+              >
+                {/* 상단 덩어리: 하트 + 제목 */}
+                <div className="flex flex-col items-center">
+                  <Heart
+                    className={cn(
+                      'mb-3 h-10 w-10 fill-[var(--s-accent-soft-bg,#f6f1ff)]',
+                      styles.accent
+                    )}
+                  />
+                  <p className={cn('font-medium', styles.ink)}>조건에 맞는 항목이 없어요</p>
+                </div>
+
+                {/* 하단 덩어리: 안내 문구(버튼 설명) + 버튼들 */}
+                <div className="mt-10 w-full max-w-md">
+                  <p className={cn('mb-3 text-sm', styles.sub)}>
+                    {canShorten
+                      ? '더 짧은 일정까지 넓혀보거나, 새 활동을 추가해 보세요.'
+                      : '위시리스트에 새 활동을 추가해 보세요.'}
+                  </p>
+                  <div className="flex flex-col gap-2">
+                    {canShorten ? (
+                      <>
+                        <Button
+                          className={cn(
+                            'h-10 w-full gap-1.5 text-white hover:brightness-105',
+                            styles.detailPrimaryBtn
+                          )}
+                          onClick={toggleShorter}
+                          disabled={recommend.isPending}
+                        >
+                          <Hourglass className="h-4 w-4" />
+                          더 짧은 일정도 볼까요?
+                        </Button>
+                        <Link href="/activities/new" className="block w-full">
+                          <Button variant="outline" className="h-10 w-full gap-1.5">
+                            <Plus className="h-4 w-4" />
+                            활동 추가하기
+                          </Button>
+                        </Link>
+                      </>
+                    ) : (
                       <Link href="/activities/new" className="block w-full">
-                        <Button variant="outline" className="h-10 w-full gap-1.5">
+                        <Button
+                          className={cn(
+                            'h-10 w-full gap-1.5 text-white hover:brightness-105',
+                            styles.detailPrimaryBtn
+                          )}
+                        >
                           <Plus className="h-4 w-4" />
                           활동 추가하기
                         </Button>
                       </Link>
-                    </>
-                  ) : (
-                    <Link href="/activities/new" className="block w-full">
-                      <Button
-                        className={cn(
-                          'h-10 w-full gap-1.5 text-white hover:brightness-105',
-                          styles.detailPrimaryBtn
-                        )}
-                      >
-                        <Plus className="h-4 w-4" />
-                        활동 추가하기
-                      </Button>
-                    </Link>
-                  )}
+                    )}
+                  </div>
                 </div>
               </div>
             ) : (
@@ -241,7 +258,12 @@ export function ActivityRecommendWizard() {
           )}
           <Button
             variant="ghost"
-            className={cn('h-10 w-full', styles.sub)}
+            className={cn(
+              'h-10 w-full bg-transparent text-[color:var(--s-sub,#6b7280)]',
+              // .dark 미적용 앱: shadcn ghost의 hover:bg-muted/hover:text-foreground가
+              // 다크에서 라이트값(흰 채움)으로 고정되므로 --s-* 토큰으로 덮어 투명 유지
+              'hover:bg-transparent hover:text-[color:var(--s-ink,#1a1033)]'
+            )}
             onClick={reset}
             disabled={recommend.isPending}
           >

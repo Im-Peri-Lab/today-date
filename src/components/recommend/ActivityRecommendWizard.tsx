@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { toast } from 'sonner'
 import { ArrowLeft, Sparkles, RotateCcw, Heart, Plus } from 'lucide-react'
@@ -11,7 +10,6 @@ import { ActivityCard } from '@/components/track/ActivityCard'
 import { useActivityCategories } from '@/hooks/useCategories'
 import {
   useRecommendActivity,
-  useSelectRecommendation,
   type ActivityRecommendResponse,
 } from '@/hooks/useRecommend'
 import { cn } from '@/lib/utils'
@@ -51,7 +49,6 @@ function StepDots({ step }: { step: number }) {
 }
 
 export function ActivityRecommendWizard() {
-  const router = useRouter()
   const [step, setStep] = useState<1 | 2 | 3>(1)
   const [showResult, setShowResult] = useState(false)
   const [duration, setDuration] = useState<DurationBucket | null>(null)
@@ -61,7 +58,6 @@ export function ActivityRecommendWizard() {
 
   const cats = useActivityCategories()
   const recommend = useRecommendActivity()
-  const select = useSelectRecommendation()
 
   function run(overrideCategories?: string[]) {
     if (!duration) return
@@ -96,11 +92,6 @@ export function ActivityRecommendWizard() {
     setCategoryIds((prev) => (prev.includes(id) ? prev.filter((c) => c !== id) : [...prev, id]))
   }
 
-  function handleLike(id: string) {
-    if (result?.log_id) select.mutate({ log_id: result.log_id, selected_id: id })
-    router.push(`/activities/${id}`)
-  }
-
   // ── 결과 화면 ──
   if (showResult && result) {
     return (
@@ -115,7 +106,9 @@ export function ActivityRecommendWizard() {
 
         <div className="mb-5 flex items-center gap-2">
           <Sparkles className="h-5 w-5 text-violet-500" />
-          <p className="text-lg font-medium text-violet-800">{result.reason}</p>
+          <p className="text-lg font-medium text-violet-800">
+            {result.reason.replace(/\s*💜\s*$/, '')}
+          </p>
         </div>
 
         {result.recommendations.length === 0 ? (
@@ -135,35 +128,22 @@ export function ActivityRecommendWizard() {
         ) : (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {result.recommendations.map((a) => (
-              <ActivityCard
-                key={a.id}
-                activity={a}
-                hideMenu
-                actionSlot={
-                  <Button
-                    onClick={() => handleLike(a.id)}
-                    className="w-full gap-1.5 bg-violet-600 text-white hover:bg-violet-700"
-                  >
-                    <Heart className="h-4 w-4" />
-                    이거 좋아 💜
-                  </Button>
-                }
-              />
+              <ActivityCard key={a.id} activity={a} hideMenu />
             ))}
           </div>
         )}
 
-        <div className="mt-6 flex flex-col gap-2 sm:flex-row">
+        <div className="mt-6 flex items-center justify-center gap-3">
           <Button
             variant="outline"
-            className="flex-1 gap-1.5"
+            className="gap-1.5"
             onClick={() => run()}
             disabled={recommend.isPending}
           >
             <RotateCcw className="h-4 w-4" />
             {recommend.isPending ? '추천 받는 중...' : '다른 추천 보기'}
           </Button>
-          <Button variant="ghost" className="flex-1 text-violet-700" onClick={reset}>
+          <Button variant="outline" onClick={reset}>
             처음부터
           </Button>
         </div>

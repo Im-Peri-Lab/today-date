@@ -84,6 +84,8 @@ export function ActivityRecommendWizard() {
         onSuccess: (data) => {
           setResult(data)
           setShowResult(true)
+          // 토글 상태는 요청 성공 후에 확정 — 로딩 중엔 직전 상태(라벨/색) 유지, 실패 시 불변
+          setIncludeShorter(shorter)
         },
         onError: (e) =>
           toast.error(e instanceof Error ? e.message : '추천 중 오류가 발생했습니다.'),
@@ -91,11 +93,9 @@ export function ActivityRecommendWizard() {
     )
   }
 
-  // 결과 화면 토글: 상태를 바꾸고 새 값으로 즉시 재호출(기존 "다른 추천 보기" 재호출 구조 활용)
+  // 결과 화면 토글: 낙관적 선반영 없이 새 값으로 재호출 → onSuccess에서 상태 확정
   function toggleShorter() {
-    const next = !includeShorter
-    setIncludeShorter(next)
-    run(undefined, next)
+    run(undefined, !includeShorter)
   }
 
   function reset() {
@@ -148,7 +148,7 @@ export function ActivityRecommendWizard() {
               <div
                 className={cn(
                   'flex flex-col items-center rounded-xl border border-dashed px-6 py-16 text-center',
-                  'border-[var(--s-card-border-strong,#eceaf3)] bg-[var(--s-card-bg,#ffffff)]'
+                  styles.recEmptyBox
                 )}
               >
                 {/* 상단 덩어리: 하트 + 제목 */}
@@ -217,7 +217,7 @@ export function ActivityRecommendWizard() {
           {recommend.isPending && (
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
               <Loader2 className={cn('h-6 w-6 animate-spin', styles.accent)} />
-              <p className={cn('text-sm', styles.sub)}>다른 추천을 찾고 있어요</p>
+              <p className={cn('text-sm', styles.sub)}>추천을 불러오는 중이에요</p>
             </div>
           )}
         </div>

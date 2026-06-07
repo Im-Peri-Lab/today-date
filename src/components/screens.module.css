@@ -1040,6 +1040,21 @@
 }
 
 /*
+ * 추천 0개 빈 상태 점선 박스.
+ * 라이트: 카드면(#fff) 위 보더가 거의 안 보여 --s-faint(#9ca3af) 점선으로 대비 확보.
+ * 다크: 기존 그대로 — 면 --s-card-bg(#241a36) + 보더 --s-card-border-strong(#3a2f4e).
+ */
+.recEmptyBox {
+  background: var(--s-card-bg, #ffffff);
+  border-color: var(--s-faint, #9ca3af);
+}
+@media (prefers-color-scheme: dark) {
+  .recEmptyBox {
+    border-color: var(--s-card-border-strong, #3a2f4e);
+  }
+}
+
+/*
  * 상세 하단 삭제 버튼 — 약한 중립 면 + faint 텍스트. hover/press 시 destructive 살짝.
  * --s-card-border-strong 이 다크 .page 미디어에서 #3a2f4e 로 자동 cascade → @media 불필요.
  * ghost variant 의 hover:bg-muted/hover:text-foreground 는 CSS Module 이 나중에 로드되므로 덮어씀.

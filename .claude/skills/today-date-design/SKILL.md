@@ -308,7 +308,7 @@ description: >
 왜: iOS 주소창 토글·오버스크롤·콘텐츠 길이에 따라 흰/검은 여백이나 FAB 출렁임이 생기지 않게 한다.
 
 - **html/body** (`globals.css`): `min-height: 100svh` + 배경색을 html/body 레벨에 직접 지정(라이트 `#fff`/다크 `#0a0712`) + `overscroll-behavior: none`. → SSR 시점부터 여백 없음.
-- **`.page`**: `min-height: 100dvh`, `display:flex; flex-direction:column`, 세이프영역 `padding`(상단 `env(safe-area-inset-top)+0.5rem` 등).
+- **`.page`** (`screens.module.css`, 일반 화면): `min-height: 100svh`, `display:flex; flex-direction:column`, 세이프영역 `padding`(상단 `env(safe-area-inset-top)+0.5rem` 등). (단위 근거는 §9-A)
 - **`.page::before`**: `position: fixed; inset: 0; z-index: -1` 배경 레이어 → 콘텐츠 길이가 변해도 배경이 움직이지 않음.
 - **`/list`**: `.pageStatic` 추가 → `min-height: auto` + `padding-bottom: 0` (dvh/env 의존 제거, 스크롤 출렁임 방지). 콘텐츠 끝은 `styles.listBottom`(`padding-bottom: 5rem`)으로 마지막 카드와 FAB 사이 간격 확보.
 - **FAB** `styles.fab`: `position: fixed; right: 1.25rem; bottom: 1.5rem`(**고정 rem — `env()` 쓰지 않음**: 주소창 토글 시 세로 출렁임 방지), `3.5rem` 원형, 그라데이션. `listBottom`의 5rem = FAB footprint(bottom 1.5 + height 3.5).
@@ -320,6 +320,23 @@ description: >
 // /list (콘텐츠 주도)
 <main className={cn(styles.page, styles.pageStatic)}><ListView /></main>
 ```
+
+### 9-A. 페이지 높이 정책 (svh / dvh 분리 — 중요)
+
+왜: 뷰포트 높이 단위는 두 종류가 공존한다. `svh`(주소창 보이는 **최소·정적** 높이)와 `dvh`(현재 가시영역을 추종하는 **동적** 높이). 화면 성격에 따라 **의도적으로 다른 단위**를 쓴다. 섞어 쓰거나 한쪽으로 통일하면 회귀가 난다(아래 교훈).
+
+- **일반 화면(홈 `/`·리스트 `/list`·상세 `/activities/[id]`·추가 `/activities/new` 등) + 전역 `html/body`**: **`min-height: 100svh`로 통일**.
+  - 근거: `svh`는 정적이라 **주소창 토글에도 문서 높이가 안 변해 스크롤 출렁임이 없다**. 콘텐츠가 짧으면 주소창 숨김 상태에서 하단에 약간의 흰 여백이 남을 수 있으나(svh 특성), 일반 화면은 `.page::before`(fixed 배경)가 덮어 대부분 가려지고, **출렁임 제거 이득이 더 커서 이 방식을 채택**한다.
+  - 위치: `screens.module.css` `.page`(`min-height:100svh`), `globals.css` html/body(`100svh`), 추천 페이지 `min-h-svh`.
+- **인증 화면(`/lock`·`/forgot`·`/reset`·`/setup`·`/setup/verify`)**: `AuthLayout` → `auth.module.css`의 **`.page`는 `100dvh`(동적)** 사용. **전역 `.page`(`screens.module.css`)와 이름만 같은 별개 클래스라 독립적.**
+  - 근거: 인증 `.page`는 배경 그라데이션을 **요소 자체에** 얹으므로, `dvh`로 가시영역을 추종해야 ① 콘텐츠가 한 화면에 들어오고(주소창 접히면 lvh까지 확장) ② 배경이 항상 뷰포트를 채워 **흰 여백이 없다**.
+  - 콘텐츠 정렬은 `.group`의 **`margin-block: auto`**: 여유가 있으면 세로 중앙, 넘치면 마진이 0이 되어 **상단부터 + 자연 스크롤** → 어떤 기기·글꼴에서도 **잘리지 않는다**(footer도 `.bodyGroup` 안 in-flow로 일원화, 하단 고정 모드 없음).
+
+**교훈 (반드시 지킬 것):**
+1. **전역 높이 단위를 바꿀 때 인증 `.page`까지 휩쓸지 말 것.** 인증은 `dvh`, 일반은 `svh`로 **분리 유지**. 과거 전역을 `svh`로 통일하며 인증 `.page`까지 `svh`로 바꿨다가 **패스코드 콘텐츠가 잘리는 회귀**가 발생했다(주소창 접힘 여유가 사라져 floor가 콘텐츠보다 작아짐).
+2. **높이 맞춤은 "요소 깎기"가 아니라 "정렬(`margin:auto`) + 자연 스크롤"로 해결.** 고정 크기 합(키패드·헤더·간격)을 가변 뷰포트(svh)에 수동으로 맞추면 기기·폰트 편차에 취약하다. 잘림은 `justify-content:center`가 오버플로를 상단으로 밀어 닿지 못하게 만들기 때문 → `margin-block:auto`로 대체하면 넘침 시 상단정렬+스크롤로 graceful degrade.
+
+
 
 ---
 

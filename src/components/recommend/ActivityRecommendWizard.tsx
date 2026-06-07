@@ -13,6 +13,7 @@ import {
   Sun,
   Moon,
   Clock,
+  Check,
   Loader2,
   type LucideIcon,
 } from 'lucide-react'
@@ -113,6 +114,11 @@ export function ActivityRecommendWizard() {
 
   // ── 결과 화면 ──
   if (showResult && result) {
+    const hasResults = result.recommendations.length > 0
+    // 결과가 있을 때만 상태 토글을 박스 밖에 노출. 반나절은 더 짧은 게 없어 제외.
+    const showResultToggle = hasResults && duration !== 'half'
+    // 빈 상태에서 조건 넓히기 여지가 남아 있을 때만 "더 짧은 일정 보기" 제공.
+    const canShorten = duration !== 'half' && !includeShorter
     return (
       <div className="mx-auto w-full max-w-4xl px-5 py-10 lg:px-8 lg:py-14">
         <button
@@ -143,14 +149,31 @@ export function ActivityRecommendWizard() {
                 <Heart className="mb-3 h-10 w-10 fill-violet-100 text-violet-300" />
                 <p className="font-medium text-violet-800">조건에 맞는 항목이 없어요</p>
                 <p className="mt-1 text-sm text-gray-500">
-                  위시리스트에 새 활동을 추가해 보세요.
+                  {canShorten
+                    ? '더 짧은 일정까지 넓혀보거나, 새 활동을 추가해 보세요.'
+                    : '위시리스트에 새 활동을 추가해 보세요.'}
                 </p>
-                <Link href="/activities/new" className="mt-5">
-                  <Button className="gap-1.5 bg-violet-600 text-white hover:bg-violet-700">
-                    <Plus className="h-4 w-4" />
-                    활동 추가하기
-                  </Button>
-                </Link>
+                <div className="mt-5 flex flex-col items-center gap-2">
+                  {canShorten && (
+                    <Button
+                      className={cn(
+                        'gap-1.5 text-white hover:brightness-105',
+                        styles.detailPrimaryBtn
+                      )}
+                      onClick={toggleShorter}
+                      disabled={recommend.isPending}
+                    >
+                      <Hourglass className="h-4 w-4" />
+                      더 짧은 일정 보기
+                    </Button>
+                  )}
+                  <Link href="/activities/new">
+                    <Button variant="outline" className="gap-1.5">
+                      <Plus className="h-4 w-4" />
+                      활동 추가하기
+                    </Button>
+                  </Link>
+                </div>
               </div>
             ) : (
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
@@ -168,7 +191,7 @@ export function ActivityRecommendWizard() {
           )}
         </div>
 
-        {duration !== 'half' && (
+        {showResultToggle && (
           <div className="mt-6 flex justify-center">
             <button
               type="button"
@@ -177,8 +200,17 @@ export function ActivityRecommendWizard() {
               disabled={recommend.isPending}
               className={cn(styles.filterToggle, includeShorter && styles.filterToggleActive)}
             >
-              <Hourglass className="h-4 w-4" />
-              더 짧은 일정도 볼까요?
+              {includeShorter ? (
+                <>
+                  <Check className="h-4 w-4" />
+                  더 짧은 일정 포함됨
+                </>
+              ) : (
+                <>
+                  <Hourglass className="h-4 w-4" />
+                  더 짧은 일정도 볼까요?
+                </>
+              )}
             </button>
           </div>
         )}
@@ -186,7 +218,7 @@ export function ActivityRecommendWizard() {
         <div
           className={cn(
             'flex flex-col items-center justify-center gap-2 sm:flex-row sm:gap-3',
-            duration === 'half' ? 'mt-6' : 'mt-4'
+            showResultToggle ? 'mt-4' : 'mt-6'
           )}
         >
           <Button

@@ -3,22 +3,33 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { toast } from 'sonner'
-import { ArrowLeft, Sparkles, RotateCcw, Heart, Plus } from 'lucide-react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  ArrowLeft,
+  Sparkles,
+  RotateCcw,
+  Heart,
+  Plus,
+  MapPin,
+  Utensils,
+  Sunset,
+  type LucideIcon,
+} from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { PlaceCard } from '@/components/track/PlaceCard'
+import { CategoryIcon } from '@/components/track/categoryIcon'
 import { usePlaceCategories } from '@/hooks/useCategories'
 import {
   useRecommendPlace,
   type PlaceRecommendResponse,
 } from '@/hooks/useRecommend'
 import { cn } from '@/lib/utils'
+import styles from '@/components/screens.module.css'
 import type { MealTime } from '@/types'
 
-const MEALS: { value: MealTime; emoji: string; label: string; sub: string }[] = [
-  { value: 'lunch', emoji: '🍽️', label: '점심', sub: '가볍게 한 끼' },
-  { value: 'dinner', emoji: '🌆', label: '저녁', sub: '분위기 있게' },
+const MEALS: { value: MealTime; icon: LucideIcon; label: string; sub: string }[] = [
+  { value: 'lunch', icon: Utensils, label: '점심', sub: '가볍게 한 끼' },
+  { value: 'dinner', icon: Sunset, label: '저녁', sub: '분위기 있게' },
 ]
 
 function defaultMeal(): MealTime {
@@ -33,7 +44,9 @@ function StepDots({ step }: { step: number }) {
           key={n}
           className={cn(
             'h-1.5 rounded-full transition-all',
-            n === step ? 'w-6 bg-violet-500' : 'w-1.5 bg-violet-200'
+            n === step
+              ? 'w-6 bg-[var(--s-active-fill,#7c3aed)]'
+              : 'w-1.5 bg-[var(--s-faint,#9ca3af)]'
           )}
         />
       ))}
@@ -146,25 +159,27 @@ export function PlaceRecommendWizard() {
     <div className="mx-auto max-w-md px-4 py-6">
       <Link
         href="/"
-        className="mb-3 inline-flex items-center gap-1.5 text-sm text-violet-600 hover:text-violet-800"
+        className={cn('mb-3 inline-flex items-center gap-1.5 text-sm', styles.accent)}
       >
         <ArrowLeft className="h-4 w-4" />
         홈으로
       </Link>
 
-      <Card className="shadow-xl border-violet-100">
-        <CardHeader className="text-center">
-          <div className="mb-1 text-4xl">📍</div>
-          <CardTitle className="text-xl text-violet-800">어디 갈까?</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <StepDots step={step} />
+      <div className={cn(styles.card, 'p-5')}>
+        <div className="mb-4 text-center">
+          <MapPin className={cn('mx-auto mb-1 h-8 w-8', styles.accent)} strokeWidth={1.75} />
+          <h1 className={cn('text-xl font-semibold', styles.ink)}>어디 갈까?</h1>
+        </div>
 
-          {step === 1 && (
-            <div className="space-y-4">
-              <p className="text-center text-sm text-muted-foreground">언제 먹을까요?</p>
-              <div className="grid grid-cols-2 gap-3">
-                {MEALS.map((m) => (
+        <StepDots step={step} />
+
+        {step === 1 && (
+          <div className="space-y-4">
+            <p className={cn('text-center text-sm', styles.sub)}>언제 먹을까요?</p>
+            <div className="grid grid-cols-2 gap-3">
+              {MEALS.map((m) => {
+                const active = meal === m.value
+                return (
                   <button
                     key={m.value}
                     type="button"
@@ -173,92 +188,97 @@ export function PlaceRecommendWizard() {
                       setStep(2)
                     }}
                     className={cn(
-                      'flex flex-col items-center gap-1 rounded-xl border-2 p-5 transition-all',
-                      meal === m.value
-                        ? 'border-violet-500 bg-violet-50'
-                        : 'border-gray-200 hover:border-violet-300'
+                      'flex flex-col items-center gap-1 rounded-xl border p-5 transition-all',
+                      active
+                        ? 'border-transparent bg-[var(--s-active-fill,#7c3aed)] text-[color:var(--s-active-on,#fff)]'
+                        : 'border-[color:var(--s-input,#eceaf3)] bg-[var(--s-card-bg,#fff)] hover:border-[color:var(--s-active-line,#7c3aed)]'
                     )}
                   >
-                    <span className="text-3xl">{m.emoji}</span>
-                    <span className="font-medium text-foreground">{m.label}</span>
-                    <span className="text-xs text-muted-foreground">{m.sub}</span>
+                    <m.icon
+                      className={cn('h-7 w-7 shrink-0', !active && styles.accent)}
+                      strokeWidth={2}
+                    />
+                    <span className={cn('font-medium', !active && styles.ink)}>{m.label}</span>
+                    <span className={cn('text-xs', !active && styles.sub)}>{m.sub}</span>
                   </button>
-                ))}
-              </div>
+                )
+              })}
             </div>
-          )}
+          </div>
+        )}
 
-          {step === 2 && (
-            <div className="space-y-4">
-              <p className="text-center text-sm text-muted-foreground">
-                가고 싶은 동네가 있어요? <span className="text-gray-400">(선택)</span>
-              </p>
-              <Input
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-                placeholder="예: 마포, 강남, 성수동"
-                autoFocus
-              />
-              <div className="flex gap-2 pt-2">
-                <Button variant="outline" className="flex-1" onClick={() => setStep(1)}>
-                  이전
-                </Button>
-                <Button
-                  className="flex-1 bg-violet-600 text-white hover:bg-violet-700"
-                  onClick={() => setStep(3)}
-                >
-                  다음
-                </Button>
-              </div>
-            </div>
-          )}
-
-          {step === 3 && (
-            <div className="space-y-4">
-              <p className="text-center text-sm text-muted-foreground">
-                카테고리를 골라볼까요? <span className="text-gray-400">(선택)</span>
-              </p>
-              <div className="flex flex-wrap justify-center gap-2">
-                {cats.data?.map((c) => (
-                  <button
-                    key={c.id}
-                    type="button"
-                    onClick={() => toggleCat(c.id)}
-                    className={cn(
-                      'rounded-full border px-3 py-1.5 text-sm transition-colors',
-                      categoryIds.includes(c.id)
-                        ? 'border-violet-500 bg-violet-50 font-medium text-violet-700'
-                        : 'border-input text-muted-foreground hover:border-violet-300'
-                    )}
-                  >
-                    {c.icon} {c.name}
-                  </button>
-                ))}
-              </div>
-              <div className="flex gap-2 pt-2">
-                <Button variant="outline" className="flex-1" onClick={() => setStep(2)}>
-                  이전
-                </Button>
-                <Button
-                  className="flex-1 gap-1.5 bg-violet-600 text-white hover:bg-violet-700"
-                  onClick={() => run()}
-                  disabled={recommend.isPending}
-                >
-                  <Sparkles className="h-4 w-4" />
-                  {recommend.isPending ? '추천 받는 중...' : '추천 받기'}
-                </Button>
-              </div>
-              <button
-                onClick={() => run([])}
-                disabled={recommend.isPending}
-                className="w-full text-center text-sm text-gray-400 hover:text-violet-600 disabled:opacity-50"
+        {step === 2 && (
+          <div className="space-y-4">
+            <p className={cn('text-center text-sm', styles.sub)}>
+              가고 싶은 동네가 있어요? <span className={styles.faint}>(선택)</span>
+            </p>
+            <Input
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              placeholder="예: 마포, 강남, 성수동"
+              autoFocus
+            />
+            <div className="flex gap-2 pt-2">
+              <Button variant="outline" className="flex-1" onClick={() => setStep(1)}>
+                이전
+              </Button>
+              <Button
+                className={cn('flex-1 text-white hover:brightness-105', styles.detailPrimaryBtn)}
+                onClick={() => setStep(3)}
               >
-                건너뛰고 추천 받기
-              </button>
+                다음
+              </Button>
             </div>
-          )}
-        </CardContent>
-      </Card>
+          </div>
+        )}
+
+        {step === 3 && (
+          <div className="space-y-4">
+            <p className={cn('text-center text-sm', styles.sub)}>
+              카테고리를 골라볼까요? <span className={styles.faint}>(선택)</span>
+            </p>
+            <div className="flex flex-wrap justify-center gap-2">
+              {cats.data?.map((c) => (
+                <button
+                  key={c.id}
+                  type="button"
+                  onClick={() => toggleCat(c.id)}
+                  className={cn(styles.chip, categoryIds.includes(c.id) && styles.chipActive)}
+                >
+                  <CategoryIcon name={c.name} className="h-3.5 w-3.5" />
+                  {c.name}
+                </button>
+              ))}
+            </div>
+            <div className="space-y-2 pt-2">
+              <Button
+                className={cn(
+                  'h-10 w-full gap-1.5 text-white hover:brightness-105',
+                  styles.detailPrimaryBtn
+                )}
+                onClick={() => run()}
+                disabled={recommend.isPending}
+              >
+                <Sparkles className="h-4 w-4" />
+                {recommend.isPending ? '추천 받는 중...' : '추천 받기'}
+              </Button>
+              <Button variant="outline" className="w-full" onClick={() => setStep(2)}>
+                이전
+              </Button>
+            </div>
+            <button
+              onClick={() => run([])}
+              disabled={recommend.isPending}
+              className={cn(
+                'w-full text-center text-sm disabled:opacity-50',
+                styles.faint
+              )}
+            >
+              건너뛰고 추천 받기
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   )
 }

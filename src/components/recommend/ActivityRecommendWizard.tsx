@@ -3,28 +3,34 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { toast } from 'sonner'
-import { ArrowLeft, Sparkles, RotateCcw, Heart, Plus } from 'lucide-react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  ArrowLeft,
+  Sparkles,
+  RotateCcw,
+  Heart,
+  Plus,
+  Hourglass,
+  Sun,
+  Moon,
+  type LucideIcon,
+} from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ActivityCard } from '@/components/track/ActivityCard'
+import { CategoryIcon } from '@/components/track/categoryIcon'
 import { useActivityCategories } from '@/hooks/useCategories'
 import {
   useRecommendActivity,
   type ActivityRecommendResponse,
 } from '@/hooks/useRecommend'
+import { TIME_OPTIONS, TIME_OF_DAY_ICONS, TIME_OF_DAY_LABELS } from '@/lib/labels'
 import { cn } from '@/lib/utils'
+import styles from '@/components/screens.module.css'
 import type { DurationBucket, TimeOfDay } from '@/types'
 
-const DURATIONS: { value: DurationBucket; emoji: string; label: string; sub: string }[] = [
-  { value: 'half', emoji: '⏳', label: '반나절', sub: '2~4시간 가볍게' },
-  { value: 'full', emoji: '☀️', label: '하루', sub: '하루를 꽉 채워서' },
-  { value: 'overnight', emoji: '🌙', label: '1박 이상', sub: '멀리 떠나기' },
-]
-
-const TIMES: { value: TimeOfDay; emoji: string; label: string }[] = [
-  { value: 'day', emoji: '🌞', label: '주간' },
-  { value: 'night', emoji: '🌃', label: '야간' },
-  { value: 'any', emoji: '🤷', label: '아무때나' },
+const DURATIONS: { value: DurationBucket; icon: LucideIcon; label: string; sub: string }[] = [
+  { value: 'half', icon: Hourglass, label: '반나절', sub: '2~4시간 가볍게' },
+  { value: 'full', icon: Sun, label: '하루', sub: '하루를 꽉 채워서' },
+  { value: 'overnight', icon: Moon, label: '1박 이상', sub: '멀리 떠나기' },
 ]
 
 function defaultTimeOfDay(): TimeOfDay {
@@ -40,7 +46,9 @@ function StepDots({ step }: { step: number }) {
           key={n}
           className={cn(
             'h-1.5 rounded-full transition-all',
-            n === step ? 'w-6 bg-violet-500' : 'w-1.5 bg-violet-200'
+            n === step
+              ? 'w-6 bg-[var(--s-active-fill,#7c3aed)]'
+              : 'w-1.5 bg-[var(--s-faint,#9ca3af)]'
           )}
         />
       ))}
@@ -156,27 +164,29 @@ export function ActivityRecommendWizard() {
     <div className="mx-auto max-w-md px-4 py-6">
       <Link
         href="/"
-        className="mb-3 inline-flex items-center gap-1.5 text-sm text-violet-600 hover:text-violet-800"
+        className={cn('mb-3 inline-flex items-center gap-1.5 text-sm', styles.accent)}
       >
         <ArrowLeft className="h-4 w-4" />
         홈으로
       </Link>
 
-      <Card className="shadow-xl border-violet-100">
-        <CardHeader className="text-center">
-          <div className="mb-1 text-4xl">🎯</div>
-          <CardTitle className="text-xl text-violet-800">오늘 뭐할까?</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <StepDots step={step} />
+      <div className={cn(styles.card, 'p-5')}>
+        <div className="mb-4 text-center">
+          <Sparkles className={cn('mx-auto mb-1 h-8 w-8', styles.accent)} strokeWidth={1.75} />
+          <h1 className={cn('text-xl font-semibold', styles.ink)}>오늘 뭐할까?</h1>
+        </div>
 
-          {step === 1 && (
-            <div className="space-y-4">
-              <p className="text-center text-sm text-muted-foreground">
-                얼마나 시간을 낼 수 있어요?
-              </p>
-              <div className="space-y-2">
-                {DURATIONS.map((d) => (
+        <StepDots step={step} />
+
+        {step === 1 && (
+          <div className="space-y-4">
+            <p className={cn('text-center text-sm', styles.sub)}>
+              얼마나 시간을 낼 수 있어요?
+            </p>
+            <div className="space-y-2">
+              {DURATIONS.map((d) => {
+                const active = duration === d.value
+                return (
                   <button
                     key={d.value}
                     type="button"
@@ -185,104 +195,120 @@ export function ActivityRecommendWizard() {
                       setStep(2)
                     }}
                     className={cn(
-                      'flex w-full items-center gap-3 rounded-xl border-2 p-4 text-left transition-all',
-                      duration === d.value
-                        ? 'border-violet-500 bg-violet-50'
-                        : 'border-gray-200 hover:border-violet-300'
+                      'flex w-full items-center gap-3 rounded-xl border p-4 text-left transition-all',
+                      active
+                        ? 'border-transparent bg-[var(--s-active-fill,#7c3aed)] text-[color:var(--s-active-on,#fff)]'
+                        : 'border-[color:var(--s-input,#eceaf3)] bg-[var(--s-card-bg,#fff)] hover:border-[color:var(--s-active-line,#7c3aed)]'
                     )}
                   >
-                    <span className="text-2xl">{d.emoji}</span>
+                    <d.icon
+                      className={cn('h-6 w-6 shrink-0', !active && styles.accent)}
+                      strokeWidth={2}
+                    />
                     <div>
-                      <div className="font-medium text-foreground">{d.label}</div>
-                      <div className="text-xs text-muted-foreground">{d.sub}</div>
+                      <div className={cn('font-medium', !active && styles.ink)}>{d.label}</div>
+                      <div className={cn('text-xs', !active && styles.sub)}>{d.sub}</div>
                     </div>
                   </button>
-                ))}
-              </div>
+                )
+              })}
             </div>
-          )}
+          </div>
+        )}
 
-          {step === 2 && (
-            <div className="space-y-4">
-              <p className="text-center text-sm text-muted-foreground">언제 만날까요?</p>
-              <div className="grid grid-cols-3 gap-2">
-                {TIMES.map((t) => (
+        {step === 2 && (
+          <div className="space-y-4">
+            <p className={cn('text-center text-sm', styles.sub)}>언제 만날까요?</p>
+            <div className="grid grid-cols-3 gap-2">
+              {TIME_OPTIONS.map((t) => {
+                const active = timeOfDay === t.value
+                const Icon = TIME_OF_DAY_ICONS[t.value]
+                return (
                   <button
                     key={t.value}
                     type="button"
                     onClick={() => setTimeOfDay(t.value)}
                     className={cn(
-                      'flex flex-col items-center gap-1 rounded-xl border-2 p-3 transition-all',
-                      timeOfDay === t.value
-                        ? 'border-violet-500 bg-violet-50'
-                        : 'border-gray-200 hover:border-violet-300'
+                      'flex flex-col items-center justify-center gap-1 rounded-xl border p-3 transition-all',
+                      active
+                        ? 'border-transparent bg-[var(--s-active-fill,#7c3aed)] text-[color:var(--s-active-on,#fff)]'
+                        : 'border-[color:var(--s-input,#eceaf3)] bg-[var(--s-card-bg,#fff)] hover:border-[color:var(--s-active-line,#7c3aed)]'
                     )}
                   >
-                    <span className="text-2xl">{t.emoji}</span>
-                    <span className="text-sm font-medium text-foreground">{t.label}</span>
+                    {Icon && (
+                      <Icon
+                        className={cn('h-6 w-6 shrink-0', !active && styles.accent)}
+                        strokeWidth={2}
+                      />
+                    )}
+                    <span className={cn('text-sm font-medium', !active && styles.ink)}>
+                      {TIME_OF_DAY_LABELS[t.value]}
+                    </span>
                   </button>
-                ))}
-              </div>
-              <div className="flex gap-2 pt-2">
-                <Button variant="outline" className="flex-1" onClick={() => setStep(1)}>
-                  이전
-                </Button>
-                <Button
-                  className="flex-1 bg-violet-600 text-white hover:bg-violet-700"
-                  onClick={() => setStep(3)}
-                >
-                  다음
-                </Button>
-              </div>
+                )
+              })}
             </div>
-          )}
-
-          {step === 3 && (
-            <div className="space-y-4">
-              <p className="text-center text-sm text-muted-foreground">
-                카테고리를 골라볼까요? <span className="text-gray-400">(선택)</span>
-              </p>
-              <div className="flex flex-wrap justify-center gap-2">
-                {cats.data?.map((c) => (
-                  <button
-                    key={c.id}
-                    type="button"
-                    onClick={() => toggleCat(c.id)}
-                    className={cn(
-                      'rounded-full border px-3 py-1.5 text-sm transition-colors',
-                      categoryIds.includes(c.id)
-                        ? 'border-violet-500 bg-violet-50 font-medium text-violet-700'
-                        : 'border-input text-muted-foreground hover:border-violet-300'
-                    )}
-                  >
-                    {c.icon} {c.name}
-                  </button>
-                ))}
-              </div>
-              <div className="flex gap-2 pt-2">
-                <Button variant="outline" className="flex-1" onClick={() => setStep(2)}>
-                  이전
-                </Button>
-                <Button
-                  className="flex-1 gap-1.5 bg-violet-600 text-white hover:bg-violet-700"
-                  onClick={() => run()}
-                  disabled={recommend.isPending}
-                >
-                  <Sparkles className="h-4 w-4" />
-                  {recommend.isPending ? '추천 받는 중...' : '추천 받기'}
-                </Button>
-              </div>
-              <button
-                onClick={() => run([])}
-                disabled={recommend.isPending}
-                className="w-full text-center text-sm text-gray-400 hover:text-violet-600 disabled:opacity-50"
+            <div className="flex gap-2 pt-2">
+              <Button variant="outline" className="flex-1" onClick={() => setStep(1)}>
+                이전
+              </Button>
+              <Button
+                className={cn('flex-1 text-white hover:brightness-105', styles.detailPrimaryBtn)}
+                onClick={() => setStep(3)}
               >
-                건너뛰고 추천 받기
-              </button>
+                다음
+              </Button>
             </div>
-          )}
-        </CardContent>
-      </Card>
+          </div>
+        )}
+
+        {step === 3 && (
+          <div className="space-y-4">
+            <p className={cn('text-center text-sm', styles.sub)}>
+              카테고리를 골라볼까요? <span className={styles.faint}>(선택)</span>
+            </p>
+            <div className="flex flex-wrap justify-center gap-2">
+              {cats.data?.map((c) => (
+                <button
+                  key={c.id}
+                  type="button"
+                  onClick={() => toggleCat(c.id)}
+                  className={cn(styles.chip, categoryIds.includes(c.id) && styles.chipActive)}
+                >
+                  <CategoryIcon name={c.name} className="h-3.5 w-3.5" />
+                  {c.name}
+                </button>
+              ))}
+            </div>
+            <div className="space-y-2 pt-2">
+              <Button
+                className={cn(
+                  'h-10 w-full gap-1.5 text-white hover:brightness-105',
+                  styles.detailPrimaryBtn
+                )}
+                onClick={() => run()}
+                disabled={recommend.isPending}
+              >
+                <Sparkles className="h-4 w-4" />
+                {recommend.isPending ? '추천 받는 중...' : '추천 받기'}
+              </Button>
+              <Button variant="outline" className="w-full" onClick={() => setStep(2)}>
+                이전
+              </Button>
+            </div>
+            <button
+              onClick={() => run([])}
+              disabled={recommend.isPending}
+              className={cn(
+                'w-full text-center text-sm disabled:opacity-50',
+                styles.faint
+              )}
+            >
+              건너뛰고 추천 받기
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   )
 }

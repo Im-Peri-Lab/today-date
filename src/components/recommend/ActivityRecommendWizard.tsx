@@ -119,6 +119,8 @@ export function ActivityRecommendWizard() {
     const showResultToggle = hasResults && duration !== 'half'
     // 빈 상태에서 조건 넓히기 여지가 남아 있을 때만 "더 짧은 일정 보기" 제공.
     const canShorten = duration !== 'half' && !includeShorter
+    // 결과가 적을 때(1~2개)는 같은 조건 재추천이 덜 유용 → 더 짧은 일정 토글을 위로 올림.
+    const fewResults = hasResults && result.recommendations.length < 3
     return (
       <div className="mx-auto w-full max-w-4xl px-5 py-10 lg:px-8 lg:py-14">
         <button
@@ -242,9 +244,12 @@ export function ActivityRecommendWizard() {
               variant="outline"
               className={cn(
                 'h-10 w-full gap-1.5',
-                // 색은 오직 include_shorter 상태로만 결정 — OFF=outline / ON=filled(--s-active-fill)
+                // 결과 1~2개면 토글을 "다른 추천 보기"보다 위로(flex order만, 높이·DOM 불변)
+                fewResults && 'order-first',
+                // 색은 오직 include_shorter 상태로만 결정 — OFF=outline / ON=연한 accent 틴트
+                // (단색 채움 CTA보다 한 단계 약하게: soft 배경 + accent 보더/글자)
                 includeShorter &&
-                  'border-transparent bg-[var(--s-active-fill,#7c3aed)] text-[color:var(--s-active-on,#ffffff)] hover:bg-[var(--s-active-fill,#7c3aed)] hover:text-[color:var(--s-active-on,#ffffff)] hover:brightness-105'
+                  'border-[var(--s-active-line,#7c3aed)] bg-[var(--s-accent-soft-bg,#f6f1ff)] text-[color:var(--s-accent,#7c3aed)] hover:bg-[var(--s-accent-soft-bg,#f6f1ff)] hover:text-[color:var(--s-accent,#7c3aed)]'
               )}
               onClick={toggleShorter}
               aria-pressed={includeShorter}

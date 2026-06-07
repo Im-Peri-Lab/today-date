@@ -10,7 +10,8 @@
 
 .page {
   min-height: 100vh;
-  min-height: 100dvh; /* iOS 주소창 동적 높이 대응 */
+  min-height: 100dvh; /* 동적 높이: 주소창 접히면 가시영역(최대 lvh)까지 늘어나 콘텐츠가 한 화면에 들어옴.
+                         그라데이션 배경이 항상 뷰포트를 채워 흰 여백도 없음. 전역 .page(svh)와 별개. */
   display: flex;
   flex-direction: column;
   text-align: center;
@@ -61,14 +62,29 @@
   }
 }
 
-/* ── 헤더 + 본문(+inlineFooter)을 하나의 그룹으로 뷰포트 중앙 정렬 ── */
+/*
+ * 컬럼 컨테이너 — 페이지 높이를 채운다(flex:1). 정렬은 자식 .group 의 margin:auto 가 담당.
+ * justify-content 로 강제 중앙정렬하지 않으므로, 콘텐츠가 넘쳐도 잘리지 않고 페이지가 자라 스크롤된다.
+ */
 .center {
   flex: 1 1 auto;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 2rem; /* 헤더 ↔ 본문(카드): 32px */
+  width: 100%;
+}
+
+/*
+ * 헤더 + 본문 + footer 한 덩어리. margin-block:auto:
+ *  - 여유가 있으면 위아래 auto 마진이 공간을 나눠 가져 → 세로 중앙.
+ *  - 콘텐츠가 .center(=svh)를 넘으면 free space 가 없어 마진이 0 → 상단부터 시작 + 페이지 스크롤(잘림 불가).
+ */
+.group {
+  margin-block: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem; /* 헤더 ↔ 본문 그룹: 32px */
   width: 100%;
 }
 
@@ -145,12 +161,6 @@
   justify-content: center;
   gap: 1.75rem;
   width: 100%;
-}
-
-/* ── 하단: 링크 영역 ───────────────────────── */
-.footer {
-  flex-shrink: 0;
-  padding-top: 1.5rem;
 }
 
 .link {

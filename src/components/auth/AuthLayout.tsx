@@ -16,42 +16,33 @@ interface AuthLayoutProps {
   /** 링크 영역 (없으면 렌더 안 함) */
   footer?: ReactNode
   /**
-   * footer 를 화면 하단 고정이 아니라 콘텐츠 그룹(카드 바로 아래)에 포함시킨다.
-   * 카드와 의미상 연결된 보조 액션(예: "잠금 화면으로 돌아가기")에 사용.
-   * 기본 false = 하단 고정 (lock 의 "패스코드를 잊으셨나요?" 처럼).
+   * (호환용 — 현재 무시됨) footer 는 항상 콘텐츠 그룹 안 in-flow 로 렌더된다.
    */
   inlineFooter?: boolean
 }
 
 /**
  * 인증 화면 공통 레이아웃.
- * - min-h-dvh flex column + safe-area + 라이트/다크 배경 (auth.module.css)
- * - 헤더 + 본문(+inlineFooter)을 .center 그룹으로 묶어 뷰포트 중앙 정렬
- *   (카드가 위/아래로 치우치지 않음)
- * - inlineFooter=true: footer 가 카드 바로 아래(.bodyGroup, 20px 갭)에 포함돼
- *   콘텐츠 그룹과 함께 중앙 정렬된다.
- * - inlineFooter=false(기본): footer 는 .footer 로 화면 하단에 고정된다.
- * - 흰/검은 여백 방지는 globals.css 의 전역 body 배경이 SSR 시점부터 담당
- *   (JS 불필요). 여기 .page 는 그 위에 그라데이션을 얹는다.
+ * - .page: min-height:100svh flex column + safe-area + 라이트/다크 배경 (auth.module.css)
+ * - 헤더 + 본문 + footer 를 하나의 in-flow 그룹(.group)으로 묶고 margin:auto 로 정렬:
+ *   여유가 있으면 뷰포트 세로 중앙, 콘텐츠가 svh 를 넘으면 상단부터 자연 스크롤된다(잘림 구조적으로 불가).
+ * - footer 는 항상 콘텐츠 그룹 안(.bodyGroup, 카드 아래 20px)에 포함된다(하단 고정 모드 없음).
+ * - 흰/검은 여백 방지는 globals.css 의 전역 body 배경이 SSR 시점부터 담당(JS 불필요).
+ *   여기 .page 는 그 위에 그라데이션을 얹는다.
  */
-export function AuthLayout({ title, subtitle, pulse, children, footer, inlineFooter = false }: AuthLayoutProps) {
-  const showInline = footer && inlineFooter
-  const showPinned = footer && !inlineFooter
-
+export function AuthLayout({ title, subtitle, pulse, children, footer }: AuthLayoutProps) {
   return (
     <main className={styles.page}>
       <div className={styles.center}>
-        <BrandHeader title={title} subtitle={subtitle} pulse={pulse} />
-        {showInline ? (
+        {/* 콘텐츠 한 덩어리: margin:auto 로 여유 시 세로 중앙, 넘치면 상단부터 자연 스크롤(잘림 불가) */}
+        <div className={styles.group}>
+          <BrandHeader title={title} subtitle={subtitle} pulse={pulse} />
           <div className={styles.bodyGroup}>
             <div className={styles.body}>{children}</div>
             {footer}
           </div>
-        ) : (
-          <div className={styles.body}>{children}</div>
-        )}
+        </div>
       </div>
-      {showPinned && <footer className={styles.footer}>{footer}</footer>}
     </main>
   )
 }

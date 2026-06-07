@@ -37,7 +37,7 @@ const DURATIONS: { value: DurationBucket; icon: LucideIcon; label: string; sub: 
 
 function StepDots({ step }: { step: number }) {
   return (
-    <div className="mb-4 flex justify-center gap-1.5">
+    <div className="mb-6 flex justify-center gap-1.5">
       {[1, 2, 3].map((n) => (
         <span
           key={n}
@@ -100,7 +100,7 @@ export function ActivityRecommendWizard() {
   // ── 결과 화면 ──
   if (showResult && result) {
     return (
-      <div className="mx-auto w-full max-w-4xl px-5 py-6 lg:px-8">
+      <div className="mx-auto my-auto w-full max-w-4xl px-5 py-8 lg:px-8">
         <button
           onClick={reset}
           className={cn('mb-3 inline-flex items-center gap-1.5 text-sm', styles.accent)}
@@ -109,9 +109,11 @@ export function ActivityRecommendWizard() {
           처음부터
         </button>
 
-        <div className="mb-5 text-center">
-          <Sparkles className={cn('mx-auto mb-1 h-8 w-8', styles.accent)} strokeWidth={1.75} />
-          <h1 className={cn('text-xl font-semibold', styles.ink)}>오늘 뭐할까?</h1>
+        <div className="mb-6 text-center">
+          <span className={cn(styles.gradIcon, 'h-8 w-8')}>
+            <Sparkles className="h-5 w-5" strokeWidth={1.75} />
+          </span>
+          <h1 className={cn('mt-3 text-xl font-semibold', styles.ink)}>오늘 뭐할까?</h1>
           <p className={cn('mt-1 text-sm', styles.sub)}>
             {result.reason.replace(/\s*💜\s*$/, '')}
           </p>
@@ -180,7 +182,7 @@ export function ActivityRecommendWizard() {
 
   // ── 마법사 화면 ──
   return (
-    <div className="mx-auto w-full max-w-lg px-5 py-6 lg:pt-10">
+    <div className="mx-auto my-auto w-full max-w-lg px-5 py-8">
       <Link
         href="/"
         className={cn('mb-3 inline-flex items-center gap-1.5 text-sm', styles.accent)}
@@ -189,10 +191,12 @@ export function ActivityRecommendWizard() {
         홈으로
       </Link>
 
-      <div className={cn(styles.card, 'p-6 lg:p-8')}>
-        <div className="mb-4 text-center">
-          <Sparkles className={cn('mx-auto mb-1 h-8 w-8', styles.accent)} strokeWidth={1.75} />
-          <h1 className={cn('text-xl font-semibold', styles.ink)}>오늘 뭐할까?</h1>
+      <div className={cn(styles.card, 'px-6 py-8 lg:px-8 lg:py-10')}>
+        <div className="mb-6 text-center">
+          <span className={cn(styles.gradIcon, 'h-8 w-8')}>
+            <Sparkles className="h-5 w-5" strokeWidth={1.75} />
+          </span>
+          <h1 className={cn('mt-3 text-xl font-semibold', styles.ink)}>오늘 뭐할까?</h1>
         </div>
 
         <StepDots step={step} />

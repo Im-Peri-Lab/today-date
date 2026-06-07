@@ -218,15 +218,15 @@ export function PlaceRecommendWizard() {
               placeholder="예: 마포, 강남, 성수동"
               autoFocus
             />
-            <div className="flex gap-2 pt-2">
-              <Button variant="outline" className="flex-1" onClick={() => setStep(1)}>
-                이전
-              </Button>
+            <div className="space-y-2 pt-2">
               <Button
-                className={cn('flex-1 text-white hover:brightness-105', styles.detailPrimaryBtn)}
+                className={cn('h-10 w-full text-white hover:brightness-105', styles.detailPrimaryBtn)}
                 onClick={() => setStep(3)}
               >
                 다음
+              </Button>
+              <Button variant="outline" className="h-10 w-full" onClick={() => setStep(1)}>
+                이전
               </Button>
             </div>
           </div>
@@ -262,7 +262,7 @@ export function PlaceRecommendWizard() {
                 <Sparkles className="h-4 w-4" />
                 {recommend.isPending ? '추천 받는 중...' : '추천 받기'}
               </Button>
-              <Button variant="outline" className="w-full" onClick={() => setStep(2)}>
+              <Button variant="outline" className="h-10 w-full" onClick={() => setStep(2)}>
                 이전
               </Button>
             </div>

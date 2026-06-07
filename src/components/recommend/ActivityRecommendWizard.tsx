@@ -230,7 +230,10 @@ export function ActivityRecommendWizard() {
                   <button
                     key={t.value}
                     type="button"
-                    onClick={() => setTimeOfDay(t.value)}
+                    onClick={() => {
+                      setTimeOfDay(t.value)
+                      setStep(3)
+                    }}
                     className={cn(
                       'flex flex-col items-center justify-center gap-1 rounded-xl border p-3 transition-all',
                       active
@@ -249,15 +252,13 @@ export function ActivityRecommendWizard() {
                 )
               })}
             </div>
-            <div className="flex gap-2 pt-2">
-              <Button variant="outline" className="flex-1" onClick={() => setStep(1)}>
-                이전
-              </Button>
+            <div className="pt-2">
               <Button
-                className={cn('flex-1 text-white hover:brightness-105', styles.detailPrimaryBtn)}
-                onClick={() => setStep(3)}
+                variant="outline"
+                className="h-10 w-full"
+                onClick={() => setStep(1)}
               >
-                다음
+                이전
               </Button>
             </div>
           </div>
@@ -293,7 +294,7 @@ export function ActivityRecommendWizard() {
                 <Sparkles className="h-4 w-4" />
                 {recommend.isPending ? '추천 받는 중...' : '추천 받기'}
               </Button>
-              <Button variant="outline" className="w-full" onClick={() => setStep(2)}>
+              <Button variant="outline" className="h-10 w-full" onClick={() => setStep(2)}>
                 이전
               </Button>
             </div>

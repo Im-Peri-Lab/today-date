@@ -12,6 +12,7 @@ import {
   Hourglass,
   Sun,
   Moon,
+  Clock,
   type LucideIcon,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -103,7 +104,7 @@ export function ActivityRecommendWizard() {
   // ── 결과 화면 ──
   if (showResult && result) {
     return (
-      <div className="mx-auto max-w-2xl px-4 py-6">
+      <div className="mx-auto w-full max-w-4xl px-5 py-6 lg:px-8">
         <button
           onClick={reset}
           className="mb-3 inline-flex items-center gap-1.5 text-sm text-violet-600 hover:text-violet-800"
@@ -134,7 +135,7 @@ export function ActivityRecommendWizard() {
             </Link>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
             {result.recommendations.map((a) => (
               <ActivityCard key={a.id} activity={a} hideMenu />
             ))}
@@ -161,7 +162,7 @@ export function ActivityRecommendWizard() {
 
   // ── 마법사 화면 ──
   return (
-    <div className="mx-auto max-w-md px-4 py-6">
+    <div className="mx-auto w-full max-w-lg px-5 py-6 lg:pt-10">
       <Link
         href="/"
         className={cn('mb-3 inline-flex items-center gap-1.5 text-sm', styles.accent)}
@@ -170,7 +171,7 @@ export function ActivityRecommendWizard() {
         홈으로
       </Link>
 
-      <div className={cn(styles.card, 'p-5')}>
+      <div className={cn(styles.card, 'p-6 lg:p-8')}>
         <div className="mb-4 text-center">
           <Sparkles className={cn('mx-auto mb-1 h-8 w-8', styles.accent)} strokeWidth={1.75} />
           <h1 className={cn('text-xl font-semibold', styles.ink)}>오늘 뭐할까?</h1>
@@ -222,7 +223,9 @@ export function ActivityRecommendWizard() {
             <div className="grid grid-cols-3 gap-2">
               {TIME_OPTIONS.map((t) => {
                 const active = timeOfDay === t.value
-                const Icon = TIME_OF_DAY_ICONS[t.value]
+                // 입력 단계 한정: any 는 공용 매핑상 아이콘이 없어(카드·상세 규칙 유지)
+                // day/night 와 시각 무게를 맞추기 위해 중립 아이콘(Clock)으로 폴백.
+                const Icon = TIME_OF_DAY_ICONS[t.value] ?? Clock
                 return (
                   <button
                     key={t.value}
@@ -235,12 +238,10 @@ export function ActivityRecommendWizard() {
                         : 'border-[color:var(--s-input,#eceaf3)] bg-[var(--s-card-bg,#fff)] hover:border-[color:var(--s-active-line,#7c3aed)]'
                     )}
                   >
-                    {Icon && (
-                      <Icon
-                        className={cn('h-6 w-6 shrink-0', !active && styles.accent)}
-                        strokeWidth={2}
-                      />
-                    )}
+                    <Icon
+                      className={cn('h-6 w-6 shrink-0', !active && styles.accent)}
+                      strokeWidth={2}
+                    />
                     <span className={cn('text-sm font-medium', !active && styles.ink)}>
                       {TIME_OF_DAY_LABELS[t.value]}
                     </span>
@@ -296,16 +297,6 @@ export function ActivityRecommendWizard() {
                 이전
               </Button>
             </div>
-            <button
-              onClick={() => run([])}
-              disabled={recommend.isPending}
-              className={cn(
-                'w-full text-center text-sm disabled:opacity-50',
-                styles.faint
-              )}
-            >
-              건너뛰고 추천 받기
-            </button>
           </div>
         )}
       </div>

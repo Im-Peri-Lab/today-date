@@ -100,7 +100,7 @@ export function PlaceRecommendWizard() {
   // ── 결과 화면 ──
   if (showResult && result) {
     return (
-      <div className="mx-auto max-w-2xl px-4 py-6">
+      <div className="mx-auto w-full max-w-4xl px-5 py-6 lg:px-8">
         <button
           onClick={reset}
           className="mb-3 inline-flex items-center gap-1.5 text-sm text-violet-600 hover:text-violet-800"
@@ -129,7 +129,7 @@ export function PlaceRecommendWizard() {
             </Link>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
             {result.recommendations.map((p) => (
               <PlaceCard key={p.id} place={p} hideMenu />
             ))}
@@ -156,7 +156,7 @@ export function PlaceRecommendWizard() {
 
   // ── 마법사 화면 ──
   return (
-    <div className="mx-auto max-w-md px-4 py-6">
+    <div className="mx-auto w-full max-w-lg px-5 py-6 lg:pt-10">
       <Link
         href="/"
         className={cn('mb-3 inline-flex items-center gap-1.5 text-sm', styles.accent)}
@@ -165,7 +165,7 @@ export function PlaceRecommendWizard() {
         홈으로
       </Link>
 
-      <div className={cn(styles.card, 'p-5')}>
+      <div className={cn(styles.card, 'p-6 lg:p-8')}>
         <div className="mb-4 text-center">
           <MapPin className={cn('mx-auto mb-1 h-8 w-8', styles.accent)} strokeWidth={1.75} />
           <h1 className={cn('text-xl font-semibold', styles.ink)}>어디 갈까?</h1>
@@ -266,16 +266,6 @@ export function PlaceRecommendWizard() {
                 이전
               </Button>
             </div>
-            <button
-              onClick={() => run([])}
-              disabled={recommend.isPending}
-              className={cn(
-                'w-full text-center text-sm disabled:opacity-50',
-                styles.faint
-              )}
-            >
-              건너뛰고 추천 받기
-            </button>
           </div>
         )}
       </div>

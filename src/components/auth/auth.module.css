@@ -17,9 +17,9 @@
   background: linear-gradient(180deg, #ffffff 0%, #f4f0fa 100%);
 
   /* 상단 노치 / 하단 브라우저 바와 분리 */
-  padding-top: calc(env(safe-area-inset-top) + 1rem);
+  padding-top: calc(env(safe-area-inset-top) + 1.5rem);
   padding-right: 1.5rem;
-  padding-bottom: calc(env(safe-area-inset-bottom) + 1rem);
+  padding-bottom: calc(env(safe-area-inset-bottom) + 1.5rem);
   padding-left: 1.5rem;
 
   font-family:
@@ -60,15 +60,29 @@
   }
 }
 
-/* ── 헤더 + 본문(+inlineFooter)을 하나의 그룹으로 뷰포트 중앙 정렬 ── */
+/*
+ * 컬럼 컨테이너 — 페이지 높이를 채운다(flex:1). 정렬은 자식 .group 의 margin:auto 가 담당.
+ * justify-content 로 강제 중앙정렬하지 않으므로, 콘텐츠가 넘쳐도 잘리지 않고 페이지가 자라 스크롤된다.
+ */
 .center {
   flex: 1 1 auto;
   display: flex;
   flex-direction: column;
   align-items: center;
-  /* safe: 콘텐츠가 svh 를 넘으면 가운데 정렬 대신 상단부터 보이게(위 잘림 방지). 평상시·큰 화면은 중앙 정렬 유지 */
-  justify-content: safe center;
-  gap: 1.25rem; /* 헤더 ↔ 본문(카드): 20px */
+  width: 100%;
+}
+
+/*
+ * 헤더 + 본문 + footer 한 덩어리. margin-block:auto:
+ *  - 여유가 있으면 위아래 auto 마진이 공간을 나눠 가져 → 세로 중앙.
+ *  - 콘텐츠가 .center(=svh)를 넘으면 free space 가 없어 마진이 0 → 상단부터 시작 + 페이지 스크롤(잘림 불가).
+ */
+.group {
+  margin-block: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem; /* 헤더 ↔ 본문 그룹: 32px */
   width: 100%;
 }
 
@@ -145,12 +159,6 @@
   justify-content: center;
   gap: 1.75rem;
   width: 100%;
-}
-
-/* ── 하단: 링크 영역 ───────────────────────── */
-.footer {
-  flex-shrink: 0;
-  padding-top: 1.5rem;
 }
 
 .link {

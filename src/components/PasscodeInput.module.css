@@ -8,7 +8,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1.5rem; /* 도트 그룹 ↔ 키패드 */
+  gap: 2.25rem; /* 도트 그룹 ↔ 키패드 (충분히 분리) */
   user-select: none;
   -webkit-user-select: none;
 }
@@ -71,7 +71,7 @@
 
 .spacer {
   width: 4.75rem;
-  height: 3.25rem;
+  height: 4rem;
 }
 
 .key {
@@ -79,7 +79,7 @@
   align-items: center;
   justify-content: center;
   width: 4.75rem;
-  height: 3.25rem;
+  height: 4rem;
   border-radius: 1.125rem;
   font-size: 1.4rem;
   font-weight: 500;

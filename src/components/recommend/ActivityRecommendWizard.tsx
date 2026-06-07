@@ -224,21 +224,28 @@ export function ActivityRecommendWizard() {
 
         {/* 하단 액션: 전부 풀폭 세로 스택(동일 너비·높이). 위계는 색으로만 — 채움>outline>ghost */}
         <div className="mx-auto mt-6 flex w-full max-w-md flex-col gap-2">
-          <Button
-            className={cn(
-              'h-10 w-full gap-1.5 text-white hover:brightness-105',
-              styles.detailPrimaryBtn
-            )}
-            onClick={() => run()}
-            disabled={recommend.isPending}
-          >
-            <RotateCcw className="h-4 w-4" />
-            다른 추천 보기
-          </Button>
+          {hasResults && (
+            <Button
+              className={cn(
+                'h-10 w-full gap-1.5 text-white hover:brightness-105',
+                styles.detailPrimaryBtn
+              )}
+              onClick={() => run()}
+              disabled={recommend.isPending}
+            >
+              <RotateCcw className="h-4 w-4" />
+              다른 추천 보기
+            </Button>
+          )}
           {showResultToggle && (
             <Button
               variant="outline"
-              className="h-10 w-full gap-1.5"
+              className={cn(
+                'h-10 w-full gap-1.5',
+                // 색은 오직 include_shorter 상태로만 결정 — OFF=outline / ON=filled(--s-active-fill)
+                includeShorter &&
+                  'border-transparent bg-[var(--s-active-fill,#7c3aed)] text-[color:var(--s-active-on,#ffffff)] hover:bg-[var(--s-active-fill,#7c3aed)] hover:text-[color:var(--s-active-on,#ffffff)] hover:brightness-105'
+              )}
               onClick={toggleShorter}
               aria-pressed={includeShorter}
               disabled={recommend.isPending}

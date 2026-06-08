@@ -41,14 +41,19 @@ export async function recommendPlaces(
     pool = pool.filter((p) => p.category_id && categoryIds.includes(p.category_id))
   }
 
+  const locationLower = location.toLowerCase()
+
+  // 지역 필터: location 입력이 있을 때만 부분포함(소문자)으로 후보를 좁힘 (없으면 전체 — 현행 유지)
+  if (locationLower) {
+    pool = pool.filter((p) => p.location && p.location.toLowerCase().includes(locationLower))
+  }
+
   const { recentIds, everIds } = await recommendedIdSets(supabase, 'place')
 
-  const locationLower = location.toLowerCase()
   const qLower = q.toLowerCase()
 
   const scored = pool.map((p) => {
     let score = 0
-    if (location && p.location && p.location.toLowerCase().includes(locationLower)) score += 10
     if (categoryIds.length > 0 && p.category_id && categoryIds.includes(p.category_id)) score += 3
     if (q) {
       const inTitle = p.title?.toLowerCase().includes(qLower)

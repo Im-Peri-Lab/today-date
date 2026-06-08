@@ -84,7 +84,10 @@ export function DatePickerField({ id, value, onChange, placeholder = '날짜 선
         </span>
       </Popover.Trigger>
       <Popover.Portal>
-        <Popover.Positioner sideOffset={6} align="start">
+        {/* z-[60]: 다이얼로그(@/components/ui/dialog 오버레이·팝업 z-50) 안에서 열릴 때
+            팝오버가 그 뒤로 깔려 안 보이/클릭 안 되는 것 방지. 포지셔너는 기본 z-auto라
+            단독 화면(인라인 편집)엔 영향 없고, 다이얼로그 위로만 올린다. */}
+        <Popover.Positioner sideOffset={6} align="start" className="z-[60]">
           <Popover.Popup className={styles.dpPopup}>
             <div className={styles.dpHeader}>
               <button type="button" className={styles.dpNav} onClick={prevMonth} aria-label="이전 달">

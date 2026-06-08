@@ -128,7 +128,7 @@ export function VisitedDialog({
         {/* 신규 데이터 생성 액션 → 풀폭 Primary 48px(추가 화면 FormLayout과 동일 패턴, 스킬 §6).
             기록 수정 화면의 32px 콘텐츠폭과는 "수정 vs 신규"의 의도된 위계 차이라 통일하지 않는다. */}
         <DialogFooter className="sm:flex-col-reverse">
-          <DialogClose render={<Button variant="outline" disabled={isPending} />}>취소</DialogClose>
+          <DialogClose render={<Button variant="outline" className="h-12 w-full" disabled={isPending} />}>취소</DialogClose>
           <Button
             onClick={handleSave}
             disabled={isPending}

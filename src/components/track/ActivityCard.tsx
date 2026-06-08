@@ -12,6 +12,7 @@ import { DeleteConfirmDialog } from './DeleteConfirmDialog'
 import { VisitedDialog } from '@/components/VisitedDialog'
 import { useDeleteActivity, useUpdateActivity } from '@/hooks/useActivities'
 import { DURATION_LABELS, TIME_OF_DAY_LABELS, TIME_OF_DAY_ICONS, STATUS_LABELS } from '@/lib/labels'
+import { formatKoreanDateWithWeekday } from '@/lib/date'
 import { cn } from '@/lib/utils'
 import type { Activity } from '@/types'
 import styles from '@/components/screens.module.css'
@@ -104,7 +105,7 @@ export function ActivityCard({ activity, hideMenu, actionSlot }: ActivityCardPro
             {activity.rating ? (
               <RatingStars value={activity.rating} size="sm" />
             ) : null}
-            {activity.visited_at && <span>{activity.visited_at}</span>}
+            {activity.visited_at && <span>{formatKoreanDateWithWeekday(activity.visited_at)}</span>}
           </div>
         )}
       </Link>

@@ -125,14 +125,14 @@ export function PlaceRecommendWizard() {
             {result.recommendations.length === 0 ? (
               <div
                 className={cn(
-                  'flex flex-col items-center rounded-xl border px-6 py-12 text-center',
+                  'mx-auto flex w-full flex-col items-center rounded-xl border px-6 py-12 text-center sm:max-w-md',
                   styles.recEmptyBox
                 )}
               >
                 <MiniHeart className="h-10 w-10 lg:h-10 lg:w-10" />
                 <p className={cn('mt-3 font-medium', styles.ink)}>가고 싶은 곳을 더 모아보세요</p>
 
-                <Link href="/places/new" className="mt-6 block w-full max-w-md">
+                <Link href="/places/new" className="mx-auto mt-6 block w-full sm:max-w-xs">
                   <Button
                     className={cn(
                       'h-10 w-full gap-1.5 text-white hover:brightness-105',
@@ -145,9 +145,16 @@ export function PlaceRecommendWizard() {
                 </Link>
               </div>
             ) : (
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
+              <div className="flex flex-wrap justify-center gap-3 sm:gap-4">
                 {result.recommendations.map((p) => (
-                  <PlaceCard key={p.id} place={p} hideMenu />
+                  // 1~2개여도 가운데로 모이게 flex+justify-center. 폭은 3열 그리드와 동일(≈267px),
+                  // 단독일 때 화면을 꽉 채우지 않도록 sm 이상 max-width 캡. 모바일은 w-full 그대로.
+                  <div
+                    key={p.id}
+                    className="w-full sm:w-[calc(50%-0.5rem)] sm:max-w-[280px] lg:w-[calc(33.333%-0.667rem)]"
+                  >
+                    <PlaceCard place={p} hideMenu />
+                  </div>
                 ))}
               </div>
             )}
@@ -160,11 +167,12 @@ export function PlaceRecommendWizard() {
           )}
         </div>
 
-        <div className="mt-6 flex flex-col items-center justify-center gap-2 sm:flex-row sm:gap-3">
+        {/* 하단 액션: 활동 화면과 동일한 max-w-md 세로 스택(동일 높이 40px). 다른 추천 보기 → 처음부터 */}
+        <div className="mx-auto mt-6 flex w-full flex-col gap-2 sm:max-w-xs">
           {result.poolSize > 3 && (
             <Button
               className={cn(
-                'h-10 w-full gap-1.5 text-white hover:brightness-105 sm:w-auto',
+                'h-10 w-full gap-1.5 text-white hover:brightness-105',
                 styles.detailPrimaryBtn
               )}
               onClick={() => run()}
@@ -176,7 +184,7 @@ export function PlaceRecommendWizard() {
           )}
           <Button
             variant="ghost"
-            className={cn('h-10 w-full sm:w-auto', styles.sub)}
+            className={cn('h-10 w-full', styles.sub)}
             onClick={reset}
             disabled={recommend.isPending}
           >

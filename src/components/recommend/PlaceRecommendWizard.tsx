@@ -184,7 +184,11 @@ export function PlaceRecommendWizard() {
           )}
           <Button
             variant="ghost"
-            className={cn('h-10 w-full', styles.sub)}
+            className={cn(
+              'h-10 w-full bg-transparent text-[color:var(--s-sub,#6b7280)]',
+              // 활동 화면과 동일: 회색 채움 hover 폐기 → 투명 유지 + accent 글씨
+              'hover:bg-transparent hover:text-[color:var(--s-active-text,#7c3aed)]'
+            )}
             onClick={reset}
             disabled={recommend.isPending}
           >

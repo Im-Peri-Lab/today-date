@@ -264,8 +264,9 @@ export function ActivityRecommendWizard() {
             className={cn(
               'h-10 w-full bg-transparent text-[color:var(--s-sub,#6b7280)]',
               // .dark 미적용 앱: shadcn ghost의 hover:bg-muted/hover:text-foreground가
-              // 다크에서 라이트값(흰 채움)으로 고정되므로 --s-* 토큰으로 덮어 투명 유지
-              'hover:bg-transparent hover:text-[color:var(--s-ink,#1a1033)]'
+              // 다크에서 라이트값(흰 채움)으로 고정되므로 --s-* 토큰으로 덮어 투명 유지.
+              // hover 통일: 회색 채움 대신 accent 글씨(보더 없는 ghost의 accent hover 등가)
+              'hover:bg-transparent hover:text-[color:var(--s-active-text,#7c3aed)]'
             )}
             onClick={reset}
             disabled={recommend.isPending}

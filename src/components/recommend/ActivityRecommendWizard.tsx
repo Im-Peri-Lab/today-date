@@ -151,7 +151,7 @@ export function ActivityRecommendWizard() {
                   styles.recEmptyBox
                 )}
               >
-                <MiniHeart />
+                <MiniHeart className="h-10 w-10 lg:h-10 lg:w-10" />
                 <p className={cn('mt-3 font-medium', styles.ink)}>
                   {canShorten ? '조건을 넓히거나 새 활동을 더해보세요' : '새 활동을 더해보세요'}
                 </p>

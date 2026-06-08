@@ -129,7 +129,7 @@ export function PlaceRecommendWizard() {
                   styles.recEmptyBox
                 )}
               >
-                <MiniHeart />
+                <MiniHeart className="h-10 w-10 lg:h-10 lg:w-10" />
                 <p className={cn('mt-3 font-medium', styles.ink)}>가고 싶은 곳을 더 모아보세요</p>
 
                 <Link href="/places/new" className="mt-6 block w-full max-w-md">

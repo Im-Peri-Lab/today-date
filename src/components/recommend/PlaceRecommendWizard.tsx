@@ -161,7 +161,7 @@ export function PlaceRecommendWizard() {
         </div>
 
         <div className="mt-6 flex flex-col items-center justify-center gap-2 sm:flex-row sm:gap-3">
-          {result.recommendations.length > 0 && (
+          {result.poolSize > 3 && (
             <Button
               className={cn(
                 'h-10 w-full gap-1.5 text-white hover:brightness-105 sm:w-auto',

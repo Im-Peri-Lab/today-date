@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
     }
 
     const supabase = getSupabaseClient()
-    const { recommendations, reason } = await recommendActivities(supabase, result.data)
+    const { recommendations, reason, poolSize } = await recommendActivities(supabase, result.data)
 
     const { data: log } = await supabase
       .from('recommendations_log')
@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
       .select('id')
       .single()
 
-    return NextResponse.json({ recommendations, reason, log_id: log?.id ?? null })
+    return NextResponse.json({ recommendations, reason, poolSize, log_id: log?.id ?? null })
   } catch (err) {
     console.error('[POST /api/recommend/activity]', err)
     return NextResponse.json({ error: '추천 중 오류가 발생했습니다.' }, { status: 500 })

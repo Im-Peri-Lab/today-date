@@ -119,6 +119,8 @@ export function ActivityRecommendWizard() {
     const showResultToggle = hasResults && duration !== 'half'
     // 빈 상태에서 조건 넓히기 여지가 남아 있을 때만 "더 짧은 일정 보기" 제공.
     const canShorten = duration !== 'half' && !includeShorter
+    // 후보 풀(필터 통과 수)이 반환 개수(3)보다 많을 때만 셔플이 새 조합을 낸다 → 그때만 "다른 추천 보기" 노출.
+    const canReshuffle = result.poolSize > 3
     return (
       <div className="mx-auto w-full max-w-4xl px-5 py-10 lg:px-8 lg:py-14">
         <button
@@ -237,7 +239,7 @@ export function ActivityRecommendWizard() {
               )}
             </Button>
           )}
-          {hasResults && (
+          {canReshuffle && (
             <Button
               className={cn(
                 'h-10 w-full gap-1.5 text-white hover:brightness-105',

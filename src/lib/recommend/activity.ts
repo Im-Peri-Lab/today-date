@@ -15,6 +15,8 @@ export interface ActivityRecommendInput {
 export interface ActivityRecommendResult {
   recommendations: Activity[]
   reason: string
+  /** 필터 통과 후보 풀 크기(scored.length). 클라이언트의 "다른 추천 보기" 노출 판단용. */
+  poolSize: number
 }
 
 export async function recommendActivities(
@@ -73,7 +75,7 @@ export async function recommendActivities(
   const recommendations = pickTopWithShuffle(scored, 5, 3)
   const reason = buildReason(input, recommendations.length)
 
-  return { recommendations, reason }
+  return { recommendations, reason, poolSize: scored.length }
 }
 
 function buildReason(input: ActivityRecommendInput, count: number): string {

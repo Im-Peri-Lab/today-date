@@ -240,6 +240,15 @@
 .cardInteractive:active {
   transform: translateY(0);
 }
+/*
+ * 카드 ⋮ 메뉴 열림 동안 보더 강조 — hover와 동일 톤(--s-card-hover-border).
+ * 트리거(base-ui DropdownMenuTrigger)가 열리면 aria-expanded="true" 를 달므로 :has 로 카드가 반영.
+ * hover와 달리 그림자·translateY 없이 보더만 유지(메뉴 조작 중 카드가 들썩이지 않게).
+ * @media(hover) 밖이라 마우스·터치 모두 열림 동안 강조된다. hideMenu 결과 카드는 트리거가 없어 미매칭.
+ */
+.cardInteractive:has([aria-expanded='true']) {
+  border-color: var(--s-card-hover-border, rgba(168, 85, 247, 0.4));
+}
 
 /* ── 그라데이션 아이콘 배지 (CTA/주요 액션 한정) ── */
 .gradIcon {

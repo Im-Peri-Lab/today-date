@@ -151,18 +151,14 @@ export function ActivityRecommendWizard() {
                   styles.recEmptyBox
                 )}
               >
-                {/* 상단 덩어리: 하트 + 제목 */}
-                <div className="flex flex-col items-center">
-                  <Heart
-                    className={cn(
-                      'mb-3 h-10 w-10 fill-[var(--s-accent-soft-bg,#f6f1ff)]',
-                      styles.accent
-                    )}
-                  />
-                  <p className={cn('font-medium', styles.ink)}>조건에 맞는 항목이 없어요</p>
-                </div>
+                <Heart
+                  className={cn(
+                    'h-10 w-10 fill-[var(--s-accent-soft-bg,#f6f1ff)]',
+                    styles.accent
+                  )}
+                />
 
-                {/* 하단 덩어리: 안내 문구(버튼 설명) + 버튼들 */}
+                {/* 안내 문구(버튼 설명) + 버튼들 */}
                 <div className="mt-10 w-full max-w-md">
                   <p className={cn('mb-3 text-sm', styles.sub)}>
                     {canShorten

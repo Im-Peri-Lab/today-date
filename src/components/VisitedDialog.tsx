@@ -95,8 +95,11 @@ export function VisitedDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
-        <DialogHeader>
-          <DialogTitle>다녀왔어요 💕</DialogTitle>
+        {/* 헤더 위계: 제목은 페이지 h1 톤을 한 단계 줄여 강조(text-xl/semibold),
+            설명은 dialog 기본 --s-sub 보조 톤 유지. gap-2.5로 두 덩어리 분리 +
+            mb-1로 설명↔첫 라벨(폼) 사이를 약간 더 띄운다(폼 요소는 미변경). */}
+        <DialogHeader className="gap-2.5 mb-1">
+          <DialogTitle className="text-xl font-semibold leading-snug tracking-[-0.01em]">다녀왔어요 💕</DialogTitle>
           <DialogDescription>
             <span className="font-medium text-[color:var(--s-ink,#1a1033)]">{title}</span> 방문 기록을 남겨보세요.
           </DialogDescription>

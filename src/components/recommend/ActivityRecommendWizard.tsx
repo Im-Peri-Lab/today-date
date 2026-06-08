@@ -149,7 +149,7 @@ export function ActivityRecommendWizard() {
             {result.recommendations.length === 0 ? (
               <div
                 className={cn(
-                  'flex flex-col items-center rounded-xl border px-6 py-12 text-center',
+                  'mx-auto flex w-full max-w-md flex-col items-center rounded-xl border px-6 py-12 text-center',
                   styles.recEmptyBox
                 )}
               >

@@ -125,7 +125,7 @@ export function PlaceRecommendWizard() {
             {result.recommendations.length === 0 ? (
               <div
                 className={cn(
-                  'flex flex-col items-center rounded-xl border px-6 py-12 text-center',
+                  'mx-auto flex w-full max-w-md flex-col items-center rounded-xl border px-6 py-12 text-center',
                   styles.recEmptyBox
                 )}
               >
@@ -167,11 +167,12 @@ export function PlaceRecommendWizard() {
           )}
         </div>
 
-        <div className="mt-6 flex flex-col items-center justify-center gap-2 sm:flex-row sm:gap-3">
+        {/* 하단 액션: 활동 화면과 동일한 max-w-md 세로 스택(동일 높이 40px). 다른 추천 보기 → 처음부터 */}
+        <div className="mx-auto mt-6 flex w-full max-w-md flex-col gap-2">
           {result.poolSize > 3 && (
             <Button
               className={cn(
-                'h-10 w-full gap-1.5 text-white hover:brightness-105 sm:w-auto',
+                'h-10 w-full gap-1.5 text-white hover:brightness-105',
                 styles.detailPrimaryBtn
               )}
               onClick={() => run()}
@@ -183,7 +184,7 @@ export function PlaceRecommendWizard() {
           )}
           <Button
             variant="ghost"
-            className={cn('h-10 w-full sm:w-auto', styles.sub)}
+            className={cn('h-10 w-full', styles.sub)}
             onClick={reset}
             disabled={recommend.isPending}
           >

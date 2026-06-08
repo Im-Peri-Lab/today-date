@@ -149,7 +149,7 @@ export function ActivityRecommendWizard() {
             {result.recommendations.length === 0 ? (
               <div
                 className={cn(
-                  'mx-auto flex w-full max-w-md flex-col items-center rounded-xl border px-6 py-12 text-center',
+                  'mx-auto flex w-full flex-col items-center rounded-xl border px-6 py-12 text-center sm:max-w-xs',
                   styles.recEmptyBox
                 )}
               >
@@ -218,7 +218,7 @@ export function ActivityRecommendWizard() {
         </div>
 
         {/* 하단 액션: 풀폭 세로 스택(동일 높이 40px). 순서 고정 — 더 짧은 일정 → 다른 추천 보기 → 처음부터 */}
-        <div className="mx-auto mt-6 flex w-full max-w-md flex-col gap-2">
+        <div className="mx-auto mt-6 flex w-full flex-col gap-2 sm:max-w-xs">
           {showResultToggle && (
             <Button
               variant="outline"

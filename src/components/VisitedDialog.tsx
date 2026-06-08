@@ -12,12 +12,14 @@ import {
   DialogClose,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
+import { DatePickerField } from '@/components/forms/DatePickerField'
 import { RatingStars } from '@/components/track/RatingStars'
 import { useUpdateActivity } from '@/hooks/useActivities'
 import { useUpdatePlace } from '@/hooks/usePlaces'
+import { cn } from '@/lib/utils'
+import styles from '@/components/screens.module.css'
 
 function todayISO() {
   const now = new Date()
@@ -100,15 +102,10 @@ export function VisitedDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4">
+        <div className="space-y-5">
           <div className="space-y-1.5">
             <Label htmlFor="visited_at">방문 날짜</Label>
-            <Input
-              id="visited_at"
-              type="date"
-              value={visitedAt}
-              onChange={(e) => setVisitedAt(e.target.value)}
-            />
+            <DatePickerField id="visited_at" value={visitedAt} onChange={setVisitedAt} />
           </div>
 
           <div className="space-y-1.5">
@@ -128,12 +125,14 @@ export function VisitedDialog({
           </div>
         </div>
 
-        <DialogFooter>
+        {/* 신규 데이터 생성 액션 → 풀폭 Primary 48px(추가 화면 FormLayout과 동일 패턴, 스킬 §6).
+            기록 수정 화면의 32px 콘텐츠폭과는 "수정 vs 신규"의 의도된 위계 차이라 통일하지 않는다. */}
+        <DialogFooter className="sm:flex-col-reverse">
           <DialogClose render={<Button variant="outline" disabled={isPending} />}>취소</DialogClose>
           <Button
             onClick={handleSave}
             disabled={isPending}
-            className="bg-violet-600 hover:bg-violet-700 text-white"
+            className={cn(styles.detailPrimaryBtn, 'h-12 w-full text-white hover:brightness-105')}
           >
             {isPending ? '저장 중...' : '저장하기'}
           </Button>

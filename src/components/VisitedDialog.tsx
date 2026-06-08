@@ -95,12 +95,13 @@ export function VisitedDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
-        {/* 헤더 위계: 제목은 페이지 h1 톤을 한 단계 줄여 강조(text-xl/semibold),
-            설명은 dialog 기본 --s-sub 보조 톤 유지. gap-2.5로 두 덩어리 분리 +
-            mb-1로 설명↔첫 라벨(폼) 사이를 약간 더 띄운다(폼 요소는 미변경). */}
-        <DialogHeader className="gap-2.5 mb-1">
-          <DialogTitle className="text-xl font-semibold leading-snug tracking-[-0.01em]">다녀왔어요 💕</DialogTitle>
-          <DialogDescription>
+        {/* 헤더 위계: 활동 추가 페이지(`/activities/new`)와 동일하게 page 헤더 클래스를 그대로 사용.
+            pageTitle(h1, ~27px/600/-0.01em) + pageSubtitle(--s-sub, margin-top 0.25rem)로 두 덩어리 위계를 통일.
+            gap-0: 제목↔설명 간격은 pageSubtitle 자체 margin-top이 담당(추가 페이지 블록 흐름과 동일).
+            mb-1: 설명↔첫 라벨 간격을 추가 페이지 mt-5(20px)에 맞춤(그리드 gap-4 16px + 4px). */}
+        <DialogHeader className="gap-0 mb-1">
+          <DialogTitle className={styles.pageTitle}>다녀왔어요 💕</DialogTitle>
+          <DialogDescription className={styles.pageSubtitle}>
             <span className="font-medium text-[color:var(--s-ink,#1a1033)]">{title}</span> 방문 기록을 남겨보세요.
           </DialogDescription>
         </DialogHeader>

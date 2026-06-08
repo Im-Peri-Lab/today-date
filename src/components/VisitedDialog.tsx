@@ -94,7 +94,9 @@ export function VisitedDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      {/* 박스 호흡: 기본 p-4 → 상단 pt-6(24px, 페이지 헤더 mt-6 호흡과 비슷), 좌우 px-5(20px),
+          하단 pb-5(20px). 폼 요소 크기·간격은 불변, 박스 패딩만 키운다. */}
+      <DialogContent className="px-5 pt-6 pb-5">
         {/* 헤더 위계: 활동 추가 페이지(`/activities/new`)와 동일하게 page 헤더 클래스를 그대로 사용.
             pageTitle(h1, ~27px/600/-0.01em) + pageSubtitle(--s-sub, margin-top 0.25rem)로 두 덩어리 위계를 통일.
             gap-0: 제목↔설명 간격은 pageSubtitle 자체 margin-top이 담당(추가 페이지 블록 흐름과 동일).
@@ -131,8 +133,21 @@ export function VisitedDialog({
 
         {/* 신규 데이터 생성 액션 → 풀폭 Primary 48px(추가 화면 FormLayout과 동일 패턴, 스킬 §6).
             기록 수정 화면의 32px 콘텐츠폭과는 "수정 vs 신규"의 의도된 위계 차이라 통일하지 않는다. */}
-        <DialogFooter className="sm:flex-col-reverse">
-          <DialogClose render={<Button variant="outline" className="h-12 w-full" disabled={isPending} />}>취소</DialogClose>
+        {/* 풋터는 박스 가장자리까지 full-bleed track 바 → 늘어난 콘텐츠 패딩(px-5/pb-5)에 맞춰
+            -mx-5/-mb-5로 가장자리 정렬, 내부 p-5로 버튼 호흡을 본문(20px)과 맞춤.
+            취소는 ghost + --s-sub로 약화(보더 제거) → 저장하기 단색 CTA가 유일한 주행동(스킬 §5-A). */}
+        <DialogFooter className="-mx-5 -mb-5 p-5 sm:flex-col-reverse">
+          <DialogClose
+            render={
+              <Button
+                variant="ghost"
+                className="h-12 w-full text-[color:var(--s-sub,#6b7280)] hover:bg-[var(--s-card-border-strong,#eceaf3)] hover:text-[color:var(--s-ink,#1a1033)]"
+                disabled={isPending}
+              />
+            }
+          >
+            취소
+          </DialogClose>
           <Button
             onClick={handleSave}
             disabled={isPending}

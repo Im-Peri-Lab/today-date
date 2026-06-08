@@ -195,9 +195,16 @@ export function ActivityRecommendWizard() {
                 </div>
               </div>
             ) : (
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
+              <div className="flex flex-wrap justify-center gap-3 sm:gap-4">
                 {result.recommendations.map((a) => (
-                  <ActivityCard key={a.id} activity={a} hideMenu />
+                  // 1~2개여도 가운데로 모이게 flex+justify-center. 폭은 3열 그리드와 동일(≈267px),
+                  // 단독일 때 화면을 꽉 채우지 않도록 sm 이상 max-width 캡. 모바일은 w-full 그대로.
+                  <div
+                    key={a.id}
+                    className="w-full sm:w-[calc(50%-0.5rem)] sm:max-w-[280px] lg:w-[calc(33.333%-0.667rem)]"
+                  >
+                    <ActivityCard activity={a} hideMenu />
+                  </div>
                 ))}
               </div>
             )}

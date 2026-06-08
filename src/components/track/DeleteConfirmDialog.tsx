@@ -32,7 +32,7 @@ export function DeleteConfirmDialog({
         <DialogHeader>
           <DialogTitle>삭제할까요?</DialogTitle>
           <DialogDescription>
-            <span className="font-medium text-foreground">{title}</span>
+            <span className="font-medium text-[color:var(--s-ink,#1a1033)]">{title}</span>
             {'  '}항목을 삭제하면 되돌릴 수 없어요.
           </DialogDescription>
         </DialogHeader>

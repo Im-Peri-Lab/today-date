@@ -147,59 +147,49 @@ export function ActivityRecommendWizard() {
             {result.recommendations.length === 0 ? (
               <div
                 className={cn(
-                  'flex flex-col items-center rounded-xl border border-dashed px-6 py-16 text-center',
+                  'flex flex-col items-center rounded-xl border px-6 py-16 text-center',
                   styles.recEmptyBox
                 )}
               >
-                <Heart
-                  className={cn(
-                    'h-10 w-10 fill-[var(--s-accent-soft-bg,#f6f1ff)]',
-                    styles.accent
-                  )}
-                />
+                <Heart className={cn('h-8 w-8', styles.accent)} strokeWidth={1.5} />
+                <p className={cn('mt-3 font-medium', styles.ink)}>
+                  {canShorten ? '조건을 넓히거나 새 활동을 더해보세요' : '새 활동을 더해보세요'}
+                </p>
 
-                {/* 안내 문구(버튼 설명) + 버튼들 */}
-                <div className="mt-10 w-full max-w-md">
-                  <p className={cn('mb-3 text-sm', styles.sub)}>
-                    {canShorten
-                      ? '더 짧은 일정까지 넓혀보거나, 새 활동을 추가해 보세요.'
-                      : '위시리스트에 새 활동을 추가해 보세요.'}
-                  </p>
-                  <div className="flex flex-col gap-2">
-                    {canShorten ? (
-                      <>
-                        <Button
-                          className={cn(
-                            'h-10 w-full gap-1.5 text-white hover:brightness-105',
-                            styles.detailPrimaryBtn
-                          )}
-                          onClick={toggleShorter}
-                          disabled={recommend.isPending}
-                        >
-                          <Hourglass className="h-4 w-4" />
-                          더 짧은 일정도 볼까요?
-                        </Button>
-                        <Link href="/activities/new" className="block w-full">
-                          <Button variant="outline" className="h-10 w-full gap-1.5">
-                            <Plus className="h-4 w-4" />
-                            활동 추가하기
-                          </Button>
-                        </Link>
-                      </>
-                    ) : (
+                <div className="mt-6 flex w-full max-w-md flex-col gap-2">
+                  {canShorten ? (
+                    <>
+                      <Button
+                        className={cn(
+                          'h-10 w-full gap-1.5 text-white hover:brightness-105',
+                          styles.detailPrimaryBtn
+                        )}
+                        onClick={toggleShorter}
+                        disabled={recommend.isPending}
+                      >
+                        <Hourglass className="h-4 w-4" />
+                        더 짧은 일정도 볼까요?
+                      </Button>
                       <Link href="/activities/new" className="block w-full">
-                        <Button
-                          className={cn(
-                            'h-10 w-full gap-1.5 text-white hover:brightness-105',
-                            styles.detailPrimaryBtn
-                          )}
-                        >
+                        <Button variant="outline" className="h-10 w-full gap-1.5">
                           <Plus className="h-4 w-4" />
                           활동 추가하기
                         </Button>
                       </Link>
-                    )}
-                  </div>
+                    </>
+                  ) : (
+                    <Link href="/activities/new" className="block w-full">
+                      <Button
+                        className={cn(
+                          'h-10 w-full gap-1.5 text-white hover:brightness-105',
+                          styles.detailPrimaryBtn
+                        )}
+                      >
+                        <Plus className="h-4 w-4" />
+                        활동 추가하기
+                      </Button>
+                    </Link>
+                  )}
                 </div>
               </div>
             ) : (

@@ -1040,18 +1040,13 @@
 }
 
 /*
- * 추천 0개 빈 상태 점선 박스.
- * 라이트: 카드면(#fff) 위 보더가 거의 안 보여 --s-faint(#9ca3af) 점선으로 대비 확보.
- * 다크: 기존 그대로 — 면 --s-card-bg(#241a36) + 보더 --s-card-border-strong(#3a2f4e).
+ * 추천 0개 빈 상태 박스 — 일반 카드와 같은 결(실선 중성 보더 + 카드 surface + 그림자).
+ * 점선·연보라 느낌 제거. --s-card-border / --s-card-shadow 는 .page 다크 미디어에서 자동 cascade.
  */
 .recEmptyBox {
   background: var(--s-card-bg, #ffffff);
-  border-color: var(--s-faint, #9ca3af);
-}
-@media (prefers-color-scheme: dark) {
-  .recEmptyBox {
-    border-color: var(--s-card-border-strong, #3a2f4e);
-  }
+  border-color: var(--s-card-border, rgba(0, 0, 0, 0.06));
+  box-shadow: var(--s-card-shadow);
 }
 
 /*

@@ -125,34 +125,24 @@ export function PlaceRecommendWizard() {
             {result.recommendations.length === 0 ? (
               <div
                 className={cn(
-                  'flex flex-col items-center rounded-xl border border-dashed px-6 py-16 text-center',
+                  'flex flex-col items-center rounded-xl border px-6 py-16 text-center',
                   styles.recEmptyBox
                 )}
               >
-                <Heart
-                  className={cn(
-                    'h-10 w-10 fill-[var(--s-accent-soft-bg,#f6f1ff)]',
-                    styles.accent
-                  )}
-                />
+                <Heart className={cn('h-8 w-8', styles.accent)} strokeWidth={1.5} />
+                <p className={cn('mt-3 font-medium', styles.ink)}>가고 싶은 곳을 더 모아보세요</p>
 
-                {/* 안내 문구(버튼 설명) + 버튼 */}
-                <div className="mt-10 w-full max-w-md">
-                  <p className={cn('mb-3 text-sm', styles.sub)}>
-                    위시리스트에 새 장소를 추가해 보세요.
-                  </p>
-                  <Link href="/places/new" className="block w-full">
-                    <Button
-                      className={cn(
-                        'h-10 w-full gap-1.5 text-white hover:brightness-105',
-                        styles.detailPrimaryBtn
-                      )}
-                    >
-                      <Plus className="h-4 w-4" />
-                      장소 추가하기
-                    </Button>
-                  </Link>
-                </div>
+                <Link href="/places/new" className="mt-6 block w-full max-w-md">
+                  <Button
+                    className={cn(
+                      'h-10 w-full gap-1.5 text-white hover:brightness-105',
+                      styles.detailPrimaryBtn
+                    )}
+                  >
+                    <Plus className="h-4 w-4" />
+                    장소 추가하기
+                  </Button>
+                </Link>
               </div>
             ) : (
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">

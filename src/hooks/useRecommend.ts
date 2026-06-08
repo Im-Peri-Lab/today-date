@@ -9,12 +9,16 @@ import { fetchJson } from './fetcher'
 export interface ActivityRecommendResponse {
   recommendations: Activity[]
   reason: string
+  /** 필터 통과 후보 풀 크기. poolSize > 3 일 때만 "다른 추천 보기"가 의미 있음. */
+  poolSize: number
   log_id: string | null
 }
 
 export interface PlaceRecommendResponse {
   recommendations: Place[]
   reason: string
+  /** 필터 통과 후보 풀 크기. poolSize > 3 일 때만 "다른 추천 보기"가 의미 있음. */
+  poolSize: number
   log_id: string | null
 }
 

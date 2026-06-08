@@ -2,10 +2,10 @@ import { cn } from '@/lib/utils'
 import styles from '@/components/screens.module.css'
 
 /** 보라→핑크 그라데이션 하트 (auth BrandHeader 와 동일 모티프). 홈/목록 등 메인 화면 헤더 공용. */
-export function MiniHeart() {
+export function MiniHeart({ className }: { className?: string } = {}) {
   return (
     <svg
-      className={cn(styles.miniHeart, 'h-6 w-6 lg:h-7 lg:w-7')}
+      className={cn(styles.miniHeart, 'h-6 w-6 lg:h-7 lg:w-7', className)}
       viewBox="0 0 24 24"
       role="img"
       aria-label="Today Date"

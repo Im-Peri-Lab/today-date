@@ -7,7 +7,6 @@ import {
   ArrowLeft,
   Sparkles,
   RotateCcw,
-  Heart,
   Plus,
   MapPin,
   Utensils,
@@ -16,6 +15,7 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { MiniHeart } from '@/components/BrandMark'
 import { Input } from '@/components/ui/input'
 import { PlaceCard } from '@/components/track/PlaceCard'
 import { CategoryIcon } from '@/components/track/categoryIcon'
@@ -123,12 +123,22 @@ export function PlaceRecommendWizard() {
             )}
           >
             {result.recommendations.length === 0 ? (
-              <div className="flex flex-col items-center rounded-xl border border-dashed border-violet-200 bg-white/50 px-6 py-14 text-center">
-                <Heart className="mb-3 h-10 w-10 fill-violet-100 text-violet-300" />
-                <p className="font-medium text-violet-800">조건에 맞는 항목이 없어요</p>
-                <p className="mt-1 text-sm text-gray-500">위시리스트에 새 장소를 추가해 보세요.</p>
-                <Link href="/places/new" className="mt-5">
-                  <Button className="gap-1.5 bg-violet-600 text-white hover:bg-violet-700">
+              <div
+                className={cn(
+                  'flex flex-col items-center rounded-xl border px-6 py-12 text-center',
+                  styles.recEmptyBox
+                )}
+              >
+                <MiniHeart className="h-10 w-10 lg:h-10 lg:w-10" />
+                <p className={cn('mt-3 font-medium', styles.ink)}>가고 싶은 곳을 더 모아보세요</p>
+
+                <Link href="/places/new" className="mt-6 block w-full max-w-md">
+                  <Button
+                    className={cn(
+                      'h-10 w-full gap-1.5 text-white hover:brightness-105',
+                      styles.detailPrimaryBtn
+                    )}
+                  >
                     <Plus className="h-4 w-4" />
                     장소 추가하기
                   </Button>
@@ -151,17 +161,19 @@ export function PlaceRecommendWizard() {
         </div>
 
         <div className="mt-6 flex flex-col items-center justify-center gap-2 sm:flex-row sm:gap-3">
-          <Button
-            className={cn(
-              'h-10 w-full gap-1.5 text-white hover:brightness-105 sm:w-auto',
-              styles.detailPrimaryBtn
-            )}
-            onClick={() => run()}
-            disabled={recommend.isPending}
-          >
-            <RotateCcw className="h-4 w-4" />
-            다른 추천 보기
-          </Button>
+          {result.poolSize > 3 && (
+            <Button
+              className={cn(
+                'h-10 w-full gap-1.5 text-white hover:brightness-105 sm:w-auto',
+                styles.detailPrimaryBtn
+              )}
+              onClick={() => run()}
+              disabled={recommend.isPending}
+            >
+              <RotateCcw className="h-4 w-4" />
+              다른 추천 보기
+            </Button>
+          )}
           <Button
             variant="ghost"
             className={cn('h-10 w-full sm:w-auto', styles.sub)}

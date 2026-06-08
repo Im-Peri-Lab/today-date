@@ -1,6 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Activity, DurationBucket, TimeOfDay } from '@/types'
-import { DURATION_LABELS, TIME_OF_DAY_LABELS } from '@/lib/labels'
+import { DURATION_LABELS, DURATION_RANK, TIME_OF_DAY_LABELS } from '@/lib/labels'
 import { recommendedIdSets, pickTopWithShuffle } from './shared'
 
 export interface ActivityRecommendInput {
@@ -8,11 +8,15 @@ export interface ActivityRecommendInput {
   time_of_day?: TimeOfDay
   category_ids?: string[]
   include_visited?: boolean
+  /** true면 고른 값보다 더 짧은 일정도 후보에 포함. 기본은 고른 값만(엄격). */
+  include_shorter?: boolean
 }
 
 export interface ActivityRecommendResult {
   recommendations: Activity[]
   reason: string
+  /** 필터 통과 후보 풀 크기(scored.length). 클라이언트의 "다른 추천 보기" 노출 판단용. */
+  poolSize: number
 }
 
 export async function recommendActivities(
@@ -41,11 +45,21 @@ export async function recommendActivities(
     pool = pool.filter((a) => a.category_id && categoryIds.includes(a.category_id))
   }
 
+  // duration 필터: 기본은 고른 값만(엄격). include_shorter면 더 짧은 일정까지 포함.
+  const targetRank = DURATION_RANK[input.duration_bucket]
+  pool = pool.filter((a) => {
+    if (!a.duration_bucket) return false
+    if (a.duration_bucket === input.duration_bucket) return true
+    if (!input.include_shorter) return false
+    return DURATION_RANK[a.duration_bucket] < targetRank
+  })
+
   const { recentIds, everIds } = await recommendedIdSets(supabase, 'activity')
 
   const scored = pool.map((a) => {
     let score = 0
-    if (a.duration_bucket === input.duration_bucket) score += 10
+    // duration은 후보 필터에서 이미 걸렀고, 정확 일치만 약한 가점으로 상위 유지(더 짧음 +0)
+    if (a.duration_bucket === input.duration_bucket) score += 3
     if (tod !== 'any') {
       if (a.time_of_day === tod) score += 5
       else if (a.time_of_day === 'any') score += 2
@@ -61,7 +75,7 @@ export async function recommendActivities(
   const recommendations = pickTopWithShuffle(scored, 5, 3)
   const reason = buildReason(input, recommendations.length)
 
-  return { recommendations, reason }
+  return { recommendations, reason, poolSize: scored.length }
 }
 
 function buildReason(input: ActivityRecommendInput, count: number): string {

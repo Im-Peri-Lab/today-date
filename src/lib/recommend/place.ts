@@ -14,6 +14,8 @@ export interface PlaceRecommendInput {
 export interface PlaceRecommendResult {
   recommendations: Place[]
   reason: string
+  /** 필터 통과 후보 풀 크기(scored.length). 클라이언트의 "다른 추천 보기" 노출 판단용. */
+  poolSize: number
 }
 
 export async function recommendPlaces(
@@ -41,14 +43,19 @@ export async function recommendPlaces(
     pool = pool.filter((p) => p.category_id && categoryIds.includes(p.category_id))
   }
 
+  const locationLower = location.toLowerCase()
+
+  // 지역 필터: location 입력이 있을 때만 부분포함(소문자)으로 후보를 좁힘 (없으면 전체 — 현행 유지)
+  if (locationLower) {
+    pool = pool.filter((p) => p.location && p.location.toLowerCase().includes(locationLower))
+  }
+
   const { recentIds, everIds } = await recommendedIdSets(supabase, 'place')
 
-  const locationLower = location.toLowerCase()
   const qLower = q.toLowerCase()
 
   const scored = pool.map((p) => {
     let score = 0
-    if (location && p.location && p.location.toLowerCase().includes(locationLower)) score += 10
     if (categoryIds.length > 0 && p.category_id && categoryIds.includes(p.category_id)) score += 3
     if (q) {
       const inTitle = p.title?.toLowerCase().includes(qLower)
@@ -63,7 +70,7 @@ export async function recommendPlaces(
   const recommendations = pickTopWithShuffle(scored, 5, 3)
   const reason = buildReason(input, recommendations.length)
 
-  return { recommendations, reason }
+  return { recommendations, reason, poolSize: scored.length }
 }
 
 function buildReason(input: PlaceRecommendInput, count: number): string {

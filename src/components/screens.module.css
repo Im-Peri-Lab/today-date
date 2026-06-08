@@ -1040,6 +1040,16 @@
 }
 
 /*
+ * 추천 0개 빈 상태 박스 — 일반 카드와 같은 결(실선 중성 보더 + 카드 surface + 그림자).
+ * 점선·연보라 느낌 제거. --s-card-border / --s-card-shadow 는 .page 다크 미디어에서 자동 cascade.
+ */
+.recEmptyBox {
+  background: var(--s-card-bg, #ffffff);
+  border-color: var(--s-card-border, rgba(0, 0, 0, 0.06));
+  box-shadow: var(--s-card-shadow);
+}
+
+/*
  * 상세 하단 삭제 버튼 — 약한 중립 면 + faint 텍스트. hover/press 시 destructive 살짝.
  * --s-card-border-strong 이 다크 .page 미디어에서 #3a2f4e 로 자동 cascade → @media 불필요.
  * ghost variant 의 hover:bg-muted/hover:text-foreground 는 CSS Module 이 나중에 로드되므로 덮어씀.

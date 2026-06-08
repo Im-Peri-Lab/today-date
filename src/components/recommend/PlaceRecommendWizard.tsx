@@ -125,14 +125,14 @@ export function PlaceRecommendWizard() {
             {result.recommendations.length === 0 ? (
               <div
                 className={cn(
-                  'mx-auto flex w-full flex-col items-center rounded-xl border px-6 py-12 text-center sm:max-w-xs',
+                  'mx-auto flex w-full flex-col items-center rounded-xl border px-6 py-12 text-center sm:max-w-md',
                   styles.recEmptyBox
                 )}
               >
                 <MiniHeart className="h-10 w-10 lg:h-10 lg:w-10" />
                 <p className={cn('mt-3 font-medium', styles.ink)}>가고 싶은 곳을 더 모아보세요</p>
 
-                <Link href="/places/new" className="mt-6 block w-full max-w-md">
+                <Link href="/places/new" className="mx-auto mt-6 block w-full sm:max-w-xs">
                   <Button
                     className={cn(
                       'h-10 w-full gap-1.5 text-white hover:brightness-105',

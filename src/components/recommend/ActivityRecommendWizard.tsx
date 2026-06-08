@@ -149,7 +149,7 @@ export function ActivityRecommendWizard() {
             {result.recommendations.length === 0 ? (
               <div
                 className={cn(
-                  'mx-auto flex w-full flex-col items-center rounded-xl border px-6 py-12 text-center sm:max-w-xs',
+                  'mx-auto flex w-full flex-col items-center rounded-xl border px-6 py-12 text-center sm:max-w-md',
                   styles.recEmptyBox
                 )}
               >
@@ -158,7 +158,7 @@ export function ActivityRecommendWizard() {
                   {canShorten ? '조건을 넓히거나 새 활동을 더해보세요' : '새 활동을 더해보세요'}
                 </p>
 
-                <div className="mt-6 flex w-full max-w-md flex-col gap-2">
+                <div className="mx-auto mt-6 flex w-full flex-col gap-2 sm:max-w-xs">
                   {canShorten ? (
                     <>
                       <Button

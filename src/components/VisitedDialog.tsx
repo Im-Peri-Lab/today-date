@@ -96,7 +96,7 @@ export function VisitedDialog({
         <DialogHeader>
           <DialogTitle>다녀왔어요 💕</DialogTitle>
           <DialogDescription>
-            <span className="font-medium text-foreground">{title}</span> 방문 기록을 남겨보세요.
+            <span className="font-medium text-[color:var(--s-ink,#1a1033)]">{title}</span> 방문 기록을 남겨보세요.
           </DialogDescription>
         </DialogHeader>
 

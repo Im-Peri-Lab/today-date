@@ -7,7 +7,6 @@ import {
   ArrowLeft,
   Sparkles,
   RotateCcw,
-  Heart,
   Plus,
   MapPin,
   Utensils,
@@ -16,6 +15,7 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { MiniHeart } from '@/components/BrandMark'
 import { Input } from '@/components/ui/input'
 import { PlaceCard } from '@/components/track/PlaceCard'
 import { CategoryIcon } from '@/components/track/categoryIcon'
@@ -125,11 +125,11 @@ export function PlaceRecommendWizard() {
             {result.recommendations.length === 0 ? (
               <div
                 className={cn(
-                  'flex flex-col items-center rounded-xl border px-6 py-16 text-center',
+                  'flex flex-col items-center rounded-xl border px-6 py-12 text-center',
                   styles.recEmptyBox
                 )}
               >
-                <Heart className={cn('h-8 w-8', styles.accent)} strokeWidth={1.5} />
+                <MiniHeart />
                 <p className={cn('mt-3 font-medium', styles.ink)}>가고 싶은 곳을 더 모아보세요</p>
 
                 <Link href="/places/new" className="mt-6 block w-full max-w-md">

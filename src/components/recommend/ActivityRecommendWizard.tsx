@@ -7,7 +7,6 @@ import {
   ArrowLeft,
   Sparkles,
   RotateCcw,
-  Heart,
   Plus,
   Hourglass,
   Sun,
@@ -18,6 +17,7 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { MiniHeart } from '@/components/BrandMark'
 import { ActivityCard } from '@/components/track/ActivityCard'
 import { CategoryIcon } from '@/components/track/categoryIcon'
 import { useActivityCategories } from '@/hooks/useCategories'
@@ -147,11 +147,11 @@ export function ActivityRecommendWizard() {
             {result.recommendations.length === 0 ? (
               <div
                 className={cn(
-                  'flex flex-col items-center rounded-xl border px-6 py-16 text-center',
+                  'flex flex-col items-center rounded-xl border px-6 py-12 text-center',
                   styles.recEmptyBox
                 )}
               >
-                <Heart className={cn('h-8 w-8', styles.accent)} strokeWidth={1.5} />
+                <MiniHeart />
                 <p className={cn('mt-3 font-medium', styles.ink)}>
                   {canShorten ? '조건을 넓히거나 새 활동을 더해보세요' : '새 활동을 더해보세요'}
                 </p>

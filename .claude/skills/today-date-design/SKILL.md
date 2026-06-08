@@ -86,7 +86,7 @@ description: >
 
 여백(패딩) 관례: 아이템 카드 `p-3.5`, CTA 카드 `p-5`, 통계 카드 `p-4`.
 
-클릭 카드: `cn(styles.card, styles.cardInteractive)` → hover 시 `translateY(-2px)` + 보더/그림자 강조.
+클릭 카드: `cn(styles.card, styles.cardInteractive)` → hover 시 `translateY(-2px)` + 보더/그림자 강조. `/list` 카드는 ⋮ 메뉴 열림 중에도 보더만 같은 톤으로 강조 유지(§5-A).
 
 복붙:
 ```tsx
@@ -173,7 +173,7 @@ description: >
 - 라벨 색: `--s-ink` (`text-[color:var(--s-ink,#1a1033)]`) — `ui/label.tsx`에 적용 → `FormField`·`VisitRecordBlock` 라벨 모두 적용됨.
 - 입력/textarea 본문 색: `--s-ink`, placeholder: `--s-faint`.
 - **폼 컨트롤 보더는 `--s-input` 전용 토큰**(입력·textarea·세그먼트·칩·날짜 트리거/팝업). 라이트 `#eceaf3`(= `--s-card-border-strong`와 동일), **다크 `#4a3f63`** — 카드면(`#241a36`)·`--s-card-border-strong`(`#3a2f4e`)보다 한 단계 밝아 다크에서 보더가 또렷이 보인다. `--s-card-border-strong`은 뱃지·삭제버튼 등 **채움**으로도 쓰이므로 보더만 분리(채움 면엔 영향 없음). 라이트 값 동일 → 라이트 무변화.
-- 활성 채움(칩·세그먼트): `--s-active-fill` 단색(§5). Primary 버튼: `styles.detailPrimaryBtn`(`--s-active-line`).
+- 활성(칩·세그먼트): **틴트**(`--s-accent-soft-bg` + `--s-active-line` 보더 + `--s-active-text`, §5·§5-A). Primary 버튼: `styles.detailPrimaryBtn`(`--s-active-line` 단색).
 - **outline 버튼(`variant="outline"`, 인라인 편집 취소 등)도 `--s-*` 기반**: 보더 `--s-card-border-strong`, 면 `bg-transparent`, 글씨 `--s-ink`, hover 면 `--s-card-border-strong`. shadcn `border-border`/`bg-background`/`text-foreground` 및 `dark:` 프리픽스 사용 금지(`.dark` 미적용 → 다크에서 흰 칩으로 뜸). `src/components/ui/button.tsx` outline variant에 반영.
 
 **인라인 편집 컨텍스트 규칙 (`DetailBlock`):**
@@ -204,19 +204,41 @@ description: >
 활성 토큰 (라이트 / 다크):
 | 토큰 | 라이트 | 다크 | 의미 |
 |---|---|---|---|
-| `--s-active-fill` | `#7c3aed` (단색) | `#7c3aed` (재정의 안 함) | 활성 **채움**: 칩·세그먼트 |
+| `--s-active-fill` | `#7c3aed` (단색) | `#7c3aed` (재정의 안 함) | **단색 채움**: StepDots 진행점·날짜 선택일 등 예외 전용 (칩·세그먼트는 틴트로 이동 — §5-A) |
 | `--s-active-on` | `#ffffff` | `#ffffff` | 채움 위 글씨/아이콘 |
 | `--s-active-line` | `#7c3aed` | `#7c3aed` | 활성/포커스 보더·링 |
 | `--s-active-text` | `#7c3aed` | `#d8b4fe` | 외곽선형 활성(토글/필터버튼) 글씨·아이콘 |
 | `--s-active-glow` | `rgba(124,58,237,0.2)` | 동일 | 옅은 포커스 글로우 |
 
-> **선택 컨트롤 활성 = 단색 채움 통일 (확정 규칙).** 카테고리 칩·소요시간/시간대/식사시간 세그먼트(`styles.option`)·필터 칩(`styles.chip`)의 활성은 **모두** `--s-active-fill`(단색 `#7c3aed`) 채움 + `--s-active-on`(흰) 글씨/아이콘. 폼(추가/수정) 제출·저장 Primary 버튼은 상세 Primary와 동일하게 `styles.detailPrimaryBtn`(`--s-active-line` `#7c3aed`) 단색 채움. **그라데이션 채움 금지** — 그라데이션은 FAB·로고(`--s-grad`)·`filterCount` 전용. `--s-active-fill`·`--s-active-line` 모두 다크에서 재정의하지 않아(`#7c3aed` 고정) 다크에서 밝게 떠 보이지 않는다.
+> **선택 컨트롤 활성 = 연한 틴트 (확정 규칙 — 상태 표현 위계 갱신).** 카테고리 칩·소요시간/시간대/식사시간 세그먼트(`styles.option`/`styles.optionCard`)·필터 칩(`styles.chip`)의 활성은 **단색 채움 금지** → `--s-accent-soft-bg` 틴트 배경 + `--s-active-line` accent 보더 + `--s-active-text` accent 글씨/아이콘/체크. 단색 채움은 **"지금 누를 단 하나의 CTA"에만**(등록·저장·다른 추천 보기 등 `styles.detailPrimaryBtn`, `--s-active-line` `#7c3aed`). 자세한 위계·예외(StepDots·날짜 선택일)는 **§5-A** 참조. **그라데이션 채움 금지** — 그라데이션은 FAB·로고(`--s-grad`)·`filterCount` 전용. `--s-active-*` 모두 다크에서 재정의하지 않아(`#7c3aed`/`#d8b4fe` 고정) 다크에서 밝게 떠 보이지 않는다.
 
 **포커스 역할 분리 규칙 (중요):**
 - 텍스트 입력(검색/위치): `:focus` → 활성 보더(`--s-active-line`) **+ 링** `box-shadow: 0 0 0 3px var(--s-active-glow)`.
 - 버튼류(필터 토글/칩): `:focus-visible` → 활성 **보더만**, 링 없음.
 
-활성 칩/세그먼트 규칙: `styles.chipActive` / `styles.optionActive`는 예외 없이 `--s-active-fill` 단색 채움 + `--s-active-on`(흰) 글씨/아이콘. 필터버튼(`styles.filterToggle`)·`/list` 상태 토글(`styles.segmentBtnActive`) 같은 외곽선형 활성만 `--s-active-text` + `--s-active-line` 보더(채움 없음).
+활성 칩/세그먼트 규칙: `styles.chipActive` / `styles.optionActive` / `styles.optionCardActive`는 **틴트**(`--s-accent-soft-bg` 배경 + `--s-active-line` 보더 + `--s-active-text` 글씨/`catIcon`). 필터버튼(`styles.filterToggle`)·`/list` 상태 토글(`styles.segmentBtnActive`) 같은 외곽선형 활성은 `--s-active-text` + `--s-active-line` 보더(채움 없음) — 종전과 동일.
+
+---
+
+## 5-A. 상태 표현 위계 + hover 언어 (이번 세션 확정)
+
+왜: hover와 "선택됨"을 요소마다 다르게 칠하지 않도록 **두 축**(① 채움 위계 ② hover 언어)을 한 원칙으로 고정한다. 추천 화면·`/list`·추가/수정 폼이 모두 같은 결로 읽혀야 한다.
+
+### 채움 위계 (단색은 CTA 하나에만)
+- **단색 채움**(`--s-active-fill`/`--s-active-line` 솔리드 + 흰 글씨): **"지금 누를 단 하나의 CTA"에만.** 등록(`/activities/new`·`/places/new` 제출)·저장(인라인/상세 Primary)·추천 "다른 추천 보기" — `styles.detailPrimaryBtn`(`--s-active-line`).
+- **선택됨/활성**(옵션 카드·칩·세그먼트·필터 칩): **단색 채움 금지** → `--s-accent-soft-bg` 틴트 + `--s-active-line` accent 보더 + `--s-active-text` accent 글씨/체크. (`styles.chipActive`/`styles.optionActive`/`styles.optionCardActive`)
+- **예외(단색 유지)**: ① **StepDots 진행 점** — "선택 상태"가 아니라 위치 표시라 `--s-active-fill` 단색 유지. ② **날짜 선택일**(date picker, §4-A) — 캘린더 단일 선택이라 `--s-active-fill` 단색 유지.
+
+### hover 언어 — "콘텐츠 vs 유틸리티" (의도된 구분)
+- **콘텐츠 요소**(카드·칩·옵션 카드 — 사용자가 *고르는* 대상): hover = **accent 보더**. 카드 `--s-card-hover-border`(라벤더 알파), 칩·옵션 비활성 `--s-active-line` 보더.
+- **유틸리티 아이콘 버튼**(도구 — `.iconBtn` ⋮케밥/홈/햄버거, `.editGhostBtn` 연필, ghost `X` 닫기): hover = **중성 회색**(라이트 `#eceaf3`=`--s-card-border-strong`, 다크 보라 소프트 `--s-accent-soft-bg`). §7·§10-B·금지규칙 4 그대로 유지 — accent로 **바꾸지 않는다**.
+- **둘이 다른 건 버그가 아니라 의도**다: 고르는 콘텐츠는 accent로 "선택 가능"을 암시, 도구 버튼은 중성으로 차분하게. (하단 삭제 `styles.detailDeleteBtn`만 destructive 틴트 — 별도 예외.)
+
+### 카드 ⋮ 메뉴 열림 강조
+- `/list` 카드(`ActivityCard`/`PlaceCard`)는 ⋮ 메뉴가 열린 동안 카드 보더를 **hover와 동일 톤**(`--s-card-hover-border`)으로 유지한다. 트리거의 `aria-expanded="true"`를 카드가 `:has([aria-expanded='true'])`로 반영(`screens.module.css` `.cardInteractive`). **보더만** — 그림자·`translateY` 없음(메뉴 조작 중 카드 들썩임 방지). `@media(hover)` 밖이라 **마우스·터치 모두** 강조. `hideMenu` 결과 카드(추천)는 트리거가 없어 미적용.
+
+### 토큰 공유 주의
+- `--s-active-fill`/`--s-active-line`은 `/list` 필터 칩·세그먼트·상태 토글과 **공유**된다. 상태 색을 바꿀 땐 토큰 정의값을 건드리지 말고 **사용처 클래스**(`.chipActive` 등)에서만 조정한다 — 토큰값을 바꾸면 StepDots·날짜 선택일·CTA까지 휩쓸려 회귀한다.
 
 ---
 
@@ -252,7 +274,7 @@ description: >
   - 메타 줄 아이콘(Clock/Sun/Moon/MapPin/Utensils 등):
     - **리스트 카드(ActivityCard/PlaceCard)**: 아이콘 색 지정 없이 부모 div(`styles.sub`) 상속.
     - **상세 화면(DetailRow 안)**: `styles.faint`(`--s-faint`) 명시 → 카테고리 아이콘(`styles.accent`)보다 한 단계 약한 위계. `className={cn('h-3.5 w-3.5 shrink-0', styles.faint)}` 패턴 사용.
-  - 헤더 아이콘 버튼(`styles.iconBtn`): `sub`, hover 시 라이트는 중성 면 `#eceaf3`+`ink`, 다크는 보라 소프트.
+  - 헤더 아이콘 버튼(`styles.iconBtn`): `sub`, hover 시 라이트는 중성 면 `#eceaf3`+`ink`, 다크는 보라 소프트. (유틸리티 도구라 **중성 hover** 유지 — 콘텐츠 요소의 accent hover와 의도적으로 구분, §5-A.)
 - strokeWidth: 카테고리 `2`, CTA 그라데이션 배지 내부 아이콘 `1.75`.
 - 크기 관례: 리스트 카드 메타 `h-3 w-3`, 상세 화면 DetailRow 메타 `h-3.5 w-3.5`, 헤더/검색 `h-4~5`.
 - 참고: 장식용 하트/💜는 카피(서브카피·빈 상태 문구)에만 등장 — 기능 아이콘 자리에는 절대 넣지 않는다.
@@ -552,7 +574,7 @@ export const STATUS_LABELS: Record<Status, string> = {
 
 라이트모드에서 절대 하지 말 것:
 1. **라이트모드 페이지/카드/컨트롤 배경에 보라·핑크 사용 금지.** 라이트 페이지 배경은 중성 `#fafafb`, 카드/컨트롤은 `#ffffff`. (옛 `bg-gradient-to-br from-violet-50 to-purple-100` 같은 보라 그라데이션 배경 금지)
-2. 보라는 **강조에만**: 활성 칩 채움(`--s-active-fill`), 카테고리 아이콘(`catIcon`), 포커스 보더/링(`--s-active-line/glow`), FAB·`gradIcon`·`filterCount`. 표면(면)에는 쓰지 않는다.
+2. 보라는 **강조에만**: 활성 칩/옵션 틴트(`--s-accent-soft-bg`+`--s-active-line` 보더, §5-A), 카테고리 아이콘(`catIcon`), 포커스 보더/링(`--s-active-line/glow`), CTA 단색 채움(`--s-active-line`), FAB·`gradIcon`·`filterCount`. 중성 표면(면)에는 쓰지 않는다.
 3. 통계 숫자(`styles.statNum`)는 라이트에서 **중성 `ink`**. (보라는 다크에서만 `@media`로 적용)
 4. 아이콘 버튼 hover 라이트는 **중성 면 `#eceaf3`** — 보라 소프트 금지.
 5. 활성/포커스 색을 요소마다 **하드코딩 금지** — 반드시 `--s-active-*` 토큰 참조.
@@ -564,6 +586,12 @@ export const STATUS_LABELS: Record<Status, string> = {
 11. **Primary 버튼 배경에 inline `style={}` 사용 금지** — CSS 클래스를 항상 이겨 다크 모드 보정 불가. `styles.detailPrimaryBtn` CSS module 클래스로 제어.
 12. **폼 컨트롤(라벨·입력 텍스트·보더·placeholder)에 shadcn `--foreground`/`--input`/`--muted-foreground` 의존 금지** — 이 앱은 `.dark` 클래스를 안 붙이고 `@media (prefers-color-scheme: dark)` + `--s-*`로만 다크를 처리하므로, shadcn HSL 토큰은 다크에서 라이트값에 고정되어 안 보인다(대비 ~1:1). 라벨/본문 `--s-ink`, placeholder `--s-faint`, 보더 `--s-card-border-strong` 사용(§4-A). `.dark` 클래스 신규 도입도 금지.
 13. **입력바/textarea 본문 폰트에 `md:text-sm`(14px↓) 금지** — `text-base`(16px) 고정. 모바일 14px 이하면 iOS 포커스 시 자동 줌인 발생.
+
+---
+
+## 백로그 (별도 작업 필요 — 미해결)
+
+- **다이얼로그가 OS 다크 미대응** (`VisitedDialog`·`DeleteConfirmDialog` 등 `DialogContent`): 다이얼로그 표면·텍스트·hover가 shadcn HSL 토큰(`--popover`/`--popover-foreground`/`--muted`/`--foreground`)에 의존하는데, 이 토큰들은 `globals.css`에서 **`.dark` 클래스 전용**으로만 다크값을 갖는다. 이 앱은 `.dark`를 부착하지 않고 `@media (prefers-color-scheme: dark)` + `--s-*`로만 다크를 처리하므로, **OS 다크에서 다이얼로그 전체가 라이트(흰 표면)로 고정**된다. ghost `X` 닫기의 `dark:hover:bg-muted/50`도 같은 이유로 죽은 규칙. (금지규칙 12와 동일 원인.) → 해결: `DialogContent` 표면·닫기 버튼을 `--s-card-bg`/`--s-ink`/`--s-card-border-strong` 등 `--s-*` 토큰으로 치환하는 별도 작업 필요. 단순 hover 패치가 아니라 다이얼로그 다크 테마 전반의 작업이라 범위를 따로 잡는다.
 
 ---
 

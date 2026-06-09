@@ -489,6 +489,23 @@
   outline: none;
   border-color: var(--s-active-line, #7c3aed);
 }
+/*
+ * 키보드 포커스 링 — CSS Module 컨트롤 공통.
+ * :focus-visible 만 → 마우스 클릭엔 안 뜨고 Tab 키보드 포커스에만 뜬다.
+ * 검색 입력의 포커스 링과 동일 패턴(box-shadow 0 0 0 3px --s-active-glow) 재사용.
+ */
+.segmentBtn:focus-visible,
+.chip:focus-visible,
+.filterToggle:focus-visible,
+.resetBtn:focus-visible,
+.optionCard:focus-visible,
+.iconBtn:focus-visible,
+.editGhostBtn:focus-visible,
+.fab:focus-visible,
+.gradIcon:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--s-active-glow, rgba(124, 58, 237, 0.2));
+}
 
 /* 필터 칩 */
 .chip {
@@ -500,7 +517,7 @@
   border-radius: 9999px; /* pill 유지 */
   padding: 0 0.75rem;
   font-size: 0.8125rem;
-  border: 1px solid var(--s-input, #eceaf3);
+  border: 1px solid var(--s-card-border-strong, #eceaf3);
   background: var(--s-card-bg, #ffffff);
   color: var(--s-sub, #6b7280);
   cursor: pointer;
@@ -523,7 +540,7 @@
 @media (hover: hover) {
   .chip:hover:not(.chipActive) {
     border-color: var(--s-active-line, #c4b5fd);
-    color: var(--s-active-line, #7c3aed);
+    color: var(--s-active-text, #7c3aed);
   }
 }
 /* 활성 칩: 연한 틴트 배경 + accent 보더/글씨 (단색 채움은 CTA 전용). 공유 토큰값은 불변, 사용처 스타일만 틴트화 */
@@ -773,9 +790,11 @@
     border-color 140ms ease,
     color 140ms ease;
 }
-.resetBtn:hover {
-  border-color: var(--s-active-line, #c4b5fd);
-  color: var(--s-active-line, #7c3aed);
+@media (hover: hover) {
+  .resetBtn:hover {
+    border-color: var(--s-active-line, #c4b5fd);
+    color: var(--s-active-text, #7c3aed);
+  }
 }
 
 /*
@@ -891,11 +910,13 @@
     background 140ms ease,
     color 140ms ease;
 }
-.editGhostBtn:hover {
-  background: var(--s-card-border-strong, #eceaf3);
-  color: var(--s-ink, #1a1033);
+@media (hover: hover) {
+  .editGhostBtn:hover {
+    background: var(--s-card-border-strong, #eceaf3);
+    color: var(--s-ink, #1a1033);
+  }
 }
-@media (prefers-color-scheme: dark) {
+@media (prefers-color-scheme: dark) and (hover: hover) {
   .editGhostBtn:hover {
     background: var(--s-accent-soft-bg, #2d2540);
     color: var(--s-accent, #c084fc);

@@ -108,7 +108,7 @@ html.dark body {
       0 18px 44px -12px rgba(0, 0, 0, 0.75);
   }
   [data-slot='dropdown-menu-item'][data-highlighted] {
-    background-color: #2d2540;
+    background-color: var(--s-accent-soft-bg, #2d2540);
   }
   [data-slot='dropdown-menu-separator'] {
     background-color: #2c2442;

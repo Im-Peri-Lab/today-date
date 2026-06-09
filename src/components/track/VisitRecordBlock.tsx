@@ -10,7 +10,7 @@ import { RatingStars } from './RatingStars'
 import { DetailBlock } from './DetailBlock'
 import { useUpdateActivity } from '@/hooks/useActivities'
 import { useUpdatePlace } from '@/hooks/usePlaces'
-import { formatKoreanDateWithWeekday } from '@/lib/date'
+import { formatDotDate } from '@/lib/date'
 import { cn } from '@/lib/utils'
 import styles from '@/components/screens.module.css'
 
@@ -118,7 +118,7 @@ export function VisitRecordBlock({
           {visitedAt && (
             <div className={cn('inline-flex items-center gap-1.5 text-base font-medium', styles.ink)}>
               <Calendar className={cn('h-4 w-4 shrink-0', styles.accent)} />
-              {formatKoreanDateWithWeekday(visitedAt)}
+              {formatDotDate(visitedAt)}
             </div>
           )}
           {rating ? <RatingStars value={rating} size="sm" /> : null}

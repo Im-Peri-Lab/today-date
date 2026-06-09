@@ -599,16 +599,18 @@
 }
 
 /*
- * 방문 기록 날짜 선택 — 커스텀 date picker(base-ui Popover + 자체 월 그리드).
- * 트리거 박스는 다른 입력바와 완전히 동일한 외형(40px / radius 10px / --s-input 보더 / px-3).
- * 단, "선택 트리거" 성격이라 [Calendar 아이콘 + gap + 날짜 텍스트]를 한 묶음으로 박스 가운데 정렬
- * (다른 입력바는 좌측 정렬 유지). 달력 UI 는 모두 --s-* 토큰 기반.
+ * 방문 날짜 선택 — 박스/leading 아이콘/표시 텍스트(YYYY.MM.DD)는 우리 토큰으로 유지하고
+ * 달력 팝업만 OS 네이티브(`<input type="date">`)를 쓴다. 박스는 다른 입력바와 동일한 외형
+ * (40px / radius 10px / --s-input 보더 / px-3) + box-sizing:border-box(w-full이 부모 폭을 안 넘음).
+ * 네이티브 input(.dateInput)을 박스 위에 opacity:0으로 덮어 클릭/포커스를 받고, 보이는 표시는
+ * 그 아래 [Calendar 아이콘 + 좌측 정렬 날짜 텍스트]가 담당한다.
  */
 .dateTrigger {
+  position: relative;
   display: flex;
   align-items: center;
-  justify-content: center;
   gap: 0.5rem;
+  box-sizing: border-box;
   width: 100%;
   height: 2.5rem; /* 40px — 입력바 표준 */
   border-radius: 0.625rem; /* 10px = var(--radius) */
@@ -621,197 +623,28 @@
   cursor: pointer;
   transition: border-color 140ms ease;
 }
-.dateTrigger:focus-visible {
-  outline: none;
+/* 네이티브 input 포커스 시 박스 보더를 활성색으로 — 다른 입력바와 동일한 포커스 언어 */
+.dateTrigger:focus-within {
   border-color: var(--s-active-line, #7c3aed);
 }
-
-/*
- * 달력 팝업 카드 — 외곽 padding 보존. 내부는 "그룹 내부 좁게 / 그룹 사이 넓게":
- *  A 헤더 ─16px─ B(요일 ─4px─ 날짜 그리드) ─12px─ C "오늘".
- * (균등 gap 대신 블록별 margin 으로 시각 그룹을 분리. flex 아이템이라 margin 안 겹침)
- */
-.dpPopup {
-  width: 17rem;
-  padding: 0.75rem;
-  display: flex;
-  flex-direction: column;
-  background: var(--s-card-bg, #ffffff);
-  border: 1px solid var(--s-input, #eceaf3);
-  border-radius: 0.75rem; /* 12px */
-  box-shadow: var(--s-card-shadow, 0 8px 24px -16px rgba(20, 10, 40, 0.18));
-}
-.dpHeader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 1rem; /* 16px — 헤더(A) ↔ 요일(B) 그룹 분리 */
-}
-.dpNav {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 2rem;
-  height: 2rem;
-  border-radius: 0.5rem; /* 8px */
-  color: var(--s-sub, #6b7280);
-  background: transparent;
-  border: 1px solid transparent;
-  cursor: pointer;
-  transition:
-    background 140ms ease,
-    color 140ms ease;
-}
-.dpNav:hover {
-  background: var(--s-card-border-strong, #eceaf3);
-  color: var(--s-ink, #1a1033);
-}
-/* 연/월 드롭다운 캡션 — 화살표(한 달)와 공존하는 큰 점프 */
-.dpCaption {
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-}
-/* select + chevron 묶음 — chevron 을 토큰 색으로 직접 그려 다크에서도 또렷 + "탭 가능" 표시 */
-.dpSelectWrap {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-}
-.dpSelect {
-  /* native select — 옵션 목록이 다크에서 다크 톤으로 뜨도록 color-scheme 적용 */
-  color-scheme: light dark;
-  appearance: none;
-  -webkit-appearance: none;
-  height: 2rem;
-  padding: 0 1.5rem 0 0.5rem; /* 우측 chevron(16px) 자리 확보 */
-  border-radius: 0.5rem; /* 8px */
-  border: 1px solid transparent;
-  background: transparent;
-  color: var(--s-ink, #1a1033);
-  font-size: 1rem; /* 16px — 본문 그리드 숫자(14px)보다 한 단계 크게(위계) */
-  font-weight: 500;
-  cursor: pointer;
-  transition:
-    background 140ms ease,
-    border-color 140ms ease;
-}
-.dpSelect:hover {
-  background: var(--s-card-border-strong, #eceaf3);
-}
-.dpSelect:focus-visible {
-  outline: none;
-  border-color: var(--s-active-line, #7c3aed);
-}
-/* 드롭다운 chevron — sub 톤으로 명확히, 클릭은 select 로 통과 */
-.dpSelectIcon {
+/* 박스 전체를 덮는 네이티브 date 입력 — 보이지 않지만 클릭/포커스를 받아 OS 달력을 연다 */
+.dateInput {
   position: absolute;
-  right: 0.375rem;
-  pointer-events: none;
-  color: var(--s-sub, #6b7280);
-}
-/* 요일 라벨 행 — 날짜 그리드와 동일한 7열·gap 으로 열 정렬. 그리드 첫 줄과 4px 만 띄워 한 표처럼 묶음 */
-.dpWeekRow {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 0.125rem;
-  margin-bottom: 0.25rem; /* 4px — 요일 ↔ 날짜 그리드(그룹 B 내부, 밀착) */
-}
-.dpGrid {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 0.125rem;
-}
-.dpWeekday {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  height: 1.75rem;
-  font-size: 0.75rem;
-  color: var(--s-faint, #9ca3af);
-}
-.dpDay {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  height: 2rem;
-  border-radius: 0.5rem; /* 8px */
-  font-size: 0.875rem;
-  color: var(--s-ink, #1a1033);
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
   background: transparent;
-  border: 1px solid transparent;
+  color: transparent;
+  opacity: 0;
   cursor: pointer;
-  transition:
-    background 140ms ease,
-    color 140ms ease;
+  font-size: 1rem; /* 16px — iOS 포커스 자동 줌인 방지 */
+  color-scheme: light dark; /* 네이티브 달력/indicator 가 OS 다크에 따라감 */
 }
-.dpDay:hover {
-  background: var(--s-accent-soft-bg, #f6f1ff);
-}
-/* 오늘: 외곽선만(선택과 구분) */
-.dpDayToday {
-  border-color: var(--s-active-line, #7c3aed);
-  color: var(--s-active-text, #7c3aed);
-}
-/* 선택일: 단색 액센트 채움 — 칩/세그먼트와 동일 규칙 */
-.dpDaySelected,
-.dpDaySelected:hover {
-  border-color: transparent;
-  background: var(--s-active-fill, #7c3aed);
-  color: var(--s-active-on, #ffffff);
-  font-weight: 500;
-}
-/*
- * 우하단 "오늘" — 그리드 마지막 행 바로 아래(헤더↔요일과 같은 결의 그룹 거리 12px).
- * 약한 박스 텍스트 버튼: 평상시 배경 투명 + --s-sub 글씨 → 좌우 화살표 hover surface
- * (--s-card-border-strong)와 평상시 톤이 겹치지 않아 "이미 눌린 듯한" 잔상 충돌이 없다.
- * hover/active 시에만 약한 surface(화살표의 neutral 과 다른 accent-soft 톤). 표시 월만 이동(선택 불변).
- */
-.dpFooter {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 0.75rem; /* 12px — 그리드(B) ↔ "오늘". 너무 멀지도 붙지도 않게 */
-}
-.dpToday {
-  padding: 0.375rem 0.75rem; /* px-3 py-1.5 */
-  border-radius: 0.625rem; /* 10px — 폼 컨트롤 표준 */
-  font-size: 0.8125rem;
-  font-weight: 500;
-  color: var(--s-sub, #6b7280);
-  background: transparent;
-  border: 1px solid transparent;
-  cursor: pointer;
-  transition:
-    background 140ms ease,
-    color 140ms ease;
-}
-.dpToday:hover {
-  background: var(--s-accent-soft-bg, #f6f1ff);
-  color: var(--s-accent, #7c3aed);
-}
-
-/*
- * 팝업은 Popover.Portal 로 .page 밖(body)에 렌더되어 .page 의 --s-* 다크 토큰을 못 받는다.
- * → 다크에서 라이트 폴백(#fff 등)으로 떠 흰 박스가 된다. 팝업 루트(.dpPopup)에 다크 토큰을
- *   재선언해 내부 모든 var(--s-*) 참조가 다크 값으로 해석되게 한다(값은 .page 다크 블록과 동일,
- *   새 색 아님). 라이트는 각 클래스의 라이트 폴백을 그대로 사용.
- */
-@media (prefers-color-scheme: dark) {
-  .dpPopup {
-    --s-card-bg: #241a36;
-    --s-input: #4a3f63;
-    --s-ink: #f5f3fa;
-    --s-sub: #a8a0b8;
-    --s-faint: #8c84a0;
-    --s-accent: #c084fc;
-    --s-accent-soft-bg: #2d2540;
-    --s-card-border-strong: #3a2f4e;
-    --s-active-line: #7c3aed;
-    --s-active-text: #d8b4fe;
-    --s-active-fill: #7c3aed;
-    --s-active-on: #ffffff;
-    --s-card-shadow: 0 8px 24px -16px rgba(0, 0, 0, 0.6);
-  }
+.dateInput:focus {
+  outline: none;
 }
 
 /*

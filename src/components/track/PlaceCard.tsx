@@ -12,7 +12,7 @@ import { DeleteConfirmDialog } from './DeleteConfirmDialog'
 import { VisitedDialog } from '@/components/VisitedDialog'
 import { useDeletePlace, useUpdatePlace } from '@/hooks/usePlaces'
 import { MEAL_LABELS, STATUS_LABELS } from '@/lib/labels'
-import { formatKoreanDateWithWeekday } from '@/lib/date'
+import { formatDotDate } from '@/lib/date'
 import { cn } from '@/lib/utils'
 import type { Place } from '@/types'
 import styles from '@/components/screens.module.css'
@@ -101,7 +101,7 @@ export function PlaceCard({ place, hideMenu, actionSlot }: PlaceCardProps) {
         {isVisited && (
           <div className={cn('mt-2.5 flex items-center gap-2 pt-2.5 text-xs', styles.divider, styles.sub)}>
             {place.rating ? <RatingStars value={place.rating} size="sm" /> : null}
-            {place.visited_at && <span>{formatKoreanDateWithWeekday(place.visited_at)}</span>}
+            {place.visited_at && <span>{formatDotDate(place.visited_at)}</span>}
           </div>
         )}
       </Link>

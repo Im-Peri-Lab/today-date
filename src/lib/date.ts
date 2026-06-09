@@ -12,17 +12,14 @@ export function formatKoreanDate(iso?: string | null): string {
   return `${y}년 ${m}월 ${d}일`
 }
 
-const WEEKDAY_LABELS = ['일', '월', '화', '수', '목', '금', '토']
-
 /**
- * 요일을 덧붙인 한글 날짜 — "2026년 7월 7일 (화)".
- * 요일 계산용 Date는 연/월/일 인자로 로컬 생성(문자열 파싱 아님)이라 타임존 안전.
- * (방문 날짜 표시 전용. "등록일" 등 요일이 무의미한 곳은 formatKoreanDate 사용)
+ * 점 구분 날짜 — "2026.05.28"(YYYY.MM.DD). 방문 날짜 표시의 단일 출처.
+ * 네이티브 date 입력 박스의 표시 텍스트·카드 방문일·방문 기록 보기 모드가 모두 이 함수를 쓴다.
+ * 저장값(ISO)은 불변, 문자열 분해라 타임존 안전. (요일이 무의미한 "등록일"은 formatKoreanDate 사용)
  */
-export function formatKoreanDateWithWeekday(iso?: string | null): string {
+export function formatDotDate(iso?: string | null): string {
   if (!iso) return ''
-  const [y, m, d] = iso.split('-').map(Number)
+  const [y, m, d] = iso.split('-')
   if (!y || !m || !d) return iso
-  const wd = WEEKDAY_LABELS[new Date(y, m - 1, d).getDay()]
-  return `${y}년 ${m}월 ${d}일 (${wd})`
+  return `${y}.${m.padStart(2, '0')}.${d.padStart(2, '0')}`
 }

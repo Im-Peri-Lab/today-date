@@ -181,19 +181,14 @@ description: >
 - 섹션 라벨(`<h2>`)이 보이는 블록(방문 기록)은 editing 시 헤더↔폼 간격을 `mt-5`(읽기 모드는 `mt-3` 유지)로 둔다. 상세 두 블록 사이 간격도 `space-y-5`(`ActivityDetail`/`PlaceDetail` 래퍼)로 폼 리듬과 통일.
 - 인라인 폼 카드는 페이지 패딩 + 카드 `px-5`로 추가 화면보다 좌우 각 20px 좁다(카드 정체상 정상, 오버플로 아님).
 
-**날짜 입력(커스텀 date picker — `src/components/forms/DatePickerField.tsx`):**
-- native `<input type="date">`는 쓰지 않는다(박스 크기/아이콘/포맷이 OS·브라우저마다 제각각 + 다크 아이콘 묻힘). base-ui `Popover` + 자체 월 그리드로 대체.
-- 트리거 박스(`styles.dateTrigger`)는 다른 입력바와 **동일한 외형**: 40px / radius 10px / `--s-input` 보더 / `px-3`. 단 "선택 트리거" 성격이라 **[lucide `Calendar`(흐린 톤) + gap + 날짜 텍스트]를 한 묶음으로 박스 가운데 정렬**(`justify-content:center`). 빈 값이면 placeholder "날짜 선택"(`--s-faint`). 박스 아래 별도 캡션 없음. **다른 입력바(제목/메모/URL/위치)는 좌측 정렬 유지** — 날짜 박스만 가운데.
-- 표시 포맷은 **요일 포함**: `formatKoreanDateWithWeekday()` → `"2026년 7월 7일 (화)"`(요일도 본문과 한 흐름, 별도 색 없음). 요일이 무의미한 "등록일" 캡션은 `formatKoreanDate()`(요일 없음) 유지.
-- 달력 팝업(`styles.dpPopup`/`dpHeader`/`dpNav`/`dpGrid`/`dpWeekday`/`dpDay`)은 전부 `--s-*` 토큰(라이트/다크 동일 토큰 시스템): 카드면 `--s-card-bg`, 보더 `--s-input`, 텍스트 `--s-ink`/`--s-sub`/`--s-faint`.
-- **팝업은 `Popover.Portal`로 `.page` 밖(body)에 렌더되어 `.page`의 다크 `--s-*`를 못 받는다** → 다크에서 흰 박스가 됨. **`.dpPopup`에 `@media (prefers-color-scheme: dark)`로 `--s-*` 토큰을 재선언**(값은 `.page` 다크 블록과 동일, 새 색 아님)해 내부 모든 `var(--s-*)`가 다크로 해석되게 한다. 라이트는 각 클래스 라이트 폴백 사용. (`.page` 밖 portal 컴포넌트의 공통 패턴)
-- **선택일 = `--s-active-fill` 단색 채움 + 흰 글씨**(`--s-active-on`), `font-weight:500` — 칩·세그먼트와 동일. **오늘(today)은 보더만**(`--s-active-line`) + `--s-active-text` 글씨로 선택과 구분(선택과 같은 채움 금지).
-- 헤더 네비게이션은 **두 방식 공존**: 좌우 화살표(`dpNav`, 아이콘 16px)=한 달 단위, 연/월 **드롭다운**(`dpCaption`/`dpSelect`)=큰 점프(연도 `2000 ~ 올해+10`). select는 `appearance:none` + lucide `ChevronsUpDown`(`dpSelectIcon`, `--s-sub`)로 **chevron을 토큰 색으로 직접 그려 다크에서도 또렷·"탭 가능" 표시**, 옵션 목록은 `color-scheme:light dark`로 다크 톤.
-- **헤더 텍스트 위계**: 캡션(연/월) 폰트는 **16px**(`font-medium`)으로 본문 그리드 숫자(`dpDay` 14px)보다 한 단계 크게 — 헤더가 본문보다 약해 보이지 않게. chevron(16px)·화살표(16px)도 같은 결로 균형.
-- **"오늘" 단축**(`dpFooter`/`dpToday`): **팝업 우하단**, 날짜 그리드 마지막 행 바로 아래(`dpFooter margin-top:0.75rem`=12px = 헤더↔요일과 같은 결의 그룹 거리, 너무 멀지도 붙지도 않게). 헤더에 두지 않는다 — 모바일 가로 폭에서 `← 연도▼ 월▼ → 오늘` 다섯 요소가 한 줄에 안 들어가 글자가 깨진다(헤더는 `← 연도▼ 월▼ →` 4요소만). 작은 박스 텍스트 버튼: `padding:px-3 py-1.5`, radius 10px. **평상시 배경 투명 + `--s-sub` 글씨**, hover/active 시에만 약한 surface(`--s-accent-soft-bg`+`--s-accent` — 좌우 화살표 hover의 neutral `--s-card-border-strong`과 **다른 톤**). 평상시 투명 이유: 화살표 hover 잔상 톤과 겹쳐 "이미 눌린 듯" 보이는 충돌 방지. 클릭 시 **표시 월만** 오늘로 이동(선택값 불변).
-- **빈 행 없음**: 커스텀 그리드는 `[선행 빈칸 + 그 달 실제 날짜]`만 렌더(고정 6행/trailing 빈칸 없음) → 6월=5행, 2월 평년=4행 등 필요한 행만. (react-day-picker의 `fixedWeeks` 개념 불필요 — 끝에 통째로 빈 줄이 생기지 않게 유지.)
-- **내부 세로 그룹("그룹 내부 좁게 / 그룹 사이 넓게")**: 균등 간격이 아니라 시각 그룹으로 분리한다. A 헤더(연/월 + 화살표) / B (요일 라벨 + 날짜 그리드, 한 덩어리) / C "오늘"(우하단). 간격: 헤더↔요일 **16px**(`dpHeader margin-bottom`, A↔B) / 요일↔그리드 첫 줄 **4px**(`dpWeekRow margin-bottom`, B 내부 밀착=한 표) / 그리드↔"오늘" **12px**(`dpFooter margin-top`, B↔C). 주차 간(날짜 행 사이)·열 간은 `dpGrid` gap **2px**(0.125rem)로 촘촘하게(표처럼 단단). 요일은 `dpWeekRow`(그리드와 같은 7열·gap)로 분리하되 4px만 띄워 그리드와 한 그룹으로. 팝업은 `flex-column`(균등 gap 없음, 블록별 margin), 외곽 `padding:0.75rem` 보존. 커스텀 그리드라 trailing 빈칸이 없어 31일/30일 달 모두 "오늘"이 마지막 행 바로 아래 12px에 붙는다.
-- 저장값은 ISO(`YYYY-MM-DD`) 그대로. 날짜 비교·생성·요일은 문자열/숫자 + 연/월/일 인자 `Date`로만(`new Date(iso)` 문자열 파싱 금지 — UTC 자정 밀림 방지, `lib/date.ts`와 동일 원칙).
+**날짜 입력(네이티브 date 입력 — `src/components/forms/DatePickerField.tsx`):**
+- **달력 팝업은 OS 네이티브(`<input type="date">`)를 쓴다.** 박스/leading 아이콘/표시 텍스트만 우리 토큰으로 유지하고, 달력 UI 자체는 OS에 위임한다. (과거 base-ui `Popover` + 자체 월 그리드를 썼으나, 다이얼로그 안 portal 잡음·데스크탑 고정폭(`17rem`) 캘린더 폭 초과·다크 토큰 재선언 부담 때문에 네이티브로 전환.)
+- 구현: `styles.dateTrigger`(relative 박스) 안에 [leading `Calendar`(흐린 톤) + 표시 텍스트] + 그 위를 덮는 `styles.dateInput`(네이티브 `<input type="date">`, `position:absolute; inset:0; opacity:0`). 박스를 누르면 네이티브 input이 클릭/포커스를 받아 OS 달력을 연다(데스크탑은 `showPicker()`로 보강, 모바일은 포커스만으로 열림). `value`/`onChange`는 ISO(`YYYY-MM-DD`) 그대로.
+- 트리거 박스(`styles.dateTrigger`)는 다른 입력바와 **동일한 외형**: 40px / radius 10px / `--s-input` 보더 / `px-3` / `box-sizing:border-box`(`w-full`이 부모 폭을 절대 안 넘음, 고정 px width 없음). **leading `Calendar` 아이콘은 좌측 정렬**(다른 입력바와 동일한 결), 빈 값이면 placeholder "날짜 선택"(`--s-faint`). 박스 아래 별도 캡션 없음.
+- 표시 포맷은 **`YYYY.MM.DD`**(예: `2026.05.28`) — `formatDotDate()`(`lib/date.ts`) 단일 출처. 방문 날짜 표시(날짜 박스·카드 방문일·방문 기록 보기)는 모두 이 함수를 쓴다(요일·한글 없음). 요일이 무의미한 "등록일" 캡션은 `formatKoreanDate()`(`"2026년 4월 6일"`) 유지.
+- 포커스: 네이티브 input 포커스 시 `styles.dateTrigger:focus-within`이 박스 보더를 `--s-active-line`로 — 다른 입력바와 동일한 포커스 언어.
+- iOS 줌인 방지: 네이티브 input `font-size:16px`. OS 다크 달력/indicator 대응: input `color-scheme: light dark`.
+- 저장값은 ISO(`YYYY-MM-DD`) 그대로. 표시 변환(`formatDotDate`/`formatKoreanDate`)은 문자열 분해로만(`new Date(iso)` 문자열 파싱 금지 — UTC 자정 밀림 방지, `lib/date.ts`와 동일 원칙).
 
 ---
 
@@ -204,13 +199,13 @@ description: >
 활성 토큰 (라이트 / 다크):
 | 토큰 | 라이트 | 다크 | 의미 |
 |---|---|---|---|
-| `--s-active-fill` | `#7c3aed` (단색) | `#7c3aed` (재정의 안 함) | **단색 채움**: StepDots 진행점·날짜 선택일 등 예외 전용 (칩·세그먼트는 틴트로 이동 — §5-A) |
+| `--s-active-fill` | `#7c3aed` (단색) | `#7c3aed` (재정의 안 함) | **단색 채움**: StepDots 진행점 등 예외 전용 (칩·세그먼트는 틴트로 이동 — §5-A; 날짜는 네이티브 input으로 전환) |
 | `--s-active-on` | `#ffffff` | `#ffffff` | 채움 위 글씨/아이콘 |
 | `--s-active-line` | `#7c3aed` | `#7c3aed` | 활성/포커스 보더·링 |
 | `--s-active-text` | `#7c3aed` | `#d8b4fe` | 외곽선형 활성(토글/필터버튼) 글씨·아이콘 |
 | `--s-active-glow` | `rgba(124,58,237,0.2)` | 동일 | 옅은 포커스 글로우 |
 
-> **선택 컨트롤 활성 = 연한 틴트 (확정 규칙 — 상태 표현 위계 갱신).** 카테고리 칩·소요시간/시간대/식사시간 세그먼트(`styles.option`/`styles.optionCard`)·필터 칩(`styles.chip`)의 활성은 **단색 채움 금지** → `--s-accent-soft-bg` 틴트 배경 + `--s-active-line` accent 보더 + `--s-active-text` accent 글씨/아이콘/체크. 단색 채움은 **"지금 누를 단 하나의 CTA"에만**(등록·저장·다른 추천 보기 등 `styles.detailPrimaryBtn`, `--s-active-line` `#7c3aed`). 자세한 위계·예외(StepDots·날짜 선택일)는 **§5-A** 참조. **그라데이션 채움 금지** — 그라데이션은 FAB·로고(`--s-grad`)·`filterCount` 전용. `--s-active-*` 모두 다크에서 재정의하지 않아(`#7c3aed`/`#d8b4fe` 고정) 다크에서 밝게 떠 보이지 않는다.
+> **선택 컨트롤 활성 = 연한 틴트 (확정 규칙 — 상태 표현 위계 갱신).** 카테고리 칩·소요시간/시간대/식사시간 세그먼트(`styles.option`/`styles.optionCard`)·필터 칩(`styles.chip`)의 활성은 **단색 채움 금지** → `--s-accent-soft-bg` 틴트 배경 + `--s-active-line` accent 보더 + `--s-active-text` accent 글씨/아이콘/체크. 단색 채움은 **"지금 누를 단 하나의 CTA"에만**(등록·저장·다른 추천 보기 등 `styles.detailPrimaryBtn`, `--s-active-line` `#7c3aed`). 자세한 위계·예외(StepDots)는 **§5-A** 참조. **그라데이션 채움 금지** — 그라데이션은 FAB·로고(`--s-grad`)·`filterCount` 전용. `--s-active-*` 모두 다크에서 재정의하지 않아(`#7c3aed`/`#d8b4fe` 고정) 다크에서 밝게 떠 보이지 않는다.
 
 **포커스 역할 분리 규칙 (중요):**
 - 텍스트 입력(검색/위치): `:focus` → 활성 보더(`--s-active-line`) **+ 링** `box-shadow: 0 0 0 3px var(--s-active-glow)`.
@@ -227,7 +222,7 @@ description: >
 ### 채움 위계 (단색은 CTA 하나에만)
 - **단색 채움**(`--s-active-fill`/`--s-active-line` 솔리드 + 흰 글씨): **"지금 누를 단 하나의 CTA"에만.** 등록(`/activities/new`·`/places/new` 제출)·저장(인라인/상세 Primary)·추천 "다른 추천 보기" — `styles.detailPrimaryBtn`(`--s-active-line`).
 - **선택됨/활성**(옵션 카드·칩·세그먼트·필터 칩): **단색 채움 금지** → `--s-accent-soft-bg` 틴트 + `--s-active-line` accent 보더 + `--s-active-text` accent 글씨/체크. (`styles.chipActive`/`styles.optionActive`/`styles.optionCardActive`)
-- **예외(단색 유지)**: ① **StepDots 진행 점** — "선택 상태"가 아니라 위치 표시라 `--s-active-fill` 단색 유지. ② **날짜 선택일**(date picker, §4-A) — 캘린더 단일 선택이라 `--s-active-fill` 단색 유지.
+- **예외(단색 유지)**: **StepDots 진행 점** — "선택 상태"가 아니라 위치 표시라 `--s-active-fill` 단색 유지. (날짜 선택은 네이티브 `<input type="date">`로 전환되어 캘린더 선택일 렌더는 OS가 담당 — 우리 토큰 예외 대상 아님, §4-A.)
 
 ### hover 언어 — "콘텐츠 vs 유틸리티" (의도된 구분)
 - **콘텐츠 요소**(카드·칩·옵션 카드 — 사용자가 *고르는* 대상): hover = **accent 보더**. 카드 `--s-card-hover-border`(라벤더 알파), 칩·옵션 비활성 `--s-active-line` 보더.
@@ -238,7 +233,7 @@ description: >
 - `/list` 카드(`ActivityCard`/`PlaceCard`)는 ⋮ 메뉴가 열린 동안 카드 보더를 **hover와 동일 톤**(`--s-card-hover-border`)으로 유지한다. 트리거의 `aria-expanded="true"`를 카드가 `:has([aria-expanded='true'])`로 반영(`screens.module.css` `.cardInteractive`). **보더만** — 그림자·`translateY` 없음(메뉴 조작 중 카드 들썩임 방지). `@media(hover)` 밖이라 **마우스·터치 모두** 강조. `hideMenu` 결과 카드(추천)는 트리거가 없어 미적용.
 
 ### 토큰 공유 주의
-- `--s-active-fill`/`--s-active-line`은 `/list` 필터 칩·세그먼트·상태 토글과 **공유**된다. 상태 색을 바꿀 땐 토큰 정의값을 건드리지 말고 **사용처 클래스**(`.chipActive` 등)에서만 조정한다 — 토큰값을 바꾸면 StepDots·날짜 선택일·CTA까지 휩쓸려 회귀한다.
+- `--s-active-fill`/`--s-active-line`은 `/list` 필터 칩·세그먼트·상태 토글과 **공유**된다. 상태 색을 바꿀 땐 토큰 정의값을 건드리지 말고 **사용처 클래스**(`.chipActive` 등)에서만 조정한다 — 토큰값을 바꾸면 StepDots·CTA까지 휩쓸려 회귀한다.
 
 ---
 
@@ -554,7 +549,7 @@ export const STATUS_LABELS: Record<Status, string> = {
 
 ### 10-H. 날짜 표시·별점·토스트
 
-**날짜**: 저장은 ISO(`YYYY-MM-DD`). 표시는 `formatKoreanDate()`(`lib/date.ts`, 문자열 분해로 타임존 안전) → `"2026년 4월 6일"`. 방문 기록 편집의 날짜 입력은 커스텀 date picker(§4-A) 사용 — native `<input type="date">` 금지.
+**날짜**: 저장은 ISO(`YYYY-MM-DD`). 방문 날짜 표시는 `formatDotDate()`(`lib/date.ts`, 문자열 분해로 타임존 안전) → `"2026.05.28"`(YYYY.MM.DD). 방문 기록 편집의 날짜 입력은 네이티브 `<input type="date">`(박스/아이콘은 우리 토큰, 달력 팝업만 OS) 사용 — §4-A. "등록일" 캡션은 `formatKoreanDate()`(`"2026년 4월 6일"`).
 
 **방문일 아이콘**: `Calendar` (`lucide-react`) + `styles.accent` 색 — 완료 이벤트 강조.
 

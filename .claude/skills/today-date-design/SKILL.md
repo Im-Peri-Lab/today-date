@@ -185,7 +185,7 @@ description: >
 - **달력 팝업은 OS 네이티브(`<input type="date">`)를 쓴다.** 박스/leading 아이콘/표시 텍스트만 우리 토큰으로 유지하고, 달력 UI 자체는 OS에 위임한다. (과거 base-ui `Popover` + 자체 월 그리드를 썼으나, 다이얼로그 안 portal 잡음·데스크탑 고정폭(`17rem`) 캘린더 폭 초과·다크 토큰 재선언 부담 때문에 네이티브로 전환.)
 - 구현: `styles.dateTrigger`(relative 박스) 안에 [leading `Calendar`(흐린 톤) + 표시 텍스트] + 그 위를 덮는 `styles.dateInput`(네이티브 `<input type="date">`, `position:absolute; inset:0; opacity:0`). 박스를 누르면 네이티브 input이 클릭/포커스를 받아 OS 달력을 연다(데스크탑은 `showPicker()`로 보강, 모바일은 포커스만으로 열림). `value`/`onChange`는 ISO(`YYYY-MM-DD`) 그대로.
 - 트리거 박스(`styles.dateTrigger`)는 다른 입력바와 **동일한 외형**: 40px / radius 10px / `--s-input` 보더 / `px-3` / `box-sizing:border-box`(`w-full`이 부모 폭을 절대 안 넘음, 고정 px width 없음). **leading `Calendar` 아이콘은 좌측 정렬**(다른 입력바와 동일한 결), 빈 값이면 placeholder "날짜 선택"(`--s-faint`). 박스 아래 별도 캡션 없음.
-- 표시 포맷은 **`YYYY.MM.DD`**(예: `2026.05.28`) — `formatDotDate()`(`lib/date.ts`) 단일 출처. 방문 날짜 표시(날짜 박스·카드 방문일·방문 기록 보기)는 모두 이 함수를 쓴다(요일·한글 없음). 요일이 무의미한 "등록일" 캡션은 `formatKoreanDate()`(`"2026년 4월 6일"`) 유지.
+- 표시 포맷은 **`YYYY.MM.DD (요일)`**(예: `2026.05.28 (목)`) — `formatDotDate()`(`lib/date.ts`) 단일 출처. 방문 날짜 표시(날짜 박스·카드 방문일·방문 기록 보기)는 모두 이 함수를 쓴다(한글 없음, 요일은 괄호로). 요일 계산용 Date는 연/월/일 인자로 로컬 생성(타임존 안전). 요일이 무의미한 "등록일" 캡션은 `formatKoreanDate()`(`"2026년 4월 6일"`) 유지.
 - 포커스: 네이티브 input 포커스 시 `styles.dateTrigger:focus-within`이 박스 보더를 `--s-active-line`로 — 다른 입력바와 동일한 포커스 언어.
 - iOS 줌인 방지: 네이티브 input `font-size:16px`. OS 다크 달력/indicator 대응: input `color-scheme: light dark`.
 - 저장값은 ISO(`YYYY-MM-DD`) 그대로. 표시 변환(`formatDotDate`/`formatKoreanDate`)은 문자열 분해로만(`new Date(iso)` 문자열 파싱 금지 — UTC 자정 밀림 방지, `lib/date.ts`와 동일 원칙).
@@ -549,7 +549,7 @@ export const STATUS_LABELS: Record<Status, string> = {
 
 ### 10-H. 날짜 표시·별점·토스트
 
-**날짜**: 저장은 ISO(`YYYY-MM-DD`). 방문 날짜 표시는 `formatDotDate()`(`lib/date.ts`, 문자열 분해로 타임존 안전) → `"2026.05.28"`(YYYY.MM.DD). 방문 기록 편집의 날짜 입력은 네이티브 `<input type="date">`(박스/아이콘은 우리 토큰, 달력 팝업만 OS) 사용 — §4-A. "등록일" 캡션은 `formatKoreanDate()`(`"2026년 4월 6일"`).
+**날짜**: 저장은 ISO(`YYYY-MM-DD`). 방문 날짜 표시는 `formatDotDate()`(`lib/date.ts`, 타임존 안전) → `"2026.05.28 (목)"`(YYYY.MM.DD (요일)). 방문 기록 편집의 날짜 입력은 네이티브 `<input type="date">`(박스/아이콘은 우리 토큰, 달력 팝업만 OS) 사용 — §4-A. "등록일" 캡션은 `formatKoreanDate()`(`"2026년 4월 6일"`).
 
 **방문일 아이콘**: `Calendar` (`lucide-react`) + `styles.accent` 색 — 완료 이벤트 강조.
 

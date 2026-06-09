@@ -34,9 +34,9 @@ export function DatePickerField({ id, value, onChange, placeholder = '날짜 선
 
   return (
     <div className={styles.dateTrigger} onClick={openPicker}>
-      {/* leading(좌측) Calendar 아이콘 — 흐린 톤 */}
-      <Calendar className={cn('h-4 w-4 shrink-0', styles.faint)} />
-      <span className={cn('flex-1 text-left', !value && styles.faint)}>
+      {/* leading(좌측) Calendar 아이콘 — accent 톤(상세화면 방문일 아이콘과 통일) */}
+      <Calendar className={cn('h-4 w-4 shrink-0', styles.accent)} />
+      <span className={cn(!value && styles.faint)}>
         {value ? formatDotDate(value) : placeholder}
       </span>
       {/* 박스 전체를 덮는 네이티브 입력 — 보이지 않지만 클릭/포커스를 받아 OS 달력을 연다.

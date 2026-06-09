@@ -603,12 +603,13 @@
  * 달력 팝업만 OS 네이티브(`<input type="date">`)를 쓴다. 박스는 다른 입력바와 동일한 외형
  * (40px / radius 10px / --s-input 보더 / px-3) + box-sizing:border-box(w-full이 부모 폭을 안 넘음).
  * 네이티브 input(.dateInput)을 박스 위에 opacity:0으로 덮어 클릭/포커스를 받고, 보이는 표시는
- * 그 아래 [Calendar 아이콘 + 좌측 정렬 날짜 텍스트]가 담당한다.
+ * 그 아래 [leading Calendar 아이콘(accent) + 날짜 텍스트]를 한 묶음으로 박스 가운데 정렬해 담당한다.
  */
 .dateTrigger {
   position: relative;
   display: flex;
   align-items: center;
+  justify-content: center; /* [leading Calendar 아이콘 + 날짜 텍스트] 묶음을 박스 가운데 정렬 */
   gap: 0.5rem;
   box-sizing: border-box;
   width: 100%;

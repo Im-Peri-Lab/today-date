@@ -397,7 +397,7 @@
 .segment {
   display: inline-flex;
   flex-shrink: 0;
-  padding: 0.1875rem;
+  padding: 0.125rem; /* 2px — 안쪽 segmentBtn(36) + padding(4) + border(2) ≈ 42px, 검색바(40) 컨트롤 층과 정합 */
   border-radius: 0.625rem;
   background: #ffffff;
   border: 1px solid var(--s-card-border-strong, #eceaf3);
@@ -731,9 +731,9 @@
   display: inline-flex;
   align-items: center;
   gap: 0.375rem;
-  height: 2.25rem;
+  height: 2.5rem; /* 40px — 토글·검색바와 동일 컨트롤 층 (너비는 내용폭 유지) */
   padding: 0 0.875rem;
-  border-radius: 0.625rem;
+  border-radius: 0.75rem; /* 검색바(.searchInput)와 정합 */
   font-size: 0.8125rem;
   font-weight: 500;
   color: var(--s-sub, #6b7280);

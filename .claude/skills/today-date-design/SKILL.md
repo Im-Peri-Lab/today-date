@@ -183,12 +183,14 @@ description: >
 
 **날짜 입력(네이티브 date 입력 — `src/components/forms/DatePickerField.tsx`):**
 - **달력 팝업은 OS 네이티브(`<input type="date">`)를 쓴다.** 박스/leading 아이콘/표시 텍스트만 우리 토큰으로 유지하고, 달력 UI 자체는 OS에 위임한다. (과거 base-ui `Popover` + 자체 월 그리드를 썼으나, 다이얼로그 안 portal 잡음·데스크탑 고정폭(`17rem`) 캘린더 폭 초과·다크 토큰 재선언 부담 때문에 네이티브로 전환.)
+- **⚠️ 폐기**: 옛 커스텀 picker 규칙(`styles.dpPopup`/`dpHeader`/`dpNav`/`dpGrid`/`dpDay`/`dpToday` 등 `dp*` 클래스, `Popover.Portal` + `@media` 다크 토큰 재선언, 자체 연/월 드롭다운·"오늘" 버튼·빈 행 없는 그리드)은 **모두 폐기**됐다. 관련 CSS·컴포넌트 코드는 제거됨 — 다시 도입하지 말 것.
 - 구현: `styles.dateTrigger`(relative 박스) 안에 [leading `Calendar`(accent 톤) + 표시 텍스트] + 그 위를 덮는 `styles.dateInput`(네이티브 `<input type="date">`, `position:absolute; inset:0; opacity:0`). 박스를 누르면 네이티브 input이 클릭/포커스를 받아 OS 달력을 연다(데스크탑은 `showPicker()`로 보강, 모바일은 포커스만으로 열림). `value`/`onChange`는 ISO(`YYYY-MM-DD`) 그대로.
 - 트리거 박스(`styles.dateTrigger`)는 다른 입력바와 **동일한 외형**: 40px / radius 10px / `--s-input` 보더 / `px-3` / `box-sizing:border-box`(`w-full`이 부모 폭을 절대 안 넘음, 고정 px width 없음). **"선택 트리거" 성격이라 [leading `Calendar` 아이콘 + 날짜 텍스트]를 한 묶음으로 박스 가운데 정렬**(`justify-content:center`) — 다른 입력바(제목/메모/위치)는 좌측 정렬 유지. 빈 값이면 placeholder "날짜 선택"(`--s-faint`). 박스 아래 별도 캡션 없음.
 - **아이콘 색은 `--s-accent`(`styles.accent`)로 통일** — 다녀왔어요 다이얼로그·기록 수정·상세화면 방문일 아이콘이 모두 같은 보라 톤(상세화면 기준). 라이트 `#7c3aed` / 다크 `#c084fc` 자동.
 - 표시 포맷은 **`YYYY.MM.DD (요일)`**(예: `2026.05.28 (목)`) — `formatDotDate()`(`lib/date.ts`) 단일 출처. 방문 날짜 표시(날짜 박스·카드 방문일·방문 기록 보기)는 모두 이 함수를 쓴다(한글 없음, 요일은 괄호로). 요일 계산용 Date는 연/월/일 인자로 로컬 생성(타임존 안전). 요일이 무의미한 "등록일" 캡션은 `formatKoreanDate()`(`"2026년 4월 6일"`) 유지.
 - 포커스: 네이티브 input 포커스 시 `styles.dateTrigger:focus-within`이 박스 보더를 `--s-active-line`로 — 다른 입력바와 동일한 포커스 언어.
 - iOS 줌인 방지: 네이티브 input `font-size:16px`. OS 다크 달력/indicator 대응: input `color-scheme: light dark`.
+- **알려진 트레이드오프(수용)**: 달력 팝업 UI는 OS 통제라 앱이 못 바꾼다. ① 선택일 강조색이 OS 기본(예: iOS Safari는 파랑)으로 뜨고 앱 보라(`--s-active-*`)로 못 바꾼다. ② "오늘로 점프" 버튼 유무 등 컨트롤이 플랫폼마다 다르다(맥 Chrome엔 "오늘", iOS엔 없음). → portal 잡음·폭 초과 제거의 대가로 의도적으로 수용. 앱 보라색 선택일/오늘 버튼이 꼭 필요하면 커스텀 picker로 회귀해야 하므로 신규 도입 전 트레이드오프를 재검토할 것.
 - 저장값은 ISO(`YYYY-MM-DD`) 그대로. 표시 변환(`formatDotDate`/`formatKoreanDate`)은 문자열 분해로만(`new Date(iso)` 문자열 파싱 금지 — UTC 자정 밀림 방지, `lib/date.ts`와 동일 원칙).
 
 ---

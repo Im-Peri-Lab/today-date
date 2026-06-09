@@ -403,8 +403,12 @@
   border: 1px solid var(--s-card-border-strong, #eceaf3);
 }
 .segmentBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   white-space: nowrap;
-  padding: 0.375rem 0.75rem;
+  height: 2.25rem; /* 36px — 필터 칩(.chip)·필터 토글(.filterToggle)과 통일 */
+  padding: 0 0.75rem;
   border-radius: 0.5rem;
   font-size: 0.8125rem;
   font-weight: 500;

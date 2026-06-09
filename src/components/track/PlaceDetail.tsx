@@ -275,7 +275,7 @@ export function PlaceDetail({ id, initialEdit }: Props) {
               {/* 좌: 삭제 — 평소 faint, hover 시 destructive 노출 */}
               <Button
                 variant="ghost"
-                className={cn(styles.detailDeleteBtn, 'gap-1.5')}
+                className={cn(styles.detailDeleteBtn, 'h-9 gap-1.5')}
                 onClick={() => setDeleteOpen(true)}
               >
                 <Trash2 className="h-4 w-4" />
@@ -285,7 +285,7 @@ export function PlaceDetail({ id, initialEdit }: Props) {
               {/* 우: Primary — --s-active-line(#7c3aed): 라이트·다크 동일, 다크 #c084fc 역전 방지 */}
               {place.status === 'visited' ? (
                 <Button
-                  className={cn(styles.detailPrimaryBtn, 'gap-1.5 text-white hover:brightness-105')}
+                  className={cn(styles.detailPrimaryBtn, 'h-9 gap-1.5 text-white hover:brightness-105')}
                   onClick={handleRevert}
                 >
                   <Undo2 className="h-4 w-4" />
@@ -293,7 +293,7 @@ export function PlaceDetail({ id, initialEdit }: Props) {
                 </Button>
               ) : (
                 <Button
-                  className={cn(styles.detailPrimaryBtn, 'gap-1.5 text-white hover:brightness-105')}
+                  className={cn(styles.detailPrimaryBtn, 'h-9 gap-1.5 text-white hover:brightness-105')}
                   onClick={() => setVisitedOpen(true)}
                 >
                   <CheckCircle2 className="h-4 w-4" />

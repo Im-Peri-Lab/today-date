@@ -36,7 +36,7 @@ export function LogoutButton() {
       aria-label="로그아웃"
       title="로그아웃"
     >
-      <LogOut className="h-[18px] w-[18px]" />
+      <LogOut className="h-5 w-5" />
     </button>
   )
 }

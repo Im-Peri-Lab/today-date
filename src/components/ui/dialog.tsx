@@ -32,7 +32,8 @@ function DialogOverlay({
     <DialogPrimitive.Backdrop
       data-slot="dialog-overlay"
       className={cn(
-        "fixed inset-0 isolate z-50 bg-black/10 duration-100 supports-backdrop-filter:backdrop-blur-xs data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0",
+        styles.dialogOverlay,
+        "fixed inset-0 isolate z-50 duration-100 supports-backdrop-filter:backdrop-blur-xs data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0",
         className
       )}
       {...props}
@@ -124,7 +125,9 @@ function DialogTitle({ className, ...props }: DialogPrimitive.Title.Props) {
     <DialogPrimitive.Title
       data-slot="dialog-title"
       className={cn(
-        "font-heading text-base leading-none font-medium",
+        // 다이얼로그 전용 제목 위계: 좁은 박스에 맞춰 페이지 h1(~27px)보다 한 단계 작은 20px.
+        // 페이지 제목과 억지로 통일하지 않음(스킬 §6은 메인 화면 h1 전용).
+        "font-heading text-xl leading-snug font-semibold tracking-[-0.01em]",
         className
       )}
       {...props}

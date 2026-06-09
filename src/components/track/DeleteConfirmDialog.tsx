@@ -28,7 +28,9 @@ export function DeleteConfirmDialog({
 }: DeleteConfirmDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-xs">
+      {/* 결정 다이얼로그 → 닫기 수단은 하단 "취소" 하나만(스킬 다이얼로그 §, iOS Action Sheet 표준:
+          삭제·취소 두 결정 명시). 상단 X는 제거(showCloseButton={false}). */}
+      <DialogContent className="max-w-xs" showCloseButton={false}>
         <DialogHeader>
           <DialogTitle>삭제할까요?</DialogTitle>
           <DialogDescription>

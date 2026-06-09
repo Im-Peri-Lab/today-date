@@ -96,12 +96,12 @@ export function VisitedDialog({
       {/* 박스 호흡: 기본 p-4 → 상단 pt-6(24px, 페이지 헤더 mt-6 호흡과 비슷), 좌우 px-5(20px),
           하단 pb-5(20px). 폼 요소 크기·간격은 불변, 박스 패딩만 키운다. */}
       <DialogContent className="px-5 pt-6 pb-5">
-        {/* 헤더 위계: 활동 추가 페이지(`/activities/new`)와 동일하게 page 헤더 클래스를 그대로 사용.
-            pageTitle(h1, ~27px/600/-0.01em) + pageSubtitle(--s-sub, margin-top 0.25rem)로 두 덩어리 위계를 통일.
-            gap-0: 제목↔설명 간격은 pageSubtitle 자체 margin-top이 담당(추가 페이지 블록 흐름과 동일).
+        {/* 헤더 위계: 제목은 다이얼로그 전용 스케일(베이스 DialogTitle, 20px/600) — 좁은 박스에 맞춰
+            페이지 h1(pageTitle ~27px)을 쓰지 않는다. 설명은 pageSubtitle(--s-sub, margin-top 0.25rem) 유지.
+            gap-0: 제목↔설명 간격은 pageSubtitle 자체 margin-top이 담당.
             mb-1: 설명↔첫 라벨 간격을 추가 페이지 mt-5(20px)에 맞춤(그리드 gap-4 16px + 4px). */}
         <DialogHeader className="gap-0 mb-1">
-          <DialogTitle className={styles.pageTitle}>다녀왔어요 💕</DialogTitle>
+          <DialogTitle>다녀왔어요 💕</DialogTitle>
           <DialogDescription className={styles.pageSubtitle}>
             <span className="font-medium text-[color:var(--s-ink,#1a1033)]">{title}</span> 방문 기록을 남겨보세요.
           </DialogDescription>

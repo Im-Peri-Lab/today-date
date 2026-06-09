@@ -826,7 +826,9 @@
 @media (prefers-color-scheme: dark) {
   .dialogPopup {
     --s-card-bg: #241a36;
-    --s-card-border: #2a1f3e;
+    /* 가장자리 ring(ring-[var(--s-card-border)])이 다크 카드면(#241a36)에 묻히지 않도록
+       border-strong(#3a2f4e)까지 끌어올려 경계를 또렷하게(라이트는 인라인 폴백 사용 → 무변화). */
+    --s-card-border: #3a2f4e;
     --s-card-border-strong: #3a2f4e;
     --s-input: #4a3f63;
     --s-divider: #2c2442;
@@ -839,6 +841,26 @@
     --s-active-line: #7c3aed;
     --s-active-text: #d8b4fe;
     --s-card-shadow: 0 8px 24px -16px rgba(0, 0, 0, 0.6);
+    /* 진해진 오버레이(아래 .dialogOverlay 다크 0.55) 위에서 팝업이 떠 보이도록 깊은 그림자 추가.
+       라이트는 .dialogPopup 베이스에 box-shadow를 두지 않아 기존 ring-only 외형 유지(무변화). */
+    box-shadow: 0 16px 48px -12px rgba(0, 0, 0, 0.7);
+  }
+}
+
+/*
+ * 다이얼로그 backdrop. base-ui Backdrop 은 portal(body)로 나가 .page 다크 토큰을 못 받으므로
+ * 라이트/다크 분기를 미디어쿼리로 직접 둔다(토큰 상속 아님 → portal 위치 무관하게 적용).
+ * 라이트: 흰 페이지 대비 검정 10%(기존 bg-black/10 과 동일, 라이트 무변화).
+ * 다크: 이미 어두운 페이지(#0a0712) 위에서 10%는 거의 안 눌려 경계 식별이 안 되므로 55%로 진하게
+ *       눌러 팝업이 떠 보이게 한다. CSS module 클래스라 Tailwind utilities 레이어를 항상 이긴다.
+ */
+.dialogOverlay {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+@media (prefers-color-scheme: dark) {
+  .dialogOverlay {
+    background: rgba(0, 0, 0, 0.55);
   }
 }
 

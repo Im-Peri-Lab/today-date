@@ -578,6 +578,20 @@ export const STATUS_LABELS: Record<Status, string> = {
 - **결정 다이얼로그** (`DeleteConfirmDialog` 등 — 확인/취소 두 결정 중 택1): **하단 "취소" 버튼만** 유지. 상단 `X`는 제거(`DialogContent`에 `showCloseButton={false}`). iOS Action Sheet 표준대로 **확인(삭제 등)·취소 두 결정을 풋터에 나란히 명시**해 동등한 선택지로 읽히게 한다.
 - 판단 기준: **"이 다이얼로그가 입력을 받는가, 결정을 묻는가?"** 입력 폼 → `X`만(CTA 명시) / 결정 다이얼로그 → 취소 버튼만(확인/취소 두 결정 명시).
 
+### 11-A. 제목 스케일 (다이얼로그 전용 위계)
+
+왜: 다이얼로그는 좁은 박스라 페이지 h1(`styles.pageTitle` ~27px, §6)을 그대로 쓰면 과하게 크다. **페이지 제목과 통일하지 않고 다이얼로그 전용으로 한 단계 작게** 둔다.
+
+- 베이스 `DialogTitle`(`ui/dialog.tsx`): **`text-xl`(20px) / `font-semibold`(600) / `leading-snug` / `tracking-[-0.01em]`**. `VisitedDialog`·`DeleteConfirmDialog` 모두 이 베이스를 쓴다(개별 다이얼로그에서 `styles.pageTitle`로 덮어쓰지 않는다).
+- 설명(`DialogDescription`)은 `--s-sub` 톤. `VisitedDialog`는 `styles.pageSubtitle`(margin-top 0.25rem)로 제목↔설명 간격을 담당.
+
+### 11-B. 다크모드 식별성 (오버레이 · 팝업 분리)
+
+왜: 다크에서 페이지(`#0a0712`)가 이미 어두워, 라이트용 오버레이(검정 10%)로는 거의 안 눌려 팝업 경계가 안 보인다. 라이트 식별성은 유지하면서 다크만 강화한다.
+
+- **오버레이**(`styles.dialogOverlay`, `screens.module.css`): 라이트 `rgba(0,0,0,0.10)`(기존 `bg-black/10`과 동일) / 다크 `rgba(0,0,0,0.55)`. `@media (prefers-color-scheme: dark)`로 직접 분기(backdrop은 portal로 나가 `--s-*` 상속 불가). CSS module 클래스라 Tailwind utilities 레이어를 이긴다.
+- **팝업 가장자리**(`styles.dialogPopup` 다크 블록): ring 색 토큰 `--s-card-border`를 다크에서 `#3a2f4e`(= border-strong)로 끌어올려 카드면(`#241a36`)과 분리 + `box-shadow: 0 16px 48px -12px rgba(0,0,0,0.7)`로 깊이를 준다. **라이트는 box-shadow를 두지 않아 기존 ring-only 외형 그대로**(무변화).
+
 ---
 
 ## 🚫 금지 규칙 (별도 섹션)

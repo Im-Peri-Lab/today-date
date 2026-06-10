@@ -91,7 +91,7 @@
     --s-sub: #a8a0b8; /* 서브카피 */
     --s-faint: #8c84a0; /* 더 옅은 보조 */
     --s-accent: #c084fc; /* 보라 강조 → 다크는 라벤더 */
-    --s-accent-soft-bg: #2d2540; /* 활성 칩/소프트 배경 */
+    --s-accent-soft-bg: #3a2d57; /* 활성 칩/소프트 배경 — 카드면(#241a36)보다 또렷이 밝은 보라 틴트(선택 면 구분) */
     --s-accent-soft-text: #d8b4fe;
 
     --s-card-bg: #241a36; /* 카드 표면 — 페이지 배경(#0a0712~#120c1e)보다 또렷이 밝게 분리 */
@@ -707,7 +707,7 @@
     --s-sub: #a8a0b8;
     --s-faint: #8c84a0;
     --s-accent: #c084fc;
-    --s-accent-soft-bg: #2d2540;
+    --s-accent-soft-bg: #3a2d57; /* .page 다크 블록과 동일값 유지(미러) */
     --s-active-line: #7c3aed;
     --s-active-text: #d8b4fe;
     --s-card-shadow: 0 8px 24px -16px rgba(0, 0, 0, 0.6);

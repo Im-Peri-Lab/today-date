@@ -136,7 +136,7 @@ export function PlaceRecommendWizard() {
                   <Button
                     className={cn(
                       'h-10 w-full gap-1.5 text-white hover:brightness-105',
-                      styles.detailPrimaryBtn
+                      styles.gradIcon
                     )}
                   >
                     <Plus className="h-4 w-4" />

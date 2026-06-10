@@ -91,7 +91,7 @@
     --s-sub: #a8a0b8; /* 서브카피 */
     --s-faint: #8c84a0; /* 더 옅은 보조 */
     --s-accent: #c084fc; /* 보라 강조 → 다크는 라벤더 */
-    --s-accent-soft-bg: #2d2540; /* 활성 칩/소프트 배경 */
+    --s-accent-soft-bg: #573f7f; /* 활성 칩/소프트 배경 — 카드면(#241a36) 대비 선택이 한눈에. 명도만 한 톤 더(보라 톤·채도 유지) */
     --s-accent-soft-text: #d8b4fe;
 
     --s-card-bg: #241a36; /* 카드 표면 — 페이지 배경(#0a0712~#120c1e)보다 또렷이 밝게 분리 */
@@ -327,6 +327,18 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
+/* 키보드 포커스 = 중성 hover 와 동일(브라우저 기본 outline 대체, 글로우 없음) */
+.iconBtn:focus-visible {
+  outline: none;
+  background: var(--s-card-border-strong, #eceaf3);
+  color: var(--s-ink, #1a1033);
+}
+@media (prefers-color-scheme: dark) {
+  .iconBtn:focus-visible {
+    background: var(--s-accent-soft-bg, #f5f0ff);
+    color: var(--s-accent, #7c3aed);
+  }
+}
 
 /* ── 보조 텍스트 링크 ──────────────────────────── */
 .textLink {
@@ -397,14 +409,20 @@
 .segment {
   display: inline-flex;
   flex-shrink: 0;
-  padding: 0.1875rem;
+  padding: 0.0625rem; /* 1px — 안쪽 segmentBtn(36) + padding(2) + border(2) = 40px, 검색바·필터와 동일 높이 */
   border-radius: 0.625rem;
-  background: #ffffff;
+  /* iOS 그루브 — .mealBadge 와 동일 패턴: 라이트 #eceaf3 / 다크 #1b1430.
+     카드(#fff)보다 한 단계 어두운 면이라 흰 선택칸이 위로 떠 보인다. */
+  background: var(--s-track, var(--s-card-border-strong, #eceaf3));
   border: 1px solid var(--s-card-border-strong, #eceaf3);
 }
 .segmentBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   white-space: nowrap;
-  padding: 0.375rem 0.75rem;
+  height: 2.25rem; /* 36px — 필터 칩(.chip)·필터 토글(.filterToggle)과 통일 */
+  padding: 0 0.75rem;
   border-radius: 0.5rem;
   font-size: 0.8125rem;
   font-weight: 500;
@@ -419,19 +437,21 @@
 }
 .segmentBtnActive {
   color: var(--s-active-text, #7c3aed);
-  background: var(--s-card-bg, #ffffff);
+  background: var(--s-card-bg, #ffffff); /* 흰 면(라이트) — 트랙 그루브 위로 떠오름 */
+  font-weight: 600; /* 선택 = 흰 면 떠오름 + accent 글자 + bold (iOS 세그먼트 패턴, 칩 틴트와 구분) */
+  /* 앱 공통 선택 언어 = --s-active-line 1px 보라 테두리(칩·필터·검색바 포커스와 동일 톤·두께).
+     흰 면 떠오름은 트랙↔선택칸 명도차가 담당하고, 중성 그림자는 보라 테두리와 충돌 않게 옅게만. */
   box-shadow:
     0 0 0 1px var(--s-active-line, #7c3aed),
-    0 4px 12px -4px var(--s-active-glow, rgba(124, 58, 237, 0.2));
+    0 1px 2px rgba(0, 0, 0, 0.06);
 }
 /*
- * 다크 토글은 기존대로 — 어두운 트랙(눌린 면) + 보더 없음.
- * (라이트의 흰 면+보더가 다크로 새지 않도록, 베이스 .segment 보다 뒤에 둬서 우선순위 확보)
+ * 다크 토글 — 트랙은 base 의 --s-track(#1b1430, 눌린 면)이 자동 적용, 선택칸은 한 단계 더 밝은
+ * raised 면(--s-raised #2f2647)으로 떠오름. 보더는 base 의 --s-card-border-strong(#3a2f4e) 유지.
  */
 @media (prefers-color-scheme: dark) {
-  .segment {
-    background: var(--s-track, #1b1430);
-    border-color: transparent;
+  .segmentBtnActive {
+    background: var(--s-raised, #2f2647);
   }
 }
 
@@ -474,8 +494,8 @@
 }
 /*
  * 포커스 역할 분리:
- *  - 텍스트 입력(검색/위치): 연보라 포커스 링 + 활성 보더 (입력 필드 관례)
- *  - 버튼류(필터/칩): 링 없이 활성 보더만
+ *  - 텍스트 입력(검색/위치): 연보라 포커스 링(글로우) + 활성 보더 — 글로우는 입력 필드 전용
+ *  - 선택 컨트롤·버튼(칩/필터/토글/옵션/초기화): 글로우 없이 활성 보더 + 활성 글자(hover 와 동일)
  * 보더는 항상 1px 자리를 차지(색만 변경)하므로 포커스 시 레이아웃 점프가 없다.
  */
 .searchInput:focus,
@@ -484,10 +504,20 @@
   border-color: var(--s-active-line, #7c3aed);
   box-shadow: 0 0 0 3px var(--s-active-glow, rgba(124, 58, 237, 0.2));
 }
+/*
+ * 선택 컨트롤·버튼(칩·필터·토글·옵션카드·초기화): 키보드 포커스 = hover 와 동일한 결과.
+ * 활성 보더(--s-active-line) + 활성 글자(--s-active-text), 글로우(box-shadow) 없음.
+ * :focus-visible 만 → 마우스 클릭엔 안 뜨고 Tab 키보드 포커스에만 뜬다.
+ * (글로우는 입력 필드 전용 — .searchInput:focus 참조. 유틸리티 아이콘 버튼은 중성 hover 유지·포커스 미지정.)
+ */
+.segmentBtn:focus-visible,
+.chip:focus-visible,
 .filterToggle:focus-visible,
-.chip:focus-visible {
+.resetBtn:focus-visible,
+.optionCard:focus-visible {
   outline: none;
   border-color: var(--s-active-line, #7c3aed);
+  color: var(--s-active-text, #7c3aed);
 }
 
 /* 필터 칩 */
@@ -500,7 +530,7 @@
   border-radius: 9999px; /* pill 유지 */
   padding: 0 0.75rem;
   font-size: 0.8125rem;
-  border: 1px solid var(--s-input, #eceaf3);
+  border: 1px solid var(--s-card-border-strong, #eceaf3);
   background: var(--s-card-bg, #ffffff);
   color: var(--s-sub, #6b7280);
   cursor: pointer;
@@ -523,7 +553,7 @@
 @media (hover: hover) {
   .chip:hover:not(.chipActive) {
     border-color: var(--s-active-line, #c4b5fd);
-    color: var(--s-active-line, #7c3aed);
+    color: var(--s-active-text, #7c3aed);
   }
 }
 /* 활성 칩: 연한 틴트 배경 + accent 보더/글씨 (단색 채움은 CTA 전용). 공유 토큰값은 불변, 사용처 스타일만 틴트화 */
@@ -590,7 +620,13 @@
 @media (hover: hover) {
   .optionCard:not(.optionCardActive):hover {
     border-color: var(--s-active-line, #7c3aed);
+    /* 리스트 카드(.cardInteractive)와 동일한 부상 토큰 — translateY + 호버 그림자 */
+    transform: translateY(-2px);
+    box-shadow: var(--s-card-shadow-hover, 0 12px 28px -12px rgba(168, 85, 247, 0.32));
   }
+}
+.optionCard:active {
+  transform: translateY(0);
 }
 .optionCardActive {
   border-color: var(--s-active-line, #7c3aed);
@@ -671,7 +707,7 @@
     --s-sub: #a8a0b8;
     --s-faint: #8c84a0;
     --s-accent: #c084fc;
-    --s-accent-soft-bg: #2d2540;
+    --s-accent-soft-bg: #573f7f; /* .page 다크 블록과 동일값 유지(미러) */
     --s-active-line: #7c3aed;
     --s-active-text: #d8b4fe;
     --s-card-shadow: 0 8px 24px -16px rgba(0, 0, 0, 0.6);
@@ -717,9 +753,9 @@
   display: inline-flex;
   align-items: center;
   gap: 0.375rem;
-  height: 2.25rem;
+  height: 2.5rem; /* 40px — 토글·검색바와 동일 컨트롤 층 (너비는 내용폭 유지) */
   padding: 0 0.875rem;
-  border-radius: 0.625rem;
+  border-radius: 0.75rem; /* 검색바(.searchInput)와 정합 */
   font-size: 0.8125rem;
   font-weight: 500;
   color: var(--s-sub, #6b7280);
@@ -773,9 +809,11 @@
     border-color 140ms ease,
     color 140ms ease;
 }
-.resetBtn:hover {
-  border-color: var(--s-active-line, #c4b5fd);
-  color: var(--s-active-line, #7c3aed);
+@media (hover: hover) {
+  .resetBtn:hover {
+    border-color: var(--s-active-line, #c4b5fd);
+    color: var(--s-active-text, #7c3aed);
+  }
 }
 
 /*
@@ -891,12 +929,26 @@
     background 140ms ease,
     color 140ms ease;
 }
-.editGhostBtn:hover {
+@media (hover: hover) {
+  .editGhostBtn:hover {
+    background: var(--s-card-border-strong, #eceaf3);
+    color: var(--s-ink, #1a1033);
+  }
+}
+@media (prefers-color-scheme: dark) and (hover: hover) {
+  .editGhostBtn:hover {
+    background: var(--s-accent-soft-bg, #2d2540);
+    color: var(--s-accent, #c084fc);
+  }
+}
+/* 키보드 포커스 = 중성 hover 와 동일(브라우저 기본 outline 대체, 글로우 없음) */
+.editGhostBtn:focus-visible {
+  outline: none;
   background: var(--s-card-border-strong, #eceaf3);
   color: var(--s-ink, #1a1033);
 }
 @media (prefers-color-scheme: dark) {
-  .editGhostBtn:hover {
+  .editGhostBtn:focus-visible {
     background: var(--s-accent-soft-bg, #2d2540);
     color: var(--s-accent, #c084fc);
   }

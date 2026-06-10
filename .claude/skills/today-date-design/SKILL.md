@@ -97,18 +97,20 @@ description: >
 
 ## 4. 토글 · 검색 · 필터 컨트롤 스타일
 
-왜: 라이트는 흰 면 + 옅은 보더(`--s-card-border-strong`)로 통일, 활성만 보라로 구분. 포커스 시 보더는 1px 자리를 항상 차지해 레이아웃 점프가 없다.
+왜: 입력/컨트롤 줄(토글·검색바·필터)은 **바깥 박스 40px로 통일**해 한 줄로 정렬되게 한다. 라이트는 흰 면 + 옅은 보더(`--s-card-border-strong`), 활성만 보라로 구분. 포커스 시 보더는 1px 자리를 항상 차지해 레이아웃 점프가 없다.
 
+- **컨트롤 줄 높이 = 40px 통일 (확정)**: 토글 트랙(`.segment`)·검색바(`.searchInput`)·필터 버튼(`.filterToggle`) **바깥 박스가 모두 40px**. 컨트롤 간 세로 간격은 **12px 균일**(`/list` 필터바: 토글↔검색바·검색바↔필터 모두 `mt-3`).
 - **세그먼트 토글** `styles.segment` / `styles.segmentBtn` / `styles.segmentBtnActive`
-  - 트랙: padding `0.1875rem`, radius `0.625rem`, 라이트 `#fff`+보더 `#eceaf3` / 다크 트랙 `#1b1430`+보더 없음
-  - 버튼: padding `0.375rem 0.75rem`, radius `0.5rem`, `0.8125rem`/weight 500, color `sub`
+  - 트랙: padding `0.0625rem`(1px), radius `0.625rem`, 배경 `var(--s-track, --s-card-border-strong)`(라이트 연회색 그루브 `#eceaf3` / 다크 트랙 `#1b1430`), 보더 `1px --s-card-border-strong`(라·다 동일 톤). **안쪽 버튼 36 + padding 2 + border 2 = 바깥 40px.**
+  - 버튼(`.segmentBtn`): height `2.25rem`(36px), padding `0 0.75rem`, radius `0.5rem`, `0.8125rem`/weight 500, color `sub`.
+  - 선택(`.segmentBtnActive`): **iOS식 흰 면 떠오름 + 보라 테두리** — 칩 틴트와 구분되는 별개 패턴(**§5-A** 참조).
 - **검색 입력** `styles.search` + `styles.searchInput`(+`styles.searchIcon` 왼쪽 아이콘)
-  - height `2.5rem`, radius `0.75rem`, 보더 `1px var(--s-card-border-strong)`, bg `card-bg`, font `0.875rem`
+  - height `2.5rem`(40px), radius `0.75rem`, 보더 `1px var(--s-card-border-strong)`, bg `card-bg`, font `0.875rem`. 포커스 = 보더 `--s-active-line` + 3px 글로우(입력 전용, §5 포커스 역할 분리).
 - **필터 토글 버튼** `styles.filterToggle`(+`styles.filterToggleActive`)
-  - height `2.25rem`, radius `0.625rem`, `0.8125rem`/weight 500
+  - height `2.5rem`(40px — 토글·검색바와 통일), radius `0.75rem`(검색바 정합), `0.8125rem`/weight 500. **너비는 내용폭(컴팩트) 유지 — 가로로 꽉 채우지 않는다.**
 - **필터 칩** `styles.chip`(+`styles.chipActive`)
-  - radius `9999px`, padding `0.375rem 0.75rem`, font `0.8125rem`, 보더 `1px var(--s-card-border)`
-- **초기화 버튼** `styles.resetBtn` (필터 버튼과 같은 높이의 작은 pill, `X` 아이콘 + 텍스트)
+  - height `2.25rem`(36px), radius `9999px`(pill), padding `0 0.75rem`, font `0.8125rem`, 보더 `1px var(--s-card-border-strong)`. 선택 = 틴트(**§5-A**).
+- **초기화 버튼** `styles.resetBtn` (height 36px 작은 pill, `X` 아이콘 + 텍스트)
 - **활성 필터 개수 뱃지** `styles.filterCount` (그라데이션 채움)
 
 복붙(필터 칩):
@@ -133,15 +135,15 @@ description: >
 | 세그먼트 (`styles.option`) | **40px** (`height:2.5rem`) | 10px (`0.625rem`) | `screens.module.css .option` |
 | 카테고리 칩 (`styles.chip`) | **36px** (`height:2.25rem`) | pill (`9999px`) | `screens.module.css .chip` |
 | 추가 화면 하단 Primary (제출) | **48px** (`h-12`) | 10px | `FormLayout.tsx` |
-| 상세 하단 Primary("다녀왔어요"/"되돌리기")·삭제 | **32px** (Button 기본 `h-8`) | 10px | `ActivityDetail`/`PlaceDetail` |
-| 인라인 편집 Save·Cancel (`DetailBlock`) | **32px** (Button 기본 `h-8`) | 10px | `DetailBlock.tsx` |
+| 상세 하단 Primary("다녀왔어요"/"되돌리기")·삭제 | **36px** (`h-9`) | 10px | `ActivityDetail`/`PlaceDetail` |
+| 인라인 편집 Save·Cancel (`DetailBlock`) | **36px** (`h-9`) | 10px | `DetailBlock.tsx` |
 
 → **액션·컨트롤 사이즈 위계** (한 화면 안에서 정렬):
 - **48px** — 신규 생성 마무리 CTA(추가 화면 Primary `h-12` **전용**). 인라인엔 쓰지 않는다.
-- **40px** — 일반 입력/선택 컨트롤(`Input`·`Textarea`·세그먼트·카테고리 외 컨트롤·날짜 박스 `dateTrigger`).
-- **36px** — 카테고리 칩.
-- **32px** — 보조 액션(상세 하단 Primary/삭제 + 인라인 Save/Cancel). Button 기본 `h-8`을 그대로 쓰고 **height 클래스를 주지 않는다**(예전 인라인 `h-10`은 제거). 한 화면(인라인 편집)에서 인라인 Save/Cancel과 하단 Primary/삭제가 같은 32px로 정렬.
-- 인라인 Save/Cancel은 카드 안 일반 컨트롤(40px)보다 **한 단계 작은 "보조 액션"(32px)** 결로 둔다. Save 채움은 단색 액센트(`styles.detailPrimaryBtn`) 유지. 컨트롤 가로 패딩은 `px-3`(0.75rem)로 통일.
+- **40px** — 일반 입력/선택 컨트롤(`Input`·`Textarea`·세그먼트·카테고리 외 컨트롤·날짜 박스 `dateTrigger`)·컨트롤 줄(토글·검색바·필터, §4).
+- **36px** — 카테고리 칩 + **인라인 액션(저장·취소·삭제·전환)**.
+- **인라인 액션 = 36px (`h-9`, 확정)**: 상세 하단 Primary/삭제·인라인 Save/Cancel 모두 `h-9` 명시(예전 32px `h-8`에서 상향). 글자만인 Save/Cancel은 정사각 옹색함을 피하려 `px-4`로 통통하게, 아이콘+글자인 삭제/전환은 Button 기본 `px-2.5` 유지(이미 폭 있음). 한 화면(인라인 편집)에서 Save/Cancel·하단 Primary/삭제가 같은 36px로 정렬.
+- 인라인 액션(36px)은 카드 안 일반 컨트롤(40px)보다 **한 단계 작은 "보조 액션"** 결. Save 채움은 단색 액센트(`styles.detailPrimaryBtn`) 유지.
 
 **페이지 높이/하단 여백**: 상세 페이지는 `cn(styles.page, styles.pageStatic)`로 `min-height:auto`(100dvh spacer 없음) → 콘텐츠 자연 높이. 짧은 콘텐츠 아래는 고정 배경(`.page::before`)이 채워 흰 빈칸이 없다(별도 spacer 금지).
 
@@ -153,13 +155,13 @@ description: >
 - 용도: "새 항목 생성 완료" — 데이터 추가가 발생하는 마무리 액션.
 - 적용처: `/activities/new` "활동 등록하기" · `/places/new` "장소 등록하기" · (향후) 추천 위저드 결과 저장, CSV 가져오기 완료 등.
 
-**2) 콘텐츠폭 액션** — **32px / 자연폭(`w-auto`, Button 기본 `h-8`) / radius 10px**
+**2) 콘텐츠폭 액션** — **36px / 자연폭(`w-auto`, `h-9`) / radius 10px**
 - 용도: "기존 항목에 작용" — 수정·전환·삭제 등 데이터 가공 액션.
 - 적용처: 인라인 편집 Save/Cancel(`DetailBlock` 내부) · 상세 하단 전환 액션("다녀왔어요"/"가보고 싶은 곳으로 되돌리기") · 상세 하단 삭제(ghost variant + destructive 톤) · 카드 메뉴 액션 · (향후) 다중 선택 액션 등.
 
 **판단 기준 — "이 행위가 새 데이터를 만드는가?"**
 - YES → 풀폭 Primary (48px)
-- NO (수정·전환·삭제·취소) → 콘텐츠폭 액션 (32px)
+- NO (수정·전환·삭제·취소) → 콘텐츠폭 액션 (36px)
 
 일반 컨트롤(입력바·세그먼트 등 **40px**)·카테고리 칩(**36px**)은 위 액션 버튼과 별개의 표준으로 유지한다(위 §4-A 높이 표 참조).
 
@@ -208,13 +210,13 @@ description: >
 | `--s-active-text` | `#7c3aed` | `#d8b4fe` | 외곽선형 활성(토글/필터버튼) 글씨·아이콘 |
 | `--s-active-glow` | `rgba(124,58,237,0.2)` | 동일 | 옅은 포커스 글로우 |
 
-> **선택 컨트롤 활성 = 연한 틴트 (확정 규칙 — 상태 표현 위계 갱신).** 카테고리 칩·소요시간/시간대/식사시간 세그먼트(`styles.option`/`styles.optionCard`)·필터 칩(`styles.chip`)의 활성은 **단색 채움 금지** → `--s-accent-soft-bg` 틴트 배경 + `--s-active-line` accent 보더 + `--s-active-text` accent 글씨/아이콘/체크. 단색 채움은 **"지금 누를 단 하나의 CTA"에만**(등록·저장·다른 추천 보기 등 `styles.detailPrimaryBtn`, `--s-active-line` `#7c3aed`). 자세한 위계·예외(StepDots)는 **§5-A** 참조. **그라데이션 채움 금지** — 그라데이션은 FAB·로고(`--s-grad`)·`filterCount` 전용. `--s-active-*` 모두 다크에서 재정의하지 않아(`#7c3aed`/`#d8b4fe` 고정) 다크에서 밝게 떠 보이지 않는다.
+> **선택 컨트롤 활성 = 연한 틴트 (확정 규칙 — 상태 표현 위계 갱신).** 카테고리 칩·소요시간/시간대/식사시간 세그먼트(`styles.option`/`styles.optionCard`)·필터 칩(`styles.chip`)의 활성은 **단색 채움 금지** → `--s-accent-soft-bg` 틴트 배경 + `--s-active-line` accent 보더 + `--s-active-text` accent 글씨/아이콘/체크. 단색 채움은 **"지금 누를 단 하나의 CTA"에만**(등록·저장·다른 추천 보기 등 `styles.detailPrimaryBtn`, `--s-active-line` `#7c3aed`). 자세한 위계·예외(StepDots)는 **§5-A** 참조. **그라데이션 채움**은 FAB·로고(`--s-grad`)·`filterCount` + **단독 진입 버튼**(빈상태 "첫 ~ 추가하기"·추천0개 "추가하기" `styles.gradIcon`) 전용 — 버튼 2개 박스는 금지(§5-A). `--s-active-*` 모두 다크에서 재정의하지 않아(`#7c3aed`/`#d8b4fe` 고정) 다크에서 밝게 떠 보이지 않는다.
 
 **포커스 역할 분리 규칙 (중요):**
 - 텍스트 입력(검색/위치): `:focus` → 활성 보더(`--s-active-line`) **+ 링** `box-shadow: 0 0 0 3px var(--s-active-glow)`.
 - 버튼류(필터 토글/칩): `:focus-visible` → 활성 **보더만**, 링 없음.
 
-활성 칩/세그먼트 규칙: `styles.chipActive` / `styles.optionActive` / `styles.optionCardActive`는 **틴트**(`--s-accent-soft-bg` 배경 + `--s-active-line` 보더 + `--s-active-text` 글씨/`catIcon`). 필터버튼(`styles.filterToggle`)·`/list` 상태 토글(`styles.segmentBtnActive`) 같은 외곽선형 활성은 `--s-active-text` + `--s-active-line` 보더(채움 없음) — 종전과 동일.
+활성 칩/세그먼트 규칙: `styles.chipActive` / `styles.optionActive` / `styles.optionCardActive`는 **틴트**(`--s-accent-soft-bg` 배경 + `--s-active-line` 보더 + `--s-active-text` 글씨/`catIcon`, weight 500). 필터버튼(`styles.filterToggle`)의 활성은 외곽선형(`--s-active-text` + `--s-active-line` 보더, 채움 없음). **`/list` 상태 토글(`styles.segmentBtnActive`)은 별개 패턴 — iOS식 "흰 면 떠오름 + 보라 테두리"(§5-A 토글 절 참조)로, 외곽선형·틴트 어느 쪽도 아니다.**
 
 ---
 
@@ -224,11 +226,23 @@ description: >
 
 ### 채움 위계 (단색은 CTA 하나에만)
 - **단색 채움**(`--s-active-fill`/`--s-active-line` 솔리드 + 흰 글씨): **"지금 누를 단 하나의 CTA"에만.** 등록(`/activities/new`·`/places/new` 제출)·저장(인라인/상세 Primary)·추천 "다른 추천 보기" — `styles.detailPrimaryBtn`(`--s-active-line`).
-- **선택됨/활성**(옵션 카드·칩·세그먼트·필터 칩): **단색 채움 금지** → `--s-accent-soft-bg` 틴트 + `--s-active-line` accent 보더 + `--s-active-text` accent 글씨/체크. (`styles.chipActive`/`styles.optionActive`/`styles.optionCardActive`)
+- **그라데이션 채움**(`styles.gradIcon`, `--s-grad`): **단독 진입 버튼에만** — 빈상태 "첫 활동/장소 추가하기"(`EmptyState`)·추천0개 "활동/장소 추가하기"(추천 위저드, **버튼이 1개일 때만**). 버튼이 2개인 박스(예: 활동 추천0개 "더 짧은 일정도 볼까요?" + "추가하기")는 **둘 다 그라데이션 금지** — Primary는 `detailPrimaryBtn` 단색, 보조는 outline.
+- **선택됨/활성**(옵션 카드·칩·세그먼트·필터 칩): **단색 채움 금지** → `--s-accent-soft-bg` 틴트 + `--s-active-line` accent 보더 + `--s-active-text` accent 글씨/체크 + **weight 500**. (`styles.chipActive`/`styles.optionActive`/`styles.optionCardActive`)
+  - **다크 틴트 밝기 규칙(확정)**: 다크 `--s-accent-soft-bg`는 카드면(`--s-card-bg` `#241a36`)보다 **분명히 밝아야** 한다(현재 `#573f7f`) — 보라 테두리에만 의존하지 않고 **면 색만으로도 선택이 구분**되도록. 라이트는 비선택 흰 배경과 또렷이 구분되는 연보라(fallback `#f6f1ff`). 비선택과 위계가 깨질 만큼 과하게 올리지는 않는다.
 - **예외(단색 유지)**: **StepDots 진행 점** — "선택 상태"가 아니라 위치 표시라 `--s-active-fill` 단색 유지. (날짜 선택은 네이티브 `<input type="date">`로 전환되어 캘린더 선택일 렌더는 OS가 담당 — 우리 토큰 예외 대상 아님, §4-A.)
 
+### 앱 전역 선택/활성 공통 언어 = 보라 테두리 (`--s-active-line`)
+- 탭 밑줄, 검색바 포커스 보더, 필터 펼침 보더(`filterToggleActive`), 칩/옵션 선택 보더, 토글 선택 링이 **모두 `--s-active-line`(`#7c3aed`, 라·다 동일) 1px**을 공유한다. **새 선택 UI도 이 보라 테두리를 따른다.**
+- 칩·옵션은 "틴트 + 보라 테두리", 토글은 "흰 면 떠오름 + 보라 테두리"로 면 처리는 다르되, **테두리 언어는 공통**. 검색바 포커스만 추가로 3px 글로우(입력 전용, §5).
+
+### 토글(세그먼트) 선택 = iOS식 "흰 면 떠오름 + 보라 테두리" (확정)
+- `/list` 상태 토글(`.segment`/`.segmentBtnActive`)은 칩의 **틴트 채움과 구분되는 별개 패턴**.
+- **트랙**: 카드면보다 한 단계 어두운 중성 그루브(`var(--s-track, --s-card-border-strong)` — 라이트 `#eceaf3` / 다크 `#1b1430`).
+- **선택칸**: 트랙 위로 **밝은 면이 떠오름** — 라이트 흰 면(`--s-card-bg` `#ffffff`) / 다크 한 단계 밝은 raised 면(`--s-raised` `#2f2647`). + `--s-active-line` 보라 1px 링(`box-shadow 0 0 0 1px`) + `--s-active-text` 보라 글자 + **weight 600**. 중성 그림자는 약하게(`0 1px 2px rgba(0,0,0,.06)`)만 — 떠오름은 트랙↔선택칸 면 명도차가 담당.
+- 비선택칸은 `transparent`(트랙 그루브가 비침).
+
 ### hover 언어 — "콘텐츠 vs 유틸리티" (의도된 구분)
-- **콘텐츠 요소**(카드·칩·옵션 카드 — 사용자가 *고르는* 대상): hover = **accent 보더**. 카드 `--s-card-hover-border`(라벤더 알파), 칩·옵션 비활성 `--s-active-line` 보더.
+- **콘텐츠 요소**(카드·칩·옵션 카드 — 사용자가 *고르는* 대상): hover = **accent 보더**. 카드 `--s-card-hover-border`(라벤더 알파), 칩·옵션 비활성 `--s-active-line` 보더. **추천 위저드 옵션 카드(`.optionCard`)는 hover 시 리스트 카드(`.cardInteractive`)와 동일한 부상**(`translateY(-2px)` + `--s-card-shadow-hover`, `@media(hover)` 한정·`:active`에서 `translateY(0)`).
 - **유틸리티 아이콘 버튼**(도구 — `.iconBtn` ⋮케밥/홈/햄버거, `.editGhostBtn` 연필, ghost `X` 닫기): hover = **중성 회색**(라이트 `#eceaf3`=`--s-card-border-strong`, 다크 보라 소프트 `--s-accent-soft-bg`). §7·§10-B·금지규칙 4 그대로 유지 — accent로 **바꾸지 않는다**.
 - **둘이 다른 건 버그가 아니라 의도**다: 고르는 콘텐츠는 accent로 "선택 가능"을 암시, 도구 버튼은 중성으로 차분하게. (하단 삭제 `styles.detailDeleteBtn`만 destructive 틴트 — 별도 예외.)
 
@@ -273,6 +287,8 @@ description: >
     - **리스트 카드(ActivityCard/PlaceCard)**: 아이콘 색 지정 없이 부모 div(`styles.sub`) 상속.
     - **상세 화면(DetailRow 안)**: `styles.faint`(`--s-faint`) 명시 → 카테고리 아이콘(`styles.accent`)보다 한 단계 약한 위계. `className={cn('h-3.5 w-3.5 shrink-0', styles.faint)}` 패턴 사용.
   - 헤더 아이콘 버튼(`styles.iconBtn`): `sub`, hover 시 라이트는 중성 면 `#eceaf3`+`ink`, 다크는 보라 소프트. (유틸리티 도구라 **중성 hover** 유지 — 콘텐츠 요소의 accent hover와 의도적으로 구분, §5-A.)
+  - **키보드 포커스(`:focus-visible`) = hover와 동일한 중성 면** (`iconBtn`·`editGhostBtn`): 브라우저 기본 outline을 끄고(`outline:none`) 중성 회색 면으로 표시. **입력 글로우(box-shadow 링) 쓰지 않는다**(글로우는 입력 필드 전용, §5).
+- **유틸 아이콘 글리프 크기 (탭타깃별 통일, 확정)**: **44px 탭타깃 버튼(`.iconBtn` — ⋮케밥·홈·햄버거·로그아웃) → 글리프 20px(`h-5 w-5`)** / **36px 버튼(`.editGhostBtn` 연필) → 글리프 16px(`h-4 w-4`)**. 탭타깃 크기(44/36) 자체는 유지하고 글리프만 이 규칙으로 맞춘다.
 - strokeWidth: 카테고리 `2`, CTA 그라데이션 배지 내부 아이콘 `1.75`.
 - 크기 관례: 리스트 카드 메타 `h-3 w-3`, 상세 화면 DetailRow 메타 `h-3.5 w-3.5`, 헤더/검색 `h-4~5`.
 - 참고: 장식용 하트/💜는 카피(서브카피·빈 상태 문구)에만 등장 — 기능 아이콘 자리에는 절대 넣지 않는다.
@@ -614,6 +630,9 @@ export const STATUS_LABELS: Record<Status, string> = {
 ## 백로그 (별도 작업 필요 — 미해결)
 
 - **다이얼로그가 OS 다크 미대응** (`VisitedDialog`·`DeleteConfirmDialog` 등 `DialogContent`): 다이얼로그 표면·텍스트·hover가 shadcn HSL 토큰(`--popover`/`--popover-foreground`/`--muted`/`--foreground`)에 의존하는데, 이 토큰들은 `globals.css`에서 **`.dark` 클래스 전용**으로만 다크값을 갖는다. 이 앱은 `.dark`를 부착하지 않고 `@media (prefers-color-scheme: dark)` + `--s-*`로만 다크를 처리하므로, **OS 다크에서 다이얼로그 전체가 라이트(흰 표면)로 고정**된다. ghost `X` 닫기의 `dark:hover:bg-muted/50`도 같은 이유로 죽은 규칙. (금지규칙 12와 동일 원인.) → 해결: `DialogContent` 표면·닫기 버튼을 `--s-card-bg`/`--s-ink`/`--s-card-border-strong` 등 `--s-*` 토큰으로 치환하는 별도 작업 필요. 단순 hover 패치가 아니라 다이얼로그 다크 테마 전반의 작업이라 범위를 따로 잡는다.
+- **라이트 `--s-*` 토큰 정식 정의 미비 — 앱 전역 토큰 정리** (`docs/design-token-audit.md` 참조): 라이트는 핵심 토큰(`--s-active-*`/`--s-card-bg`/`--s-card-border-strong`/`--s-input`/`--s-card-shadow`)만 `.page`에 정의돼 있고, `--s-accent-soft-bg`·`--s-sub`·`--s-faint`·`--s-ink`·`--s-accent`·`--s-grad`·`--s-grad-shadow`·`--s-card-shadow-hover` 등은 **라이트 값이 없어 각 클래스의 `var(--token, fallback)` fallback에 의존**한다(다크만 `@media`로 정의). 동작엔 문제없지만 단일 출처가 약함. → 라이트 `.page`에 정식 정의를 추가하는 정리 작업(시각 변경 아님, 1:1 유지 확인 필요).
+- **`--s-faint` fallback 불일치**: 같은 토큰인데 `.searchIcon`은 `#9ca3af`, `.searchInput::placeholder`는 `#b0aabe` — 라이트에서 둘 다 live라 실제로 다른 회색으로 렌더된다. 의미 분리(아이콘=기능 신호 / placeholder=임시 안내)인지 단순 불일치인지 정리 필요. (`--s-card-border-strong`·`--s-active-line` fallback도 선언마다 다르나 토큰이 정의돼 있어 렌더 영향은 없음 — 소스 표기만 통일하면 됨.)
+- **드롭다운 portal 리터럴 토큰화**: `globals.css`의 `[data-slot='dropdown-menu-*']`은 body로 portal 렌더돼 `.page` `--s-*`를 못 받아 색·그림자가 직접 리터럴(`#eceaf3`·`#241a36`·`#3a2f4e`·`#2c2442` 등). 토큰화하려면 다이얼로그 `.dialogPopup` 패턴처럼 portal 루트에 토큰 재선언 필요. (위 다이얼로그 다크 대응과 묶어 처리 가능.)
 
 ---
 

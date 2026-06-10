@@ -98,6 +98,18 @@ html.dark body {
     0 0 0 1px #eceaf3,
     0 14px 32px -12px rgba(20, 20, 30, 0.18);
 }
+/*
+ * 항목 hover/highlight (base-ui data-highlighted) — shadcn dead Tailwind variant 대신 여기서 직접.
+ * 메뉴는 portal 이라 .page 의 --s-* 토큰을 못 받으므로 직접값/공용 토큰 사용.
+ * 일반 = 중성 회색(검색·필터 보더 톤), 삭제(data-variant=destructive) = destructive 빨강 틴트.
+ * 라이트 일반은 아래 다크 @media 일반 규칙과 대칭(다크는 accent-soft). 삭제는 라이트·다크 공통 빨강.
+ */
+[data-slot='dropdown-menu-item'][data-highlighted] {
+  background-color: var(--s-card-border-strong, #eceaf3);
+}
+[data-slot='dropdown-menu-item'][data-variant='destructive'][data-highlighted] {
+  background-color: hsl(var(--destructive) / 0.1);
+}
 @media (prefers-color-scheme: dark) {
   [data-slot='dropdown-menu-content'] {
     background-color: #241a36;
@@ -108,7 +120,7 @@ html.dark body {
       0 18px 44px -12px rgba(0, 0, 0, 0.75);
   }
   [data-slot='dropdown-menu-item'][data-highlighted] {
-    background-color: #2d2540;
+    background-color: var(--s-accent-soft-bg, #2d2540);
   }
   [data-slot='dropdown-menu-separator'] {
     background-color: #2c2442;

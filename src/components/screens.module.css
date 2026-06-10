@@ -411,7 +411,9 @@
   flex-shrink: 0;
   padding: 0.0625rem; /* 1px — 안쪽 segmentBtn(36) + padding(2) + border(2) = 40px, 검색바·필터와 동일 높이 */
   border-radius: 0.625rem;
-  background: #ffffff;
+  /* iOS 그루브 — .mealBadge 와 동일 패턴: 라이트 #eceaf3 / 다크 #1b1430.
+     카드(#fff)보다 한 단계 어두운 면이라 흰 선택칸이 위로 떠 보인다. */
+  background: var(--s-track, var(--s-card-border-strong, #eceaf3));
   border: 1px solid var(--s-card-border-strong, #eceaf3);
 }
 .segmentBtn {
@@ -435,19 +437,20 @@
 }
 .segmentBtnActive {
   color: var(--s-active-text, #7c3aed);
-  background: var(--s-card-bg, #ffffff);
+  background: var(--s-card-bg, #ffffff); /* 흰 면(라이트) — 트랙 그루브 위로 떠오름 */
   font-weight: 600; /* 선택 = 흰 면 떠오름 + accent 글자 + bold (iOS 세그먼트 패턴, 칩 틴트와 구분) */
+  /* 보라 1px 링·글로우 제거 → 중성 그림자로 면 떠오름만. 선택 강조는 면 대비 + accent 글자·bold 가 담당. */
   box-shadow:
-    0 0 0 1px var(--s-active-line, #7c3aed),
-    0 4px 12px -4px var(--s-active-glow, rgba(124, 58, 237, 0.2));
+    0 1px 2px rgba(0, 0, 0, 0.06),
+    0 3px 8px -2px rgba(0, 0, 0, 0.12);
 }
 /*
- * 다크 토글 — 어두운 트랙(눌린 면) 표면은 유지하되, 보더는 베이스(.segment)의
- * --s-card-border-strong(다크 #3a2f4e)을 그대로 둬서 검색바·필터와 같은 보더로 정합.
+ * 다크 토글 — 트랙은 base 의 --s-track(#1b1430, 눌린 면)이 자동 적용, 선택칸은 한 단계 더 밝은
+ * raised 면(--s-raised #2f2647)으로 떠오름. 보더는 base 의 --s-card-border-strong(#3a2f4e) 유지.
  */
 @media (prefers-color-scheme: dark) {
-  .segment {
-    background: var(--s-track, #1b1430);
+  .segmentBtnActive {
+    background: var(--s-raised, #2f2647);
   }
 }
 

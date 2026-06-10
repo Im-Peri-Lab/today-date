@@ -397,7 +397,7 @@
 .segment {
   display: inline-flex;
   flex-shrink: 0;
-  padding: 0.125rem; /* 2px — 안쪽 segmentBtn(36) + padding(4) + border(2) ≈ 42px, 검색바(40) 컨트롤 층과 정합 */
+  padding: 0.0625rem; /* 1px — 안쪽 segmentBtn(36) + padding(2) + border(2) = 40px, 검색바·필터와 동일 높이 */
   border-radius: 0.625rem;
   background: #ffffff;
   border: 1px solid var(--s-card-border-strong, #eceaf3);
@@ -429,13 +429,12 @@
     0 4px 12px -4px var(--s-active-glow, rgba(124, 58, 237, 0.2));
 }
 /*
- * 다크 토글은 기존대로 — 어두운 트랙(눌린 면) + 보더 없음.
- * (라이트의 흰 면+보더가 다크로 새지 않도록, 베이스 .segment 보다 뒤에 둬서 우선순위 확보)
+ * 다크 토글 — 어두운 트랙(눌린 면) 표면은 유지하되, 보더는 베이스(.segment)의
+ * --s-card-border-strong(다크 #3a2f4e)을 그대로 둬서 검색바·필터와 같은 보더로 정합.
  */
 @media (prefers-color-scheme: dark) {
   .segment {
     background: var(--s-track, #1b1430);
-    border-color: transparent;
   }
 }
 

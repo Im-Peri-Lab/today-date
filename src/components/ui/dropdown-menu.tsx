@@ -58,10 +58,12 @@ function DropdownMenuItem({
   return (
     <MenuPrimitive.Item
       data-slot="dropdown-menu-item"
+      data-variant={variant}
       className={cn(
-        "relative flex cursor-pointer items-center gap-2 rounded-md px-2 py-2 text-sm outline-none transition-colors select-none data-highlighted:bg-[var(--s-card-border-strong,#eceaf3)] data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:size-4 [&_svg]:shrink-0",
-        variant === "destructive" &&
-          "text-destructive data-highlighted:bg-destructive/10",
+        // highlight 배경은 globals.css 의 [data-slot][data-highlighted] 규칙이 담당
+        // (라이트/다크 대칭). 여기서는 텍스트 색만 — destructive=빨강 글자.
+        "relative flex cursor-pointer items-center gap-2 rounded-md px-2 py-2 text-sm outline-none transition-colors select-none data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:size-4 [&_svg]:shrink-0",
+        variant === "destructive" && "text-destructive",
         className
       )}
       {...props}

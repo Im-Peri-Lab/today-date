@@ -327,6 +327,18 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
+/* 키보드 포커스 = 중성 hover 와 동일(브라우저 기본 outline 대체, 글로우 없음) */
+.iconBtn:focus-visible {
+  outline: none;
+  background: var(--s-card-border-strong, #eceaf3);
+  color: var(--s-ink, #1a1033);
+}
+@media (prefers-color-scheme: dark) {
+  .iconBtn:focus-visible {
+    background: var(--s-accent-soft-bg, #f5f0ff);
+    color: var(--s-accent, #7c3aed);
+  }
+}
 
 /* ── 보조 텍스트 링크 ──────────────────────────── */
 .textLink {
@@ -424,6 +436,7 @@
 .segmentBtnActive {
   color: var(--s-active-text, #7c3aed);
   background: var(--s-card-bg, #ffffff);
+  font-weight: 600; /* 선택 = 흰 면 떠오름 + accent 글자 + bold (iOS 세그먼트 패턴, 칩 틴트와 구분) */
   box-shadow:
     0 0 0 1px var(--s-active-line, #7c3aed),
     0 4px 12px -4px var(--s-active-glow, rgba(124, 58, 237, 0.2));
@@ -603,7 +616,13 @@
 @media (hover: hover) {
   .optionCard:not(.optionCardActive):hover {
     border-color: var(--s-active-line, #7c3aed);
+    /* 리스트 카드(.cardInteractive)와 동일한 부상 토큰 — translateY + 호버 그림자 */
+    transform: translateY(-2px);
+    box-shadow: var(--s-card-shadow-hover, 0 12px 28px -12px rgba(168, 85, 247, 0.32));
   }
+}
+.optionCard:active {
+  transform: translateY(0);
 }
 .optionCardActive {
   border-color: var(--s-active-line, #7c3aed);
@@ -914,6 +933,18 @@
 }
 @media (prefers-color-scheme: dark) and (hover: hover) {
   .editGhostBtn:hover {
+    background: var(--s-accent-soft-bg, #2d2540);
+    color: var(--s-accent, #c084fc);
+  }
+}
+/* 키보드 포커스 = 중성 hover 와 동일(브라우저 기본 outline 대체, 글로우 없음) */
+.editGhostBtn:focus-visible {
+  outline: none;
+  background: var(--s-card-border-strong, #eceaf3);
+  color: var(--s-ink, #1a1033);
+}
+@media (prefers-color-scheme: dark) {
+  .editGhostBtn:focus-visible {
     background: var(--s-accent-soft-bg, #2d2540);
     color: var(--s-accent, #c084fc);
   }

@@ -1,5 +1,6 @@
 import Link from 'next/link'
-import { Heart, SearchX } from 'lucide-react'
+import { SearchX } from 'lucide-react'
+import { MiniHeart } from '@/components/BrandMark'
 import { cn } from '@/lib/utils'
 import styles from '@/components/screens.module.css'
 
@@ -13,10 +14,14 @@ interface EmptyStateProps {
 }
 
 export function EmptyState({ message, hint, addHref, addLabel, noResults }: EmptyStateProps) {
-  const Icon = noResults ? SearchX : Heart
   return (
     <div className={styles.empty}>
-      <Icon className={cn('mb-3 h-10 w-10', styles.accent)} strokeWidth={1.5} />
+      {/* 검색·필터 결과 없음 = 외곽선 SearchX / 목록 자체가 빔 = 그라데이션 하트(추천 화면과 동일 모티프) */}
+      {noResults ? (
+        <SearchX className={cn('mb-3 h-10 w-10', styles.accent)} strokeWidth={1.5} />
+      ) : (
+        <MiniHeart className="mb-3 h-10 w-10 lg:h-10 lg:w-10" />
+      )}
       <p className={cn('font-medium', styles.ink)}>{message}</p>
       {hint && <p className={cn('mt-1 text-sm', styles.sub)}>{hint}</p>}
       {addHref && addLabel && (

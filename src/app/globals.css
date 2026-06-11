@@ -120,7 +120,10 @@ html.dark body {
       0 18px 44px -12px rgba(0, 0, 0, 0.75);
   }
   [data-slot='dropdown-menu-item'][data-highlighted] {
-    background-color: var(--s-accent-soft-bg, #2d2540);
+    /* portal 이라 .page 의 --s-accent-soft-bg 를 상속 못 받음 → fallback 이 실렌더값.
+       카드면(#241a36) 대비 거의 안 보이던 #2d2540 을, .page 다크 소프트강조(#573f7f)와
+       같은 값으로 올려 가시성·전역 일관성 확보. (삭제 항목·라이트는 미변경) */
+    background-color: var(--s-accent-soft-bg, #573f7f);
   }
   [data-slot='dropdown-menu-separator'] {
     background-color: #2c2442;

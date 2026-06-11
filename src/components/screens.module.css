@@ -52,6 +52,9 @@
   --s-accent: #7c3aed; /* 보라 강조 */
   --s-accent-soft-bg: #f6f1ff; /* 활성 칩/소프트 강조 배경 */
   --s-grad: linear-gradient(135deg, #a855f7 0%, #ec4899 100%); /* 주요 액션/아이콘/FAB 그라데이션 */
+  /* 폼 입력 placeholder(임시 안내 글자) 전용 — 기능 신호용 --s-faint(#9ca3af)와 의미 분리.
+     값은 종전 placeholder 폴백 #b0aabe 그대로(렌더 무변화). 다크는 아래 @media 에서 --s-faint 와 동일 톤. */
+  --s-placeholder: #b0aabe;
 
   /* 노치/홈 인디케이터 안전 영역 */
   padding-top: calc(env(safe-area-inset-top) + 0.5rem);
@@ -102,6 +105,7 @@
     --s-ink: #f5f3fa; /* 제목/주요 텍스트 */
     --s-sub: #a8a0b8; /* 서브카피 */
     --s-faint: #8c84a0; /* 더 옅은 보조 */
+    --s-placeholder: #8c84a0; /* placeholder 다크 — 종전 .searchInput::placeholder 가 --s-faint(#8c84a0)로 렌더되던 값 보존 */
     --s-accent: #c084fc; /* 보라 강조 → 다크는 라벤더 */
     --s-accent-soft-bg: #573f7f; /* 활성 칩/소프트 배경 — 카드면(#241a36) 대비 선택이 한눈에. 명도만 한 톤 더(보라 톤·채도 유지) */
     --s-accent-soft-text: #d8b4fe;
@@ -510,7 +514,7 @@
 }
 .searchInput::placeholder,
 .plainInput::placeholder {
-  color: var(--s-faint, #b0aabe);
+  color: var(--s-placeholder, #b0aabe);
 }
 /*
  * 포커스 역할 분리:

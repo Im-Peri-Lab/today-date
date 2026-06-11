@@ -41,6 +41,21 @@
   --s-input: #eceaf3;
   --s-card-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 4px 12px rgba(0, 0, 0, 0.05);
 
+  /*
+   * ── 텍스트·강조 토큰 (라이트 명시) ───────────────
+   * 종전엔 라이트에서 미정의 → 각 사용처의 var(--s-*, 폴백)에 암묵 의존해 값이 결정됐다.
+   * 실측한 폴백값을 그대로 명시해 fallback 의존을 제거(렌더 무변화). 다크는 아래 @media 에서 오버라이드.
+   * (.tab 비활성색·.visitBox 면은 종전에 다른 폴백을 쓰던 예외 → 각 사용처에서 직접 보존, 아래 참고)
+   */
+  --s-ink: #1a1033; /* 제목/주요 텍스트 */
+  --s-sub: #6b7280; /* 서브카피 */
+  --s-accent: #7c3aed; /* 보라 강조 */
+  --s-accent-soft-bg: #f6f1ff; /* 활성 칩/소프트 강조 배경 */
+  --s-grad: linear-gradient(135deg, #a855f7 0%, #ec4899 100%); /* 주요 액션/아이콘/FAB 그라데이션 */
+  /* 폼 입력 placeholder(임시 안내 글자) 전용 — 기능 신호용 --s-faint(#9ca3af)와 의미 분리.
+     값은 종전 placeholder 폴백 #b0aabe 그대로(렌더 무변화). 다크는 아래 @media 에서 --s-faint 와 동일 톤. */
+  --s-placeholder: #b0aabe;
+
   /* 노치/홈 인디케이터 안전 영역 */
   padding-top: calc(env(safe-area-inset-top) + 0.5rem);
   padding-bottom: calc(env(safe-area-inset-bottom) + 0.5rem);
@@ -90,6 +105,7 @@
     --s-ink: #f5f3fa; /* 제목/주요 텍스트 */
     --s-sub: #a8a0b8; /* 서브카피 */
     --s-faint: #8c84a0; /* 더 옅은 보조 */
+    --s-placeholder: #8c84a0; /* placeholder 다크 — 종전 .searchInput::placeholder 가 --s-faint(#8c84a0)로 렌더되던 값 보존 */
     --s-accent: #c084fc; /* 보라 강조 → 다크는 라벤더 */
     --s-accent-soft-bg: #573f7f; /* 활성 칩/소프트 배경 — 카드면(#241a36) 대비 선택이 한눈에. 명도만 한 톤 더(보라 톤·채도 유지) */
     --s-accent-soft-text: #d8b4fe;
@@ -387,7 +403,9 @@
   padding: 0.625rem 0.125rem;
   font-size: 0.9375rem;
   font-weight: 500;
-  color: var(--s-sub, #9ca3af);
+  /* 비활성 탭은 종전 라이트 렌더(#9ca3af, sub #6b7280 보다 한 단계 옅음)를 보존 — --s-sub 를
+     라이트에 명시하기 전 이 자리는 var(--s-sub, #9ca3af) 의 폴백에 의존했다. 다크는 아래 @media 에서 --s-sub. */
+  color: #9ca3af;
   background: none;
   border: none;
   border-bottom: 2px solid transparent;
@@ -403,6 +421,12 @@
 .tabActive {
   color: var(--s-accent, #7c3aed);
   border-bottom-color: var(--s-accent, #7c3aed);
+}
+/* 비활성 탭 다크색은 종전대로 --s-sub(#a8a0b8). 라이트는 위 .tab 에서 #9ca3af 직접 지정. */
+@media (prefers-color-scheme: dark) {
+  .tab {
+    color: var(--s-sub, #9ca3af);
+  }
 }
 
 /* 세그먼트 토글 (위시리스트/다녀온 곳) — 컨트롤 면(흰색)+연한 보더, 활성만 보라 강조 */
@@ -490,7 +514,7 @@
 }
 .searchInput::placeholder,
 .plainInput::placeholder {
-  color: var(--s-faint, #b0aabe);
+  color: var(--s-placeholder, #b0aabe);
 }
 /*
  * 포커스 역할 분리:
@@ -898,7 +922,15 @@
 }
 .visitBox {
   border-radius: 0.875rem;
-  background: var(--s-accent-soft-bg, var(--s-card-border-strong, #eceaf3));
+  /* 라이트는 중성 면(#eceaf3)을 유지한다. 종전엔 라이트에서 --s-accent-soft-bg 가 미정의여서
+     체이닝 폴백(--s-card-border-strong=#eceaf3)으로 떨어졌는데, accent-soft-bg 를 라이트에 명시한 뒤
+     같은 렌더를 보존하려 카드보더 토큰을 직접 참조. 다크 보라 면은 아래 @media 에서 accent-soft-bg(#573f7f). */
+  background: var(--s-card-border-strong, #eceaf3);
+}
+@media (prefers-color-scheme: dark) {
+  .visitBox {
+    background: var(--s-accent-soft-bg, #573f7f);
+  }
 }
 
 /* 로딩 스켈레톤 바 */

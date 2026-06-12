@@ -212,11 +212,32 @@ description: >
 
 > **선택 컨트롤 활성 = 연한 틴트 (확정 규칙 — 상태 표현 위계 갱신).** 카테고리 칩·소요시간/시간대/식사시간 세그먼트(`styles.option`/`styles.optionCard`)·필터 칩(`styles.chip`)의 활성은 **단색 채움 금지** → `--s-accent-soft-bg` 틴트 배경 + `--s-active-line` accent 보더 + `--s-active-text` accent 글씨/아이콘/체크. 단색 채움은 **"지금 누를 단 하나의 CTA"에만**(등록·저장·다른 추천 보기 등 `styles.detailPrimaryBtn`, `--s-active-line` `#7c3aed`). 자세한 위계·예외(StepDots)는 **§5-A** 참조. **그라데이션 채움**은 FAB·로고(`--s-grad`)·`filterCount` + **단독 진입 버튼**(빈상태 "첫 ~ 추가하기"·추천0개 "추가하기" `styles.gradIcon`) 전용 — 버튼 2개 박스는 금지(§5-A). `--s-active-*` 모두 다크에서 재정의하지 않아(`#7c3aed`/`#d8b4fe` 고정) 다크에서 밝게 떠 보이지 않는다.
 
-**포커스 역할 분리 규칙 (중요):**
-- 텍스트 입력(검색/위치): `:focus` → 활성 보더(`--s-active-line`) **+ 링** `box-shadow: 0 0 0 3px var(--s-active-glow)`.
-- 버튼류(필터 토글/칩): `:focus-visible` → 활성 **보더만**, 링 없음.
+**포커스 역할 분리 규칙 — 3분류 (확정, 문구 갱신):**
+
+키보드 포커스(`:focus-visible`) 표시는 요소 군에 따라 **셋으로** 갈린다. (과거 "글로우 = 입력 전용" 2분류 문구를 코드 현실에 맞춰 갱신 — 채움형 CTA·키패드도 글로우를 받는다. 직전 진단에서 `button.tsx`가 채움형 CTA에 링을 부여함을 확인.)
+
+- **글로우 = 입력 + 채움형 CTA + 키패드**: 활성 보더(`--s-active-line`) **+ 포커스 링 글로우**.
+  - **글로우 표준값(확정): 두께 `3px`, accent색(`--s-active-line`/shadcn `--ring` 계열), 알파 `0.5`** → `box-shadow: 0 0 0 3px <accent 0.5>` (또는 shadcn `ring-3 ring-ring/50`).
+  - 적용 군: 텍스트 입력(`.searchInput`/`.plainInput`/auth `.input`), 채움형 CTA(shadcn `default`/`secondary`/`ghost`/`link`·`styles.detailPrimaryBtn`), 패스코드 키패드 키.
+  - **현 코드 정합 메모**: shadcn CTA `ring-ring/50`(=0.5)·키패드 알파 0.5 는 이미 표준 일치. **입력의 `--s-active-glow`(현재 `0.2`)·키패드 두께(현재 `2px`→`3px`)는 후속 커밋에서 표준값으로 상향**(이번엔 문서만). 토큰 표의 `--s-active-glow` 0.2 는 현 코드값 기록이며, 표준 목표는 0.5.
+- **보더만 = 선택·컨트롤 버튼**: `:focus-visible` → 활성 **보더(`--s-active-line`) + 활성 글씨(`--s-active-text`)만, 글로우 없음**(= hover와 동일 결과). 칩·세그먼트·필터 토글·`resetBtn`·옵션카드·shadcn `outline` 변형. **기존 유지.**
+- **중성면 = 유틸 아이콘 버튼**: `:focus-visible` → hover와 동일한 **중성 면**(라이트 `#eceaf3`=`--s-card-border-strong` / 다크 accent-soft), 글로우 없음. `.iconBtn`·`.editGhostBtn`. **§7 그대로 유지.**
+
+**focus-visible 누락 보강 원칙 (확정):** 채움형 버튼인데 포커스 표시가 없어 **브라우저 기본 outline으로 떨어지는** 요소 — 인증 `.btnPrimary`/`.btnSecondary`/`.link`(`auth.module.css`), FAB(`.fab`, base-ui `<button>`) — 는 위 **채움형 글로우 표준(3px·accent·0.5)을 동일 적용**한다. 브라우저 기본 outline 방치 금지. (적용은 후속 커밋에서 화면별로.)
 
 활성 칩/세그먼트 규칙: `styles.chipActive` / `styles.optionActive` / `styles.optionCardActive`는 **틴트**(`--s-accent-soft-bg` 배경 + `--s-active-line` 보더 + `--s-active-text` 글씨/`catIcon`, weight 500). 필터버튼(`styles.filterToggle`)의 활성은 외곽선형(`--s-active-text` + `--s-active-line` 보더, 채움 없음). **`/list` 상태 토글(`styles.segmentBtnActive`)은 별개 패턴 — iOS식 "흰 면 떠오름 + 보라 테두리"(§5-A 토글 절 참조)로, 외곽선형·틴트 어느 쪽도 아니다.**
+
+**`:active`(눌림) 표준 — 신설 (확정):** 모든 인터랙티브 요소는 눌리는 순간 피드백을 가진다. 방식은 **`transform: scale` 축소로 통일**(색 변화가 아니라 물리적 눌림 느낌).
+
+| 요소 군 | active(눌림) 표시 | 비고 |
+|---|---|---|
+| 채움형 CTA · 패스코드 키패드 키 | `transform: scale(0.96)` + inset 눌림 그림자 | 가장 또렷한 눌림 |
+| 선택·컨트롤 버튼(칩·세그먼트·필터·`resetBtn` 등) | `transform: scale(0.97)` | CTA보다 한 단계 약하게 |
+| 카드(`.cardInteractive`·`.optionCard` 등) | **기존 `translateY(0)` 유지**(hover 부상 취소) | scale 아님 — 부상형 콘텐츠 전용, 건드리지 않음 |
+
+- **원칙(명문화):** *키보드 focus(글로우/보더/면)와 active(눌림, scale)는 항상 시각적으로 구분된다.* focus = 정적 표시, active = 순간 물리 변형(scale) → 한 요소에서 focus와 active가 같은 모습이 되지 않는다.
+- **예외(정당):** **입력 필드**(`.searchInput`/`.plainInput`/auth `.input`)는 **active 없음** — "탭 = 포커스 = 입력 개시"라 별도 눌림 상태가 의미 없다(focus 글로우 하나로 충분, 위 포커스 분리 규칙). 텍스트 링크(`.link`/`.textLink`)도 press 상태 불필요.
+- **현 코드 정합 메모**: 현재 눌림값이 군별로 분산(`active:translate-y-px`(shadcn) / `scale .95`(키패드) / `scale .96`(FAB) / `scale .97`(인증 버튼) / `translateY(0)`(카드))돼 있다. 위 표준으로의 수렴(키패드 `.95→.96`, shadcn `translate-y-px→scale .96/.97`, 인증 `.97` 유지, 컨트롤·유틸에 `scale .97` 신규 부여)은 **후속 커밋에서 화면별 적용**(이번엔 문서만).
 
 ---
 

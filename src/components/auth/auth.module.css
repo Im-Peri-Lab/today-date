@@ -41,9 +41,14 @@
   --pi-key-border: #eee9f5;
   --pi-key-shadow: 0 1px 2px rgba(20, 10, 40, 0.05);
   --pi-key-text: #1a1033;
-  --pi-key-hover: #f5f0ff;
-  --pi-key-active: #ede4ff;
+  /* 상호작용 위계 focus < hover < active. hover/active 는 --s-accent-soft-bg(#f6f1ff) 계열의
+     라벤더 틴트를 한 단계씩 진하게(hover↔표면 CR≈1.16, active↔hover CR≈1.17 — 눈으로 구분). */
+  --pi-key-hover: #efe7ff;
+  --pi-key-active: #e2d4ff;
   --pi-key-press-shadow: rgba(124, 58, 237, 0.12);
+  /* 포커스 링: 키보드 탭 전용(:focus-visible). 선택 상태의 1px 솔리드 accent 보더와 겹치지 않게
+     2px 반투명 글로우로 차별화(두께·투명도). 기존 포커스 토큰이 없어 신규 추가. */
+  --pi-key-focus-ring: rgba(124, 58, 237, 0.5);
   --pi-del-color: #9ca3af;
   --pi-error-color: #be123c;
   --pi-label-color: #6b7280;
@@ -420,9 +425,13 @@
     --pi-key-border: #322843;
     --pi-key-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
     --pi-key-text: #f5f3fa;
-    --pi-key-hover: #2f2647;
-    --pi-key-active: #382d54;
+    /* 다크 위계: 표면(#251d38) 위에서 hover↔표면 CR≈1.21, active↔hover CR≈1.30.
+       active 는 통일 소프트강조(#573f7f) 패밀리 쪽으로 한 단계 더(단, CTA처럼 과하지 않게). */
+    --pi-key-hover: #342b4b;
+    --pi-key-active: #473a66;
     --pi-key-press-shadow: rgba(0, 0, 0, 0.45);
+    /* §5 focus 글로우 표준 알파 0.5 로 통일(라이트와 동일) */
+    --pi-key-focus-ring: rgba(192, 132, 252, 0.5);
     --pi-del-color: #9890a8;
     --pi-error-color: #fb7185;
     --pi-label-color: #a8a0b8;

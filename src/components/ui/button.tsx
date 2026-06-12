@@ -19,8 +19,11 @@ const buttonVariants = cva(
           "border-[var(--s-card-border-strong,#eceaf3)] bg-transparent text-[color:var(--s-ink,#1a1033)] hover:border-[var(--s-active-line,#7c3aed)] hover:text-[color:var(--s-active-text,#7c3aed)] focus-visible:border-[var(--s-active-line,#7c3aed)] focus-visible:text-[color:var(--s-active-text,#7c3aed)] aria-expanded:border-[var(--s-active-line,#7c3aed)] aria-expanded:text-[color:var(--s-active-text,#7c3aed)]",
         secondary: `bg-secondary text-secondary-foreground hover:bg-secondary/80 aria-expanded:bg-secondary aria-expanded:text-secondary-foreground ${focusRing}`,
         ghost: `hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:hover:bg-muted/50 ${focusRing}`,
+        // 배경 틴트는 공용 토큰(--s-destructive-soft-bg / -strong)으로 — 라이트 0.10/0.20,
+        // 다크 0.18/0.30 을 :root @media 로 인코딩. (기존 dark:bg-* 는 .dark 미적용이라 죽어서
+        // 다크에서 라이트값으로 묽게 떴음 → 토큰으로 교체해 다크에서 의도대로 진하게.)
         destructive:
-          "bg-destructive/10 text-destructive hover:bg-destructive/20 focus-visible:border-destructive/40 focus-visible:ring-3 focus-visible:ring-destructive/20 dark:bg-destructive/20 dark:hover:bg-destructive/30 dark:focus-visible:ring-destructive/40",
+          "bg-[var(--s-destructive-soft-bg)] text-destructive hover:bg-[var(--s-destructive-soft-bg-strong)] focus-visible:border-destructive/40 focus-visible:ring-3 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40",
         link: `text-primary underline-offset-4 hover:underline ${focusRing}`,
       },
       size: {

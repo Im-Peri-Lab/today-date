@@ -100,14 +100,24 @@
     box-shadow 100ms ease;
 }
 
+/* 위계: focus < hover < active. 색은 --pi-* 토큰(auth.module.css 라이트/다크)에서 주입. */
 .key:hover:not(:disabled) {
-  background: var(--pi-key-hover, #f5f0ff);
+  background: var(--pi-key-hover, #efe7ff);
 }
 
 .key:active:not(:disabled) {
   transform: scale(0.95);
-  background: var(--pi-key-active, #ede4ff);
+  background: var(--pi-key-active, #e2d4ff);
   box-shadow: inset 0 1px 3px var(--pi-key-press-shadow, rgba(124, 58, 237, 0.12));
+}
+
+/* 키보드 탭에만 뜨는 포커스 링(:focus-visible) — 마우스 클릭엔 안 뜸.
+   브라우저 기본 outline 제거하고 2px 반투명 accent 글로우로 대체(기본 키 그림자는 유지). */
+.key:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 2px var(--pi-key-focus-ring, rgba(124, 58, 237, 0.5)),
+    var(--pi-key-shadow, 0 1px 2px rgba(0, 0, 0, 0.04));
 }
 
 .key:disabled {

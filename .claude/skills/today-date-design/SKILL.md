@@ -254,6 +254,39 @@ description: >
 
 ---
 
+## 5-B. destructive(삭제) 소프트 배경 — 공통 토큰 + 표면별 분리 (확정)
+
+왜: 삭제 hover/채움의 빨강 틴트가 화면마다 다른 불투명도로 흩어져 있었다. **표면색이 같은 곳은 공통 토큰으로 묶고, 표면이 다르면 같은 불투명도를 강요하지 않는다** — 불투명도 틴트는 표면이 어두울수록 perceptually 묽게(빨강이 아니라 면색처럼) 읽히기 때문이다.
+
+### 공통 토큰 (표면 `#241a36` 전용) — `globals.css`
+`--destructive`(`0 84% 60%`) 위에 알파를 얹은 소프트 배경. 라이트보다 다크를 한 단계 진하게(다크면에선 같은 알파가 묽게 읽힘 → 드롭다운 hover 기준 CR≈1.23로 맞춤):
+
+| 토큰 | 라이트 | 다크 | 용도 |
+|---|---|---|---|
+| `--s-destructive-soft-bg` | `hsl(var(--destructive) / 0.1)` | `hsl(var(--destructive) / 0.18)` | 삭제 hover·소프트 채움 기본 |
+| `--s-destructive-soft-bg-strong` | `hsl(var(--destructive) / 0.2)` | `hsl(var(--destructive) / 0.3)` | hover 강조·active 단계 |
+
+- **portal 상속**: 드롭다운·다이얼로그는 body로 portal돼 `.page`의 `--s-*`를 못 받는다 → 이 토큰은 **`:root` 전역 정의 + `@media (prefers-color-scheme: dark)`로 다크 오버라이드**해 portal에서도 상속되게 한다.
+- 적용처(둘 다 표면 `#241a36`):
+  - **드롭다운 삭제 항목 hover**: `[data-slot='dropdown-menu-item'][data-variant='destructive'][data-highlighted]` → `background: var(--s-destructive-soft-bg)`. 단일 규칙(specificity `0,3,0`)이 다크 일반항목 규칙(`0,2,0`)을 이겨 모드 분기 없이 적용.
+  - **삭제 확인 다이얼로그 버튼**(`Button variant="destructive"`, `DeleteConfirmDialog`): rest `bg-[var(--s-destructive-soft-bg)]` / hover `bg-[var(--s-destructive-soft-bg-strong)]`. (옛 `dark:bg-destructive/*`는 `.dark` 미적용이라 죽어 다크에서 라이트값으로 묽게 떴음 → 토큰으로 교체해 다크에서 의도대로 진해짐.)
+
+### 표면이 다르면 같은 불투명도를 강요하지 말 것
+상세 하단 삭제 버튼(`.detailDeleteBtn`)은 드롭다운/다이얼로그(`#241a36`)보다 **더 어두운 페이지 배경(`#0a0712~#120c1e`)** 위에 있다. 공통 토큰의 다크값(`0.18`)은 이 표면에서 미달(CR≈1.20)이라 **공통 토큰을 쓰지 않고** 이 표면에 맞춘 값을 `@media`로 직접 적용한다:
+
+| 상태 | 라이트 | 다크(이 표면 전용) |
+|---|---|---|
+| hover | `/0.15` (불변) | `/0.20` (CR≈1.23 — 드롭다운 기준과 동급) |
+| active | `/0.2` (불변) | `/0.26` (CR≈1.36) |
+
+→ **원칙: 빨강 틴트의 불투명도는 "표면색"에 종속된다.** 새 destructive 면을 추가할 때 표면이 `#241a36`면 공통 토큰을, 더 어둡거나 밝은 표면이면 그 표면에서 기준 대비(hover CR≈1.23)를 맞춘 값을 별도로 정한다.
+
+### 소프트 배경과 섞지 않는 것 (분리 유지)
+- **삭제 글자·아이콘 색(`text-destructive`)**: 전경색이라 솔리드 `hsl(var(--destructive))` 단일 출처. 소프트 배경 토큰에 섞지 않는다.
+- **폼 오류 표시(`aria-invalid` border/ring)**: "삭제"가 아니라 "검증 오류" 의미축 — 빨강을 공유하지만 역할이 달라 별도 유지.
+
+---
+
 ## 6. 헤더(PageHeader) 통일 기준
 
 왜: 홈과 `/list`의 로고~제목~서브카피 세로 간격을 픽셀 단위로 동일하게 유지하려고 **공용 `PageHeader`** 하나만 쓴다. 절대 화면마다 직접 헤더를 짜지 않는다.
@@ -549,8 +582,9 @@ export const STATUS_LABELS: Record<Status, string> = {
 
 **삭제 버튼** (`styles.detailDeleteBtn`):
 - 기본: `--s-card-border-strong` 배경 + `--s-faint` 텍스트 (중립 면, 빨강 배경 금지)
-- hover: `hsl(var(--destructive) / 0.15)` 배경 + destructive 텍스트
-- active: `hsl(var(--destructive) / 0.2)`
+- hover: 배경 라이트 `hsl(var(--destructive) / 0.15)` / **다크 `/0.20`** + destructive 텍스트
+- active: 배경 라이트 `hsl(var(--destructive) / 0.2)` / **다크 `/0.26`**
+- 다크값이 더 진한 이유: 이 버튼은 페이지 배경(`#0a0712~#120c1e`)이라 드롭다운/다이얼로그(`#241a36`)보다 어두워, 공통 토큰(`--s-destructive-soft-bg`) 대신 이 표면 전용값을 `@media`로 직접 적용한다(§5-B 표면별 분리). 라이트는 불변.
 - 위치: 좌측 끝(오삭제 방지). Primary와 최대한 분리.
 
 ---
@@ -632,7 +666,8 @@ export const STATUS_LABELS: Record<Status, string> = {
 - **다이얼로그가 OS 다크 미대응** (`VisitedDialog`·`DeleteConfirmDialog` 등 `DialogContent`): 다이얼로그 표면·텍스트·hover가 shadcn HSL 토큰(`--popover`/`--popover-foreground`/`--muted`/`--foreground`)에 의존하는데, 이 토큰들은 `globals.css`에서 **`.dark` 클래스 전용**으로만 다크값을 갖는다. 이 앱은 `.dark`를 부착하지 않고 `@media (prefers-color-scheme: dark)` + `--s-*`로만 다크를 처리하므로, **OS 다크에서 다이얼로그 전체가 라이트(흰 표면)로 고정**된다. ghost `X` 닫기의 `dark:hover:bg-muted/50`도 같은 이유로 죽은 규칙. (금지규칙 12와 동일 원인.) → 해결: `DialogContent` 표면·닫기 버튼을 `--s-card-bg`/`--s-ink`/`--s-card-border-strong` 등 `--s-*` 토큰으로 치환하는 별도 작업 필요. 단순 hover 패치가 아니라 다이얼로그 다크 테마 전반의 작업이라 범위를 따로 잡는다.
 - **라이트 `--s-*` 토큰 정식 정의 미비 — 앱 전역 토큰 정리** (`docs/design-token-audit.md` 참조): 라이트는 핵심 토큰(`--s-active-*`/`--s-card-bg`/`--s-card-border-strong`/`--s-input`/`--s-card-shadow`)만 `.page`에 정의돼 있고, `--s-accent-soft-bg`·`--s-sub`·`--s-faint`·`--s-ink`·`--s-accent`·`--s-grad`·`--s-grad-shadow`·`--s-card-shadow-hover` 등은 **라이트 값이 없어 각 클래스의 `var(--token, fallback)` fallback에 의존**한다(다크만 `@media`로 정의). 동작엔 문제없지만 단일 출처가 약함. → 라이트 `.page`에 정식 정의를 추가하는 정리 작업(시각 변경 아님, 1:1 유지 확인 필요).
 - **`--s-faint` fallback 불일치**: 같은 토큰인데 `.searchIcon`은 `#9ca3af`, `.searchInput::placeholder`는 `#b0aabe` — 라이트에서 둘 다 live라 실제로 다른 회색으로 렌더된다. 의미 분리(아이콘=기능 신호 / placeholder=임시 안내)인지 단순 불일치인지 정리 필요. (`--s-card-border-strong`·`--s-active-line` fallback도 선언마다 다르나 토큰이 정의돼 있어 렌더 영향은 없음 — 소스 표기만 통일하면 됨.)
-- **드롭다운 portal 리터럴 토큰화**: `globals.css`의 `[data-slot='dropdown-menu-*']`은 body로 portal 렌더돼 `.page` `--s-*`를 못 받아 색·그림자가 직접 리터럴(`#eceaf3`·`#241a36`·`#3a2f4e`·`#2c2442` 등). 토큰화하려면 다이얼로그 `.dialogPopup` 패턴처럼 portal 루트에 토큰 재선언 필요. (위 다이얼로그 다크 대응과 묶어 처리 가능.)
+- **드롭다운 portal 리터럴 토큰화**: `globals.css`의 `[data-slot='dropdown-menu-*']`은 body로 portal 렌더돼 `.page` `--s-*`를 못 받아 색·그림자가 직접 리터럴(`#eceaf3`·`#241a36`·`#3a2f4e`·`#2c2442` 등). 토큰화하려면 다이얼로그 `.dialogPopup` 패턴처럼 portal 루트에 토큰 재선언 필요. (위 다이얼로그 다크 대응과 묶어 처리 가능.) ※ **삭제 항목 hover 배경만 `--s-destructive-soft-bg`로 토큰화 완료**(§5-B) — 나머지(콘텐츠 배경·보더·구분선·일반 항목 hover)는 아직 리터럴.
+- **`.detailDeleteBtn` 라이트 hover 불투명도 불일치**: 라이트 hover가 `/0.15`로, 공통 토큰 base(`--s-destructive-soft-bg` 라이트 `/0.1`)와 다르다. 본래 있던 불일치이며, 통일하면 라이트 hover가 `0.15→0.1`로 묽어지는 **라이트 시각 변경**이라 별도 사인오프 필요. (다크는 §5-B대로 이미 이 표면 전용값 `/0.20`·`/0.26`으로 분리 적용됨.)
 
 ---
 

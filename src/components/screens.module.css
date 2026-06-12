@@ -1031,6 +1031,23 @@
   color: hsl(var(--destructive));
   background: hsl(var(--destructive) / 0.2);
 }
+/*
+ * 다크 표면 보정 — 이 버튼은 드롭다운/다이얼로그(#241a36)보다 어두운 페이지 배경
+ * (#0a0712~#120c1e) 위에 떠서, 라이트와 같은 불투명도로는 빨강이 묽게 읽힌다(0.15 → CR≈1.15).
+ * 다크에서만 hover 0.20(CR≈1.23, 드롭다운 기준과 동급)·active 0.26(CR≈1.36)으로 올려 또렷하게.
+ * 공용 토큰(--s-destructive-soft-bg, #241a36용 0.18/0.30)은 이 표면엔 perceptually 안 맞아 미사용.
+ * 라이트(hover 0.15 / active 0.20)는 미변경. (라이트 0.15가 토큰 base 0.10과 다른 건 본래 불일치 — 범위 밖)
+ */
+@media (prefers-color-scheme: dark) and (hover: hover) {
+  .detailDeleteBtn:hover {
+    background: hsl(var(--destructive) / 0.2);
+  }
+}
+@media (prefers-color-scheme: dark) {
+  .detailDeleteBtn:active {
+    background: hsl(var(--destructive) / 0.26);
+  }
+}
 
 /* ── 인라인 편집: 라디오 옵션 버튼 ────────────────── */
 .editRadioOption {

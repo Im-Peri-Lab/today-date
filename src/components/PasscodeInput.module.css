@@ -66,11 +66,14 @@
 .pad {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 0.75rem;
+  /* iOS 잠금화면 느낌 — 버튼 사이 간격을 살짝 넉넉하게 */
+  gap: 1.125rem;
+  justify-items: center;
 }
 
 .spacer {
-  width: 4.75rem;
+  /* 키와 동일한 정원 풋프린트로 그리드 정렬 유지 */
+  width: 4rem;
   height: 4rem;
 }
 
@@ -78,11 +81,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 4.75rem;
+  /* 둥근 사각형 → 완전한 정원(컴팩트하게 축소) */
+  width: 4rem;
   height: 4rem;
-  border-radius: 1.125rem;
-  font-size: 1.4rem;
-  font-weight: 500;
+  border-radius: 9999px;
+  font-size: 1.5rem;
+  font-weight: 400;
   font-variant-numeric: tabular-nums;
   color: var(--pi-key-text, #1a1033);
   background: var(--pi-key-bg, #fcfcfd);

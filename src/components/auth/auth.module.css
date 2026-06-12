@@ -430,7 +430,8 @@
     --pi-key-hover: #342b4b;
     --pi-key-active: #473a66;
     --pi-key-press-shadow: rgba(0, 0, 0, 0.45);
-    --pi-key-focus-ring: rgba(192, 132, 252, 0.55);
+    /* §5 focus 글로우 표준 알파 0.5 로 통일(라이트와 동일) */
+    --pi-key-focus-ring: rgba(192, 132, 252, 0.5);
     --pi-del-color: #9890a8;
     --pi-error-color: #fb7185;
     --pi-label-color: #a8a0b8;

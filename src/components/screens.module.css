@@ -880,6 +880,25 @@
   transform: scale(0.96);
 }
 
+/* 키보드 탭 전용 포커스 링(:focus-visible) — 마우스 클릭엔 안 뜸.
+   §5 채움형 글로우 표준: 두께 3px · accent · 알파 0.5 (키패드·shadcn 채움형과 동일).
+   브라우저 기본 파란 outline 을 끄고 반드시 자체 accent 글로우로 대체(접근성).
+   기본 그라데이션 그림자는 글로우 뒤에 함께 유지. hover/active 동작은 건드리지 않음. */
+.fab:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 3px rgba(124, 58, 237, 0.5),
+    var(--s-grad-shadow, 0 10px 24px -6px rgba(168, 85, 247, 0.55));
+}
+@media (prefers-color-scheme: dark) {
+  /* 다크 accent(#c084fc) 알파 0.5 — 어두운 페이지 배경 위에서 또렷하게 */
+  .fab:focus-visible {
+    box-shadow:
+      0 0 0 3px rgba(192, 132, 252, 0.5),
+      var(--s-grad-shadow, 0 10px 24px -6px rgba(168, 85, 247, 0.55));
+  }
+}
+
 /* 빈 상태 */
 .empty {
   display: flex;

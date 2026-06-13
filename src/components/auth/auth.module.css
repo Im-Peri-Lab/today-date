@@ -186,7 +186,8 @@
 }
 
 .link:hover svg,
-.link:active svg {
+.link:active svg,
+.link:focus-visible svg {
   transform: translateX(-2px);
 }
 
@@ -194,6 +195,18 @@
 .link:active {
   color: #7c3aed;
   text-decoration: underline;
+}
+
+/* 텍스트 링크 포커스(:focus-visible): §5 "focus-visible 누락 보강" 대상이나, 텍스트 링크에
+   채움형 박스 글로우(box-shadow ring)는 어색하다(§5: 글로우는 입력·채움형 CTA·키패드 전용).
+   대신 링크에 맞는 표시 — accent 색 + 굵은 밑줄(2px)로 대체한다. 밑줄은 색에만 의존하지 않는
+   비색상 신호라 접근성을 충족하고(WCAG), rest(밑줄 없음) 대비 또렷이 구분된다. hover(1px 밑줄)보다
+   한 단계 굵게 두어 키보드 포커스가 hover 와도 구별된다. 브라우저 기본 outline 은 끈다. */
+.link:focus-visible {
+  outline: none;
+  color: #7c3aed;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
 }
 
 /* ── 단계 인디케이터 (setup 마법사) ────────── */
@@ -376,6 +389,22 @@
   transform: scale(0.97);
 }
 
+/* 키보드 탭 전용 포커스 링(:focus-visible) — 마우스 클릭엔 안 뜸.
+   §5 채움형 글로우 표준: 두께 3px · accent · 알파 0.5 (키패드 .key:focus-visible·shadcn 채움형과 동일).
+   브라우저 기본 파란 outline 을 끄고 반드시 자체 accent 글로우로 대체(접근성 — 표시 없는 채로 두지 않음).
+   btnPrimary 는 기본 떠오름 그림자를 글로우 뒤에 함께 유지. hover/active 동작은 건드리지 않음. */
+.btnPrimary:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 3px rgba(124, 58, 237, 0.5),
+    0 4px 14px -7px rgba(168, 85, 247, 0.45);
+}
+
+.btnSecondary:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.5);
+}
+
 .btnPrimary:disabled,
 .btnSecondary:disabled {
   opacity: 0.55;
@@ -454,7 +483,8 @@
   }
 
   .link:hover,
-  .link:active {
+  .link:active,
+  .link:focus-visible {
     color: #c084fc;
   }
 
@@ -527,6 +557,18 @@
   .btnSecondary:hover:not(:disabled) {
     background: #281f3c;
     border-color: #3f3454;
+  }
+
+  /* §5 focus 글로우 표준 알파 0.5, 다크 accent(#c084fc — 키패드 .key:focus-visible 다크와 동일).
+     btnPrimary 기본 그림자는 다크에서 재정의 없어 라이트값 유지 → 글로우 뒤에 함께 둔다. */
+  .btnPrimary:focus-visible {
+    box-shadow:
+      0 0 0 3px rgba(192, 132, 252, 0.5),
+      0 4px 14px -7px rgba(168, 85, 247, 0.45);
+  }
+
+  .btnSecondary:focus-visible {
+    box-shadow: 0 0 0 3px rgba(192, 132, 252, 0.5);
   }
 
   .lockNotice {

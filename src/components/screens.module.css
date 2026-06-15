@@ -25,7 +25,10 @@
   --s-active-on: #ffffff; /* 채움 위 글씨/아이콘 */
   --s-active-line: #7c3aed; /* 활성/포커스 보더·링 */
   --s-active-text: #7c3aed; /* 외곽선형 활성(토글/필터버튼)의 글씨·아이콘 — 다크에선 밝게 */
-  --s-active-glow: rgba(124, 58, 237, 0.2); /* 옅은 포커스 링/글로우 */
+  --s-active-glow: rgba(124, 58, 237, 0.2); /* 옅은 포커스 링/글로우 — 입력(검색/위치) 전용(§5) */
+  /* 채움형 :focus-visible 글로우 표준(§5): 3px · accent · 알파 0.5. 입력용(--s-active-glow 0.2)보다
+     진해, 채움 표면(FAB·키패드·shadcn 채움형) 위에서도 또렷이 보인다. 키패드 --pi-key-focus-ring 와 동치. */
+  --s-focus-ring: rgba(124, 58, 237, 0.5);
 
   /*
    * 요소 표면/보더/그림자 (라이트 기본값) — 다크 구조를 미러링.
@@ -125,6 +128,9 @@
     /* 그라데이션(주요 액션/아이콘/FAB) — 다크는 한 톤 밝게 */
     --s-grad: linear-gradient(135deg, #c084fc 0%, #f472b6 100%);
     --s-grad-shadow: 0 8px 20px -8px rgba(192, 132, 252, 0.45);
+
+    /* 채움형 focus 글로우 표준(§5) — 다크 accent(#c084fc) 알파 0.5(라이트와 동일 알파) */
+    --s-focus-ring: rgba(192, 132, 252, 0.5);
   }
 }
 
@@ -879,24 +885,14 @@
 .fab:active {
   transform: scale(0.96);
 }
-
-/* 키보드 탭 전용 포커스 링(:focus-visible) — 마우스 클릭엔 안 뜸.
-   §5 채움형 글로우 표준: 두께 3px · accent · 알파 0.5 (키패드·shadcn 채움형과 동일).
-   브라우저 기본 파란 outline 을 끄고 반드시 자체 accent 글로우로 대체(접근성).
-   기본 그라데이션 그림자는 글로우 뒤에 함께 유지. hover/active 동작은 건드리지 않음. */
+/* 키보드 탭 전용(:focus-visible) — 마우스 클릭엔 안 뜸.
+   채움형 focus 글로우 표준(§5): 3px · accent · 알파 0.5. 브라우저 기본 파란 outline 을 끄고
+   자체 accent 글로우로 대체하되, FAB 의 기존 떠 있는 그라데이션 그림자는 함께 유지. */
 .fab:focus-visible {
   outline: none;
   box-shadow:
-    0 0 0 3px rgba(124, 58, 237, 0.5),
+    0 0 0 3px var(--s-focus-ring, rgba(124, 58, 237, 0.5)),
     var(--s-grad-shadow, 0 10px 24px -6px rgba(168, 85, 247, 0.55));
-}
-@media (prefers-color-scheme: dark) {
-  /* 다크 accent(#c084fc) 알파 0.5 — 어두운 페이지 배경 위에서 또렷하게 */
-  .fab:focus-visible {
-    box-shadow:
-      0 0 0 3px rgba(192, 132, 252, 0.5),
-      var(--s-grad-shadow, 0 10px 24px -6px rgba(168, 85, 247, 0.55));
-  }
 }
 
 /* 빈 상태 */

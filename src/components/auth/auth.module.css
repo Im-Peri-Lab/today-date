@@ -49,6 +49,9 @@
   /* 포커스 링: 키보드 탭 전용(:focus-visible). 선택 상태의 1px 솔리드 accent 보더와 겹치지 않게
      2px 반투명 글로우로 차별화(두께·투명도). 기존 포커스 토큰이 없어 신규 추가. */
   --pi-key-focus-ring: rgba(124, 58, 237, 0.5);
+  /* 채움형 :focus-visible 글로우 표준(§5): 3px · accent · 알파 0.5.
+     btnPrimary/btnSecondary 가 공유 — 키패드 focus 링과 동일 표준값(라·다 알파 0.5 통일). */
+  --auth-focus-ring: rgba(124, 58, 237, 0.5);
   --pi-del-color: #9ca3af;
   --pi-error-color: #be123c;
   --pi-label-color: #6b7280;
@@ -186,8 +189,7 @@
 }
 
 .link:hover svg,
-.link:active svg,
-.link:focus-visible svg {
+.link:active svg {
   transform: translateX(-2px);
 }
 
@@ -197,11 +199,12 @@
   text-decoration: underline;
 }
 
-/* 텍스트 링크 포커스(:focus-visible): §5 "focus-visible 누락 보강" 대상이나, 텍스트 링크에
-   채움형 박스 글로우(box-shadow ring)는 어색하다(§5: 글로우는 입력·채움형 CTA·키패드 전용).
-   대신 링크에 맞는 표시 — accent 색 + 굵은 밑줄(2px)로 대체한다. 밑줄은 색에만 의존하지 않는
-   비색상 신호라 접근성을 충족하고(WCAG), rest(밑줄 없음) 대비 또렷이 구분된다. hover(1px 밑줄)보다
-   한 단계 굵게 두어 키보드 포커스가 hover 와도 구별된다. 브라우저 기본 outline 은 끈다. */
+/* 키보드 탭 전용(:focus-visible) — 마우스 클릭엔 안 뜸.
+   텍스트 링크라 채움형 박스 글로우(3px ring)는 글자 주위에 사각 테두리로 떠 어색하다.
+   §5 "표시 없이 두지 말 것" 원칙은 지키되, 링크에 맞는 표시로 대체한다:
+   브라우저 기본 outline 제거 + accent 색 + 또렷한 2px 밑줄(기본 1px → 2px).
+   색만으로 구분하지 않도록 밑줄 두께를 함께 키워 접근성(비색각 구분)을 확보하고,
+   hover(accent + 1px 밑줄)와 두께로 차별화해 키보드 포커스임을 드러낸다. */
 .link:focus-visible {
   outline: none;
   color: #7c3aed;
@@ -389,20 +392,19 @@
   transform: scale(0.97);
 }
 
-/* 키보드 탭 전용 포커스 링(:focus-visible) — 마우스 클릭엔 안 뜸.
-   §5 채움형 글로우 표준: 두께 3px · accent · 알파 0.5 (키패드 .key:focus-visible·shadcn 채움형과 동일).
-   브라우저 기본 파란 outline 을 끄고 반드시 자체 accent 글로우로 대체(접근성 — 표시 없는 채로 두지 않음).
-   btnPrimary 는 기본 떠오름 그림자를 글로우 뒤에 함께 유지. hover/active 동작은 건드리지 않음. */
+/* 키보드 탭 전용(:focus-visible) — 마우스 클릭엔 안 뜸.
+   채움형 focus 글로우 표준(§5): 3px · accent · 알파 0.5(--auth-focus-ring).
+   브라우저 기본 파란 outline 을 끄고 자체 accent 글로우로 대체(접근성: 표시 없는 채로 두지 않음).
+   btnPrimary 는 기존 그라데이션 그림자를 함께 유지. hover/active 동작은 건드리지 않음. */
+.btnSecondary:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--auth-focus-ring, rgba(124, 58, 237, 0.5));
+}
 .btnPrimary:focus-visible {
   outline: none;
   box-shadow:
-    0 0 0 3px rgba(124, 58, 237, 0.5),
+    0 0 0 3px var(--auth-focus-ring, rgba(124, 58, 237, 0.5)),
     0 4px 14px -7px rgba(168, 85, 247, 0.45);
-}
-
-.btnSecondary:focus-visible {
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.5);
 }
 
 .btnPrimary:disabled,
@@ -461,6 +463,8 @@
     --pi-key-press-shadow: rgba(0, 0, 0, 0.45);
     /* §5 focus 글로우 표준 알파 0.5 로 통일(라이트와 동일) */
     --pi-key-focus-ring: rgba(192, 132, 252, 0.5);
+    /* §5 focus 글로우 표준 알파 0.5(라이트와 동일 알파, 다크 accent 톤) */
+    --auth-focus-ring: rgba(192, 132, 252, 0.5);
     --pi-del-color: #9890a8;
     --pi-error-color: #fb7185;
     --pi-label-color: #a8a0b8;
@@ -483,7 +487,10 @@
   }
 
   .link:hover,
-  .link:active,
+  .link:active {
+    color: #c084fc;
+  }
+
   .link:focus-visible {
     color: #c084fc;
   }
@@ -557,18 +564,6 @@
   .btnSecondary:hover:not(:disabled) {
     background: #281f3c;
     border-color: #3f3454;
-  }
-
-  /* §5 focus 글로우 표준 알파 0.5, 다크 accent(#c084fc — 키패드 .key:focus-visible 다크와 동일).
-     btnPrimary 기본 그림자는 다크에서 재정의 없어 라이트값 유지 → 글로우 뒤에 함께 둔다. */
-  .btnPrimary:focus-visible {
-    box-shadow:
-      0 0 0 3px rgba(192, 132, 252, 0.5),
-      0 4px 14px -7px rgba(168, 85, 247, 0.45);
-  }
-
-  .btnSecondary:focus-visible {
-    box-shadow: 0 0 0 3px rgba(192, 132, 252, 0.5);
   }
 
   .lockNotice {

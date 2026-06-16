@@ -220,7 +220,8 @@ description: >
   - **글로우 표준값(확정): 두께 `3px`, accent색(`--s-active-line`/shadcn `--ring` 계열), 알파 `0.5`** → `box-shadow: 0 0 0 3px <accent 0.5>` (또는 shadcn `ring-3 ring-ring/50`).
   - 적용 군: 텍스트 입력(`.searchInput`/`.plainInput`/auth `.input`), 채움형 CTA(shadcn `default`/`secondary`/`ghost`/`link`·`styles.detailPrimaryBtn`), 패스코드 키패드 키.
   - **현 코드 정합 메모**: shadcn CTA `ring-ring/50`(=0.5)·키패드 알파 0.5 는 이미 표준 일치. **입력의 `--s-active-glow`(현재 `0.2`)·키패드 두께(현재 `2px`→`3px`)는 후속 커밋에서 표준값으로 상향**(이번엔 문서만). 토큰 표의 `--s-active-glow` 0.2 는 현 코드값 기록이며, 표준 목표는 0.5.
-- **보더만 = 선택·컨트롤 버튼**: `:focus-visible` → 활성 **보더(`--s-active-line`) + 활성 글씨(`--s-active-text`)만, 글로우 없음**(= hover와 동일 결과). 칩·세그먼트·필터 토글·`resetBtn`·옵션카드·shadcn `outline` 변형. **기존 유지.**
+- **글로우 = 선택·컨트롤 버튼**: `:focus-visible` → 활성 **보더(`--s-active-line`) + 활성 글씨(`--s-active-text`) + 3px 글로우(`--s-focus-ring`)**. 칩(`.chip`)·세그먼트(`.segmentBtn`·`.option`)·필터 토글(`.filterToggle`)·`resetBtn`·옵션카드(`.optionCard`). `box-shadow: 0 0 0 3px var(--s-focus-ring)`.
+- **보더만 = shadcn `outline` 변형**: `:focus-visible` → 활성 보더 + 활성 글씨만, 글로우 없음.
 - **중성면 = 유틸 아이콘 버튼**: `:focus-visible` → hover와 동일한 **중성 면**(라이트 `#eceaf3`=`--s-card-border-strong` / 다크 accent-soft), 글로우 없음. `.iconBtn`·`.editGhostBtn`. **§7 그대로 유지.**
 
 **focus-visible 누락 보강 원칙 (확정):** 채움형 버튼인데 포커스 표시가 없어 **브라우저 기본 outline으로 떨어지는** 요소 — 인증 `.btnPrimary`/`.btnSecondary`/`.link`(`auth.module.css`), FAB(`.fab`, base-ui `<button>`) — 는 위 **채움형 글로우 표준(3px·accent·0.5)을 동일 적용**한다. 브라우저 기본 outline 방치 금지. (적용은 후속 커밋에서 화면별로.)

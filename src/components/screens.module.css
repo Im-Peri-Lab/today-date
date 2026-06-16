@@ -748,6 +748,20 @@
 }
 
 /*
+ * 다이얼로그 닫기(X) 버튼 hover — .iconBtn 과 동일한 중립 버튼 패턴.
+ * 라이트: --s-card-border-strong(#eceaf3 회색), 다크: --s-accent-soft-bg(#573f7f 보라).
+ * portal 상속: 라이트는 :root 값, 다크는 .dialogPopup 재선언 값으로 해석.
+ */
+.dialogCloseBtn:hover {
+  background: var(--s-card-border-strong, #eceaf3);
+}
+@media (prefers-color-scheme: dark) {
+  .dialogCloseBtn:hover {
+    background: var(--s-accent-soft-bg, #573f7f);
+  }
+}
+
+/*
  * 다이얼로그 backdrop. base-ui Backdrop 은 portal(body)로 나가 .page 다크 토큰을 못 받으므로
  * 라이트/다크 분기를 미디어쿼리로 직접 둔다(토큰 상속 아님 → portal 위치 무관하게 적용).
  * 라이트: 흰 페이지 대비 검정 10%(기존 bg-black/10 과 동일, 라이트 무변화).

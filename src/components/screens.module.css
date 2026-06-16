@@ -50,7 +50,6 @@
    * ── 텍스트·강조 토큰 (라이트 명시) ───────────────
    * 종전엔 라이트에서 미정의 → 각 사용처의 var(--s-*, 폴백)에 암묵 의존해 값이 결정됐다.
    * 실측한 폴백값을 그대로 명시해 fallback 의존을 제거(렌더 무변화). 다크는 아래 @media 에서 오버라이드.
-   * (.tab 비활성색·.visitBox 면은 종전에 다른 폴백을 쓰던 예외 → 각 사용처에서 직접 보존, 아래 참고)
    */
   --s-ink: #1a1033; /* 제목/주요 텍스트 */
   --s-sub: #6b7280; /* 서브카피 */
@@ -169,14 +168,6 @@
   border-radius: 6px;
   box-shadow: var(--s-focus-ring, 0 0 0 2px rgba(124, 58, 237, 0.5));
 }
-.greeting {
-  /* 크기는 Tailwind(text-2xl lg:text-4xl)로 — 모듈은 톤만 */
-  font-weight: 500;
-  letter-spacing: -0.02em;
-  line-height: 1.15;
-  color: var(--s-ink, #1a1033);
-}
-
 /*
  * 페이지 제목/서브카피 공용 토큰 (홈·/list 등 메인 화면 공통).
  * 홈(작음)과 리스트(text-3xl bold)의 중간 무게감: 모바일 ~27px / 데스크탑 30px, semibold, 살짝 타이트.
@@ -228,26 +219,6 @@
   display: flex;
   flex-direction: column;
 }
-/* 통계 섹션을 위 콘텐츠와 분리 — 데스크탑에서만 얇은 구분선 + 여백 */
-@media (min-width: 1024px) {
-  .sectionTop {
-    border-top: 1px solid var(--s-divider, rgba(0, 0, 0, 0.06));
-    padding-top: 2rem;
-  }
-}
-
-/* 통계 그룹 라벨 + 핵심 통계 강조 */
-.statLabel {
-  font-size: 0.75rem;
-  font-weight: 500;
-  letter-spacing: 0.02em;
-  color: var(--s-faint, #9ca3af);
-}
-.statCardAccent {
-  background: var(--s-accent-soft-bg, #f6f1ff);
-  border-color: transparent;
-}
-
 /* 클릭 가능한 카드: 호버 시 살짝 떠오름 */
 .cardInteractive {
   transition:
@@ -424,13 +395,6 @@
   border-radius: 4px;
   box-shadow: var(--s-focus-ring, 0 0 0 2px rgba(124, 58, 237, 0.5));
 }
-.heading {
-  font-size: 1.375rem;
-  font-weight: 500;
-  letter-spacing: -0.02em;
-  color: var(--s-ink, #1a1033);
-}
-
 /* 탭 (활동/장소) — 활성: 보라 underline + 진한 텍스트 */
 .tabBar {
   display: flex;
@@ -535,8 +499,7 @@
   color: var(--s-faint, #9ca3af);
   pointer-events: none;
 }
-.searchInput,
-.plainInput {
+.searchInput {
   width: 100%;
   height: 2.5rem;
   border-radius: 0.75rem;
@@ -545,18 +508,12 @@
   color: var(--s-ink, #1a1033);
   font-size: 0.875rem;
   outline: none;
+  padding: 0 0.875rem 0 2.25rem;
   transition:
     border-color 140ms ease,
     box-shadow 140ms ease;
 }
-.searchInput {
-  padding: 0 0.875rem 0 2.25rem;
-}
-.plainInput {
-  padding: 0 0.875rem;
-}
-.searchInput::placeholder,
-.plainInput::placeholder {
+.searchInput::placeholder {
   color: var(--s-placeholder, #b0aabe);
 }
 /*
@@ -565,8 +522,7 @@
  *  - 선택 컨트롤·버튼(칩/필터/토글/옵션/초기화): 글로우 없이 활성 보더 + 활성 글자(hover 와 동일)
  * 보더는 항상 1px 자리를 차지(색만 변경)하므로 포커스 시 레이아웃 점프가 없다.
  */
-.searchInput:focus,
-.plainInput:focus {
+.searchInput:focus {
   outline: none;
   border-color: var(--s-active-line, #7c3aed);
   box-shadow: var(--s-active-glow, 0 0 0 3px rgba(124, 58, 237, 0.2));
@@ -1001,19 +957,6 @@
     /* color: var(--s-accent) → .page 다크 미디어에서 #c084fc 로 자동 cascade */
   }
 }
-.visitBox {
-  border-radius: 0.875rem;
-  /* 라이트는 중성 면(#eceaf3)을 유지한다. 종전엔 라이트에서 --s-accent-soft-bg 가 미정의여서
-     체이닝 폴백(--s-card-border-strong=#eceaf3)으로 떨어졌는데, accent-soft-bg 를 라이트에 명시한 뒤
-     같은 렌더를 보존하려 카드보더 토큰을 직접 참조. 다크 보라 면은 아래 @media 에서 accent-soft-bg(#573f7f). */
-  background: var(--s-card-border-strong, #eceaf3);
-}
-@media (prefers-color-scheme: dark) {
-  .visitBox {
-    background: var(--s-accent-soft-bg, #573f7f);
-  }
-}
-
 /* 로딩 스켈레톤 바 */
 .skelBar {
   background: var(--s-skeleton, #ece7f5);
@@ -1128,32 +1071,6 @@
   .detailDeleteBtn:active {
     background: hsl(var(--destructive) / 0.26);
   }
-}
-
-/* ── 인라인 편집: 라디오 옵션 버튼 ────────────────── */
-.editRadioOption {
-  flex: 1;
-  cursor: pointer;
-  border-radius: 0.5rem;
-  border: 1px solid var(--s-card-border-strong, #eceaf3);
-  padding: 0.5rem 0.75rem;
-  text-align: center;
-  font-size: 0.875rem;
-  color: var(--s-sub, #6b7280);
-  background: var(--s-card-bg, #ffffff);
-  transition:
-    border-color 140ms ease,
-    color 140ms ease;
-}
-@media (hover: hover) {
-  .editRadioOption:hover {
-    border-color: var(--s-active-line, #7c3aed);
-  }
-}
-.editRadioOptionActive {
-  border-color: var(--s-active-line, #7c3aed);
-  color: var(--s-active-text, #7c3aed);
-  font-weight: 500;
 }
 
 /* ── 정의형 시트 행 (상세 화면 본문) ─────────────────

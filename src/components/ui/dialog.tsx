@@ -68,7 +68,10 @@ function DialogContent({
             render={
               <Button
                 variant="ghost"
-                className="absolute top-2 right-2 text-[color:var(--s-faint,#9ca3af)] hover:bg-[var(--s-accent-soft-bg,#eceaf3)] hover:text-[color:var(--s-accent,#1a1033)]"
+                className={cn(
+                  "absolute top-2 right-2 text-[color:var(--s-faint,#9ca3af)] hover:text-[color:var(--s-accent,#1a1033)]",
+                  styles.dialogCloseBtn
+                )}
                 size="icon-sm"
               />
             }

@@ -36,7 +36,7 @@ export function RatingStars({ value, onChange, size = 'md', className }: RatingS
             key={n}
             type="button"
             onClick={() => onChange?.(n)}
-            className="transition-transform hover:scale-110"
+            className={cn('transition-transform hover:scale-110', styles.ratingStar)}
             aria-label={`별점 ${n}점`}
           >
             {star}

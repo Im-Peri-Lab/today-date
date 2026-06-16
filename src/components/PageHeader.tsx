@@ -32,7 +32,7 @@ export function PageHeader({
     <>
       <header className="flex items-center justify-between">
         {homeNav ? (
-          <Link href="/" className="flex items-center gap-2.5" aria-label="홈으로">
+          <Link href="/" className={cn('flex items-center gap-2.5', styles.brandLink)} aria-label="홈으로">
             {brand}
           </Link>
         ) : (

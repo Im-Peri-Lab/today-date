@@ -234,7 +234,7 @@ export function ActivityDetail({ id, initialEdit }: Props) {
                         href={activity.reference_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className={cn('inline-flex items-center gap-1.5 hover:underline', styles.accent)}
+                        className={cn('inline-flex items-center gap-1.5 hover:underline', styles.textLink)}
                       >
                         <ExternalLink className="h-3.5 w-3.5 shrink-0" />
                         참고 링크 열기

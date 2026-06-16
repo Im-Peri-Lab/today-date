@@ -101,7 +101,7 @@ export function PlaceRecommendWizard() {
       <div className="mx-auto w-full max-w-4xl px-5 py-10 lg:px-8 lg:py-14">
         <button
           onClick={reset}
-          className={cn('mb-3 inline-flex items-center gap-1.5 text-sm', styles.accent)}
+          className={cn('mb-3 inline-flex items-center gap-1.5 text-sm', styles.backLink)}
         >
           <ArrowLeft className="h-4 w-4" />
           처음부터
@@ -204,7 +204,7 @@ export function PlaceRecommendWizard() {
     <div className="mx-auto w-full max-w-lg px-5 py-10 lg:py-14">
       <Link
         href="/"
-        className={cn('mb-3 inline-flex items-center gap-1.5 text-sm', styles.accent)}
+        className={cn('mb-3 inline-flex items-center gap-1.5 text-sm', styles.backLink)}
       >
         <ArrowLeft className="h-4 w-4" />
         홈으로

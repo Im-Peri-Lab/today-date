@@ -50,10 +50,7 @@ function StatCard({
   return (
     <Link
       href={href}
-      className={cn(
-        styles.card,
-        'flex flex-col p-4 transition-transform duration-150 hover:-translate-y-0.5 active:scale-[0.98]'
-      )}
+      className={cn(styles.card, styles.cardInteractive, 'flex flex-col p-4')}
     >
       {loading ? (
         <Skeleton className="h-7 w-10" />

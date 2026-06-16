@@ -46,12 +46,12 @@
   --pi-key-hover: #efe7ff;
   --pi-key-active: #e2d4ff;
   --pi-key-press-shadow: rgba(124, 58, 237, 0.12);
-  /* 포커스 링: 키보드 탭 전용(:focus-visible). 선택 상태의 1px 솔리드 accent 보더와 겹치지 않게
-     2px 반투명 글로우로 차별화(두께·투명도). 기존 포커스 토큰이 없어 신규 추가. */
-  --pi-key-focus-ring: rgba(124, 58, 237, 0.5);
-  /* 채움형 :focus-visible 글로우 표준(§5): 3px · accent · 알파 0.5.
-     btnPrimary/btnSecondary 가 공유 — 키패드 focus 링과 동일 표준값(라·다 알파 0.5 통일). */
-  --auth-focus-ring: rgba(124, 58, 237, 0.5);
+  /* 포커스 링 토큰 — §5 2-tier 표준(full shadow 값으로 토큰화, 사용처는 var() 참조만):
+     - 소형 컨트롤(키패드·버튼): 2px accent 0.5
+     - 입력 필드: 3px accent 0.2 은은 */
+  --pi-key-focus-ring: 0 0 0 2px rgba(124, 58, 237, 0.5);
+  --auth-focus-ring: 0 0 0 2px rgba(124, 58, 237, 0.5);
+  --auth-input-glow: 0 0 0 3px rgba(168, 85, 247, 0.2); /* auth 입력 전용(auth 팔레트 톤 유지) */
   --pi-del-color: #9ca3af;
   --pi-error-color: #be123c;
   --pi-label-color: #6b7280;
@@ -329,7 +329,7 @@
 
 .input:focus {
   border-color: #a855f7;
-  box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.15);
+  box-shadow: var(--auth-input-glow, 0 0 0 3px rgba(168, 85, 247, 0.2));
 }
 
 .errorText {
@@ -393,17 +393,16 @@
 }
 
 /* 키보드 탭 전용(:focus-visible) — 마우스 클릭엔 안 뜸.
-   채움형 focus 글로우 표준(§5): 3px · accent · 알파 0.5(--auth-focus-ring).
-   브라우저 기본 파란 outline 을 끄고 자체 accent 글로우로 대체(접근성: 표시 없는 채로 두지 않음).
-   btnPrimary 는 기존 그라데이션 그림자를 함께 유지. hover/active 동작은 건드리지 않음. */
+   §5 소형 컨트롤 tier: 2px · accent 0.5(--auth-focus-ring).
+   btnPrimary 는 기존 그라데이션 그림자를 함께 유지. */
 .btnSecondary:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 3px var(--auth-focus-ring, rgba(124, 58, 237, 0.5));
+  box-shadow: var(--auth-focus-ring, 0 0 0 2px rgba(124, 58, 237, 0.5));
 }
 .btnPrimary:focus-visible {
   outline: none;
   box-shadow:
-    0 0 0 3px var(--auth-focus-ring, rgba(124, 58, 237, 0.5)),
+    var(--auth-focus-ring, 0 0 0 2px rgba(124, 58, 237, 0.5)),
     0 4px 14px -7px rgba(168, 85, 247, 0.45);
 }
 
@@ -461,10 +460,10 @@
     --pi-key-hover: #342b4b;
     --pi-key-active: #473a66;
     --pi-key-press-shadow: rgba(0, 0, 0, 0.45);
-    /* §5 focus 글로우 표준 알파 0.5 로 통일(라이트와 동일) */
-    --pi-key-focus-ring: rgba(192, 132, 252, 0.5);
-    /* §5 focus 글로우 표준 알파 0.5(라이트와 동일 알파, 다크 accent 톤) */
-    --auth-focus-ring: rgba(192, 132, 252, 0.5);
+    /* §5 소형 컨트롤 2px (다크 accent 톤, 알파 동일) */
+    --pi-key-focus-ring: 0 0 0 2px rgba(192, 132, 252, 0.5);
+    --auth-focus-ring: 0 0 0 2px rgba(192, 132, 252, 0.5);
+    --auth-input-glow: 0 0 0 3px rgba(192, 132, 252, 0.2);
     --pi-del-color: #9890a8;
     --pi-error-color: #fb7185;
     --pi-label-color: #a8a0b8;
@@ -544,7 +543,7 @@
 
   .input:focus {
     border-color: #c084fc;
-    box-shadow: 0 0 0 3px rgba(192, 132, 252, 0.2);
+    box-shadow: var(--auth-input-glow, 0 0 0 3px rgba(192, 132, 252, 0.2));
   }
 
   .errorText {

@@ -113,11 +113,11 @@
 }
 
 /* 키보드 탭에만 뜨는 포커스 링(:focus-visible) — 마우스 클릭엔 안 뜸.
-   §5 focus 글로우 표준: 두께 3px · accent · 알파 0.5 (입력·채움형 CTA와 동일). 기본 키 그림자는 유지. */
+   §5 소형 컨트롤 tier: 2px · accent 0.5(--pi-key-focus-ring). 기본 키 그림자는 유지. */
 .key:focus-visible {
   outline: none;
   box-shadow:
-    0 0 0 3px var(--pi-key-focus-ring, rgba(124, 58, 237, 0.5)),
+    var(--pi-key-focus-ring, 0 0 0 2px rgba(124, 58, 237, 0.5)),
     var(--pi-key-shadow, 0 1px 2px rgba(0, 0, 0, 0.04));
 }
 

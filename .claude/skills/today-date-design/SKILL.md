@@ -701,6 +701,67 @@ export const STATUS_LABELS: Record<Status, string> = {
 
 ---
 
+## 12. 화면 전환 로딩 패턴
+
+왜: 로딩 방식은 "앱 전반 일관성"이 아니라 **레이아웃 예측 가능성**으로 정한다. 화면마다 레이아웃 특성이 다르므로 같은 패턴을 강제하면 오히려 레이아웃 점프가 생긴다.
+
+### 패턴 선택 기준
+
+**스켈레톤**: 개별 요소(카드 한 장)의 모양·크기가 예측 가능한 경우.
+- 카드 개수가 가변이어도 **모양이 고정**이면 스켈레톤이 위에서부터 차곡차곡 정렬돼 점프 없이 자연스럽게 늘고 줄어든다(`/list` 카드 그리드, `CardGridSkeleton`).
+- 반면 개별 요소의 크기 자체가 가변이면(상세 페이지 텍스트·태그 수) 스켈레톤이 실제 콘텐츠 크기를 예측 못 해 레이아웃 점프 발생 → 서버 prefetch로 해결.
+
+**서버 prefetch** (`page.tsx`에서 조회 → `initialData`): 개별 요소 크기가 가변인 상세 페이지에 적용.
+- `page.tsx` 서버 컴포넌트에서 DB 조회(e.g. `getActivityById(id)`) → 클라이언트 컴포넌트에 `initialData`로 전달 → React Query `isLoading=false` → 스켈레톤 없이 즉시 렌더.
+- 데이터가 없으면 서버에서 `notFound()` 처리 → 클라이언트 로딩 후 에러 표시 대신 즉시 404.
+
+**프로그래매틱 `router.push` + API 대기**: `useTopLoader()`로 수동 제어.
+```tsx
+topLoader.start()              // API 호출 직전
+try {
+  const res = await fetch(...)
+  if (!res.ok) {
+    topLoader.done()           // 에러 경로: 명시 done
+    return
+  }
+  router.push('/destination')  // 성공 경로: done() 호출 안 함
+} catch {
+  topLoader.done()             // 네트워크 오류: 명시 done
+} finally {
+  setIsLoading(false)
+  // ⚠️ finally에 done()을 두면 router.push 직후 동기 실행되어 RSC 도착 전에 막대가
+  //    조기 종료 → 막대 끝 후 공백. 성공 경로는 pushState 패치가 RSC 완료 시 자동 done.
+}
+```
+
+**`<Link>` 전환**: `nextjs-toploader` 자동.
+- 앵커 클릭 → `start()` → RSC 완료 후 `pushState` 패치 → `done()`. 추가 코드 불필요.
+- `<DropdownMenuItem onClick={() => router.push(...)}>`처럼 앵커 클릭이 아닌 프로그래매틱 이동은 자동 적용 안 됨. API 대기 없는 즉시 이동이면 막대 없어도 무방.
+
+### 의도된 차이
+
+| 라우트 | 로딩 패턴 | 이유 |
+|---|---|---|
+| `/list` | `CardGridSkeleton` | 카드 모양 고정, 개수만 가변 → 스켈레톤이 점프 없이 자연스럽게 늘고 줄어듦 |
+| `/activities/[id]`, `/places/[id]` | 서버 prefetch + `initialData` | 텍스트·태그 길이 가변 → 스켈레톤이 크기 예측 못 해 점프. prefetch로 즉시 렌더 |
+
+둘 다 위 기준을 따른 결과이며, 패턴이 달라도 불일치가 아니다.
+
+### 새 라우트 추가 시 판단 흐름
+
+```
+도착 화면의 개별 요소 크기가 예측 가능한가?
+  YES (카드 그리드 등) → 스켈레톤
+  NO  (상세 페이지, 가변 텍스트) → 서버 prefetch (page.tsx + initialData)
+
+전환 방식이 <Link>인가?
+  YES → toploader 자동, 추가 코드 없음
+  NO  (router.push + API 대기) → useTopLoader() 수동 제어 (위 코드 패턴 참조)
+  NO  (router.push + 즉시 이동) → 막대 없어도 무방
+```
+
+---
+
 ## 🚫 금지 규칙 (별도 섹션)
 
 라이트모드에서 절대 하지 말 것:

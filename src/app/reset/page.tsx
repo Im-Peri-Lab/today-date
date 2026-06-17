@@ -2,6 +2,7 @@
 
 import { Suspense, useEffect, useRef, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { useTopLoader } from 'nextjs-toploader'
 import { toast } from 'sonner'
 import { PasscodeInput } from '@/components/PasscodeInput'
 import { AuthLayout } from '@/components/auth/AuthLayout'
@@ -11,6 +12,7 @@ type SubStep = 'set' | 'confirm'
 function ResetForm() {
   const searchParams = useSearchParams()
   const router = useRouter()
+  const topLoader = useTopLoader()
   const token = searchParams.get('token') ?? ''
 
   const [subStep, setSubStep] = useState<SubStep>('set')
@@ -43,6 +45,7 @@ function ResetForm() {
     submittingRef.current = true
     setIsLoading(true)
     setConfirmError('')
+    topLoader.start()
     try {
       const res = await fetch('/api/auth/reset', {
         method: 'POST',
@@ -55,10 +58,13 @@ function ResetForm() {
         setFirstPasscode('')
         setSubStep('set')
         submittingRef.current = false
+        topLoader.done()
         return
       }
       toast.success('패스코드가 변경되었습니다!')
       router.push('/lock')
+    } catch {
+      topLoader.done()
     } finally {
       setIsLoading(false)
     }
@@ -70,7 +76,7 @@ function ResetForm() {
     <AuthLayout
       subtitle={
         subStep === 'set'
-          ? '새로운 4~6자리 패스코드를 설정하세요'
+          ? '새로운 6자리 패스코드를 설정하세요'
           : '패스코드를 한 번 더 입력하세요'
       }
     >
@@ -97,7 +103,7 @@ function ResetForm() {
 
 export default function ResetPage() {
   return (
-    <Suspense fallback={null}>
+    <Suspense fallback={<AuthLayout subtitle="새로운 6자리 패스코드를 설정하세요">{null}</AuthLayout>}>
       <ResetForm />
     </Suspense>
   )

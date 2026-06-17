@@ -7,8 +7,8 @@ import { getSession } from '@/lib/auth/session'
 const schema = z.object({
   passcode: z
     .string()
-    .min(4, '4자리 이상 입력하세요.')
-    .max(6, '6자리 이하로 입력하세요.')
+    .min(6, '6자리를 입력하세요.')
+    .max(6, '6자리를 입력하세요.')
     .regex(/^\d+$/, '숫자만 입력하세요.'),
 })
 

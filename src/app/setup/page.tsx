@@ -2,6 +2,7 @@
 
 import { Suspense, useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { useTopLoader } from 'nextjs-toploader'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -23,6 +24,7 @@ type PasscodeSubStep = 'set' | 'confirm'
 function SetupFlow() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const topLoader = useTopLoader()
   const [step, setStep] = useState<Step>(1)
   const [sentEmail, setSentEmail] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -81,6 +83,7 @@ function SetupFlow() {
     }
     setIsLoading(true)
     setConfirmError('')
+    topLoader.start()
     try {
       const res = await fetch('/api/auth/setup/passcode', {
         method: 'POST',
@@ -93,10 +96,13 @@ function SetupFlow() {
         // 실패 시 첫 번째 단계로 리셋
         setFirstPasscode('')
         setPasscodeSubStep('set')
+        topLoader.done()
         return
       }
       toast.success('패스코드가 설정되었습니다!')
       router.push('/')
+    } catch {
+      topLoader.done()
     } finally {
       setIsLoading(false)
     }
@@ -201,7 +207,7 @@ function SetupFlow() {
 
 export default function SetupPage() {
   return (
-    <Suspense fallback={null}>
+    <Suspense fallback={<AuthLayout subtitle="둘만의 공간을 만들어요">{null}</AuthLayout>}>
       <SetupFlow />
     </Suspense>
   )

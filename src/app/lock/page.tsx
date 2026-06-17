@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { useTopLoader } from 'nextjs-toploader'
 import { PasscodeInput } from '@/components/PasscodeInput'
 import { AuthLayout } from '@/components/auth/AuthLayout'
 import styles from '@/components/auth/auth.module.css'
@@ -19,6 +20,7 @@ function formatCountdown(totalSeconds: number) {
 
 export default function LockPage() {
   const router = useRouter()
+  const topLoader = useTopLoader()
   const [error, setError] = useState('')
   const [isLocked, setIsLocked] = useState(false)
   const [lockedUntil, setLockedUntil] = useState<Date | null>(null)
@@ -45,6 +47,7 @@ export default function LockPage() {
   const handleComplete = useCallback(async (code: string) => {
     setIsLoading(true)
     setError('')
+    topLoader.start()
     try {
       const res = await fetch('/api/auth/unlock', {
         method: 'POST',
@@ -56,20 +59,24 @@ export default function LockPage() {
       if (res.status === 423 || json.locked) {
         setIsLocked(true)
         setLockedUntil(new Date(json.lockedUntil))
+        topLoader.done()
         return
       }
 
       if (!res.ok) {
         setError(json.error ?? '패스코드가 틀렸습니다.')
+        topLoader.done()
         return
       }
 
       router.push('/')
       router.refresh()
+    } catch {
+      topLoader.done()
     } finally {
       setIsLoading(false)
     }
-  }, [router])
+  }, [router, topLoader])
 
   const showLock = isLocked || DEV_FORCE_LOCK
   const displaySeconds = DEV_FORCE_LOCK && !isLocked ? 582 : countdown

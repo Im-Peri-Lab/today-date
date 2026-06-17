@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useTopLoader } from 'nextjs-toploader'
 import { Menu, LogOut } from 'lucide-react'
 import { toast } from 'sonner'
 import {
@@ -15,20 +16,24 @@ import styles from '@/components/screens.module.css'
 /** 홈/목록 우상단 미니멀 메뉴 — 햄버거 → 로그아웃 */
 export function HomeMenu() {
   const router = useRouter()
+  const topLoader = useTopLoader()
   const [isLoading, setIsLoading] = useState(false)
 
   async function handleLogout() {
     setIsLoading(true)
+    topLoader.start()
     try {
       const res = await fetch('/api/auth/logout', { method: 'POST' })
       if (!res.ok) {
         toast.error('로그아웃 중 오류가 발생했습니다.')
+        topLoader.done()
         return
       }
       router.push('/lock')
       router.refresh()
     } catch {
       toast.error('네트워크 오류가 발생했습니다.')
+      topLoader.done()
     } finally {
       setIsLoading(false)
     }

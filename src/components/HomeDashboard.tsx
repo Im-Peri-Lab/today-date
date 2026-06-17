@@ -5,7 +5,7 @@ import { Sparkles, MapPin } from 'lucide-react'
 import { Skeleton } from '@/components/ui/skeleton'
 import { HomeFab } from '@/components/HomeFab'
 import { PageHeader } from '@/components/PageHeader'
-import { useDashboardStats } from '@/hooks/useDashboardStats'
+import { useDashboardStats, type DashboardStats } from '@/hooks/useDashboardStats'
 import { STATUS_LABELS } from '@/lib/labels'
 import { cn } from '@/lib/utils'
 import styles from '@/components/screens.module.css'
@@ -62,8 +62,8 @@ function StatCard({
   )
 }
 
-export function HomeDashboard() {
-  const { data, isLoading } = useDashboardStats()
+export function HomeDashboard({ initialStats }: { initialStats?: DashboardStats }) {
+  const { data, isLoading } = useDashboardStats(initialStats)
 
   return (
     <div

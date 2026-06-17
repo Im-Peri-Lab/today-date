@@ -10,10 +10,11 @@ export interface DashboardStats {
   visitedPlaces: number
 }
 
-export function useDashboardStats() {
+export function useDashboardStats(initialData?: DashboardStats) {
   return useQuery({
     queryKey: ['dashboard-stats'],
     queryFn: async () => fetchJson<DashboardStats>('/api/dashboard/stats'),
     staleTime: 30_000,
+    initialData,
   })
 }

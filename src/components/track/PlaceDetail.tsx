@@ -18,19 +18,21 @@ import { DeleteConfirmDialog } from './DeleteConfirmDialog'
 import { VisitedDialog } from '@/components/VisitedDialog'
 import { usePlace, useDeletePlace, useUpdatePlace } from '@/hooks/usePlaces'
 import { placeFormSchema, type PlaceFormValues } from '@/lib/schemas/placeSchema'
+import type { Place } from '@/types'
 import { MEAL_LABELS, STATUS_LABELS } from '@/lib/labels'
 import { cn } from '@/lib/utils'
 import styles from '@/components/screens.module.css'
 
 interface Props {
   id: string
+  initialData?: Place
   /** 'info' = 등록 정보 블록 / 'visit' = 방문 기록 블록을 편집모드로 열고 진입 */
   initialEdit?: 'info' | 'visit'
 }
 
-export function PlaceDetail({ id, initialEdit }: Props) {
+export function PlaceDetail({ id, initialData, initialEdit }: Props) {
   const router = useRouter()
-  const { data: place, isLoading, isError } = usePlace(id)
+  const { data: place, isLoading, isError } = usePlace(id, initialData)
   const del = useDeletePlace()
   const update = useUpdatePlace()
 

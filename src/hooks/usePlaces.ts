@@ -33,11 +33,12 @@ export function usePlaces(filters: PlaceFilters, enabled = true) {
   })
 }
 
-export function usePlace(id: string | undefined) {
+export function usePlace(id: string | undefined, initialData?: Place) {
   return useQuery({
     queryKey: ['place', id],
     queryFn: async () => (await fetchJson<{ data: Place }>(`/api/places/${id}`)).data,
     enabled: !!id,
+    initialData,
   })
 }
 

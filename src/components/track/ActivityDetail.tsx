@@ -35,19 +35,21 @@ import { DeleteConfirmDialog } from './DeleteConfirmDialog'
 import { VisitedDialog } from '@/components/VisitedDialog'
 import { useActivity, useDeleteActivity, useUpdateActivity } from '@/hooks/useActivities'
 import { activityFormSchema, type ActivityFormValues } from '@/lib/schemas/activitySchema'
+import type { Activity } from '@/types'
 import { DURATION_LABELS, TIME_OF_DAY_LABELS, TIME_OF_DAY_ICONS, STATUS_LABELS } from '@/lib/labels'
 import { cn } from '@/lib/utils'
 import styles from '@/components/screens.module.css'
 
 interface Props {
   id: string
+  initialData?: Activity
   /** 'info' = 등록 정보 블록 / 'visit' = 방문 기록 블록을 편집모드로 열고 진입 */
   initialEdit?: 'info' | 'visit'
 }
 
-export function ActivityDetail({ id, initialEdit }: Props) {
+export function ActivityDetail({ id, initialData, initialEdit }: Props) {
   const router = useRouter()
-  const { data: activity, isLoading, isError } = useActivity(id)
+  const { data: activity, isLoading, isError } = useActivity(id, initialData)
   const del = useDeleteActivity()
   const update = useUpdateActivity()
 

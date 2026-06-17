@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
+import { getPlaceById } from '@/lib/data/places'
 import { getSupabaseClient } from '@/lib/supabase/client'
 
 const patchSchema = z.object({
@@ -21,16 +22,8 @@ type RouteContext = { params: Promise<{ id: string }> }
 export async function GET(_req: NextRequest, { params }: RouteContext) {
   const { id } = await params
   try {
-    const supabase = getSupabaseClient()
-    const { data, error } = await supabase
-      .from('places')
-      .select('*, category:place_categories(id,name,icon,color)')
-      .eq('id', id)
-      .single()
-
-    if (error) {
-      return NextResponse.json({ error: '장소를 찾을 수 없습니다.' }, { status: 404 })
-    }
+    const data = await getPlaceById(id)
+    if (!data) return NextResponse.json({ error: '장소를 찾을 수 없습니다.' }, { status: 404 })
     return NextResponse.json({ data })
   } catch (err) {
     console.error('[GET /api/places/[id]]', err)

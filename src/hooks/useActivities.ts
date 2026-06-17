@@ -34,12 +34,13 @@ export function useActivities(filters: ActivityFilters, enabled = true) {
   })
 }
 
-export function useActivity(id: string | undefined) {
+export function useActivity(id: string | undefined, initialData?: Activity) {
   return useQuery({
     queryKey: ['activity', id],
     queryFn: async () =>
       (await fetchJson<{ data: Activity }>(`/api/activities/${id}`)).data,
     enabled: !!id,
+    initialData,
   })
 }
 

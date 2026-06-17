@@ -1,5 +1,6 @@
-import { redirect } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import { getSession } from '@/lib/auth/session'
+import { getActivityById } from '@/lib/data/activities'
 import { ActivityDetail } from '@/components/track/ActivityDetail'
 import { cn } from '@/lib/utils'
 import styles from '@/components/screens.module.css'
@@ -16,9 +17,16 @@ export default async function ActivityDetailPage({
   const { id } = await params
   const { edit } = await searchParams
 
+  const activity = await getActivityById(id)
+  if (!activity) notFound()
+
   return (
     <main className={cn(styles.page, styles.pageStatic)}>
-      <ActivityDetail id={id} initialEdit={edit === 'info' || edit === 'visit' ? edit : undefined} />
+      <ActivityDetail
+        id={id}
+        initialData={activity}
+        initialEdit={edit === 'info' || edit === 'visit' ? edit : undefined}
+      />
     </main>
   )
 }

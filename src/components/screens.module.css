@@ -60,6 +60,30 @@
      값은 종전 placeholder 폴백 #b0aabe 그대로(렌더 무변화). 다크는 아래 @media 에서 --s-faint 와 동일 톤. */
   --s-placeholder: #b0aabe;
 
+  /* ── StatRow 전용 토큰 (라이트) ───────────────── */
+  --s-row-card-bg: #ffffff;
+  --s-row-card-border: #efecf7;
+  --s-row-divider: #f2f0f7;
+  --s-row-header: #8b8798;
+  --s-row-title: #1f1a2e;
+  --s-row-preview: #8b8798;
+  --s-row-preview-empty: #b5b0bf;
+  --s-row-chevron: #c7c3d2;
+
+  /* 아이콘 칩: type(activity/place) × status(wishlist/visited) */
+  --s-chip-act-wish-bg: #f0ebfb;
+  --s-chip-act-wish-fg: #9333ea;
+  --s-chip-plc-wish-bg: #fbeaf3;
+  --s-chip-plc-wish-fg: #db2777;
+  --s-chip-vis-bg: #f1f0f4;
+  --s-chip-act-vis-fg: #908da0;
+  --s-chip-plc-vis-fg: #a8a4b5;
+
+  /* 완료 체크 배지 (다녀온 곳 & count>0) */
+  --s-check-bg: #16a34a;
+  --s-check-fg: #ffffff;
+  --s-check-ring: #ffffff;
+
   /* 노치/홈 인디케이터 안전 영역 */
   padding-top: calc(env(safe-area-inset-top) + 0.5rem);
   padding-bottom: calc(env(safe-area-inset-bottom) + 0.5rem);
@@ -134,6 +158,28 @@
     --s-active-glow: 0 0 0 3px rgba(192, 132, 252, 0.2);
     --s-focus-ring: 0 0 0 2px rgba(192, 132, 252, 0.5);
     --s-focus-ring-card: 0 0 0 3px rgba(192, 132, 252, 0.5);
+
+    /* StatRow 다크 */
+    --s-row-card-bg: #211d2c;
+    --s-row-card-border: #322c40;
+    --s-row-divider: #2c2738;
+    --s-row-header: #908aa0;
+    --s-row-title: #eeebf4;
+    --s-row-preview: #908aa0;
+    --s-row-preview-empty: #635d72;
+    --s-row-chevron: #4f4960;
+
+    --s-chip-act-wish-bg: #2c2440;
+    --s-chip-act-wish-fg: #b794f6;
+    --s-chip-plc-wish-bg: #3a2433;
+    --s-chip-plc-wish-fg: #f18fb5;
+    --s-chip-vis-bg: #2a2636;
+    --s-chip-act-vis-fg: #7e7890;
+    --s-chip-plc-vis-fg: #635d72;
+
+    --s-check-bg: #1fb877;
+    --s-check-fg: #15121e;
+    --s-check-ring: #15121e;
   }
 }
 
@@ -1086,4 +1132,232 @@
   outline: none;
   border-radius: 50%;
   box-shadow: var(--s-focus-ring, 0 0 0 2px rgba(124, 58, 237, 0.5));
+}
+
+/* ════════════════════════════════════════════════
+ *  홈 — StatSection / StatRow
+ * ════════════════════════════════════════════════ */
+
+/* 두 섹션을 세로로 쌓는 컨테이너 */
+.statSections {
+  margin-top: 1.5rem; /* mt-6 */
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+
+@media (min-width: 1024px) {
+  .statSections {
+    gap: 13px;
+  }
+}
+
+/* 섹션 헤더 레이블 */
+.statSectionHeader {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--s-row-header, #8b8798);
+  margin-bottom: 7px;
+}
+
+@media (min-width: 1024px) {
+  .statSectionHeader {
+    margin-bottom: 8px;
+  }
+}
+
+/* 섹션 카드 (행 2개 래퍼) */
+.statSectionCard {
+  background: var(--s-row-card-bg, #ffffff);
+  border: 1px solid var(--s-row-card-border, #efecf7);
+  border-radius: 13px;
+  overflow: hidden;
+}
+
+@media (min-width: 1024px) {
+  .statSectionCard {
+    border-radius: 14px;
+  }
+}
+
+/* 행 — 전체가 탭 영역 */
+.statRow {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 10px 11px;
+  text-decoration: none;
+  transition: background 120ms ease;
+}
+
+/* 두 번째 행 위 구분선 */
+.statRow + .statRow {
+  border-top: 1px solid var(--s-row-divider, #f2f0f7);
+}
+
+@media (hover: hover) {
+  .statRow:hover {
+    background: var(--s-row-divider, #f2f0f7);
+  }
+}
+
+.statRow:active {
+  background: var(--s-row-divider, #f2f0f7);
+}
+
+.statRow:focus-visible {
+  outline: none;
+  box-shadow: inset var(--s-focus-ring, 0 0 0 2px rgba(124, 58, 237, 0.5));
+}
+
+@media (min-width: 1024px) {
+  .statRow {
+    gap: 12px;
+    padding: 12px 14px;
+  }
+}
+
+/* 아이콘 칩 영역 — 체크 배지 앵커 */
+.statChipWrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
+/* 아이콘 칩 */
+.statChip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+}
+
+.statChip > svg {
+  width: 16px;
+  height: 16px;
+}
+
+@media (min-width: 1024px) {
+  .statChip {
+    width: 36px;
+    height: 36px;
+    border-radius: 11px;
+  }
+
+  .statChip > svg {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+/* 칩 type × status 색 */
+.statChipActWish {
+  background: var(--s-chip-act-wish-bg, #f0ebfb);
+  color: var(--s-chip-act-wish-fg, #9333ea);
+}
+
+.statChipPlcWish {
+  background: var(--s-chip-plc-wish-bg, #fbeaf3);
+  color: var(--s-chip-plc-wish-fg, #db2777);
+}
+
+.statChipActVis {
+  background: var(--s-chip-vis-bg, #f1f0f4);
+  color: var(--s-chip-act-vis-fg, #908da0);
+}
+
+.statChipPlcVis {
+  background: var(--s-chip-vis-bg, #f1f0f4);
+  color: var(--s-chip-plc-vis-fg, #a8a4b5);
+}
+
+/* 본문 영역 */
+.statRowContent {
+  flex: 1;
+  min-width: 0; /* ellipsis가 flex 자식에서 작동하려면 필요 */
+}
+
+.statRowTitle {
+  display: block;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--s-row-title, #1f1a2e);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (min-width: 1024px) {
+  .statRowTitle {
+    font-size: 14px;
+  }
+}
+
+.statRowPreview {
+  display: block;
+  margin-top: 2px;
+  font-size: 11px;
+  color: var(--s-row-preview, #8b8798);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.statRowPreviewEmpty {
+  color: var(--s-row-preview-empty, #b5b0bf);
+}
+
+@media (min-width: 1024px) {
+  .statRowPreview {
+    font-size: 12px;
+  }
+}
+
+/* Chevron */
+.statRowChevron {
+  flex-shrink: 0;
+  width: 15px;
+  height: 15px;
+  color: var(--s-row-chevron, #c7c3d2);
+}
+
+@media (min-width: 1024px) {
+  .statRowChevron {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+/* 완료 체크 배지 */
+.statCheckBadge {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 13px;
+  height: 13px;
+  border-radius: 9999px;
+  background: var(--s-check-bg, #16a34a);
+  color: var(--s-check-fg, #ffffff);
+  border: 1.5px solid var(--s-check-ring, #ffffff);
+}
+
+.statCheckBadge > svg {
+  width: 7px;
+  height: 7px;
+}
+
+@media (min-width: 1024px) {
+  .statCheckBadge {
+    width: 15px;
+    height: 15px;
+  }
+
+  .statCheckBadge > svg {
+    width: 8px;
+    height: 8px;
+  }
 }

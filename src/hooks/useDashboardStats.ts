@@ -8,6 +8,10 @@ export interface DashboardStats {
   wishlistPlaces: number
   visitedActivities: number
   visitedPlaces: number
+  wishlistActivityTitles: string[]
+  wishlistPlaceTitles: string[]
+  visitedActivityTitles: string[]
+  visitedPlaceTitles: string[]
 }
 
 export function useDashboardStats(initialData?: DashboardStats) {

@@ -60,29 +60,8 @@
      값은 종전 placeholder 폴백 #b0aabe 그대로(렌더 무변화). 다크는 아래 @media 에서 --s-faint 와 동일 톤. */
   --s-placeholder: #b0aabe;
 
-  /* ── StatRow 전용 토큰 (라이트) ───────────────── */
-  --s-row-card-bg: #ffffff;
-  --s-row-card-border: #efecf7;
-  --s-row-divider: #f2f0f7;
-  --s-row-header: #8b8798;
-  --s-row-title: #1f1a2e;
-  --s-row-preview: #8b8798;
-  --s-row-preview-empty: #b5b0bf;
-  --s-row-chevron: #c7c3d2;
-
-  /* 아이콘 칩: type(activity/place) × status(wishlist/visited) */
-  --s-chip-act-wish-bg: #f0ebfb;
-  --s-chip-act-wish-fg: #9333ea;
-  --s-chip-plc-wish-bg: #fbeaf3;
-  --s-chip-plc-wish-fg: #db2777;
-  --s-chip-vis-bg: #f1f0f4;
-  --s-chip-act-vis-fg: #908da0;
-  --s-chip-plc-vis-fg: #a8a4b5;
-
-  /* 완료 체크 배지 (다녀온 곳 & count>0) */
-  --s-check-bg: #16a34a;
-  --s-check-fg: #ffffff;
-  --s-check-ring: #ffffff;
+  /* ── StatRow 섹션 구분선 (라이트) — 나머지는 globals.css 전역 토큰 참조 ── */
+  --s-row-divider: #f2f0f7; /* 카드 내부 행 구분선 — --s-divider(#ece7f5)보다 연해 위계 구분 */
 
   /* 노치/홈 인디케이터 안전 영역 */
   padding-top: calc(env(safe-area-inset-top) + 0.5rem);
@@ -159,27 +138,8 @@
     --s-focus-ring: 0 0 0 2px rgba(192, 132, 252, 0.5);
     --s-focus-ring-card: 0 0 0 3px rgba(192, 132, 252, 0.5);
 
-    /* StatRow 다크 */
-    --s-row-card-bg: #211d2c;
-    --s-row-card-border: #322c40;
+    /* StatRow 섹션 구분선 다크 */
     --s-row-divider: #2c2738;
-    --s-row-header: #908aa0;
-    --s-row-title: #eeebf4;
-    --s-row-preview: #908aa0;
-    --s-row-preview-empty: #635d72;
-    --s-row-chevron: #4f4960;
-
-    --s-chip-act-wish-bg: #2c2440;
-    --s-chip-act-wish-fg: #b794f6;
-    --s-chip-plc-wish-bg: #3a2433;
-    --s-chip-plc-wish-fg: #f18fb5;
-    --s-chip-vis-bg: #2a2636;
-    --s-chip-act-vis-fg: #7e7890;
-    --s-chip-plc-vis-fg: #635d72;
-
-    --s-check-bg: #1fb877;
-    --s-check-fg: #15121e;
-    --s-check-ring: #15121e;
   }
 }
 
@@ -1156,7 +1116,7 @@
 .statSectionHeader {
   font-size: 12px;
   font-weight: 500;
-  color: var(--s-row-header, #8b8798);
+  color: var(--s-label-muted, #8b8798);
   margin-bottom: 7px;
 }
 
@@ -1166,18 +1126,12 @@
   }
 }
 
-/* 섹션 카드 (행 2개 래퍼) */
+/* 섹션 카드 (행 2개 래퍼) — 조연 카드: 그림자 없음 + radius 14px(CTA 16px보다 작게) */
 .statSectionCard {
-  background: var(--s-row-card-bg, #ffffff);
-  border: 1px solid var(--s-row-card-border, #efecf7);
-  border-radius: 13px;
+  background: var(--s-card-bg, #ffffff);
+  border: 1px solid var(--s-card-border-strong, #eceaf3);
+  border-radius: 0.875rem; /* 14px — 13/14px 모바일·PC 통일 */
   overflow: hidden;
-}
-
-@media (min-width: 1024px) {
-  .statSectionCard {
-    border-radius: 14px;
-  }
 }
 
 /* 행 — 전체가 탭 영역 */
@@ -1253,23 +1207,23 @@
 
 /* 칩 type × status 색 */
 .statChipActWish {
-  background: var(--s-chip-act-wish-bg, #f0ebfb);
-  color: var(--s-chip-act-wish-fg, #9333ea);
+  background: var(--s-accent-chip-tint, #f6f1ff);
+  color: var(--s-accent, #7c3aed);
 }
 
 .statChipPlcWish {
-  background: var(--s-chip-plc-wish-bg, #fbeaf3);
-  color: var(--s-chip-plc-wish-fg, #db2777);
+  background: var(--s-accent-pink-soft-bg, #fbeaf3);
+  color: var(--s-accent-pink, #db2777);
 }
 
 .statChipActVis {
-  background: var(--s-chip-vis-bg, #f1f0f4);
-  color: var(--s-chip-act-vis-fg, #908da0);
+  background: var(--s-chip-neutral-bg, #eceaf3);
+  color: var(--s-label-muted, #8b8798);
 }
 
 .statChipPlcVis {
-  background: var(--s-chip-vis-bg, #f1f0f4);
-  color: var(--s-chip-plc-vis-fg, #a8a4b5);
+  background: var(--s-chip-neutral-bg, #eceaf3);
+  color: var(--s-hint, #b5b0bf);
 }
 
 /* 본문 영역 */
@@ -1280,9 +1234,9 @@
 
 .statRowTitle {
   display: block;
-  font-size: 12.5px;
+  font-size: 0.8125rem; /* 13px — 기존 .chip 단계와 통일 (12.5px 제거) */
   font-weight: 500;
-  color: var(--s-row-title, #1f1a2e);
+  color: var(--s-ink, #1a1033);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1298,14 +1252,14 @@
   display: block;
   margin-top: 2px;
   font-size: 11px;
-  color: var(--s-row-preview, #8b8798);
+  color: var(--s-label-muted, #8b8798);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .statRowPreviewEmpty {
-  color: var(--s-row-preview-empty, #b5b0bf);
+  color: var(--s-hint, #b5b0bf);
 }
 
 @media (min-width: 1024px) {
@@ -1319,7 +1273,7 @@
   flex-shrink: 0;
   width: 15px;
   height: 15px;
-  color: var(--s-row-chevron, #c7c3d2);
+  color: var(--s-icon-muted, #c7c3d2);
 }
 
 @media (min-width: 1024px) {
@@ -1340,9 +1294,9 @@
   width: 13px;
   height: 13px;
   border-radius: 9999px;
-  background: var(--s-check-bg, #16a34a);
-  color: var(--s-check-fg, #ffffff);
-  border: 1.5px solid var(--s-check-ring, #ffffff);
+  background: var(--s-success, #16a34a);
+  color: var(--s-success-on, #ffffff);
+  border: 1.5px solid var(--s-success-on, #ffffff);
 }
 
 .statCheckBadge > svg {

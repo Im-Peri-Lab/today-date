@@ -57,6 +57,24 @@ description: >
 
 복붙: 페이지 래퍼는 `styles.page`만 쓰면 배경이 자동 적용됨. 카드/컨트롤은 `styles.card` 등 클래스가 토큰을 읽으므로 색 지정 불필요.
 
+### 전역 시맨틱 토큰 (`:root` — portal 안전)
+
+`.page` 스코프 밖(portal·body 직접 렌더)에서도 참조 가능한 토큰들. `globals.css` `:root`에 정의 + `@media (prefers-color-scheme: dark)` 오버라이드.
+
+| 토큰 | 라이트 | 다크 | 용도 |
+|---|---|---|---|
+| `--s-success` | `#16a34a` | `#1fb877` | 완료·체크 배지 배경 |
+| `--s-success-on` | `#ffffff` | `#15121e` | success 면 위 전경(글씨·아이콘·링) |
+| `--s-accent-pink` | `#db2777` | `#f18fb5` | 장소(place) 브랜드 핑크 전경 |
+| `--s-accent-pink-soft-bg` | `#fbeaf3` | `#3a2433` | 장소 위시리스트 칩 배경 |
+| `--s-accent-chip-tint` | `var(--s-accent-soft-bg)` | `#2c2440` | 활동 위시리스트 칩 배경 (다크는 accent-soft-bg `#573f7f`보다 어두운 미세 틴트) |
+| `--s-chip-neutral-bg` | `var(--s-card-border-strong)` | `var(--s-card-bg)` | 다녀온 곳 칩 중성 배경 |
+| `--s-label-muted` | `#8b8798` | `#908aa0` | 섹션 레이블·미리보기 텍스트 (sub↔faint 중간 톤) |
+| `--s-icon-muted` | `#c7c3d2` | `#4f4960` | chevron 등 중성 진입 아이콘 |
+| `--s-hint` | `#b5b0bf` | `#635d72` | 빈 상태 안내·visited place 칩 전경 |
+
+> **`--s-hint` vs `--s-placeholder`**: `--s-placeholder`는 폼 입력 placeholder 전용(접근성 대비 기준 유지). `--s-hint`는 UI 안내 텍스트(빈 상태·칩 흐림) 전용 — 어두운 배경 위에서 더 낮은 대비를 허용하는 컨텍스트. 두 토큰을 섞지 않는다.
+
 ---
 
 ## 2. 글씨색 (기본 / 흐린 텍스트)
@@ -92,6 +110,21 @@ description: >
 ```tsx
 <div className={cn(styles.card, styles.cardInteractive, 'p-3.5')}>…</div>
 ```
+
+### 조연 카드 위계 규칙 (StatSection — 홈 통계 카드)
+
+**위계 차이는 딱 두 가지만.** CTA 카드(주연)와 통계 카드(조연)를 구분하는 요소는 색이 아니라 구조적 가중치다:
+
+| 속성 | CTA 카드 (주연) | 조연 카드 (`statSectionCard`) |
+|---|---|---|
+| `box-shadow` | `var(--s-card-shadow)` (라이트 `0 1px 3px… 0 4px 12px…`) | **없음** (`box-shadow: none`) |
+| `border-radius` | **16px** (`1rem`) | **14px** (`0.875rem`) — 모바일/PC 동일 |
+| `background` | `var(--s-card-bg)` | `var(--s-card-bg)` (동일) |
+| `border` | `1px solid var(--s-card-border)` | `1px solid var(--s-card-border-strong)` |
+
+**radius 통일 이유**: 과거 모바일 `13px` / PC `14px` 분리는 의도 없는 임의값이었다. `0.875rem`(14px)으로 통일. CTA(16px)보다 한 단계 작아 시각적 위계를 유지한다.
+
+**색은 기존 토큰 흡수.** 조연 카드 안의 색(칩·텍스트·아이콘)은 전용 네임스페이스 토큰 없이 전역 시맨틱 토큰(`--s-accent`, `--s-ink`, `--s-label-muted`, `--s-icon-muted`, `--s-hint` 등)을 직접 참조한다. 전용 토큰은 `--s-row-divider`(카드 내 행 구분선 — `--s-divider`보다 연한 톤이 의도)만 남긴다.
 
 ---
 
@@ -263,6 +296,21 @@ description: >
 3. **portal 체크**: `.page` 밖 렌더 시 → `.dialogPopup` 다크 블록에 `--s-focus-ring` / `--s-focus-ring-card` 재선언 필요 (없으면 다크에서 글로우가 라이트색 fallback으로 뜸).
 
 4. **라이트/다크 확인**: 라이트는 보라(`rgba(124,58,237,...)`), 다크는 라벤더(`rgba(192,132,252,...)`) 톤.
+
+### 카드 내부 행(statRow) 포커스 — inset 링 패턴
+
+카드 안에 행(`<a>`)이 쌓이는 구조(`statSectionCard` > `statRow`)는 **overflow가 잘려 외부 글로우가 안 보인다**. 이 경우 `inset` 그림자로 카드 안쪽에서 링을 그린다:
+
+```css
+.statRow:focus-visible {
+  outline: none;
+  box-shadow: inset var(--s-focus-ring, inset 0 0 0 2px rgba(124, 58, 237, 0.5));
+}
+```
+
+- `inset` 키워드로 링이 요소 **내부**에 그려져 overflow:hidden 컨테이너 클리핑 문제를 우회한다.
+- 카드 자체 `:has(a:focus-visible)` 규칙(카드·박스형 tier)과 **충돌 없음** — `statSectionCard`는 `cardInteractive`가 아니라 조연 컨테이너라 `:has` 규칙 미적용.
+- 적용처: `statRow`처럼 **카드 내부에서 overflow 밖으로 글로우가 나갈 수 없는 `<a>`/`<button>` 행**. 컨테이너가 `overflow:visible`이면 일반 외부 글로우 패턴(카드·박스형 tier) 사용.
 
 **활성 칩/세그먼트 규칙:** `styles.chipActive` / `styles.optionActive` / `styles.optionCardActive`는 **틴트**(`--s-accent-soft-bg` 배경 + `--s-active-line` 보더 + `--s-active-text` 글씨, weight 500). `/list` 상태 토글(`styles.segmentBtnActive`)은 별개 패턴 — iOS식 "흰 면 떠오름 + 보라 테두리"(§5-A 참조).
 

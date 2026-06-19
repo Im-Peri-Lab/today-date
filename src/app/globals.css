@@ -120,6 +120,16 @@ html.dark body {
   --s-accent-soft-bg: #f6f1ff;
   --s-dropdown-ring: #eceaf3;
   --s-dropdown-shadow: 0 14px 32px -12px rgba(20, 20, 30, 0.18);
+  /* 시맨틱 확장 토큰 — 메인 화면 컴포넌트가 참조 + portal 안전 */
+  --s-success: #16a34a;             /* 완료·visited 체크 배지 배경 */
+  --s-success-on: #ffffff;          /* success 면 위 글씨/아이콘·링 */
+  --s-accent-pink: #db2777;         /* 장소(place) 브랜드 핑크 전경 */
+  --s-accent-pink-soft-bg: #fbeaf3; /* 장소 위시리스트 칩 배경 */
+  --s-accent-chip-tint: var(--s-accent-soft-bg, #f6f1ff); /* 활동 위시리스트 칩 배경 (다크는 별도값) */
+  --s-chip-neutral-bg: var(--s-card-border-strong, #eceaf3); /* 다녀온 곳 칩 중성 배경 */
+  --s-label-muted: #8b8798;         /* 섹션 레이블·미리보기 텍스트 (sub·faint 중간 톤) */
+  --s-icon-muted: #c7c3d2;          /* 진입 방향 아이콘(chevron) 중성 톤 */
+  --s-hint: #b5b0bf;                /* 빈 상태 안내 텍스트·visited place 칩 fg (다크는 훨씬 어두움) */
 }
 @media (prefers-color-scheme: dark) {
   :root {
@@ -130,6 +140,15 @@ html.dark body {
     --s-divider: #2c2442;
     --s-dropdown-ring: #3a2f4e;
     --s-dropdown-shadow: 0 18px 44px -12px rgba(0, 0, 0, 0.75);
+    --s-success: #1fb877;
+    --s-success-on: #15121e;
+    --s-accent-pink: #f18fb5;
+    --s-accent-pink-soft-bg: #3a2433;
+    --s-accent-chip-tint: #2c2440;  /* accent-soft-bg(#573f7f)보다 어두운 미세 틴트 — 활동 칩 전용 */
+    --s-chip-neutral-bg: var(--s-card-bg, #241a36);
+    --s-label-muted: #908aa0;
+    --s-icon-muted: #4f4960;
+    --s-hint: #635d72;
   }
 }
 

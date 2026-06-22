@@ -50,12 +50,20 @@ description: >
 | 용도 | 라이트 | 다크 | 출처/클래스 |
 |---|---|---|---|
 | 전역 html/body | `#ffffff` | `#0a0712` | `globals.css` html,body |
-| 페이지 고정 배경 레이어 | `#fafafb` | radial(보라 `rgba(192,132,252,0.12)`)+radial(핑크 `rgba(244,114,182,0.07)`)+linear `#0a0712→#120c1e` | `.page::before` |
+| 페이지 고정 배경 레이어 | `--s-page-bg-light` 기본 `#fafafb` (홈은 `#f4f2fa` 오버라이드) | radial(보라)+radial(핑크)+linear `#0a0712→#120c1e` | `.page::before` + `.pageHome` |
 | 카드 표면 `--s-card-bg` | `#ffffff` | `#241a36` | `styles.card` |
 | 컨트롤 표면(검색/필터/세그먼트) | `#ffffff` | 세그먼트 트랙 `#1b1430`, 검색/필터 `#241a36` | `styles.search*/filterToggle/segment` |
 | 소프트 강조 배경 `--s-accent-soft-bg` | `#f6f1ff` | `#2d2540` | `styles.statCardAccent/visitedTag/visitBox` |
 
-복붙: 페이지 래퍼는 `styles.page`만 쓰면 배경이 자동 적용됨. 카드/컨트롤은 `styles.card` 등 클래스가 토큰을 읽으므로 색 지정 불필요.
+복붙:
+- 일반 화면(리스트/상세): `styles.page` — 배경 `#fafafb` 자동 적용.
+- **홈**: `cn(styles.page, styles.pageHome)` — `--s-page-bg-light`를 `#f4f2fa`(옅은 라일락)로 오버라이드해 흰 카드가 떠 보이게.
+- 카드/컨트롤은 `styles.card` 등 클래스가 토큰을 읽으므로 색 지정 불필요.
+- 전체 확장 시: `.page { --s-page-bg-light }` 기본값 한 줄만 교체하면 모든 `.page` 화면에 라일락 배경 일괄 적용.
+
+**배경 < 카드 계층 관계 (라이트/다크 둘 다 충족):**
+- **라이트**: 배경 `#f4f2fa`(홈) / `#fafafb`(기타 화면) ≪ 카드 `#ffffff` — 라일락 배경 위 흰 카드가 떠 보임.
+- **다크**: 배경 `#0a0712~#120c1e` ≪ 카드 `#241a36` — 이미 충족, 변경 없음.
 
 ### 전역 시맨틱 토큰 (`:root` — portal 안전)
 
@@ -113,14 +121,22 @@ description: >
 
 ### 조연 카드 위계 규칙 (StatSection — 홈 통계 카드)
 
-**위계 차이는 딱 두 가지만.** CTA 카드(주연)와 통계 카드(조연)를 구분하는 요소는 색이 아니라 구조적 가중치다:
+**카드 그림자 3단계 위계.** 주연(CTA)·리스트·조연(통계)은 동일한 `--s-card-shadow` 계열 토큰 안에서 단계를 나눠 위계를 만든다:
 
-| 속성 | CTA 카드 (주연) | 조연 카드 (`statSectionCard`) |
-|---|---|---|
-| `box-shadow` | `var(--s-card-shadow)` (라이트 `0 1px 3px… 0 4px 12px…`) | **없음** (`box-shadow: none`) |
-| `border-radius` | **16px** (`1rem`) | **14px** (`0.875rem`) — 모바일/PC 동일 |
-| `background` | `var(--s-card-bg)` | `var(--s-card-bg)` (동일) |
-| `border` | `1px solid var(--s-card-border)` | `1px solid var(--s-card-border-strong)` |
+| 단계 | 적용 카드 | `box-shadow` 토큰 | 라이트 값 | 다크 값 |
+|---|---|---|---|---|
+| 표준 | CTA 카드 (주연) + 리스트 카드 | `--s-card-shadow` | `0 1px 3px rgba(0,0,0,0.06), 0 4px 12px rgba(0,0,0,0.05)` | `0 8px 24px -16px rgba(0,0,0,0.6)` |
+| 최약 | 통계 카드 (`statSectionCard`) | `--s-card-shadow-xs` | `0 1px 2px rgba(0,0,0,0.05), 0 2px 6px rgba(0,0,0,0.04)` | `none` (다크: 배경<카드 명도 계층이 이미 충분) |
+
+**다크 통계 카드 그림자 = none (현행 유지)**: 다크에서는 배경(`#0a0712~#120c1e`) < 카드(`#241a36`) 명도 계층이 그림자 없이도 카드를 충분히 분리한다. `--s-card-shadow-xs`는 다크에서 `none`으로 재정의돼 있어 다크 시각에 영향이 없다.
+
+| 속성 | CTA 카드 (주연) | 리스트 카드 | 조연 카드 (`statSectionCard`) |
+|---|---|---|---|
+| `box-shadow` 라이트 | `var(--s-card-shadow)` | `var(--s-card-shadow)` | `var(--s-card-shadow-xs)` (최약) |
+| `box-shadow` 다크 | `var(--s-card-shadow)` | `var(--s-card-shadow)` | `none` |
+| `border-radius` | **16px** (`1rem`) | **16px** (`1rem`) | **14px** (`0.875rem`) |
+| `background` | `var(--s-card-bg)` | `var(--s-card-bg)` | `var(--s-card-bg)` |
+| `border` | `var(--s-card-border)` | `var(--s-card-border)` | `var(--s-card-border-strong)` |
 
 **radius 통일 이유**: 과거 모바일 `13px` / PC `14px` 분리는 의도 없는 임의값이었다. `0.875rem`(14px)으로 통일. CTA(16px)보다 한 단계 작아 시각적 위계를 유지한다.
 
@@ -813,7 +829,7 @@ try {
 ## 🚫 금지 규칙 (별도 섹션)
 
 라이트모드에서 절대 하지 말 것:
-1. **라이트모드 페이지/카드/컨트롤 배경에 보라·핑크 사용 금지.** 라이트 페이지 배경은 중성 `#fafafb`, 카드/컨트롤은 `#ffffff`. (옛 `bg-gradient-to-br from-violet-50 to-purple-100` 같은 보라 그라데이션 배경 금지)
+1. **라이트모드 페이지/카드/컨트롤 배경에 보라·핑크 사용 금지.** 라이트 페이지 배경은 `--s-page-bg-light`(기본 중성 `#fafafb`, 홈만 옅은 라일락 `#f4f2fa`), 카드/컨트롤은 `#ffffff`. (옛 `bg-gradient-to-br from-violet-50 to-purple-100` 같은 채도 있는 보라 그라데이션 배경 금지 — `#f4f2fa`는 채도가 거의 없는 라이트 서피스로 허용)
 2. 보라는 **강조에만**: 활성 칩/옵션 틴트(`--s-accent-soft-bg`+`--s-active-line` 보더, §5-A), 카테고리 아이콘(`catIcon`), 포커스 보더/링(`--s-active-line/glow`), CTA 단색 채움(`--s-active-line`), FAB·`gradIcon`·`filterCount`. 중성 표면(면)에는 쓰지 않는다.
 3. 통계 숫자(`styles.statNum`)는 라이트에서 **중성 `ink`**. (보라는 다크에서만 `@media`로 적용)
 4. 아이콘 버튼 hover 라이트는 **중성 면 `#eceaf3`** — 보라 소프트 금지.

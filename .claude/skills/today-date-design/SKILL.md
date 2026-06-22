@@ -50,19 +50,19 @@ description: >
 | 용도 | 라이트 | 다크 | 출처/클래스 |
 |---|---|---|---|
 | 전역 html/body | `#ffffff` | `#0a0712` | `globals.css` html,body |
-| 페이지 고정 배경 레이어 | `--s-page-bg-light` 기본 `#fafafb` (홈은 `#f4f2fa` 오버라이드) | radial(보라)+radial(핑크)+linear `#0a0712→#120c1e` | `.page::before` + `.pageHome` |
+| 페이지 고정 배경 레이어 | `--s-page-bg-light` 기본 `#fafafb` (홈은 `#ede9f5` 오버라이드) | radial(보라)+radial(핑크)+linear `#0a0712→#120c1e` | `.page::before` + `.pageHome` |
 | 카드 표면 `--s-card-bg` | `#ffffff` | `#241a36` | `styles.card` |
 | 컨트롤 표면(검색/필터/세그먼트) | `#ffffff` | 세그먼트 트랙 `#1b1430`, 검색/필터 `#241a36` | `styles.search*/filterToggle/segment` |
 | 소프트 강조 배경 `--s-accent-soft-bg` | `#f6f1ff` | `#2d2540` | `styles.statCardAccent/visitedTag/visitBox` |
 
 복붙:
 - 일반 화면(리스트/상세): `styles.page` — 배경 `#fafafb` 자동 적용.
-- **홈**: `cn(styles.page, styles.pageHome)` — `--s-page-bg-light`를 `#f4f2fa`(옅은 라일락)로 오버라이드해 흰 카드가 떠 보이게.
+- **홈**: `cn(styles.page, styles.pageHome)` — `--s-page-bg-light`를 `#ede9f5`(옅은 라일락)로 오버라이드해 흰 카드가 떠 보이게.
 - 카드/컨트롤은 `styles.card` 등 클래스가 토큰을 읽으므로 색 지정 불필요.
 - 전체 확장 시: `.page { --s-page-bg-light }` 기본값 한 줄만 교체하면 모든 `.page` 화면에 라일락 배경 일괄 적용.
 
 **배경 < 카드 계층 관계 (라이트/다크 둘 다 충족):**
-- **라이트**: 배경 `#f4f2fa`(홈) / `#fafafb`(기타 화면) ≪ 카드 `#ffffff` — 라일락 배경 위 흰 카드가 떠 보임.
+- **라이트**: 배경 `#ede9f5`(홈) / `#fafafb`(기타 화면) ≪ 카드 `#ffffff` — 라일락 배경 위 흰 카드가 떠 보임.
 - **다크**: 배경 `#0a0712~#120c1e` ≪ 카드 `#241a36` — 이미 충족, 변경 없음.
 
 ### 전역 시맨틱 토큰 (`:root` — portal 안전)
@@ -829,7 +829,7 @@ try {
 ## 🚫 금지 규칙 (별도 섹션)
 
 라이트모드에서 절대 하지 말 것:
-1. **라이트모드 페이지/카드/컨트롤 배경에 보라·핑크 사용 금지.** 라이트 페이지 배경은 `--s-page-bg-light`(기본 중성 `#fafafb`, 홈만 옅은 라일락 `#f4f2fa`), 카드/컨트롤은 `#ffffff`. (옛 `bg-gradient-to-br from-violet-50 to-purple-100` 같은 채도 있는 보라 그라데이션 배경 금지 — `#f4f2fa`는 채도가 거의 없는 라이트 서피스로 허용)
+1. **라이트모드 페이지/카드/컨트롤 배경에 보라·핑크 사용 금지.** 라이트 페이지 배경은 `--s-page-bg-light`(기본 중성 `#fafafb`, 홈만 옅은 라일락 `#ede9f5`), 카드/컨트롤은 `#ffffff`. (옛 `bg-gradient-to-br from-violet-50 to-purple-100` 같은 채도 있는 보라 그라데이션 배경 금지 — `#ede9f5`는 채도가 거의 없는 라이트 서피스로 허용)
 2. 보라는 **강조에만**: 활성 칩/옵션 틴트(`--s-accent-soft-bg`+`--s-active-line` 보더, §5-A), 카테고리 아이콘(`catIcon`), 포커스 보더/링(`--s-active-line/glow`), CTA 단색 채움(`--s-active-line`), FAB·`gradIcon`·`filterCount`. 중성 표면(면)에는 쓰지 않는다.
 3. 통계 숫자(`styles.statNum`)는 라이트에서 **중성 `ink`**. (보라는 다크에서만 `@media`로 적용)
 4. 아이콘 버튼 hover 라이트는 **중성 면 `#eceaf3`** — 보라 소프트 금지.

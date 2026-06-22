@@ -87,7 +87,7 @@
  * 다크는 @media dark 가 .page::before 를 완전 오버라이드하므로 여기선 영향 없음.
  */
 .pageHome {
-  --s-page-bg-light: #f4f2fa;
+  --s-page-bg-light: #ede9f5;
 }
 
 /*
@@ -1263,7 +1263,7 @@
 
 @media (min-width: 1024px) {
   .statRowTitle {
-    font-size: 0.9375rem; /* 15px — 모바일 13px보다 2단계 위 */
+    font-size: 1rem; /* 16px — CTA 영역 텍스트와 균형 */
   }
 }
 

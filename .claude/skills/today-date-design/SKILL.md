@@ -78,7 +78,7 @@ description: >
 | `--s-accent-pink-soft-bg` | `#fbeaf3` | `#3a2433` | 장소 위시리스트 칩 배경 |
 | `--s-accent-chip-tint` | `var(--s-accent-soft-bg)` | `#2c2440` | 활동 위시리스트 칩 배경 (다크는 accent-soft-bg `#573f7f`보다 어두운 미세 틴트) |
 | `--s-chip-neutral-bg` | `var(--s-card-border-strong)` | `var(--s-card-bg)` | 다녀온 곳 칩 중성 배경 |
-| `--s-label-muted` | `#8b8798` | `#908aa0` | 섹션 레이블·미리보기 텍스트 (sub↔faint 중간 톤) |
+| `--s-label-muted` | `#8b8798` | `#908aa0` | 행 미리보기·중성 칩 텍스트 (sub↔faint 중간 톤; 섹션 라벨은 `--s-sub`) |
 | `--s-icon-muted` | `#c7c3d2` | `#4f4960` | chevron 등 중성 진입 아이콘 |
 | `--s-hint` | `#b5b0bf` | `#635d72` | 빈 상태 안내·visited place 칩 전경 |
 
@@ -98,6 +98,33 @@ description: >
 | 강조 `styles.accent` (`--s-accent`) | `#7c3aed` | `#c084fc` |
 
 복붙: `cn('text-...', styles.ink)` / `styles.sub` / `styles.faint`. shadcn 영역은 `text-foreground`(라이트 `0 0% 8%` / 다크 `0 0% 98%`), 보조는 `text-muted-foreground`(라이트 `0 0% 40%` / 다크 `0 0% 60%`).
+
+### 2-A. 섹션/그룹 라벨 표준 (구조 구분 신호)
+
+왜: 화면 안에서 항목들을 묶는 "그룹 헤더 라벨"은 행 제목보다 약하되 미리보기보다 또렷해야 위계가 읽힌다. 화면마다 제각각이었던 값을 아래와 같이 정의한다.
+
+**표준값 (홈 `.statSectionHeader` 기준, 확정):**
+- font-size: **12px**
+- font-weight: **600**
+- color: **`--s-sub`** (라이트 `#6b7280` / 다크 `#a8a0b8`)
+
+**위계 3단계 (홈 기준):**
+
+| 요소 | font-size | font-weight | color 토큰 | 라이트 |
+|---|---|---|---|---|
+| 행 제목 (`.statRowTitle`) | 13px → PC 16px | 500 | `--s-ink` | `#1a1033` |
+| **섹션 라벨 (`.statSectionHeader`)** | **12px** | **600** | **`--s-sub`** | **`#6b7280`** |
+| 미리보기 (`.statRowPreview`) | 11px → PC 12px | 400 | `--s-label-muted` | `#8b8798` |
+
+**현황 및 확장 가이드:**
+
+| 화면 | 구현 | 현재값 | 표준 적용 여부 |
+|---|---|---|---|
+| 홈 `.statSectionHeader` | `screens.module.css` | 12px / 600 / `--s-sub` | ✅ 적용됨 |
+| `/list` `FilterGroup` 라벨 | `ListView.tsx` `text-xs + styles.faint` | 12px / 400 / `--s-faint` (`#9ca3af`) | ⏳ 별도 작업 — `styles.sub` + 600으로 통합 권장 |
+| 추천 위저드 질문 라벨 | `ActivityRecommendWizard.tsx` `text-sm + styles.sub` | 14px / 400 / `--s-sub` | ⏳ 별도 작업 — 14px가 적합한지 재검토 후 결정 |
+
+통합 시 주의: `/list` `FilterGroup`은 동일 표준(12px/600/`--s-sub`) 직접 적용 가능. 위저드 질문 라벨은 "질문 텍스트" 역할상 14px 유지 여부를 먼저 검토한 뒤 통합.
 
 ---
 

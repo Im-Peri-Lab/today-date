@@ -136,7 +136,7 @@ html.dark body {
   --s-accent-pink-soft-bg: #fbeaf3; /* 장소 위시리스트 칩 배경 */
   --s-accent-chip-tint: var(--s-accent-soft-bg, #f6f1ff); /* 활동 위시리스트 칩 배경 (다크는 별도값) */
   --s-chip-neutral-bg: var(--s-card-border-strong, #eceaf3); /* 다녀온 곳 칩 중성 배경 */
-  --s-label-muted: #8b8798;         /* 섹션 레이블·미리보기 텍스트 (sub·faint 중간 톤) */
+  --s-label-muted: #8b8798;         /* 행 미리보기·중성 칩 텍스트 (sub↔faint 중간 톤; 섹션 라벨은 --s-sub) */
   --s-icon-muted: #c7c3d2;          /* 진입 방향 아이콘(chevron) 중성 톤 */
   --s-hint: #b5b0bf;                /* 빈 상태 안내 텍스트·visited place 칩 fg (다크는 훨씬 어두움) */
 }

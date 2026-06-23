@@ -1144,8 +1144,8 @@
 /* 섹션 헤더 레이블 */
 .statSectionHeader {
   font-size: 12px;
-  font-weight: 500;
-  color: var(--s-label-muted, #8b8798);
+  font-weight: 600;
+  color: var(--s-sub, #6b7280);
   margin-bottom: 7px;
 }
 

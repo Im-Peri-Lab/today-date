@@ -82,24 +82,22 @@
 }
 
 /*
- * 홈 전용 배경 — 흰 통계 카드가 배경 위로 떠 보이도록 옅은 라일락 톤 부여.
+ * 홈 전용 배경 — /lock 와 동일한 그라데이션(--s-page-gradient-light)을 공유.
+ * 흰 카드가 라일락 그라데이션 위에 떠 보이고, 홈↔lock 간 배경 일관성이 유지된다.
  *
  * ※ ::before(z-index:-1) 대신 요소에 직접 적용하는 이유:
  *   CSS painting order 상 position:fixed z-index:-1 요소(step 2)는
  *   body 일반 블록 배경(step 3)보다 먼저 그려져 덮힌다.
- *   body { background-color:#ffffff }가 항상 ::before 위에 올라오므로
- *   라벤더가 실제 픽셀에 반영되지 않음. 요소 자체에 background-color를 쓰면
- *   DOM 요소(main)가 body 위에서 렌더링되므로 정상 표시된다.
- * 다크는 background-color: transparent 로 무효화 → dark gradient(::before) 무간섭.
+ *   요소 자체에 background를 쓰면 DOM 요소(main)가 body 위에서 렌더링되므로 정상 표시.
+ * 다크는 background: transparent 로 무효화 → dark gradient(::before) 무간섭.
  */
 .pageHome {
-  --s-page-bg-light: #ede9f5;
-  background-color: var(--s-page-bg-light);
+  background: var(--s-page-gradient-light, linear-gradient(180deg, #ffffff 0%, #f4f0fa 100%));
 }
 
 @media (prefers-color-scheme: dark) {
   .pageHome {
-    background-color: transparent;
+    background: transparent;
   }
 }
 
@@ -116,7 +114,7 @@
 
 /*
  * 배경을 뷰포트에 고정된 레이어로 분리한다(콘텐츠 길이가 달라져도 안 움직임).
- * 라이트: --s-page-bg-light 토큰 참조(기본 #fafafb, 홈은 #F4F2FA로 오버라이드).
+ * 라이트: --s-page-bg-light 토큰 참조(기본 #fafafb). 홈 배경은 .pageHome background가 담당.
  * CSS 커스텀 프로퍼티는 ::before 가 position:fixed여도 생성 요소(.page)에서 상속됨.
  * (다크는 아래 @media 에서 보라/핑크 코너 글로우 + 다크 그라데이션 — 기존 유지)
  */

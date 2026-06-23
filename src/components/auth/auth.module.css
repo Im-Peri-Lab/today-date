@@ -16,7 +16,7 @@
   flex-direction: column;
   text-align: center;
 
-  background: linear-gradient(180deg, #ffffff 0%, #f4f0fa 100%);
+  background: var(--s-page-gradient-light, linear-gradient(180deg, #ffffff 0%, #f4f0fa 100%));
 
   /* 상단 노치 / 하단 브라우저 바와 분리 */
   padding-top: calc(env(safe-area-inset-top) + 1.5rem);

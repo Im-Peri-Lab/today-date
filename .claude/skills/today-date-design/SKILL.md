@@ -50,20 +50,20 @@ description: >
 | 용도 | 라이트 | 다크 | 출처/클래스 |
 |---|---|---|---|
 | 전역 html/body | `#ffffff` | `#0a0712` | `globals.css` html,body |
-| 페이지 고정 배경 레이어 | 기본 `#fafafb`(`::before`) / 홈은 `#ede9f5` (`.pageHome` 직접) | radial(보라)+radial(핑크)+linear `#0a0712→#120c1e` | `.page::before` (다크) / `.pageHome` (라이트 홈) |
+| 페이지 고정 배경 레이어 | `--s-page-gradient-light` = `linear-gradient(#ffffff→#f4f0fa)` — 홈·인증 공유 | radial(보라)+radial(핑크)+linear `#0a0712→#120c1e` | `.pageHome background` (라이트) / `.page::before` (다크) |
 | 카드 표면 `--s-card-bg` | `#ffffff` | `#241a36` | `styles.card` |
 | 컨트롤 표면(검색/필터/세그먼트) | `#ffffff` | 세그먼트 트랙 `#1b1430`, 검색/필터 `#241a36` | `styles.search*/filterToggle/segment` |
 | 소프트 강조 배경 `--s-accent-soft-bg` | `#f6f1ff` | `#2d2540` | `styles.statCardAccent/visitedTag/visitBox` |
 
 복붙:
 - 일반 화면(리스트/상세): `styles.page` — `.page::before`(z-index:-1)가 `#fafafb` 배경 적용.
-- **홈**: `cn(styles.page, styles.pageHome)` — `background-color: #ede9f5`를 요소 자체에 직접 적용해 흰 카드가 떠 보이게.
+- **홈**: `cn(styles.page, styles.pageHome)` — `background: var(--s-page-gradient-light)` 요소 직접 적용. `/lock` 화면과 픽셀 단위 동일한 흰→라일락 그라데이션.
 - 카드/컨트롤은 `styles.card` 등 클래스가 토큰을 읽으므로 색 지정 불필요.
 
-> ⚠️ **라이트 배경은 `.pageHome`에 직접 적용해야 함**: `body { background-color:#ffffff }`는 CSS painting order 상 `position:fixed; z-index:-1` 요소(step 2)보다 나중에 그려져(step 3) `::before` 라벤더를 완전히 덮는다. `.pageHome background-color`는 DOM 요소가 body 위에서 렌더링되므로 정상 표시. 다크에서는 `background-color: transparent`로 무효화(dark `::before` gradient 유지).
+> ⚠️ **라이트 배경은 `.pageHome`에 직접 적용해야 함**: `body { background-color:#ffffff }`는 CSS painting order 상 `position:fixed; z-index:-1` 요소(step 2)보다 나중에 그려져(step 3) `::before` 색을 완전히 덮는다. `.pageHome background`는 DOM 요소가 body 위에서 렌더링되므로 정상 표시. 다크에서는 `background: transparent`로 무효화(dark `::before` gradient 유지).
 
 **배경 < 카드 계층 관계 (라이트/다크 둘 다 충족):**
-- **라이트**: 배경 `#ede9f5`(홈) ≪ 카드 `#ffffff` — RGB avg diff 16.7 (Playwright pixel sample 확인).
+- **라이트**: 배경 그라데이션 하단 `#f4f0fa` avg=244.7 ≪ 카드 `#ffffff` avg=255 — RGB avg diff ≈10 (Playwright pixel sample 확인).
 - **다크**: 배경 `#0a0712~#120c1e` ≪ 카드 `#241a36` — 이미 충족, 변경 없음.
 
 ### 전역 시맨틱 토큰 (`:root` — portal 안전)
@@ -830,7 +830,7 @@ try {
 ## 🚫 금지 규칙 (별도 섹션)
 
 라이트모드에서 절대 하지 말 것:
-1. **라이트모드 페이지/카드/컨트롤 배경에 보라·핑크 사용 금지.** 라이트 페이지 배경은 `--s-page-bg-light`(기본 중성 `#fafafb`, 홈만 옅은 라일락 `#ede9f5`), 카드/컨트롤은 `#ffffff`. (옛 `bg-gradient-to-br from-violet-50 to-purple-100` 같은 채도 있는 보라 그라데이션 배경 금지 — `#ede9f5`는 채도가 거의 없는 라이트 서피스로 허용)
+1. **라이트모드 페이지/카드/컨트롤 배경에 채도 있는 보라·핑크 사용 금지.** 라이트 페이지 배경은 `--s-page-gradient-light`(`#ffffff→#f4f0fa`, 홈·인증 공유) — 옅은 중성 그라데이션. 카드/컨트롤은 `#ffffff`. (옛 `bg-gradient-to-br from-violet-50 to-purple-100` 같은 채도 있는 보라 그라데이션 배경 금지)
 2. 보라는 **강조에만**: 활성 칩/옵션 틴트(`--s-accent-soft-bg`+`--s-active-line` 보더, §5-A), 카테고리 아이콘(`catIcon`), 포커스 보더/링(`--s-active-line/glow`), CTA 단색 채움(`--s-active-line`), FAB·`gradIcon`·`filterCount`. 중성 표면(면)에는 쓰지 않는다.
 3. 통계 숫자(`styles.statNum`)는 라이트에서 **중성 `ink`**. (보라는 다크에서만 `@media`로 적용)
 4. 아이콘 버튼 hover 라이트는 **중성 면 `#eceaf3`** — 보라 소프트 금지.

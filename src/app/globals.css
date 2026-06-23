@@ -106,6 +106,15 @@ html.dark body {
 }
 
 /*
+ * 라이트 페이지 그라데이션 배경 — 인증 화면(.page, auth.module.css)과 홈(.pageHome)이 공유.
+ * 상단 흰색 → 하단 옅은 라일락으로 부드럽게 이어진다.
+ * 변경 시 이 한 줄만 수정하면 홈·lock·setup·forgot·reset 모두 일괄 반영.
+ */
+:root {
+  --s-page-gradient-light: linear-gradient(180deg, #ffffff 0%, #f4f0fa 100%);
+}
+
+/*
  * portal(드롭다운·다이얼로그)이 .page 스코프 밖이라 상속 못 받는 --s-* 토큰을 :root 전역으로 승격.
  * 라이트는 .page 정의와 동일값 — .page 안 요소는 로컬 선언이 이기므로 시각 변화 없음.
  * 다크는 @media 오버라이드로 교체. --s-divider 는 .page 라이트 정의가 없어 다크만 추가.

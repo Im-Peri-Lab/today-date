@@ -83,11 +83,24 @@
 
 /*
  * 홈 전용 배경 — 흰 통계 카드가 배경 위로 떠 보이도록 옅은 라일락 톤 부여.
- * 나중에 모든 .page 화면에 확장하려면 위 .page { --s-page-bg-light } 기본값만 교체하면 됨.
- * 다크는 @media dark 가 .page::before 를 완전 오버라이드하므로 여기선 영향 없음.
+ *
+ * ※ ::before(z-index:-1) 대신 요소에 직접 적용하는 이유:
+ *   CSS painting order 상 position:fixed z-index:-1 요소(step 2)는
+ *   body 일반 블록 배경(step 3)보다 먼저 그려져 덮힌다.
+ *   body { background-color:#ffffff }가 항상 ::before 위에 올라오므로
+ *   라벤더가 실제 픽셀에 반영되지 않음. 요소 자체에 background-color를 쓰면
+ *   DOM 요소(main)가 body 위에서 렌더링되므로 정상 표시된다.
+ * 다크는 background-color: transparent 로 무효화 → dark gradient(::before) 무간섭.
  */
 .pageHome {
   --s-page-bg-light: #ede9f5;
+  background-color: var(--s-page-bg-light);
+}
+
+@media (prefers-color-scheme: dark) {
+  .pageHome {
+    background-color: transparent;
+  }
 }
 
 /*

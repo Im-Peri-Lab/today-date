@@ -50,19 +50,20 @@ description: >
 | 용도 | 라이트 | 다크 | 출처/클래스 |
 |---|---|---|---|
 | 전역 html/body | `#ffffff` | `#0a0712` | `globals.css` html,body |
-| 페이지 고정 배경 레이어 | `--s-page-bg-light` 기본 `#fafafb` (홈은 `#ede9f5` 오버라이드) | radial(보라)+radial(핑크)+linear `#0a0712→#120c1e` | `.page::before` + `.pageHome` |
+| 페이지 고정 배경 레이어 | 기본 `#fafafb`(`::before`) / 홈은 `#ede9f5` (`.pageHome` 직접) | radial(보라)+radial(핑크)+linear `#0a0712→#120c1e` | `.page::before` (다크) / `.pageHome` (라이트 홈) |
 | 카드 표면 `--s-card-bg` | `#ffffff` | `#241a36` | `styles.card` |
 | 컨트롤 표면(검색/필터/세그먼트) | `#ffffff` | 세그먼트 트랙 `#1b1430`, 검색/필터 `#241a36` | `styles.search*/filterToggle/segment` |
 | 소프트 강조 배경 `--s-accent-soft-bg` | `#f6f1ff` | `#2d2540` | `styles.statCardAccent/visitedTag/visitBox` |
 
 복붙:
-- 일반 화면(리스트/상세): `styles.page` — 배경 `#fafafb` 자동 적용.
-- **홈**: `cn(styles.page, styles.pageHome)` — `--s-page-bg-light`를 `#ede9f5`(옅은 라일락)로 오버라이드해 흰 카드가 떠 보이게.
+- 일반 화면(리스트/상세): `styles.page` — `.page::before`(z-index:-1)가 `#fafafb` 배경 적용.
+- **홈**: `cn(styles.page, styles.pageHome)` — `background-color: #ede9f5`를 요소 자체에 직접 적용해 흰 카드가 떠 보이게.
 - 카드/컨트롤은 `styles.card` 등 클래스가 토큰을 읽으므로 색 지정 불필요.
-- 전체 확장 시: `.page { --s-page-bg-light }` 기본값 한 줄만 교체하면 모든 `.page` 화면에 라일락 배경 일괄 적용.
+
+> ⚠️ **라이트 배경은 `.pageHome`에 직접 적용해야 함**: `body { background-color:#ffffff }`는 CSS painting order 상 `position:fixed; z-index:-1` 요소(step 2)보다 나중에 그려져(step 3) `::before` 라벤더를 완전히 덮는다. `.pageHome background-color`는 DOM 요소가 body 위에서 렌더링되므로 정상 표시. 다크에서는 `background-color: transparent`로 무효화(dark `::before` gradient 유지).
 
 **배경 < 카드 계층 관계 (라이트/다크 둘 다 충족):**
-- **라이트**: 배경 `#ede9f5`(홈) / `#fafafb`(기타 화면) ≪ 카드 `#ffffff` — 라일락 배경 위 흰 카드가 떠 보임.
+- **라이트**: 배경 `#ede9f5`(홈) ≪ 카드 `#ffffff` — RGB avg diff 16.7 (Playwright pixel sample 확인).
 - **다크**: 배경 `#0a0712~#120c1e` ≪ 카드 `#241a36` — 이미 충족, 변경 없음.
 
 ### 전역 시맨틱 토큰 (`:root` — portal 안전)

@@ -70,6 +70,46 @@
   /* ── StatRow 섹션 구분선 (라이트) — 나머지는 globals.css 전역 토큰 참조 ── */
   --s-row-divider: #f2f0f7; /* 카드 내부 행 구분선 — --s-divider(#ece7f5)보다 연해 위계 구분 */
 
+  /* ── 타이포 스케일 역할 토큰 (§0 — 정의만, 컴포넌트 미적용) ─────────────────────────
+   * font-size / font-weight / color 3속성을 역할별로 토큰화.
+   * color는 기존 --s-* 참조 → .page 다크 블록에서 자동 해석, 별도 다크 재선언 불필요.
+   * PC 크기 오버라이드: 하단 @media (min-width: 1024px) { .page } 블록에서 분기. */
+
+  /* page-title: 모바일 27px / PC 30px / weight 600 / --s-ink */
+  --type-page-title:           1.6875rem; /* 27px */
+  --type-page-title-weight:    600;
+  --type-page-title-color:     var(--s-ink, #1a1033);
+
+  /* card-title: 18px / weight 600 / --s-ink */
+  --type-card-title:           1.125rem;  /* 18px */
+  --type-card-title-weight:    600;
+  --type-card-title-color:     var(--s-ink, #1a1033);
+
+  /* card-title-sm: 모바일 15px / PC 16px / weight 600 / --s-ink */
+  --type-card-title-sm:        0.9375rem; /* 15px */
+  --type-card-title-sm-weight: 600;
+  --type-card-title-sm-color:  var(--s-ink, #1a1033);
+
+  /* section-label: 12px / weight 600 / --s-sub */
+  --type-section-label:        0.75rem;   /* 12px */
+  --type-section-label-weight: 600;
+  --type-section-label-color:  var(--s-sub, #6b7280);
+
+  /* body: 14px / weight 400 / --s-ink */
+  --type-body:                 0.875rem;  /* 14px */
+  --type-body-weight:          400;
+  --type-body-color:           var(--s-ink, #1a1033);
+
+  /* preview-meta: 12px / weight 400 / --s-label-muted */
+  --type-preview-meta:         0.75rem;   /* 12px */
+  --type-preview-meta-weight:  400;
+  --type-preview-meta-color:   var(--s-label-muted, #8b8798);
+
+  /* caption: 12px / weight 400 / --s-faint */
+  --type-caption:              0.75rem;   /* 12px */
+  --type-caption-weight:       400;
+  --type-caption-color:        var(--s-faint, #9ca3af);
+
   /* 노치/홈 인디케이터 안전 영역 */
   padding-top: calc(env(safe-area-inset-top) + 0.5rem);
   padding-bottom: calc(env(safe-area-inset-bottom) + 0.5rem);
@@ -79,6 +119,16 @@
     'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont,
     'SF Pro Display', 'SF Pro Text', 'Apple SD Gothic Neo', system-ui,
     'Segoe UI', Roboto, sans-serif;
+}
+
+/* ── 타이포 스케일 PC 크기 오버라이드 ────────────────────────────────────────────────
+ * page-title: 27px → 30px / card-title-sm: 15px → 16px
+ * (weight·color 토큰은 모바일·PC 동일 — 재정의 없음) */
+@media (min-width: 1024px) {
+  .page {
+    --type-page-title:    1.875rem;   /* 30px PC */
+    --type-card-title-sm: 1rem;       /* 16px PC */
+  }
 }
 
 /*

@@ -50,12 +50,39 @@ description: >
 | 용도 | 라이트 | 다크 | 출처/클래스 |
 |---|---|---|---|
 | 전역 html/body | `#ffffff` | `#0a0712` | `globals.css` html,body |
-| 페이지 고정 배경 레이어 | `#fafafb` | radial(보라 `rgba(192,132,252,0.12)`)+radial(핑크 `rgba(244,114,182,0.07)`)+linear `#0a0712→#120c1e` | `.page::before` |
+| 페이지 고정 배경 레이어 | `--s-page-gradient-light` = `linear-gradient(#ffffff→#f4f0fa)` — 홈·인증 공유 | radial(보라)+radial(핑크)+linear `#0a0712→#120c1e` | `.pageHome background` (라이트) / `.page::before` (다크) |
 | 카드 표면 `--s-card-bg` | `#ffffff` | `#241a36` | `styles.card` |
 | 컨트롤 표면(검색/필터/세그먼트) | `#ffffff` | 세그먼트 트랙 `#1b1430`, 검색/필터 `#241a36` | `styles.search*/filterToggle/segment` |
 | 소프트 강조 배경 `--s-accent-soft-bg` | `#f6f1ff` | `#2d2540` | `styles.statCardAccent/visitedTag/visitBox` |
 
-복붙: 페이지 래퍼는 `styles.page`만 쓰면 배경이 자동 적용됨. 카드/컨트롤은 `styles.card` 등 클래스가 토큰을 읽으므로 색 지정 불필요.
+복붙:
+- 일반 화면(리스트/상세): `styles.page` — `.page::before`(z-index:-1)가 `#fafafb` 배경 적용.
+- **홈**: `cn(styles.page, styles.pageHome)` — `background: var(--s-page-gradient-light)` 요소 직접 적용. `/lock` 화면과 픽셀 단위 동일한 흰→라일락 그라데이션.
+- 카드/컨트롤은 `styles.card` 등 클래스가 토큰을 읽으므로 색 지정 불필요.
+
+> ⚠️ **라이트 배경은 `.pageHome`에 직접 적용해야 함**: `body { background-color:#ffffff }`는 CSS painting order 상 `position:fixed; z-index:-1` 요소(step 2)보다 나중에 그려져(step 3) `::before` 색을 완전히 덮는다. `.pageHome background`는 DOM 요소가 body 위에서 렌더링되므로 정상 표시. 다크에서는 `background: transparent`로 무효화(dark `::before` gradient 유지).
+
+**배경 < 카드 계층 관계 (라이트/다크 둘 다 충족):**
+- **라이트**: 배경 그라데이션 하단 `#f4f0fa` avg=244.7 ≪ 카드 `#ffffff` avg=255 — RGB avg diff ≈10 (Playwright pixel sample 확인).
+- **다크**: 배경 `#0a0712~#120c1e` ≪ 카드 `#241a36` — 이미 충족, 변경 없음.
+
+### 전역 시맨틱 토큰 (`:root` — portal 안전)
+
+`.page` 스코프 밖(portal·body 직접 렌더)에서도 참조 가능한 토큰들. `globals.css` `:root`에 정의 + `@media (prefers-color-scheme: dark)` 오버라이드.
+
+| 토큰 | 라이트 | 다크 | 용도 |
+|---|---|---|---|
+| `--s-success` | `#16a34a` | `#1fb877` | 완료·체크 배지 배경 |
+| `--s-success-on` | `#ffffff` | `#15121e` | success 면 위 전경(글씨·아이콘·링) |
+| `--s-accent-pink` | `#db2777` | `#f18fb5` | 장소(place) 브랜드 핑크 전경 |
+| `--s-accent-pink-soft-bg` | `#fbeaf3` | `#3a2433` | 장소 위시리스트 칩 배경 |
+| `--s-accent-chip-tint` | `var(--s-accent-soft-bg)` | `#2c2440` | 활동 위시리스트 칩 배경 (다크는 accent-soft-bg `#573f7f`보다 어두운 미세 틴트) |
+| `--s-chip-neutral-bg` | `var(--s-card-border-strong)` | `var(--s-card-bg)` | 다녀온 곳 칩 중성 배경 |
+| `--s-label-muted` | `#8b8798` | `#908aa0` | 행 미리보기·중성 칩 텍스트 (sub↔faint 중간 톤; 섹션 라벨은 `--s-sub`) |
+| `--s-icon-muted` | `#c7c3d2` | `#4f4960` | chevron 등 중성 진입 아이콘 |
+| `--s-hint` | `#b5b0bf` | `#635d72` | 빈 상태 안내·visited place 칩 전경 |
+
+> **`--s-hint` vs `--s-placeholder`**: `--s-placeholder`는 폼 입력 placeholder 전용(접근성 대비 기준 유지). `--s-hint`는 UI 안내 텍스트(빈 상태·칩 흐림) 전용 — 어두운 배경 위에서 더 낮은 대비를 허용하는 컨텍스트. 두 토큰을 섞지 않는다.
 
 ---
 
@@ -71,6 +98,33 @@ description: >
 | 강조 `styles.accent` (`--s-accent`) | `#7c3aed` | `#c084fc` |
 
 복붙: `cn('text-...', styles.ink)` / `styles.sub` / `styles.faint`. shadcn 영역은 `text-foreground`(라이트 `0 0% 8%` / 다크 `0 0% 98%`), 보조는 `text-muted-foreground`(라이트 `0 0% 40%` / 다크 `0 0% 60%`).
+
+### 2-A. 섹션/그룹 라벨 표준 (구조 구분 신호)
+
+왜: 화면 안에서 항목들을 묶는 "그룹 헤더 라벨"은 행 제목보다 약하되 미리보기보다 또렷해야 위계가 읽힌다. 화면마다 제각각이었던 값을 아래와 같이 정의한다.
+
+**표준값 (홈 `.statSectionHeader` 기준, 확정):**
+- font-size: **12px**
+- font-weight: **600**
+- color: **`--s-sub`** (라이트 `#6b7280` / 다크 `#a8a0b8`)
+
+**위계 3단계 (홈 기준):**
+
+| 요소 | font-size | font-weight | color 토큰 | 라이트 |
+|---|---|---|---|---|
+| 행 제목 (`.statRowTitle`) | 13px → PC 16px | 500 | `--s-ink` | `#1a1033` |
+| **섹션 라벨 (`.statSectionHeader`)** | **12px** | **600** | **`--s-sub`** | **`#6b7280`** |
+| 미리보기 (`.statRowPreview`) | 11px → PC 12px | 400 | `--s-label-muted` | `#8b8798` |
+
+**현황 및 확장 가이드:**
+
+| 화면 | 구현 | 현재값 | 표준 적용 여부 |
+|---|---|---|---|
+| 홈 `.statSectionHeader` | `screens.module.css` | 12px / 600 / `--s-sub` | ✅ 적용됨 |
+| `/list` `FilterGroup` 라벨 | `ListView.tsx` `text-xs + styles.faint` | 12px / 400 / `--s-faint` (`#9ca3af`) | ⏳ 별도 작업 — `styles.sub` + 600으로 통합 권장 |
+| 추천 위저드 질문 라벨 | `ActivityRecommendWizard.tsx` `text-sm + styles.sub` | 14px / 400 / `--s-sub` | ⏳ 별도 작업 — 14px가 적합한지 재검토 후 결정 |
+
+통합 시 주의: `/list` `FilterGroup`은 동일 표준(12px/600/`--s-sub`) 직접 적용 가능. 위저드 질문 라벨은 "질문 텍스트" 역할상 14px 유지 여부를 먼저 검토한 뒤 통합.
 
 ---
 
@@ -92,6 +146,29 @@ description: >
 ```tsx
 <div className={cn(styles.card, styles.cardInteractive, 'p-3.5')}>…</div>
 ```
+
+### 조연 카드 위계 규칙 (StatSection — 홈 통계 카드)
+
+**카드 그림자 3단계 위계.** 주연(CTA)·리스트·조연(통계)은 동일한 `--s-card-shadow` 계열 토큰 안에서 단계를 나눠 위계를 만든다:
+
+| 단계 | 적용 카드 | `box-shadow` 토큰 | 라이트 값 | 다크 값 |
+|---|---|---|---|---|
+| 표준 | CTA 카드 (주연) + 리스트 카드 | `--s-card-shadow` | `0 1px 3px rgba(0,0,0,0.06), 0 4px 12px rgba(0,0,0,0.05)` | `0 8px 24px -16px rgba(0,0,0,0.6)` |
+| 최약 | 통계 카드 (`statSectionCard`) | `--s-card-shadow-xs` | `0 1px 2px rgba(0,0,0,0.05), 0 2px 6px rgba(0,0,0,0.04)` | `none` (다크: 배경<카드 명도 계층이 이미 충분) |
+
+**다크 통계 카드 그림자 = none (현행 유지)**: 다크에서는 배경(`#0a0712~#120c1e`) < 카드(`#241a36`) 명도 계층이 그림자 없이도 카드를 충분히 분리한다. `--s-card-shadow-xs`는 다크에서 `none`으로 재정의돼 있어 다크 시각에 영향이 없다.
+
+| 속성 | CTA 카드 (주연) | 리스트 카드 | 조연 카드 (`statSectionCard`) |
+|---|---|---|---|
+| `box-shadow` 라이트 | `var(--s-card-shadow)` | `var(--s-card-shadow)` | `var(--s-card-shadow-xs)` (최약) |
+| `box-shadow` 다크 | `var(--s-card-shadow)` | `var(--s-card-shadow)` | `none` |
+| `border-radius` | **16px** (`1rem`) | **16px** (`1rem`) | **14px** (`0.875rem`) |
+| `background` | `var(--s-card-bg)` | `var(--s-card-bg)` | `var(--s-card-bg)` |
+| `border` | `var(--s-card-border)` | `var(--s-card-border)` | `var(--s-card-border-strong)` |
+
+**radius 통일 이유**: 과거 모바일 `13px` / PC `14px` 분리는 의도 없는 임의값이었다. `0.875rem`(14px)으로 통일. CTA(16px)보다 한 단계 작아 시각적 위계를 유지한다.
+
+**색은 기존 토큰 흡수.** 조연 카드 안의 색(칩·텍스트·아이콘)은 전용 네임스페이스 토큰 없이 전역 시맨틱 토큰(`--s-accent`, `--s-ink`, `--s-label-muted`, `--s-icon-muted`, `--s-hint` 등)을 직접 참조한다. 전용 토큰은 `--s-row-divider`(카드 내 행 구분선 — `--s-divider`보다 연한 톤이 의도)만 남긴다.
 
 ---
 
@@ -263,6 +340,21 @@ description: >
 3. **portal 체크**: `.page` 밖 렌더 시 → `.dialogPopup` 다크 블록에 `--s-focus-ring` / `--s-focus-ring-card` 재선언 필요 (없으면 다크에서 글로우가 라이트색 fallback으로 뜸).
 
 4. **라이트/다크 확인**: 라이트는 보라(`rgba(124,58,237,...)`), 다크는 라벤더(`rgba(192,132,252,...)`) 톤.
+
+### 카드 내부 행(statRow) 포커스 — inset 링 패턴
+
+카드 안에 행(`<a>`)이 쌓이는 구조(`statSectionCard` > `statRow`)는 **overflow가 잘려 외부 글로우가 안 보인다**. 이 경우 `inset` 그림자로 카드 안쪽에서 링을 그린다:
+
+```css
+.statRow:focus-visible {
+  outline: none;
+  box-shadow: inset var(--s-focus-ring, inset 0 0 0 2px rgba(124, 58, 237, 0.5));
+}
+```
+
+- `inset` 키워드로 링이 요소 **내부**에 그려져 overflow:hidden 컨테이너 클리핑 문제를 우회한다.
+- 카드 자체 `:has(a:focus-visible)` 규칙(카드·박스형 tier)과 **충돌 없음** — `statSectionCard`는 `cardInteractive`가 아니라 조연 컨테이너라 `:has` 규칙 미적용.
+- 적용처: `statRow`처럼 **카드 내부에서 overflow 밖으로 글로우가 나갈 수 없는 `<a>`/`<button>` 행**. 컨테이너가 `overflow:visible`이면 일반 외부 글로우 패턴(카드·박스형 tier) 사용.
 
 **활성 칩/세그먼트 규칙:** `styles.chipActive` / `styles.optionActive` / `styles.optionCardActive`는 **틴트**(`--s-accent-soft-bg` 배경 + `--s-active-line` 보더 + `--s-active-text` 글씨, weight 500). `/list` 상태 토글(`styles.segmentBtnActive`)은 별개 패턴 — iOS식 "흰 면 떠오름 + 보라 테두리"(§5-A 참조).
 
@@ -765,7 +857,7 @@ try {
 ## 🚫 금지 규칙 (별도 섹션)
 
 라이트모드에서 절대 하지 말 것:
-1. **라이트모드 페이지/카드/컨트롤 배경에 보라·핑크 사용 금지.** 라이트 페이지 배경은 중성 `#fafafb`, 카드/컨트롤은 `#ffffff`. (옛 `bg-gradient-to-br from-violet-50 to-purple-100` 같은 보라 그라데이션 배경 금지)
+1. **라이트모드 페이지/카드/컨트롤 배경에 채도 있는 보라·핑크 사용 금지.** 라이트 페이지 배경은 `--s-page-gradient-light`(`#ffffff→#f4f0fa`, 홈·인증 공유) — 옅은 중성 그라데이션. 카드/컨트롤은 `#ffffff`. (옛 `bg-gradient-to-br from-violet-50 to-purple-100` 같은 채도 있는 보라 그라데이션 배경 금지)
 2. 보라는 **강조에만**: 활성 칩/옵션 틴트(`--s-accent-soft-bg`+`--s-active-line` 보더, §5-A), 카테고리 아이콘(`catIcon`), 포커스 보더/링(`--s-active-line/glow`), CTA 단색 채움(`--s-active-line`), FAB·`gradIcon`·`filterCount`. 중성 표면(면)에는 쓰지 않는다.
 3. 통계 숫자(`styles.statNum`)는 라이트에서 **중성 `ink`**. (보라는 다크에서만 `@media`로 적용)
 4. 아이콘 버튼 hover 라이트는 **중성 면 `#eceaf3`** — 보라 소프트 금지.

@@ -106,6 +106,15 @@ html.dark body {
 }
 
 /*
+ * 라이트 페이지 그라데이션 배경 — 인증 화면(.page, auth.module.css)과 홈(.pageHome)이 공유.
+ * 상단 흰색 → 하단 옅은 라일락으로 부드럽게 이어진다.
+ * 변경 시 이 한 줄만 수정하면 홈·lock·setup·forgot·reset 모두 일괄 반영.
+ */
+:root {
+  --s-page-gradient-light: linear-gradient(180deg, #ffffff 0%, #f4f0fa 100%);
+}
+
+/*
  * portal(드롭다운·다이얼로그)이 .page 스코프 밖이라 상속 못 받는 --s-* 토큰을 :root 전역으로 승격.
  * 라이트는 .page 정의와 동일값 — .page 안 요소는 로컬 선언이 이기므로 시각 변화 없음.
  * 다크는 @media 오버라이드로 교체. --s-divider 는 .page 라이트 정의가 없어 다크만 추가.
@@ -120,6 +129,16 @@ html.dark body {
   --s-accent-soft-bg: #f6f1ff;
   --s-dropdown-ring: #eceaf3;
   --s-dropdown-shadow: 0 14px 32px -12px rgba(20, 20, 30, 0.18);
+  /* 시맨틱 확장 토큰 — 메인 화면 컴포넌트가 참조 + portal 안전 */
+  --s-success: #16a34a;             /* 완료·visited 체크 배지 배경 */
+  --s-success-on: #ffffff;          /* success 면 위 글씨/아이콘·링 */
+  --s-accent-pink: #db2777;         /* 장소(place) 브랜드 핑크 전경 */
+  --s-accent-pink-soft-bg: #fbeaf3; /* 장소 위시리스트 칩 배경 */
+  --s-accent-chip-tint: var(--s-accent-soft-bg, #f6f1ff); /* 활동 위시리스트 칩 배경 (다크는 별도값) */
+  --s-chip-neutral-bg: var(--s-card-border-strong, #eceaf3); /* 다녀온 곳 칩 중성 배경 */
+  --s-label-muted: #8b8798;         /* 행 미리보기·중성 칩 텍스트 (sub↔faint 중간 톤; 섹션 라벨은 --s-sub) */
+  --s-icon-muted: #c7c3d2;          /* 진입 방향 아이콘(chevron) 중성 톤 */
+  --s-hint: #b5b0bf;                /* 빈 상태 안내 텍스트·visited place 칩 fg (다크는 훨씬 어두움) */
 }
 @media (prefers-color-scheme: dark) {
   :root {
@@ -130,6 +149,15 @@ html.dark body {
     --s-divider: #2c2442;
     --s-dropdown-ring: #3a2f4e;
     --s-dropdown-shadow: 0 18px 44px -12px rgba(0, 0, 0, 0.75);
+    --s-success: #1fb877;
+    --s-success-on: #15121e;
+    --s-accent-pink: #f18fb5;
+    --s-accent-pink-soft-bg: #3a2433;
+    --s-accent-chip-tint: #2c2440;  /* accent-soft-bg(#573f7f)보다 어두운 미세 틴트 — 활동 칩 전용 */
+    --s-chip-neutral-bg: var(--s-card-bg, #241a36);
+    --s-label-muted: #908aa0;
+    --s-icon-muted: #4f4960;
+    --s-hint: #635d72;
   }
 }
 

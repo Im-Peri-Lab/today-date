@@ -3,6 +3,7 @@ import { getSession } from '@/lib/auth/session'
 import { getDashboardStats } from '@/lib/data/dashboard'
 import { HomeDashboard } from '@/components/HomeDashboard'
 import styles from '@/components/screens.module.css'
+import { cn } from '@/lib/utils'
 
 export default async function HomePage() {
   const session = await getSession()
@@ -14,7 +15,7 @@ export default async function HomePage() {
   const initialStats = await getDashboardStats()
 
   return (
-    <main className={styles.page}>
+    <main className={cn(styles.page, styles.pageHome)}>
       <HomeDashboard initialStats={initialStats} />
     </main>
   )

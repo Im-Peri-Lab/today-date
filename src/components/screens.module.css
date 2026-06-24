@@ -131,6 +131,15 @@
   }
 }
 
+/* ── 섹션/그룹 라벨 유틸 — --type-section-label 토큰 참조 ────────────────────────────
+ * FilterGroup 라벨, StatSection 헤더 등 화면 안 그룹 구분 신호 요소에 공통 적용.
+ * 토큰이 .page 스코프에 정의돼 있으므로 portal·인증 화면 요소에는 쓰지 않는다. */
+.sectionLabel {
+  font-size: var(--type-section-label, 0.75rem);
+  font-weight: var(--type-section-label-weight, 600);
+  color: var(--type-section-label-color, var(--s-sub, #6b7280));
+}
+
 /*
  * 홈 전용 배경 — /lock 와 동일한 그라데이션(--s-page-gradient-light)을 공유.
  * 흰 카드가 라일락 그라데이션 위에 떠 보이고, 홈↔lock 간 배경 일관성이 유지된다.
@@ -1191,11 +1200,11 @@
   }
 }
 
-/* 섹션 헤더 레이블 */
+/* 섹션 헤더 레이블 — .sectionLabel 토큰 참조로 수렴, 간격만 직접 선언 */
 .statSectionHeader {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--s-sub, #6b7280);
+  font-size: var(--type-section-label, 0.75rem);
+  font-weight: var(--type-section-label-weight, 600);
+  color: var(--type-section-label-color, var(--s-sub, #6b7280));
   margin-bottom: 7px;
 }
 

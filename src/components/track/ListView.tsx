@@ -144,7 +144,7 @@ function FilterBar({
 function FilterGroup({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
-      <p className={cn('mb-1.5 text-xs', styles.faint)}>{label}</p>
+      <p className={cn('mb-1.5', styles.sectionLabel)}>{label}</p>
       <div className="flex flex-wrap gap-x-2 gap-y-2.5">{children}</div>
     </div>
   )

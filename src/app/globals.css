@@ -126,6 +126,8 @@ html.dark body {
   --s-card-bg: #ffffff;
   --s-card-border-strong: #eceaf3;
   --s-ink: #1a1033;
+  --s-sub: #6b7280;            /* 보조 텍스트 (portal 안전) */
+  --s-faint: #9ca3af;          /* 더 옅은 보조 텍스트 (portal 안전) */
   --s-accent-soft-bg: #f6f1ff;
   --s-dropdown-ring: #eceaf3;
   --s-dropdown-shadow: 0 14px 32px -12px rgba(20, 20, 30, 0.18);
@@ -145,6 +147,8 @@ html.dark body {
     --s-card-bg: #241a36;
     --s-card-border-strong: #3a2f4e;
     --s-ink: #f5f3fa;
+    --s-sub: #a8a0b8;            /* 보조 텍스트 다크 */
+    --s-faint: #8c84a0;          /* 더 옅은 보조 텍스트 다크 */
     --s-accent-soft-bg: #573f7f;
     --s-divider: #2c2442;
     --s-dropdown-ring: #3a2f4e;

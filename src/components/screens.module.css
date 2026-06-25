@@ -59,7 +59,6 @@
    * 실측한 폴백값을 그대로 명시해 fallback 의존을 제거(렌더 무변화). 다크는 아래 @media 에서 오버라이드.
    */
   --s-ink: #1a1033; /* 제목/주요 텍스트 */
-  --s-sub: #6b7280; /* 서브카피 */
   --s-accent: #7c3aed; /* 보라 강조 */
   --s-accent-soft-bg: #f6f1ff; /* 활성 칩/소프트 강조 배경 */
   --s-grad: linear-gradient(135deg, #a855f7 0%, #ec4899 100%); /* 주요 액션/아이콘/FAB 그라데이션 */
@@ -219,8 +218,6 @@
        상세 Primary(--s-active-line)와 같은 기준: 다크에서 밝게 떠 보이지 않게 고정 */
     --s-active-text: #d8b4fe; /* 다크: 외곽선형 활성 글씨/아이콘을 밝은 라벤더로 */
     --s-ink: #f5f3fa; /* 제목/주요 텍스트 */
-    --s-sub: #a8a0b8; /* 서브카피 */
-    --s-faint: #8c84a0; /* 더 옅은 보조 */
     --s-placeholder: #8c84a0; /* placeholder 다크 — 종전 .searchInput::placeholder 가 --s-faint(#8c84a0)로 렌더되던 값 보존 */
     --s-accent: #c084fc; /* 보라 강조 → 다크는 라벤더 */
     --s-accent-soft-bg: #573f7f; /* 활성 칩/소프트 배경 — 카드면(#241a36) 대비 선택이 한눈에. 명도만 한 톤 더(보라 톤·채도 유지) */
@@ -854,8 +851,6 @@
     --s-divider: #2c2442;
     --s-track: #1b1430;
     --s-ink: #f5f3fa;
-    --s-sub: #a8a0b8;
-    --s-faint: #8c84a0;
     --s-accent: #c084fc;
     --s-accent-soft-bg: #573f7f; /* .page 다크 블록과 동일값 유지(미러) */
     --s-active-line: #7c3aed;

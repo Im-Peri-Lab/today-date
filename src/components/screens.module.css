@@ -140,6 +140,13 @@
   color: var(--type-section-label-color, var(--s-sub, #6b7280));
 }
 
+/* 필드명 라벨 (12/500/--s-sub) — 섹션 헤더(600)보다 약하게, 값(ink)에 종속된 라벨 */
+.fieldLabel {
+  font-size: var(--type-section-label, 0.75rem);
+  font-weight: 500;
+  color: var(--type-section-label-color, var(--s-sub, #6b7280));
+}
+
 /* 캡션·약한 라벨 (12/400/--s-faint) */
 .captionText {
   font-size: var(--type-caption, 0.75rem);

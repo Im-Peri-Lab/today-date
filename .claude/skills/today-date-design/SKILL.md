@@ -112,9 +112,9 @@ description: >
 
 | 요소 | font-size | font-weight | color 토큰 | 라이트 |
 |---|---|---|---|---|
-| 행 제목 (`.statRowTitle`) | 13px → PC 16px | 500 | `--s-ink` | `#1a1033` |
+| 행 제목 (`.statRowTitle`) | **15px** → PC 16px | **600** | `--s-ink` | `#1a1033` | ← feat/typography-scale 수렴됨 |
 | **섹션 라벨 (`.statSectionHeader`)** | **12px** | **600** | **`--s-sub`** | **`#6b7280`** |
-| 미리보기 (`.statRowPreview`) | 11px → PC 12px | 400 | `--s-label-muted` | `#8b8798` |
+| 미리보기 (`.statRowPreview`) | 12px (토큰) | 400 | `--s-label-muted` | `#8b8798` |
 
 **현황 및 확장 가이드:**
 
@@ -125,6 +125,51 @@ description: >
 | 추천 위저드 질문 라벨 | `ActivityRecommendWizard.tsx` `text-sm + styles.sub` | 14px / 400 / `--s-sub` | ⏳ 별도 작업 — 14px가 적합한지 재검토 후 결정 |
 
 통합 시 주의: `/list` `FilterGroup`은 동일 표준(12px/600/`--s-sub`) 직접 적용 가능. 위저드 질문 라벨은 "질문 텍스트" 역할상 14px 유지 여부를 먼저 검토한 뒤 통합.
+
+### 2-B. 타이포그래피 스케일 — 7역할 토큰 체계 (feat/typography-scale 완료)
+
+왜: 화면마다 제각각이었던 텍스트 size/weight/color를 7개 역할 토큰으로 수렴해 임의값 지정을 막고 단일 출처를 만든다. `screens.module.css` `.page` 블록에 정의.
+
+| 토큰 | 모바일 | PC(lg) | weight | color 토큰 | 유틸 클래스 | 수렴 대상 |
+|---|---|---|---|---|---|---|
+| `--type-page-title` | 27px (1.6875rem) | 30px (1.875rem) | 600 | `--s-ink` | `.pageTitle` | 페이지 h1 (상세·폼 제목) |
+| `--type-card-title` | 18px (1.125rem) | 18px | 600 | `--s-ink` | `.cardTitle` | 리스트·인증 카드 제목 |
+| `--type-card-title-sm` | 15px (0.9375rem) | 16px (1rem) | 600 | `--s-ink` | `.cardTitleSm` | 홈 통계 행 제목 |
+| `--type-section-label` | 12px (0.75rem) | 12px | 600 | `--s-sub` | `.sectionLabel` | 섹션 헤더 (독립 구획 제목) |
+| `--type-body` | 14px (0.875rem) | 14px | 400 | `--s-ink` | `.bodyText` | 본문·값 |
+| `--type-preview-meta` | 12px (0.75rem) | 12px | 400 | `--s-label-muted` | `.previewMetaText` | 미리보기·메타 |
+| `--type-caption` | 12px (0.75rem) | 12px | 400 | `--s-faint` | `.captionText` | 캡션·약한 라벨 (등록일 등 메타) |
+
+**사용 규칙:**
+- 새 화면 텍스트는 위 7역할 중 하나로 분류해 해당 유틸 클래스 사용. 임의 size/weight/color 직접 지정 금지.
+- 색 토큰(`--s-sub`·`--s-faint` 포함)은 `:root` 전역 정의라 portal·인증 화면도 상속 가능.
+- PC 오버라이드는 토큰 자체 내에 `@media (min-width: 1024px)` 블록으로 정의돼 있어 유틸 클래스에 별도 미디어 쿼리 불필요.
+
+**의도된 예외 (7토큰에 넣지 않음):**
+- 추천 위저드 h1 20px: 키우면 레이아웃 흔들림, 미반영 화면 스코프.
+- 다이얼로그 제목 20px: 페이지 h1과 분리된 전용 사이즈 (§11-A).
+- 카드 메모 미리보기·빈 상태 14px/`--s-faint` (ActivityCard·PlaceCard·VisitRecordBlock): body도 caption도 아닌 "카드 흐린 미리보기" 의도된 조합.
+- DetailBlock h2 블록 제목 14px/500: 필드 라벨 톤, 별도 위계.
+
+### 2-C. 라벨 위계 — 섹션 헤더 vs 필드명 (중요)
+
+같은 라벨처럼 보여도 정보 구조상 계위가 다르므로 두 역할로 분리한다. **역할을 혼용하지 않는다.**
+
+| 클래스 | weight | 역할 | 예 |
+|---|---|---|---|
+| `.sectionLabel` | **600** | **섹션 헤더**: 위/아래 콘텐츠 블록을 나누는 독립 구획 제목. 값에 종속되지 않고 홀로 떠 있어 또렷해야 함 | 홈/리스트 "가보고 싶은 곳"·FilterGroup 라벨 |
+| `.fieldLabel` | **500** | **필드명**: 바로 아래 값과 1:1로 붙어 그 값을 설명. 값에 종속되므로 값보다 약해야 함 | 상세 화면 "소요시간"·"위치"·"메모" |
+
+- size·color는 두 클래스 모두 동일: 12px / `--s-sub`.
+- **판정 기준**: 독립적으로 구획을 나누면 600 (`.sectionLabel`), 특정 값에 붙은 이름이면 500 (`.fieldLabel`).
+- `.sectionLabel`을 수정하면 홈/리스트 섹션 헤더 전체에 영향. `.fieldLabel`은 상세 `DetailRow`만 적용.
+
+**상세 화면 값 위계 (내림차순 강도):**
+
+실제값(`--s-ink`) > 필드명 라벨(`--s-sub`/500, `.fieldLabel`) > 빈값(`--s-faint`, `.faint`) ≥ 메타 캡션(`--s-faint`, `.captionText`)
+
+- 빈값("아직 메모가 없어요")은 `--s-faint` 유지. 라벨을 sub로 올리면 빈값과 자동 분리됨.
+- 등록일 등 메타 캡션은 `.captionText`(`--s-faint`) 유지(가장 약한 보조 정보).
 
 ---
 
@@ -169,6 +214,23 @@ description: >
 **radius 통일 이유**: 과거 모바일 `13px` / PC `14px` 분리는 의도 없는 임의값이었다. `0.875rem`(14px)으로 통일. CTA(16px)보다 한 단계 작아 시각적 위계를 유지한다.
 
 **색은 기존 토큰 흡수.** 조연 카드 안의 색(칩·텍스트·아이콘)은 전용 네임스페이스 토큰 없이 전역 시맨틱 토큰(`--s-accent`, `--s-ink`, `--s-label-muted`, `--s-icon-muted`, `--s-hint` 등)을 직접 참조한다. 전용 토큰은 `--s-row-divider`(카드 내 행 구분선 — `--s-divider`보다 연한 톤이 의도)만 남긴다.
+
+### 3-A. 홈 레이아웃 확정값 (변경 금지)
+
+| 항목 | 값 | 이유 |
+|---|---|---|
+| 모바일 컨테이너 폭 | `max-w-xl` (576px) | 유지 |
+| PC 컨테이너 폭 | `max-w-3xl` (768px) | 더 넓히면 추천 2열 과하게 벌어지고 통계 행 횡 늘어짐 — 768px 유지 |
+| 추천 CTA 카드 padding | `p-5` (20px) | 주연 카드 존재감. 줄이지 말 것 |
+| 추천 CTA 아이콘↔텍스트 | `mt-4` (16px) | 주연 여백. 줄이지 말 것 |
+| 통계 행 상하 padding | 12px | 제목 15px 무게에 맞춘 값 |
+| 통계 행 아이콘↔텍스트 gap | 12px | 동일 |
+| 정렬 | 좌측 | 추천·통계 모두. 가운데 정렬 금지 |
+
+**위계**: 페이지 h1(주연) > 추천 카드(준주연, 16px semibold) > 통계 행(조연, 15px semibold).  
+추천 제목 `text-base`(16px)는 리스트 카드 `.cardTitle`(18px)과 구분되는 자리이므로 키우지 말 것.
+
+홈 컨테이너는 공통 컨테이너가 아닌 `HomeDashboard.tsx` 개별 선언 — 홈만 변경해도 `/list`·상세·추가 화면에 영향 없음.
 
 ---
 
@@ -643,8 +705,9 @@ description: >
 ```
 
 `styles.sheetRow`: `padding-top: 0.875rem` — 구분선(border-top) 없이 여백만으로 행 구분.  
-라벨: `text-xs font-normal uppercase tracking-wide` + `styles.faint` (값보다 약한 캡션 톤)  
-값: `text-sm` + `styles.ink`
+라벨: `.fieldLabel` + `uppercase tracking-wide` — 12px / **500** / `--s-sub` (값보다 약하되 빈값보다 또렷한 필드명, §2-C)  
+값: `.bodyText` — 14px / 400 / `--s-ink`  
+빈값: `.faint` — `--s-faint` (라벨보다 약함)
 
 등록 메타(추가자·등록일) 캡션: `styles.sheetRow` 제외, `mt-3.5` + `sm:col-span-2`, `text-xs` + `styles.faint`.
 
@@ -875,6 +938,7 @@ try {
 
 ## 백로그 (별도 작업 필요 — 미해결)
 
+- **식사시간 칩(`.mealBadge`) 크기 개선** (`/places/[id]` 상세): 현재 11px / 상하 1px padding / pill — 너무 작아 보임. 카테고리 칩(`.chip`, 36px/13px) 기준에 맞춰 키울 것. 사용처는 `PlaceDetail.tsx` 1곳만 — 공용 칩과 별개라 영향 범위 좁음. 타이포 수렴과 성격 달라(spacing/sizing) **별도 브랜치**에서 처리.
 - **다이얼로그가 OS 다크 미대응** (`VisitedDialog`·`DeleteConfirmDialog` 등 `DialogContent`): 다이얼로그 표면·텍스트·hover가 shadcn HSL 토큰(`--popover`/`--popover-foreground`/`--muted`/`--foreground`)에 의존하는데, 이 토큰들은 `globals.css`에서 **`.dark` 클래스 전용**으로만 다크값을 갖는다. 이 앱은 `.dark`를 부착하지 않고 `@media (prefers-color-scheme: dark)` + `--s-*`로만 다크를 처리하므로, **OS 다크에서 다이얼로그 전체가 라이트(흰 표면)로 고정**된다. ghost `X` 닫기의 `dark:hover:bg-muted/50`도 같은 이유로 죽은 규칙. (금지규칙 12와 동일 원인.) → 해결: `DialogContent` 표면·닫기 버튼을 `--s-card-bg`/`--s-ink`/`--s-card-border-strong` 등 `--s-*` 토큰으로 치환하는 별도 작업 필요. 단순 hover 패치가 아니라 다이얼로그 다크 테마 전반의 작업이라 범위를 따로 잡는다.
 - **라이트 `--s-*` 토큰 정식 정의 미비 — 앱 전역 토큰 정리** (`docs/design-token-audit.md` 참조): 라이트는 핵심 토큰(`--s-active-*`/`--s-card-bg`/`--s-card-border-strong`/`--s-input`/`--s-card-shadow`)만 `.page`에 정의돼 있고, `--s-accent-soft-bg`·`--s-sub`·`--s-faint`·`--s-ink`·`--s-accent`·`--s-grad`·`--s-grad-shadow`·`--s-card-shadow-hover` 등은 **라이트 값이 없어 각 클래스의 `var(--token, fallback)` fallback에 의존**한다(다크만 `@media`로 정의). 동작엔 문제없지만 단일 출처가 약함. → 라이트 `.page`에 정식 정의를 추가하는 정리 작업(시각 변경 아님, 1:1 유지 확인 필요).
 - **`--s-faint` fallback 불일치**: 같은 토큰인데 `.searchIcon`은 `#9ca3af`, `.searchInput::placeholder`는 `#b0aabe` — 라이트에서 둘 다 live라 실제로 다른 회색으로 렌더된다. 의미 분리(아이콘=기능 신호 / placeholder=임시 안내)인지 단순 불일치인지 정리 필요. (`--s-card-border-strong`·`--s-active-line` fallback도 선언마다 다르나 토큰이 정의돼 있어 렌더 영향은 없음 — 소스 표기만 통일하면 됨.)

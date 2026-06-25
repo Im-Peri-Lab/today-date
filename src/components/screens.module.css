@@ -293,11 +293,11 @@
  * 홈(작음)과 리스트(text-3xl bold)의 중간 무게감: 모바일 ~27px / 데스크탑 30px, semibold, 살짝 타이트.
  */
 .pageTitle {
-  font-size: 1.7rem; /* ~27px (text-2xl 24 ~ 3xl 30 의 중간) */
-  font-weight: 600; /* semibold — bold(700)보다 한 단계 부드럽게 */
+  font-size: var(--type-page-title, 1.6875rem); /* 27px mobile / 30px PC via @media override */
+  font-weight: var(--type-page-title-weight, 600);
   letter-spacing: -0.01em;
   line-height: 1.2;
-  color: var(--s-ink, #1a1033);
+  color: var(--type-page-title-color, var(--s-ink, #1a1033));
 }
 .pageSubtitle {
   margin-top: 0.25rem;
@@ -305,9 +305,6 @@
   color: var(--s-sub, #6b7280);
 }
 @media (min-width: 1024px) {
-  .pageTitle {
-    font-size: 1.875rem; /* text-3xl 30px */
-  }
   .pageSubtitle {
     margin-top: 0.375rem;
     font-size: 1.125rem; /* text-lg */

@@ -1255,8 +1255,8 @@
 .statRow {
   display: flex;
   align-items: center;
-  gap: 9px;
-  padding: 10px 11px;
+  gap: 12px;
+  padding: 12px 11px;
   text-decoration: none;
   transition: background 120ms ease;
 }

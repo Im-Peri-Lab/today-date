@@ -168,6 +168,13 @@
   color: var(--type-card-title-color, var(--s-ink, #1a1033));
 }
 
+/* 소형 카드 제목 (모바일 15/PC 16/600/--s-ink) — 홈 통계 행 제목 */
+.cardTitleSm {
+  font-size: var(--type-card-title-sm, 0.9375rem);
+  font-weight: var(--type-card-title-sm-weight, 600);
+  color: var(--type-card-title-sm-color, var(--s-ink, #1a1033));
+}
+
 /*
  * 홈 전용 배경 — /lock 와 동일한 그라데이션(--s-page-gradient-light)을 공유.
  * 흰 카드가 라일락 그라데이션 위에 떠 보이고, 홈↔lock 간 배경 일관성이 유지된다.
@@ -1344,18 +1351,12 @@
 
 .statRowTitle {
   display: block;
-  font-size: 0.8125rem; /* 13px — 기존 .chip 단계와 통일 (12.5px 제거) */
-  font-weight: 500;
-  color: var(--s-ink, #1a1033);
+  font-size: var(--type-card-title-sm, 0.9375rem); /* 15px 모바일 / 16px PC via token */
+  font-weight: var(--type-card-title-sm-weight, 600);
+  color: var(--type-card-title-sm-color, var(--s-ink, #1a1033));
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-@media (min-width: 1024px) {
-  .statRowTitle {
-    font-size: 1rem; /* 16px — CTA 영역 텍스트와 균형 */
-  }
 }
 
 .statRowPreview {

@@ -22,10 +22,10 @@ export function DetailRow({ label, children, wide }: DetailRowProps) {
   return (
     <div className={cn(styles.sheetRow, wide && 'sm:col-span-2')}>
       {/* 라벨: faint 톤 + 일반 굵기 — 값(ink/기본)보다 약하게 */}
-      <p className={cn('mb-1.5 text-xs font-normal uppercase tracking-wide', styles.faint)}>
+      <p className={cn('mb-1.5 uppercase tracking-wide', styles.captionText)}>
         {label}
       </p>
-      <div className={cn('text-sm', styles.ink)}>{children}</div>
+      <div className={styles.bodyText}>{children}</div>
     </div>
   )
 }

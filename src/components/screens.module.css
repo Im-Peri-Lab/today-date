@@ -131,13 +131,35 @@
   }
 }
 
-/* ── 섹션/그룹 라벨 유틸 — --type-section-label 토큰 참조 ────────────────────────────
- * FilterGroup 라벨, StatSection 헤더 등 화면 안 그룹 구분 신호 요소에 공통 적용.
- * 토큰이 .page 스코프에 정의돼 있으므로 portal·인증 화면 요소에는 쓰지 않는다. */
+/* ── 타이포 역할 유틸 — 역할별 size/weight/color 토큰 참조 ─────────────────────────
+ * .page 스코프 안 요소 전용. portal·인증 화면에는 쓰지 않는다. */
+
+/* 섹션/그룹 라벨 (12/600/--s-sub) */
 .sectionLabel {
   font-size: var(--type-section-label, 0.75rem);
   font-weight: var(--type-section-label-weight, 600);
   color: var(--type-section-label-color, var(--s-sub, #6b7280));
+}
+
+/* 캡션·약한 라벨 (12/400/--s-faint) */
+.captionText {
+  font-size: var(--type-caption, 0.75rem);
+  font-weight: var(--type-caption-weight, 400);
+  color: var(--type-caption-color, var(--s-faint, #9ca3af));
+}
+
+/* 미리보기·메타 (12/400/--s-label-muted) */
+.previewMetaText {
+  font-size: var(--type-preview-meta, 0.75rem);
+  font-weight: var(--type-preview-meta-weight, 400);
+  color: var(--type-preview-meta-color, var(--s-label-muted, #8b8798));
+}
+
+/* 본문·값 (14/400/--s-ink) */
+.bodyText {
+  font-size: var(--type-body, 0.875rem);
+  font-weight: var(--type-body-weight, 400);
+  color: var(--type-body-color, var(--s-ink, #1a1033));
 }
 
 /*
@@ -1340,8 +1362,8 @@
 .statRowPreview {
   display: block;
   margin-top: 2px;
-  font-size: 11px;
-  color: var(--s-label-muted, #8b8798);
+  font-size: var(--type-preview-meta, 0.75rem);
+  color: var(--type-preview-meta-color, var(--s-label-muted, #8b8798));
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1349,12 +1371,6 @@
 
 .statRowPreviewEmpty {
   color: var(--s-hint, #b5b0bf);
-}
-
-@media (min-width: 1024px) {
-  .statRowPreview {
-    font-size: 12px;
-  }
 }
 
 /* Chevron */

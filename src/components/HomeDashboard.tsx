@@ -108,10 +108,10 @@ function CtaCard({
   return (
     <Link
       href={href}
-      className={cn(styles.card, styles.cardInteractive, 'flex flex-col p-4 lg:p-5')}
+      className={cn(styles.card, styles.cardInteractive, 'flex flex-col p-5')}
     >
       <span className={cn(styles.gradIcon, 'h-8 w-8')}>{icon}</span>
-      <span className="mt-3 block lg:mt-4">
+      <span className="mt-4 block">
         <span className={cn('block text-base font-semibold lg:text-lg', styles.ink)}>{title}</span>
         <span className={cn('mt-0.5 block text-sm', styles.sub)}>{subtitle}</span>
       </span>
@@ -127,7 +127,7 @@ export function HomeDashboard({ initialStats }: { initialStats?: DashboardStats 
     <div
       className={cn(
         styles.fill,
-        'mx-auto w-full max-w-xl px-5 pb-16 pt-6 lg:max-w-4xl lg:px-8 lg:pb-24 lg:pt-12'
+        'mx-auto w-full max-w-xl px-5 pb-16 pt-6 lg:max-w-3xl lg:px-8 lg:pb-24 lg:pt-12'
       )}
     >
       <PageHeader title="오늘, 우리 어떻게 보낼까?" subtitle="위시리스트에서 골라드릴게요 💜" />

@@ -161,6 +161,13 @@
   color: var(--type-body-color, var(--s-ink, #1a1033));
 }
 
+/* 카드 제목 (18/600/--s-ink) — ActivityCard·PlaceCard <h3> */
+.cardTitle {
+  font-size: var(--type-card-title, 1.125rem);
+  font-weight: var(--type-card-title-weight, 600);
+  color: var(--type-card-title-color, var(--s-ink, #1a1033));
+}
+
 /*
  * 홈 전용 배경 — /lock 와 동일한 그라데이션(--s-page-gradient-light)을 공유.
  * 흰 카드가 라일락 그라데이션 위에 떠 보이고, 홈↔lock 간 배경 일관성이 유지된다.

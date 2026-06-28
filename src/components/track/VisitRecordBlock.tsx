@@ -124,7 +124,7 @@ export function VisitRecordBlock({
           {rating ? <RatingStars value={rating} size="sm" /> : null}
           {/* 한줄평: italic 인용구 느낌 + ink 톤(sub보다 따뜻하게) — 새 색상 없음 */}
           {reviewNote && (
-            <p className={cn('whitespace-pre-wrap text-sm leading-relaxed italic', styles.ink)}>
+            <p className={cn('whitespace-pre-wrap leading-relaxed italic', styles.bodyText)}>
               {reviewNote}
             </p>
           )}

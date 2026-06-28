@@ -59,7 +59,6 @@
    * 실측한 폴백값을 그대로 명시해 fallback 의존을 제거(렌더 무변화). 다크는 아래 @media 에서 오버라이드.
    */
   --s-ink: #1a1033; /* 제목/주요 텍스트 */
-  --s-sub: #6b7280; /* 서브카피 */
   --s-accent: #7c3aed; /* 보라 강조 */
   --s-accent-soft-bg: #f6f1ff; /* 활성 칩/소프트 강조 배경 */
   --s-grad: linear-gradient(135deg, #a855f7 0%, #ec4899 100%); /* 주요 액션/아이콘/FAB 그라데이션 */
@@ -70,6 +69,46 @@
   /* ── StatRow 섹션 구분선 (라이트) — 나머지는 globals.css 전역 토큰 참조 ── */
   --s-row-divider: #f2f0f7; /* 카드 내부 행 구분선 — --s-divider(#ece7f5)보다 연해 위계 구분 */
 
+  /* ── 타이포 스케일 역할 토큰 (§0 — 정의만, 컴포넌트 미적용) ─────────────────────────
+   * font-size / font-weight / color 3속성을 역할별로 토큰화.
+   * color는 기존 --s-* 참조 → .page 다크 블록에서 자동 해석, 별도 다크 재선언 불필요.
+   * PC 크기 오버라이드: 하단 @media (min-width: 1024px) { .page } 블록에서 분기. */
+
+  /* page-title: 모바일 27px / PC 30px / weight 600 / --s-ink */
+  --type-page-title:           1.6875rem; /* 27px */
+  --type-page-title-weight:    600;
+  --type-page-title-color:     var(--s-ink, #1a1033);
+
+  /* card-title: 18px / weight 600 / --s-ink */
+  --type-card-title:           1.125rem;  /* 18px */
+  --type-card-title-weight:    600;
+  --type-card-title-color:     var(--s-ink, #1a1033);
+
+  /* card-title-sm: 모바일 15px / PC 16px / weight 600 / --s-ink */
+  --type-card-title-sm:        0.9375rem; /* 15px */
+  --type-card-title-sm-weight: 600;
+  --type-card-title-sm-color:  var(--s-ink, #1a1033);
+
+  /* section-label: 12px / weight 600 / --s-sub */
+  --type-section-label:        0.75rem;   /* 12px */
+  --type-section-label-weight: 600;
+  --type-section-label-color:  var(--s-sub, #6b7280);
+
+  /* body: 14px / weight 400 / --s-ink */
+  --type-body:                 0.875rem;  /* 14px */
+  --type-body-weight:          400;
+  --type-body-color:           var(--s-ink, #1a1033);
+
+  /* preview-meta: 12px / weight 400 / --s-label-muted */
+  --type-preview-meta:         0.75rem;   /* 12px */
+  --type-preview-meta-weight:  400;
+  --type-preview-meta-color:   var(--s-label-muted, #8b8798);
+
+  /* caption: 12px / weight 400 / --s-faint */
+  --type-caption:              0.75rem;   /* 12px */
+  --type-caption-weight:       400;
+  --type-caption-color:        var(--s-faint, #9ca3af);
+
   /* 노치/홈 인디케이터 안전 영역 */
   padding-top: calc(env(safe-area-inset-top) + 0.5rem);
   padding-bottom: calc(env(safe-area-inset-bottom) + 0.5rem);
@@ -79,6 +118,68 @@
     'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont,
     'SF Pro Display', 'SF Pro Text', 'Apple SD Gothic Neo', system-ui,
     'Segoe UI', Roboto, sans-serif;
+}
+
+/* ── 타이포 스케일 PC 크기 오버라이드 ────────────────────────────────────────────────
+ * page-title: 27px → 30px / card-title-sm: 15px → 16px
+ * (weight·color 토큰은 모바일·PC 동일 — 재정의 없음) */
+@media (min-width: 1024px) {
+  .page {
+    --type-page-title:    1.875rem;   /* 30px PC */
+    --type-card-title-sm: 1rem;       /* 16px PC */
+  }
+}
+
+/* ── 타이포 역할 유틸 — 역할별 size/weight/color 토큰 참조 ─────────────────────────
+ * .page 스코프 안 요소 전용. portal·인증 화면에는 쓰지 않는다. */
+
+/* 섹션/그룹 라벨 (12/600/--s-sub) */
+.sectionLabel {
+  font-size: var(--type-section-label, 0.75rem);
+  font-weight: var(--type-section-label-weight, 600);
+  color: var(--type-section-label-color, var(--s-sub, #6b7280));
+}
+
+/* 필드명 라벨 (12/500/--s-sub) — 섹션 헤더(600)보다 약하게, 값(ink)에 종속된 라벨 */
+.fieldLabel {
+  font-size: var(--type-section-label, 0.75rem);
+  font-weight: 500;
+  color: var(--type-section-label-color, var(--s-sub, #6b7280));
+}
+
+/* 캡션·약한 라벨 (12/400/--s-faint) */
+.captionText {
+  font-size: var(--type-caption, 0.75rem);
+  font-weight: var(--type-caption-weight, 400);
+  color: var(--type-caption-color, var(--s-faint, #9ca3af));
+}
+
+/* 미리보기·메타 (12/400/--s-label-muted) */
+.previewMetaText {
+  font-size: var(--type-preview-meta, 0.75rem);
+  font-weight: var(--type-preview-meta-weight, 400);
+  color: var(--type-preview-meta-color, var(--s-label-muted, #8b8798));
+}
+
+/* 본문·값 (14/400/--s-ink) */
+.bodyText {
+  font-size: var(--type-body, 0.875rem);
+  font-weight: var(--type-body-weight, 400);
+  color: var(--type-body-color, var(--s-ink, #1a1033));
+}
+
+/* 카드 제목 (18/600/--s-ink) — ActivityCard·PlaceCard <h3> */
+.cardTitle {
+  font-size: var(--type-card-title, 1.125rem);
+  font-weight: var(--type-card-title-weight, 600);
+  color: var(--type-card-title-color, var(--s-ink, #1a1033));
+}
+
+/* 소형 카드 제목 (모바일 15/PC 16/600/--s-ink) — 홈 통계 행 제목 */
+.cardTitleSm {
+  font-size: var(--type-card-title-sm, 0.9375rem);
+  font-weight: var(--type-card-title-sm-weight, 600);
+  color: var(--type-card-title-sm-color, var(--s-ink, #1a1033));
 }
 
 /*
@@ -138,8 +239,6 @@
        상세 Primary(--s-active-line)와 같은 기준: 다크에서 밝게 떠 보이지 않게 고정 */
     --s-active-text: #d8b4fe; /* 다크: 외곽선형 활성 글씨/아이콘을 밝은 라벤더로 */
     --s-ink: #f5f3fa; /* 제목/주요 텍스트 */
-    --s-sub: #a8a0b8; /* 서브카피 */
-    --s-faint: #8c84a0; /* 더 옅은 보조 */
     --s-placeholder: #8c84a0; /* placeholder 다크 — 종전 .searchInput::placeholder 가 --s-faint(#8c84a0)로 렌더되던 값 보존 */
     --s-accent: #c084fc; /* 보라 강조 → 다크는 라벤더 */
     --s-accent-soft-bg: #573f7f; /* 활성 칩/소프트 배경 — 카드면(#241a36) 대비 선택이 한눈에. 명도만 한 톤 더(보라 톤·채도 유지) */
@@ -208,11 +307,11 @@
  * 홈(작음)과 리스트(text-3xl bold)의 중간 무게감: 모바일 ~27px / 데스크탑 30px, semibold, 살짝 타이트.
  */
 .pageTitle {
-  font-size: 1.7rem; /* ~27px (text-2xl 24 ~ 3xl 30 의 중간) */
-  font-weight: 600; /* semibold — bold(700)보다 한 단계 부드럽게 */
+  font-size: var(--type-page-title, 1.6875rem); /* 27px mobile / 30px PC via @media override */
+  font-weight: var(--type-page-title-weight, 600);
   letter-spacing: -0.01em;
   line-height: 1.2;
-  color: var(--s-ink, #1a1033);
+  color: var(--type-page-title-color, var(--s-ink, #1a1033));
 }
 .pageSubtitle {
   margin-top: 0.25rem;
@@ -220,9 +319,6 @@
   color: var(--s-sub, #6b7280);
 }
 @media (min-width: 1024px) {
-  .pageTitle {
-    font-size: 1.875rem; /* text-3xl 30px */
-  }
   .pageSubtitle {
     margin-top: 0.375rem;
     font-size: 1.125rem; /* text-lg */
@@ -773,8 +869,6 @@
     --s-divider: #2c2442;
     --s-track: #1b1430;
     --s-ink: #f5f3fa;
-    --s-sub: #a8a0b8;
-    --s-faint: #8c84a0;
     --s-accent: #c084fc;
     --s-accent-soft-bg: #573f7f; /* .page 다크 블록과 동일값 유지(미러) */
     --s-active-line: #7c3aed;
@@ -1141,11 +1235,11 @@
   }
 }
 
-/* 섹션 헤더 레이블 */
+/* 섹션 헤더 레이블 — .sectionLabel 토큰 참조로 수렴, 간격만 직접 선언 */
 .statSectionHeader {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--s-sub, #6b7280);
+  font-size: var(--type-section-label, 0.75rem);
+  font-weight: var(--type-section-label-weight, 600);
+  color: var(--type-section-label-color, var(--s-sub, #6b7280));
   margin-bottom: 7px;
 }
 
@@ -1168,8 +1262,8 @@
 .statRow {
   display: flex;
   align-items: center;
-  gap: 9px;
-  padding: 10px 11px;
+  gap: 12px;
+  padding: 12px 11px;
   text-decoration: none;
   transition: background 120ms ease;
 }
@@ -1264,25 +1358,19 @@
 
 .statRowTitle {
   display: block;
-  font-size: 0.8125rem; /* 13px — 기존 .chip 단계와 통일 (12.5px 제거) */
-  font-weight: 500;
-  color: var(--s-ink, #1a1033);
+  font-size: var(--type-card-title-sm, 0.9375rem); /* 15px 모바일 / 16px PC via token */
+  font-weight: var(--type-card-title-sm-weight, 600);
+  color: var(--type-card-title-sm-color, var(--s-ink, #1a1033));
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-@media (min-width: 1024px) {
-  .statRowTitle {
-    font-size: 1rem; /* 16px — CTA 영역 텍스트와 균형 */
-  }
-}
-
 .statRowPreview {
   display: block;
   margin-top: 2px;
-  font-size: 11px;
-  color: var(--s-label-muted, #8b8798);
+  font-size: var(--type-preview-meta, 0.75rem);
+  color: var(--type-preview-meta-color, var(--s-label-muted, #8b8798));
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1290,12 +1378,6 @@
 
 .statRowPreviewEmpty {
   color: var(--s-hint, #b5b0bf);
-}
-
-@media (min-width: 1024px) {
-  .statRowPreview {
-    font-size: 12px;
-  }
 }
 
 /* Chevron */

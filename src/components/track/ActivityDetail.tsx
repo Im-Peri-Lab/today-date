@@ -253,8 +253,7 @@ export function ActivityDetail({ id, initialData, initialEdit }: Props) {
                       className={cn(
                         'sm:col-span-2 mt-3.5',
                         'flex flex-wrap items-center gap-x-3 gap-y-0.5',
-                        'text-xs',
-                        styles.faint,
+                        styles.captionText,
                       )}
                     >
                       {activity.added_by && (

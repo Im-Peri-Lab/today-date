@@ -81,7 +81,7 @@ export function ActivityCard({ activity, hideMenu, actionSlot }: ActivityCardPro
           </div>
         )}
 
-        <h3 className={cn('mb-3 line-clamp-1 text-lg font-semibold', styles.ink)}>{activity.title}</h3>
+        <h3 className={cn('mb-3 line-clamp-1', styles.cardTitle)}>{activity.title}</h3>
 
         <div className={cn('mb-1 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-xs', styles.sub)}>
           {activity.duration_bucket && (

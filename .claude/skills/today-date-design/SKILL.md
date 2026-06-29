@@ -547,7 +547,17 @@ description: >
 
 - **카테고리 뱃지** `CategoryBadge` → `styles.labelBadge`: **배경 pill 없음**. 인라인 `아이콘 + 텍스트`, gap `0.3rem`, font `0.8125rem`/weight 500, color `sub`. 아이콘만 보라(`catIcon`).
 - **메타 줄**(소요시간/시간대/위치/식사시간): `flex flex-wrap items-center gap-x-2.5 gap-y-1 text-xs` + `styles.sub`, 각 항목 `inline-flex items-center gap-1` 아이콘(`h-3 w-3`)+텍스트.
-- 식사시간 등 보조 pill이 꼭 필요할 때만 `styles.mealBadge`(track 배경, radius full, `11px`).
+- 식사시간 등 보조 pill이 꼭 필요할 때만 `styles.mealBadge`(track 배경, radius full).
+
+**`.mealBadge` 의도된 예외** (`/places/[id]` `PlaceDetail.tsx` 전용):
+- `font-size: var(--type-caption)` (12px 토큰 참조, `.captionText` 유틸 통째 적용 금지 — color는 기존 `--s-sub` 유지)
+- `padding: 0.25rem 0.625rem` (4px 상하 / 10px 좌우) — spacing 전용 토큰 없어 직접 지정
+- `line-height: 1.4` 명시, `border-radius: 9999px` pill 유지, `height` 고정 없음
+- **카테고리 칩(`.chip`, height 36px / 컨트롤)과 달리 정보 표시 전용 뱃지**라 height 고정 패턴 미적용
+
+**spacing 토큰 표준화 백로그 신호** (현행 유지, 미작업):
+- 이 프로젝트는 `--s-space-*` 계열 spacing 전용 토큰이 없으며 padding/gap을 inline 수치 또는 Tailwind 클래스로 직접 지정한다.
+- `.mealBadge` 같은 "정보 뱃지 크기" 케이스가 2~3개 이상 누적되면 타이포 스케일(`§2-B`)처럼 spacing 토큰 수렴을 검토할 것. 지금은 단일 사례라 전면 토큰화 없이 직접 지정 + 신호 기록으로 둔다.
 
 복붙:
 ```tsx
@@ -938,7 +948,7 @@ try {
 
 ## 백로그 (별도 작업 필요 — 미해결)
 
-- **식사시간 칩(`.mealBadge`) 크기 개선** (`/places/[id]` 상세): 현재 11px / 상하 1px padding / pill — 너무 작아 보임. 카테고리 칩(`.chip`, 36px/13px) 기준에 맞춰 키울 것. 사용처는 `PlaceDetail.tsx` 1곳만 — 공용 칩과 별개라 영향 범위 좁음. 타이포 수렴과 성격 달라(spacing/sizing) **별도 브랜치**에서 처리.
+- ~~**식사시간 칩(`.mealBadge`) 크기 개선**~~ ✅ 완료 (`design/meal-badge-size`): 12px(`--type-caption`) / padding 4px 10px / `line-height: 1.4` / pill. 의도된 예외 및 spacing 백로그 신호는 §8 참고.
 - **다이얼로그가 OS 다크 미대응** (`VisitedDialog`·`DeleteConfirmDialog` 등 `DialogContent`): 다이얼로그 표면·텍스트·hover가 shadcn HSL 토큰(`--popover`/`--popover-foreground`/`--muted`/`--foreground`)에 의존하는데, 이 토큰들은 `globals.css`에서 **`.dark` 클래스 전용**으로만 다크값을 갖는다. 이 앱은 `.dark`를 부착하지 않고 `@media (prefers-color-scheme: dark)` + `--s-*`로만 다크를 처리하므로, **OS 다크에서 다이얼로그 전체가 라이트(흰 표면)로 고정**된다. ghost `X` 닫기의 `dark:hover:bg-muted/50`도 같은 이유로 죽은 규칙. (금지규칙 12와 동일 원인.) → 해결: `DialogContent` 표면·닫기 버튼을 `--s-card-bg`/`--s-ink`/`--s-card-border-strong` 등 `--s-*` 토큰으로 치환하는 별도 작업 필요. 단순 hover 패치가 아니라 다이얼로그 다크 테마 전반의 작업이라 범위를 따로 잡는다.
 - **라이트 `--s-*` 토큰 정식 정의 미비 — 앱 전역 토큰 정리** (`docs/design-token-audit.md` 참조): 라이트는 핵심 토큰(`--s-active-*`/`--s-card-bg`/`--s-card-border-strong`/`--s-input`/`--s-card-shadow`)만 `.page`에 정의돼 있고, `--s-accent-soft-bg`·`--s-sub`·`--s-faint`·`--s-ink`·`--s-accent`·`--s-grad`·`--s-grad-shadow`·`--s-card-shadow-hover` 등은 **라이트 값이 없어 각 클래스의 `var(--token, fallback)` fallback에 의존**한다(다크만 `@media`로 정의). 동작엔 문제없지만 단일 출처가 약함. → 라이트 `.page`에 정식 정의를 추가하는 정리 작업(시각 변경 아님, 1:1 유지 확인 필요).
 - **`--s-faint` fallback 불일치**: 같은 토큰인데 `.searchIcon`은 `#9ca3af`, `.searchInput::placeholder`는 `#b0aabe` — 라이트에서 둘 다 live라 실제로 다른 회색으로 렌더된다. 의미 분리(아이콘=기능 신호 / placeholder=임시 안내)인지 단순 불일치인지 정리 필요. (`--s-card-border-strong`·`--s-active-line` fallback도 선언마다 다르나 토큰이 정의돼 있어 렌더 영향은 없음 — 소스 표기만 통일하면 됨.)

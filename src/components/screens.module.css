@@ -416,11 +416,12 @@
 .mealBadge {
   white-space: nowrap;
   border-radius: 9999px;
-  padding: 0.0625rem 0.5rem;
-  font-size: 11px;
-  /* 라이트: --s-track 미정의 → --s-card-border-strong(#eceaf3) 중성 폴백.
-     다크: --s-track: #1b1430 정상 동작. */
-  background: var(--s-track, var(--s-card-border-strong, #eceaf3));
+  padding: 0.25rem 0.625rem;
+  font-size: var(--type-caption, 0.75rem);
+  line-height: 1.4;
+  /* 라이트: #eceaf3(불변) / 다크: #3a2f4e(카드면 #241a36보다 밝아 또렷).
+     .visitedTagVisited 와 동일 토큰 — 면색 일관. */
+  background: var(--s-card-border-strong, #eceaf3);
   color: var(--s-sub, #6b7280);
 }
 

@@ -1,3 +1,7 @@
+> [ARCHIVED] 이 문서는 홈 리디자인 외부 의뢰용 일회성 브리프입니다.
+> 목적이 소비되었고 내용이 stale하며, 현재 디자인 권위는 `.claude/skills/today-date-design/SKILL.md`에 있습니다.
+> 이력 보존 목적으로만 남겨둡니다.
+
 # Design Brief — Today Date 홈 화면 리디자인
 
 > 목적: 외부 디자이너 AI에게 홈 화면(`/`) 리디자인 시안을 의뢰하기 위한 브리프.  

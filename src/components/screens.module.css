@@ -1355,7 +1355,7 @@
 
 .statChipPlcVis {
   background: var(--s-chip-neutral-bg, #eceaf3);
-  color: var(--s-hint, #b5b0bf);
+  color: var(--s-faint, #9ca3af);
 }
 
 /* 본문 영역 */
@@ -1385,7 +1385,7 @@
 }
 
 .statRowPreviewEmpty {
-  color: var(--s-hint, #b5b0bf);
+  color: var(--s-faint, #9ca3af);
 }
 
 /* Chevron */

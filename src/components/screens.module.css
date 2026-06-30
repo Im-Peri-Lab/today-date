@@ -208,13 +208,13 @@
 }
 
 /*
- * /list 용 — 콘텐츠 주도(위 정렬). dvh/env 의존 제거가 목적.
- *  - min-height: auto → 뷰포트 높이에 의존하지 않음(콘텐츠가 높이를 결정). 짧으면 아래는 배경이 보임(정상).
+ * /list·상세·추가·추천 화면 공통. dvh/env 의존 제거가 목적.
+ *  - min-height: .page 기본값(100svh) 유지 — 배경 그라데이션이 요소에 직접 칠해지므로
+ *    콘텐츠가 짧아도 요소가 뷰포트를 채워야 배경이 화면 하단까지 이어진다.
  *  - padding-bottom: 0 → .page 의 env(safe-area-inset-bottom) 의존 제거(스크롤 출렁임 방지).
  * (중앙정렬/공간분배는 쓰지 않음 — 길든 짧든 마지막 카드 + listBottom 에서 끝남)
  */
 .pageStatic {
-  min-height: auto;
   padding-bottom: 0;
 }
 

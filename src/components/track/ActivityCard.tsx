@@ -12,6 +12,7 @@ import { DeleteConfirmDialog } from './DeleteConfirmDialog'
 import { VisitedDialog } from '@/components/VisitedDialog'
 import { useDeleteActivity, useUpdateActivity } from '@/hooks/useActivities'
 import { DURATION_LABELS, TIME_OF_DAY_LABELS, TIME_OF_DAY_ICONS, STATUS_LABELS } from '@/lib/labels'
+import { buildDetailHref } from '@/lib/listReturn'
 import { formatDotDate } from '@/lib/date'
 import { cn } from '@/lib/utils'
 import type { Activity } from '@/types'
@@ -21,9 +22,10 @@ interface ActivityCardProps {
   activity: Activity
   hideMenu?: boolean
   actionSlot?: ReactNode
+  returnTo?: string
 }
 
-export function ActivityCard({ activity, hideMenu, actionSlot }: ActivityCardProps) {
+export function ActivityCard({ activity, hideMenu, actionSlot, returnTo }: ActivityCardProps) {
   const router = useRouter()
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [visitedOpen, setVisitedOpen] = useState(false)
@@ -52,6 +54,7 @@ export function ActivityCard({ activity, hideMenu, actionSlot }: ActivityCardPro
 
   const isVisited = activity.status === 'visited'
   const TimeOfDayIcon = TIME_OF_DAY_ICONS[activity.time_of_day]
+  const detailPath = `/activities/${activity.id}`
 
   return (
     <div className={cn(styles.card, styles.cardInteractive, 'group relative')}>
@@ -62,8 +65,8 @@ export function ActivityCard({ activity, hideMenu, actionSlot }: ActivityCardPro
         >
           <ItemMenu
             status={activity.status}
-            onEditInfo={() => router.push(`/activities/${activity.id}?edit=info`)}
-            onEditVisit={() => router.push(`/activities/${activity.id}?edit=visit`)}
+            onEditInfo={() => router.push(buildDetailHref(detailPath, { edit: 'info', returnTo }))}
+            onEditVisit={() => router.push(buildDetailHref(detailPath, { edit: 'visit', returnTo }))}
             onDelete={() => setDeleteOpen(true)}
             onMarkVisited={() => setVisitedOpen(true)}
             onRevert={handleRevert}
@@ -72,7 +75,7 @@ export function ActivityCard({ activity, hideMenu, actionSlot }: ActivityCardPro
       )}
 
       <Link
-        href={`/activities/${activity.id}`}
+        href={buildDetailHref(detailPath, { returnTo })}
         className={cn('block p-3.5', hideMenu ? 'pr-3.5' : 'pr-11')}
       >
         {activity.category && (

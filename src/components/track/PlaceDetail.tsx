@@ -20,6 +20,7 @@ import { usePlace, useDeletePlace, useUpdatePlace } from '@/hooks/usePlaces'
 import { placeFormSchema, type PlaceFormValues } from '@/lib/schemas/placeSchema'
 import type { Place } from '@/types'
 import { MEAL_LABELS, STATUS_LABELS } from '@/lib/labels'
+import { buildDetailHref, DEFAULT_LIST_RETURN_TO } from '@/lib/listReturn'
 import { cn } from '@/lib/utils'
 import styles from '@/components/screens.module.css'
 
@@ -28,9 +29,10 @@ interface Props {
   initialData?: Place
   /** 'info' = 등록 정보 블록 / 'visit' = 방문 기록 블록을 편집모드로 열고 진입 */
   initialEdit?: 'info' | 'visit'
+  returnTo?: string
 }
 
-export function PlaceDetail({ id, initialData, initialEdit }: Props) {
+export function PlaceDetail({ id, initialData, initialEdit, returnTo }: Props) {
   const router = useRouter()
   const { data: place, isLoading, isError } = usePlace(id, initialData)
   const del = useDeletePlace()
@@ -39,6 +41,7 @@ export function PlaceDetail({ id, initialData, initialEdit }: Props) {
   const [editingInfo, setEditingInfo] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [visitedOpen, setVisitedOpen] = useState(false)
+  const listHref = returnTo ?? DEFAULT_LIST_RETURN_TO
 
   const {
     register,
@@ -79,7 +82,7 @@ export function PlaceDetail({ id, initialData, initialEdit }: Props) {
     del.mutate(id, {
       onSuccess: () => {
         toast.success('삭제했어요')
-        router.push('/list')
+        router.push(listHref)
       },
       onError: () => toast.error('삭제 중 오류가 발생했습니다.'),
     })
@@ -104,7 +107,7 @@ export function PlaceDetail({ id, initialData, initialEdit }: Props) {
     setEditingInfo(false)
     // URL에서 ?edit= 제거 (재내비게이션 없이 히스토리만 교체)
     if (typeof window !== 'undefined') {
-      window.history.replaceState(null, '', `/places/${id}`)
+      window.history.replaceState(null, '', buildDetailHref(`/places/${id}`, { returnTo }))
     }
   }
 
@@ -128,7 +131,7 @@ export function PlaceDetail({ id, initialData, initialEdit }: Props) {
 
   return (
     <div className="mx-auto w-full max-w-lg px-5 pb-16 pt-6 lg:pt-10">
-      <Link href="/list" className={styles.backLink}>
+      <Link href={listHref} className={styles.backLink}>
         <ArrowLeft className="h-4 w-4" />
         목록으로
       </Link>
@@ -266,6 +269,7 @@ export function PlaceDetail({ id, initialData, initialEdit }: Props) {
                 rating={place.rating}
                 reviewNote={place.review_note}
                 initialEditing={initialEdit === 'visit'}
+                returnTo={returnTo}
               />
             )}
           </div>

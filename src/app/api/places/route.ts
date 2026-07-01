@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { getSupabaseClient } from '@/lib/supabase/client'
+import { isValidReferenceUrl } from '@/lib/url'
 
 const createSchema = z.object({
   title: z.string().min(1, '제목을 입력해 주세요.').max(100, '제목은 100자 이하로 입력해 주세요.'),
@@ -11,7 +12,7 @@ const createSchema = z.object({
     .min(1, '식사 시간을 하나 이상 선택해 주세요.')
     .max(2),
   memo: z.string().max(1000, '메모는 1000자 이하로 입력해 주세요.').optional().nullable(),
-  reference_url: z.string().url('올바른 URL 형식이 아닙니다.').optional().nullable().or(z.literal('')),
+  reference_url: z.string().refine(isValidReferenceUrl, '올바른 URL 형식이 아닙니다.').optional().nullable().or(z.literal('')),
   added_by: z.string().optional().nullable(),
 })
 

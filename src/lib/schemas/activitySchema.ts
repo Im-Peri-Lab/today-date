@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { isValidReferenceUrl } from '@/lib/url'
 
 export const activityFormSchema = z.object({
   title: z.string().min(1, '제목을 입력해 주세요.').max(100, '제목은 100자 이하로 입력해 주세요.'),
@@ -11,8 +12,8 @@ export const activityFormSchema = z.object({
   reference_url: z
     .string()
     .optional()
-    .refine((v) => !v || v === '' || /^https?:\/\/.+/.test(v), {
-      message: '올바른 URL 형식이 아닙니다. (http:// 또는 https://로 시작)',
+    .refine((v) => isValidReferenceUrl(v ?? ''), {
+      message: '올바른 URL 형식이 아닙니다.',
     }),
   added_by: z.string().optional(),
 })

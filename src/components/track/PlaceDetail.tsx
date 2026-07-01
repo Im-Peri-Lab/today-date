@@ -302,7 +302,7 @@ export function PlaceDetail({ id, initialData, initialEdit, returnTo }: Props) {
                   onClick={() => setVisitedOpen(true)}
                 >
                   <CheckCircle2 className="h-4 w-4" />
-                  {STATUS_MENU_LABELS.visited}
+                  다녀왔어요
                 </Button>
               )}
             </div>

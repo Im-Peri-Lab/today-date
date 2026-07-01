@@ -296,7 +296,7 @@ description: >
 
 **2) 콘텐츠폭 액션** — **36px / 자연폭(`w-auto`, `h-9`) / radius 10px**
 - 용도: "기존 항목에 작용" — 수정·전환·삭제 등 데이터 가공 액션.
-- 적용처: 인라인 편집 Save/Cancel(`DetailBlock` 내부) · 상세 하단 전환 액션("다녀온 곳으로"/"가보고 싶은 곳으로", `STATUS_MENU_LABELS` 공유) · 상세 하단 삭제(ghost variant + destructive 톤) · 카드 메뉴 액션 · (향후) 다중 선택 액션 등.
+- 적용처: 인라인 편집 Save/Cancel(`DetailBlock` 내부) · 상세 하단 전환 액션("다녀왔어요"/"가보고 싶은 곳으로" — 역방향만 `STATUS_MENU_LABELS.wishlist` 공유) · 상세 하단 삭제(ghost variant + destructive 톤) · 카드 메뉴 액션 · (향후) 다중 선택 액션 등.
 
 **판단 기준 — "이 행위가 새 데이터를 만드는가?"**
 - YES → 풀폭 Primary (48px)

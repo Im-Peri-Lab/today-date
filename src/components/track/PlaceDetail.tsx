@@ -22,6 +22,7 @@ import type { Place } from '@/types'
 import { MEAL_LABELS, STATUS_LABELS, STATUS_MENU_LABELS } from '@/lib/labels'
 import { buildDetailHref, DEFAULT_LIST_RETURN_TO } from '@/lib/listReturn'
 import { cn } from '@/lib/utils'
+import { resolveHref } from '@/lib/url'
 import styles from '@/components/screens.module.css'
 
 interface Props {
@@ -215,7 +216,7 @@ export function PlaceDetail({ id, initialData, initialEdit, returnTo }: Props) {
                   <DetailRow label="참고 링크" wide>
                     {place.reference_url ? (
                       <a
-                        href={place.reference_url}
+                        href={resolveHref(place.reference_url)}
                         target="_blank"
                         rel="noopener noreferrer"
                         className={cn('inline-flex max-w-full items-center gap-1.5 hover:underline', styles.textLink)}

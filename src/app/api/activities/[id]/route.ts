@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { getActivityById } from '@/lib/data/activities'
 import { getSupabaseClient } from '@/lib/supabase/client'
+import { isValidReferenceUrl } from '@/lib/url'
 
 const patchSchema = z.object({
   title: z.string().min(1, '제목을 입력해 주세요.').max(100).optional(),
@@ -9,7 +10,7 @@ const patchSchema = z.object({
   duration_bucket: z.enum(['half', 'full', 'overnight']).optional(),
   time_of_day: z.enum(['day', 'night', 'any']).optional(),
   memo: z.string().max(1000).optional().nullable(),
-  reference_url: z.string().url('올바른 URL 형식이 아닙니다.').optional().nullable().or(z.literal('')),
+  reference_url: z.string().refine(isValidReferenceUrl, '올바른 URL 형식이 아닙니다.').optional().nullable().or(z.literal('')),
   added_by: z.string().optional().nullable(),
   status: z.enum(['wishlist', 'visited', 'archived']).optional(),
   visited_at: z.string().optional().nullable(),

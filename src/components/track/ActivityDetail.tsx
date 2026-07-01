@@ -45,6 +45,7 @@ import {
 } from '@/lib/labels'
 import { buildDetailHref, DEFAULT_LIST_RETURN_TO } from '@/lib/listReturn'
 import { cn } from '@/lib/utils'
+import { resolveHref } from '@/lib/url'
 import styles from '@/components/screens.module.css'
 
 interface Props {
@@ -242,7 +243,7 @@ export function ActivityDetail({ id, initialData, initialEdit, returnTo }: Props
                   <DetailRow label="참고 링크" wide>
                     {activity.reference_url ? (
                       <a
-                        href={activity.reference_url}
+                        href={resolveHref(activity.reference_url)}
                         target="_blank"
                         rel="noopener noreferrer"
                         className={cn('inline-flex max-w-full items-center gap-1.5 hover:underline', styles.textLink)}

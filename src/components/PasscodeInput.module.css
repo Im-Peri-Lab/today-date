@@ -101,8 +101,10 @@
 }
 
 /* 위계: focus < hover < active. 색은 --pi-* 토큰(auth.module.css 라이트/다크)에서 주입. */
-.key:hover:not(:disabled) {
-  background: var(--pi-key-hover, #efe7ff);
+@media (hover: hover) and (pointer: fine) {
+  .key:hover:not(:disabled) {
+    background: var(--pi-key-hover, #efe7ff);
+  }
 }
 
 .key:active:not(:disabled) {

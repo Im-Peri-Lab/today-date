@@ -1,6 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
+import { useTopLoader } from 'nextjs-toploader'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
@@ -12,6 +13,7 @@ import type { Place } from '@/types'
 
 export function PlaceForm({ place }: { place?: Place }) {
   const router = useRouter()
+  const topLoader = useTopLoader()
   const queryClient = useQueryClient()
   const isEdit = !!place
   const {
@@ -62,7 +64,8 @@ export function PlaceForm({ place }: { place?: Place }) {
       router.push(`/places/${place!.id}`)
     } else {
       toast.success('장소가 등록되었습니다! 📍')
-      router.push('/list')
+      topLoader.start()
+      router.push(`/places/${json.data.id}`)
     }
   }
 

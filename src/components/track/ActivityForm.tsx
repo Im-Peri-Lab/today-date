@@ -1,6 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
+import { useTopLoader } from 'nextjs-toploader'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
@@ -12,6 +13,7 @@ import type { Activity } from '@/types'
 
 export function ActivityForm({ activity }: { activity?: Activity }) {
   const router = useRouter()
+  const topLoader = useTopLoader()
   const update = useUpdateActivity()
   const isEdit = !!activity
   const {
@@ -63,7 +65,8 @@ export function ActivityForm({ activity }: { activity?: Activity }) {
         return
       }
       toast.success('활동이 등록되었습니다! 🎉')
-      router.push('/list')
+      topLoader.start()
+      router.push(`/activities/${json.data.id}`)
     }
   }
 

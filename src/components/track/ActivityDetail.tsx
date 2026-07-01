@@ -36,7 +36,13 @@ import { VisitedDialog } from '@/components/VisitedDialog'
 import { useActivity, useDeleteActivity, useUpdateActivity } from '@/hooks/useActivities'
 import { activityFormSchema, type ActivityFormValues } from '@/lib/schemas/activitySchema'
 import type { Activity } from '@/types'
-import { DURATION_LABELS, TIME_OF_DAY_LABELS, TIME_OF_DAY_ICONS, STATUS_LABELS } from '@/lib/labels'
+import {
+  DURATION_LABELS,
+  TIME_OF_DAY_LABELS,
+  TIME_OF_DAY_ICONS,
+  STATUS_LABELS,
+  STATUS_MENU_LABELS,
+} from '@/lib/labels'
 import { buildDetailHref, DEFAULT_LIST_RETURN_TO } from '@/lib/listReturn'
 import { cn } from '@/lib/utils'
 import styles from '@/components/screens.module.css'
@@ -239,10 +245,10 @@ export function ActivityDetail({ id, initialData, initialEdit, returnTo }: Props
                         href={activity.reference_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className={cn('inline-flex items-center gap-1.5 hover:underline', styles.textLink)}
+                        className={cn('inline-flex max-w-full items-center gap-1.5 hover:underline', styles.textLink)}
                       >
                         <ExternalLink className="h-3.5 w-3.5 shrink-0" />
-                        참고 링크 열기
+                        <span className="min-w-0 truncate">{activity.reference_url}</span>
                       </a>
                     ) : (
                       <span className={styles.faint}>참고 링크가 없어요</span>
@@ -315,7 +321,7 @@ export function ActivityDetail({ id, initialData, initialEdit, returnTo }: Props
                   onClick={() => setRevertOpen(true)}
                 >
                   <Undo2 className="h-4 w-4" />
-                  가보고 싶은 곳으로 되돌리기
+                  {STATUS_MENU_LABELS.wishlist}
                 </Button>
               ) : (
                 <Button
@@ -323,7 +329,7 @@ export function ActivityDetail({ id, initialData, initialEdit, returnTo }: Props
                   onClick={() => setVisitedOpen(true)}
                 >
                   <CheckCircle2 className="h-4 w-4" />
-                  다녀왔어요
+                  {STATUS_MENU_LABELS.visited}
                 </Button>
               )}
             </div>

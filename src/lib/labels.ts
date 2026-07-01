@@ -8,9 +8,9 @@ export const STATUS_LABELS: Record<Status, string> = {
 }
 
 /**
- * 카드 메뉴(ItemMenu) 전용 상태 전환 라벨 — 메뉴 폭을 아끼는 단축형.
- * key = 전환 '목적지' 상태. 상세 화면 하단 Primary 버튼의 풀 라벨
- * ("가보고 싶은 곳으로 되돌리기")과는 분리해서 관리한다.
+ * 상태 전환 라벨 단일 출처 — 카드 메뉴(ItemMenu)와 상세 화면 하단
+ * Primary 전환 버튼(ActivityDetail·PlaceDetail)이 공유한다.
+ * key = 전환 '목적지' 상태. 양쪽 문구를 여기서 통일해 관리한다.
  */
 export const STATUS_MENU_LABELS: Record<Status, string> = {
   wishlist: '가보고 싶은 곳으로',

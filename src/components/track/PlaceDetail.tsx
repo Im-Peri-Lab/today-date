@@ -19,7 +19,7 @@ import { VisitedDialog } from '@/components/VisitedDialog'
 import { usePlace, useDeletePlace, useUpdatePlace } from '@/hooks/usePlaces'
 import { placeFormSchema, type PlaceFormValues } from '@/lib/schemas/placeSchema'
 import type { Place } from '@/types'
-import { MEAL_LABELS, STATUS_LABELS } from '@/lib/labels'
+import { MEAL_LABELS, STATUS_LABELS, STATUS_MENU_LABELS } from '@/lib/labels'
 import { buildDetailHref, DEFAULT_LIST_RETURN_TO } from '@/lib/listReturn'
 import { cn } from '@/lib/utils'
 import styles from '@/components/screens.module.css'
@@ -218,10 +218,10 @@ export function PlaceDetail({ id, initialData, initialEdit, returnTo }: Props) {
                         href={place.reference_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className={cn('inline-flex items-center gap-1.5 hover:underline', styles.textLink)}
+                        className={cn('inline-flex max-w-full items-center gap-1.5 hover:underline', styles.textLink)}
                       >
                         <ExternalLink className="h-3.5 w-3.5 shrink-0" />
-                        참고 링크 열기
+                        <span className="min-w-0 truncate">{place.reference_url}</span>
                       </a>
                     ) : (
                       <span className={styles.faint}>참고 링크가 없어요</span>
@@ -294,7 +294,7 @@ export function PlaceDetail({ id, initialData, initialEdit, returnTo }: Props) {
                   onClick={handleRevert}
                 >
                   <Undo2 className="h-4 w-4" />
-                  가보고 싶은 곳으로 되돌리기
+                  {STATUS_MENU_LABELS.wishlist}
                 </Button>
               ) : (
                 <Button
@@ -302,7 +302,7 @@ export function PlaceDetail({ id, initialData, initialEdit, returnTo }: Props) {
                   onClick={() => setVisitedOpen(true)}
                 >
                   <CheckCircle2 className="h-4 w-4" />
-                  다녀왔어요
+                  {STATUS_MENU_LABELS.visited}
                 </Button>
               )}
             </div>

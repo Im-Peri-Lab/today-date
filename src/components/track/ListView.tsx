@@ -15,11 +15,17 @@ import { usePlaces } from '@/hooks/usePlaces'
 import { useActivityCategories, usePlaceCategories } from '@/hooks/useCategories'
 import { useDebounced } from '@/hooks/useDebounced'
 import { DURATION_OPTIONS, TIME_OPTIONS, MEAL_OPTIONS, STATUS_LABELS } from '@/lib/labels'
+import {
+  buildListReturnTo,
+  isListStatus,
+  isListTab,
+  type ListStatus,
+  type ListTab,
+} from '@/lib/listReturn'
 import { cn } from '@/lib/utils'
-import type { Status } from '@/types'
 import styles from '@/components/screens.module.css'
 
-type Track = 'activity' | 'place'
+type Track = ListTab
 
 function Chip({
   active,
@@ -45,10 +51,10 @@ function StatusToggle({
   value,
   onChange,
 }: {
-  value: Status
-  onChange: (s: Status) => void
+  value: ListStatus
+  onChange: (s: ListStatus) => void
 }) {
-  const options: { value: Status; label: string }[] = [
+  const options: { value: ListStatus; label: string }[] = [
     { value: 'wishlist', label: STATUS_LABELS.wishlist },
     { value: 'visited', label: STATUS_LABELS.visited },
   ]
@@ -153,13 +159,14 @@ function FilterGroup({ label, children }: { label: string; children: React.React
 const GRID = 'grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3'
 
 export function ListView() {
-  // 홈 통계 카드에서 넘어온 진입 지점(?tab=, ?status=)을 초기값으로만 사용 (이후 토글은 자유)
+  // 홈 통계 카드에서 넘어온 진입 지점(?tab=, ?status=)을 초기값으로 사용하고,
+  // 상세 화면 복귀를 위해 이후 탭/상태 변경도 URL에 반영한다.
   const searchParams = useSearchParams()
-  const [track, setTrack] = useState<Track>(
-    searchParams.get('tab') === 'place' ? 'place' : 'activity'
-  )
-  const [status, setStatus] = useState<Status>(
-    searchParams.get('status') === 'visited' ? 'visited' : 'wishlist'
+  const initialTab = searchParams.get('tab')
+  const initialStatus = searchParams.get('status')
+  const [track, setTrack] = useState<Track>(isListTab(initialTab) ? initialTab : 'activity')
+  const [status, setStatus] = useState<ListStatus>(
+    isListStatus(initialStatus) ? initialStatus : 'wishlist'
   )
   const [search, setSearch] = useState('')
   const [filtersOpen, setFiltersOpen] = useState(false)
@@ -203,6 +210,21 @@ export function ListView() {
     setter(list.includes(id) ? list.filter((c) => c !== id) : [...list, id])
   }
 
+  function replaceListUrl(nextTrack: Track, nextStatus: ListStatus) {
+    if (typeof window === 'undefined') return
+    window.history.replaceState(null, '', buildListReturnTo(window.location.search, nextTrack, nextStatus))
+  }
+
+  function handleTrackChange(nextTrack: Track) {
+    setTrack(nextTrack)
+    replaceListUrl(nextTrack, status)
+  }
+
+  function handleStatusChange(nextStatus: ListStatus) {
+    setStatus(nextStatus)
+    replaceListUrl(track, nextStatus)
+  }
+
   // 현재 탭의 모든 필터 + 검색 해제 (UI 상태만 초기화, 필터 로직은 그대로)
   function resetActivityFilters() {
     setActCats([])
@@ -221,6 +243,7 @@ export function ListView() {
   const placeFilterCount = placeCats.length + (placeMeal ? 1 : 0)
   const activityFiltering = Boolean(debouncedSearch) || activityFilterCount > 0
   const placeFiltering = Boolean(debouncedSearch) || placeFilterCount > 0
+  const currentListReturnTo = buildListReturnTo(searchParams.toString(), track, status)
 
   return (
     <div className={cn(styles.listBottom, 'mx-auto w-full max-w-4xl px-5 pt-6 lg:px-8 lg:pt-12')}>
@@ -233,7 +256,7 @@ export function ListView() {
           type="button"
           role="tab"
           aria-selected={track === 'activity'}
-          onClick={() => setTrack('activity')}
+          onClick={() => handleTrackChange('activity')}
           className={cn(styles.tab, track === 'activity' && styles.tabActive)}
         >
           활동
@@ -242,7 +265,7 @@ export function ListView() {
           type="button"
           role="tab"
           aria-selected={track === 'place'}
-          onClick={() => setTrack('place')}
+          onClick={() => handleTrackChange('place')}
           className={cn(styles.tab, track === 'place' && styles.tabActive)}
         >
           장소
@@ -252,7 +275,7 @@ export function ListView() {
       {/* ── 활동 탭 ── */}
       {track === 'activity' && (
         <div className="mt-4">
-          <StatusToggle value={status} onChange={setStatus} />
+          <StatusToggle value={status} onChange={handleStatusChange} />
 
           <FilterBar
             count={activityFilterCount}
@@ -307,7 +330,7 @@ export function ListView() {
             ) : activitiesQ.data && activitiesQ.data.length > 0 ? (
               <div className={GRID}>
                 {activitiesQ.data.map((a) => (
-                  <ActivityCard key={a.id} activity={a} />
+                  <ActivityCard key={a.id} activity={a} returnTo={currentListReturnTo} />
                 ))}
               </div>
             ) : activityFiltering ? (
@@ -335,7 +358,7 @@ export function ListView() {
       {/* ── 장소 탭 ── */}
       {track === 'place' && (
         <div className="mt-4">
-          <StatusToggle value={status} onChange={setStatus} />
+          <StatusToggle value={status} onChange={handleStatusChange} />
 
           <FilterBar
             count={placeFilterCount}
@@ -379,7 +402,7 @@ export function ListView() {
             ) : placesQ.data && placesQ.data.length > 0 ? (
               <div className={GRID}>
                 {placesQ.data.map((p) => (
-                  <PlaceCard key={p.id} place={p} />
+                  <PlaceCard key={p.id} place={p} returnTo={currentListReturnTo} />
                 ))}
               </div>
             ) : placeFiltering ? (

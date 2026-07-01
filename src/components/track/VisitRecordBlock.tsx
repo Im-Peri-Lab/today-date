@@ -11,6 +11,7 @@ import { DetailBlock } from './DetailBlock'
 import { useUpdateActivity } from '@/hooks/useActivities'
 import { useUpdatePlace } from '@/hooks/usePlaces'
 import { formatDotDate } from '@/lib/date'
+import { buildDetailHref } from '@/lib/listReturn'
 import { cn } from '@/lib/utils'
 import styles from '@/components/screens.module.css'
 
@@ -22,6 +23,7 @@ interface VisitRecordBlockProps {
   reviewNote: string | null
   /** ?edit=visit 진입 시 방문 기록 블록을 처음부터 편집모드로 연다 */
   initialEditing?: boolean
+  returnTo?: string
 }
 
 /**
@@ -36,6 +38,7 @@ export function VisitRecordBlock({
   rating,
   reviewNote,
   initialEditing = false,
+  returnTo,
 }: VisitRecordBlockProps) {
   const [editing, setEditing] = useState(initialEditing)
   // 방문 날짜 입력은 저장 값과 동일한 ISO('YYYY-MM-DD')를 그대로 바인딩(표시 변환은 보기 모드에서만).
@@ -58,7 +61,8 @@ export function VisitRecordBlock({
     setEditing(false)
     // ?edit=visit로 진입했을 경우 URL에서 쿼리 제거 (재내비게이션 없이 히스토리만 교체)
     if (typeof window !== 'undefined') {
-      window.history.replaceState(null, '', window.location.pathname)
+      const detailPath = `/${track === 'activity' ? 'activities' : 'places'}/${id}`
+      window.history.replaceState(null, '', buildDetailHref(detailPath, { returnTo }))
     }
   }
 

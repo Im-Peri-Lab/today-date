@@ -12,6 +12,7 @@ import { DeleteConfirmDialog } from './DeleteConfirmDialog'
 import { VisitedDialog } from '@/components/VisitedDialog'
 import { useDeletePlace, useUpdatePlace } from '@/hooks/usePlaces'
 import { MEAL_LABELS, STATUS_LABELS } from '@/lib/labels'
+import { buildDetailHref } from '@/lib/listReturn'
 import { formatDotDate } from '@/lib/date'
 import { cn } from '@/lib/utils'
 import type { Place } from '@/types'
@@ -21,9 +22,10 @@ interface PlaceCardProps {
   place: Place
   hideMenu?: boolean
   actionSlot?: ReactNode
+  returnTo?: string
 }
 
-export function PlaceCard({ place, hideMenu, actionSlot }: PlaceCardProps) {
+export function PlaceCard({ place, hideMenu, actionSlot, returnTo }: PlaceCardProps) {
   const router = useRouter()
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [visitedOpen, setVisitedOpen] = useState(false)
@@ -51,6 +53,7 @@ export function PlaceCard({ place, hideMenu, actionSlot }: PlaceCardProps) {
   }
 
   const isVisited = place.status === 'visited'
+  const detailPath = `/places/${place.id}`
 
   return (
     <div className={cn(styles.card, styles.cardInteractive, 'group relative')}>
@@ -61,8 +64,8 @@ export function PlaceCard({ place, hideMenu, actionSlot }: PlaceCardProps) {
         >
           <ItemMenu
             status={place.status}
-            onEditInfo={() => router.push(`/places/${place.id}?edit=info`)}
-            onEditVisit={() => router.push(`/places/${place.id}?edit=visit`)}
+            onEditInfo={() => router.push(buildDetailHref(detailPath, { edit: 'info', returnTo }))}
+            onEditVisit={() => router.push(buildDetailHref(detailPath, { edit: 'visit', returnTo }))}
             onDelete={() => setDeleteOpen(true)}
             onMarkVisited={() => setVisitedOpen(true)}
             onRevert={handleRevert}
@@ -70,7 +73,10 @@ export function PlaceCard({ place, hideMenu, actionSlot }: PlaceCardProps) {
         </div>
       )}
 
-      <Link href={`/places/${place.id}`} className={cn('block p-3.5', hideMenu ? 'pr-3.5' : 'pr-11')}>
+      <Link
+        href={buildDetailHref(detailPath, { returnTo })}
+        className={cn('block p-3.5', hideMenu ? 'pr-3.5' : 'pr-11')}
+      >
         {place.category && (
           <div className="mb-0.5">
             <CategoryBadge category={place.category} />

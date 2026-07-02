@@ -32,8 +32,10 @@ export function MapLink({ query }: { query: string }) {
         <span className="min-w-0 truncate">{query}</span>
       </span>
 
-      {/* 오른쪽: 액션 2개 (지도 열기 / 앱 선택) */}
-      <span className="flex shrink-0 items-center gap-1">
+      {/* 오른쪽: 액션 2개 (지도 열기 / 앱 선택) — 한 세트로 인접 배치.
+          editGhostBtn(36px 탭타깃)을 유지하되 박스를 거의 맞붙여(gap 2px, 비겹침)
+          하나의 액션 세트로 읽히게 한다. 겹치지 않으므로 탭 오작동 없음. */}
+      <span className="flex shrink-0 items-center gap-0.5">
         <a
           href={defaultApp.build(query)}
           target="_blank"

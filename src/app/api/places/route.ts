@@ -13,7 +13,6 @@ const createSchema = z.object({
     .max(2),
   memo: z.string().max(1000, '메모는 1000자 이하로 입력해 주세요.').optional().nullable(),
   reference_url: z.string().refine(isValidReferenceUrl, '올바른 URL 형식이 아닙니다.').optional().nullable().or(z.literal('')),
-  added_by: z.string().optional().nullable(),
 })
 
 async function getDefaultCategoryId(supabase: ReturnType<typeof getSupabaseClient>) {

@@ -9,7 +9,7 @@ const schema = z.object({
   meal_time: z.enum(['lunch', 'dinner'], {
     error: '식사 시간을 선택해 주세요.',
   }),
-  location: z.string().optional(),
+  area: z.string().optional(),
   category_ids: z.array(z.string().uuid()).optional(),
   q: z.string().optional(),
   include_visited: z.boolean().optional(),

@@ -5,7 +5,7 @@ import { recommendedIdSets, pickTopWithShuffle } from './shared'
 
 export interface PlaceRecommendInput {
   meal_time: MealTime
-  location?: string
+  area?: string
   category_ids?: string[]
   q?: string
   include_visited?: boolean
@@ -24,7 +24,7 @@ export async function recommendPlaces(
 ): Promise<PlaceRecommendResult> {
   const statuses = input.include_visited ? ['wishlist', 'visited'] : ['wishlist']
   const categoryIds = input.category_ids ?? []
-  const location = input.location?.trim() ?? ''
+  const area = input.area?.trim() ?? ''
   const q = input.q?.trim() ?? ''
 
   const { data, error } = await supabase
@@ -43,11 +43,11 @@ export async function recommendPlaces(
     pool = pool.filter((p) => p.category_id && categoryIds.includes(p.category_id))
   }
 
-  const locationLower = location.toLowerCase()
+  const areaLower = area.toLowerCase()
 
-  // 지역 필터: location 입력이 있을 때만 부분포함(소문자)으로 후보를 좁힘 (없으면 전체 — 현행 유지)
-  if (locationLower) {
-    pool = pool.filter((p) => p.location && p.location.toLowerCase().includes(locationLower))
+  // 지역 필터: area 입력이 있을 때만 부분포함(소문자)으로 후보를 좁힘 (없으면 전체 — 현행 유지)
+  if (areaLower) {
+    pool = pool.filter((p) => p.area && p.area.toLowerCase().includes(areaLower))
   }
 
   const { recentIds, everIds } = await recommendedIdSets(supabase, 'place')
@@ -78,9 +78,9 @@ function buildReason(input: PlaceRecommendInput, count: number): string {
     return '조건에 맞는 장소를 찾지 못했어요.'
   }
   const meal = MEAL_LABELS[input.meal_time]
-  const location = input.location?.trim()
-  if (location) {
-    return `${location} 근처 ${meal} 장소를 찾아봤어요 💜`
+  const area = input.area?.trim()
+  if (area) {
+    return `${area} 근처 ${meal} 장소를 찾아봤어요 💜`
   }
   return `${meal}에 가기 좋은 장소예요 💜`
 }

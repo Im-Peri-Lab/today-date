@@ -55,7 +55,7 @@ export function PlaceRecommendWizard() {
   const [step, setStep] = useState<1 | 2 | 3>(1)
   const [showResult, setShowResult] = useState(false)
   const [meal, setMeal] = useState<MealTime | null>(null)
-  const [location, setLocation] = useState('')
+  const [area, setArea] = useState('')
   const [categoryIds, setCategoryIds] = useState<string[]>([])
   const [result, setResult] = useState<PlaceRecommendResponse | null>(null)
 
@@ -68,7 +68,7 @@ export function PlaceRecommendWizard() {
     recommend.mutate(
       {
         meal_time: meal,
-        location: location.trim() || undefined,
+        area: area.trim() || undefined,
         category_ids: ids.length > 0 ? ids : undefined,
       },
       {
@@ -87,7 +87,7 @@ export function PlaceRecommendWizard() {
     setShowResult(false)
     setResult(null)
     setMeal(null)
-    setLocation('')
+    setArea('')
     setCategoryIds([])
   }
 
@@ -259,8 +259,8 @@ export function PlaceRecommendWizard() {
               가고 싶은 동네가 있어요? <span className={styles.faint}>(선택)</span>
             </p>
             <Input
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
+              value={area}
+              onChange={(e) => setArea(e.target.value)}
               placeholder="예: 마포, 강남, 성수동"
               autoFocus
             />

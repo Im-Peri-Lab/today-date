@@ -47,7 +47,7 @@ export interface Place {
   id: string
   title: string
   category_id: string | null
-  location: string
+  area: string
   meal_times: MealTime[]
   memo: string | null
   reference_url: string | null

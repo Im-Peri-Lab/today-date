@@ -366,7 +366,7 @@ export function ListView() {
             onToggle={() => setFiltersOpen((v) => !v)}
             onReset={resetPlaceFilters}
             search={
-              <SearchBox value={search} onChange={setSearch} placeholder="제목·메모·위치 검색" />
+              <SearchBox value={search} onChange={setSearch} placeholder="제목·메모·지역 검색" />
             }
           >
             <div className="space-y-3">

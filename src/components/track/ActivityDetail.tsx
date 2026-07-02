@@ -234,11 +234,13 @@ export function ActivityDetail({ id, initialData, initialEdit, returnTo }: Props
                       {TIME_OF_DAY_LABELS[activity.time_of_day]}
                     </span>
                   </DetailRow>
-                  {activity.location && (
-                    <DetailRow label="위치" wide>
+                  <DetailRow label="위치" wide>
+                    {activity.location ? (
                       <MapLink query={activity.location} />
-                    </DetailRow>
-                  )}
+                    ) : (
+                      <span className={styles.faint}>아직 위치가 없어요</span>
+                    )}
+                  </DetailRow>
                   <DetailRow label="메모" wide>
                     {activity.memo ? (
                       <p className="whitespace-pre-wrap leading-relaxed">{activity.memo}</p>

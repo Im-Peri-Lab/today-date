@@ -22,9 +22,21 @@ export const MAP_APPS: MapApp[] = [
     build: (q) => `https://map.naver.com/p/search/${encodeURIComponent(q)}`,
   },
   {
+    id: 'kakao',
+    label: '카카오맵',
+    build: (q) => `https://map.kakao.com/link/search/${encodeURIComponent(q)}`,
+  },
+  {
     id: 'google',
     label: '구글지도',
     build: (q) => `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q)}`,
+  },
+  {
+    // 티맵은 웹 검색 페이지가 없어 앱 스킴만 지원한다.
+    // 모바일에서 티맵 앱이 설치돼 있을 때만 열리고, 데스크탑/미설치 환경에서는 동작하지 않는다.
+    id: 'tmap',
+    label: '티맵',
+    build: (q) => `tmap://search?name=${encodeURIComponent(q)}`,
   },
 ]
 

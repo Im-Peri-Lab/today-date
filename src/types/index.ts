@@ -31,6 +31,7 @@ export interface Activity {
   category_id: string | null
   duration_bucket: DurationBucket | null
   time_of_day: TimeOfDay
+  location: string | null
   memo: string | null
   reference_url: string | null
   image_urls: string[]
@@ -48,6 +49,7 @@ export interface Place {
   title: string
   category_id: string | null
   area: string
+  location: string | null
   meal_times: MealTime[]
   memo: string | null
   reference_url: string | null

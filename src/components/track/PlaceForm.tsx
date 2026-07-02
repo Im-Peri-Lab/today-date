@@ -29,6 +29,7 @@ export function PlaceForm({ place }: { place?: Place }) {
           title: place.title,
           category_id: place.category_id ?? '',
           area: place.area,
+          location: place.location ?? '',
           meal_times: place.meal_times,
           memo: place.memo ?? '',
           reference_url: place.reference_url ?? '',
@@ -41,6 +42,7 @@ export function PlaceForm({ place }: { place?: Place }) {
       ...values,
       category_id: values.category_id || null,
       reference_url: values.reference_url || null,
+      location: values.location || null,
       memo: values.memo || null,
     }
 

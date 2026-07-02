@@ -9,6 +9,7 @@ const patchSchema = z.object({
   category_id: z.string().uuid().optional().nullable(),
   duration_bucket: z.enum(['half', 'full', 'overnight']).optional(),
   time_of_day: z.enum(['day', 'night', 'any']).optional(),
+  location: z.string().max(200).optional().nullable(),
   memo: z.string().max(1000).optional().nullable(),
   reference_url: z.string().refine(isValidReferenceUrl, '올바른 URL 형식이 아닙니다.').optional().nullable().or(z.literal('')),
   status: z.enum(['wishlist', 'visited', 'archived']).optional(),

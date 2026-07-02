@@ -30,6 +30,7 @@ export function ActivityForm({ activity }: { activity?: Activity }) {
           category_id: activity.category_id ?? '',
           duration_bucket: activity.duration_bucket ?? undefined,
           time_of_day: activity.time_of_day,
+          location: activity.location ?? '',
           memo: activity.memo ?? '',
           reference_url: activity.reference_url ?? '',
         }
@@ -41,6 +42,7 @@ export function ActivityForm({ activity }: { activity?: Activity }) {
       ...values,
       category_id: values.category_id || null,
       reference_url: values.reference_url || null,
+      location: values.location || null,
       memo: values.memo || null,
     }
 

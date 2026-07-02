@@ -23,6 +23,7 @@ import { MEAL_LABELS, STATUS_LABELS, STATUS_MENU_LABELS } from '@/lib/labels'
 import { buildDetailHref, DEFAULT_LIST_RETURN_TO } from '@/lib/listReturn'
 import { cn } from '@/lib/utils'
 import { resolveHref } from '@/lib/url'
+import { MapLink } from './MapLink'
 import styles from '@/components/screens.module.css'
 
 interface Props {
@@ -53,7 +54,7 @@ export function PlaceDetail({ id, initialData, initialEdit, returnTo }: Props) {
     formState: { errors, isSubmitting },
   } = useForm<PlaceFormValues>({
     resolver: zodResolver(placeFormSchema),
-    defaultValues: { title: '', area: '', meal_times: [], memo: '', reference_url: '', category_id: '' },
+    defaultValues: { title: '', area: '', location: '', meal_times: [], memo: '', reference_url: '', category_id: '' },
   })
 
   function fillForm() {
@@ -62,6 +63,7 @@ export function PlaceDetail({ id, initialData, initialEdit, returnTo }: Props) {
       title: place.title,
       category_id: place.category_id ?? '',
       area: place.area,
+      location: place.location ?? '',
       meal_times: place.meal_times,
       memo: place.memo ?? '',
       reference_url: place.reference_url ?? '',
@@ -118,6 +120,7 @@ export function PlaceDetail({ id, initialData, initialEdit, returnTo }: Props) {
       ...values,
       category_id: values.category_id || null,
       reference_url: values.reference_url || null,
+      location: values.location || null,
       memo: values.memo || null,
     }
     try {
@@ -203,6 +206,11 @@ export function PlaceDetail({ id, initialData, initialEdit, returnTo }: Props) {
                           ))}
                         </span>
                       </span>
+                    </DetailRow>
+                  )}
+                  {place.location && (
+                    <DetailRow label="위치" wide>
+                      <MapLink query={place.location} />
                     </DetailRow>
                   )}
                   <DetailRow label="메모" wide>

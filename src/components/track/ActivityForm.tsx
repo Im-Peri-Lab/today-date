@@ -42,7 +42,6 @@ export function ActivityForm({ activity }: { activity?: Activity }) {
       category_id: values.category_id || null,
       reference_url: values.reference_url || null,
       memo: values.memo || null,
-      added_by: values.added_by || null,
     }
 
     if (isEdit) {

@@ -11,7 +11,6 @@ const patchSchema = z.object({
   time_of_day: z.enum(['day', 'night', 'any']).optional(),
   memo: z.string().max(1000).optional().nullable(),
   reference_url: z.string().refine(isValidReferenceUrl, '올바른 URL 형식이 아닙니다.').optional().nullable().or(z.literal('')),
-  added_by: z.string().optional().nullable(),
   status: z.enum(['wishlist', 'visited', 'archived']).optional(),
   visited_at: z.string().optional().nullable(),
   rating: z.number().int().min(1).max(5).optional().nullable(),

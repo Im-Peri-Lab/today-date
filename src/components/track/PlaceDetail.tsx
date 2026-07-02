@@ -6,7 +6,7 @@ import { useState, useRef, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
-import { ArrowLeft, Trash2, CheckCircle2, Undo2, MapPin, ExternalLink, User, Utensils } from 'lucide-react'
+import { ArrowLeft, Trash2, CheckCircle2, Undo2, MapPin, ExternalLink, Utensils } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { CategoryBadge } from './CategoryBadge'
@@ -119,7 +119,6 @@ export function PlaceDetail({ id, initialData, initialEdit, returnTo }: Props) {
       category_id: values.category_id || null,
       reference_url: values.reference_url || null,
       memo: values.memo || null,
-      added_by: values.added_by || null,
     }
     try {
       await update.mutateAsync({ id: place.id, patch: payload })
@@ -231,7 +230,7 @@ export function PlaceDetail({ id, initialData, initialEdit, returnTo }: Props) {
 
                   {/* 등록 메타 캡션 — 블록 맨 마지막, faint 톤.
                       sheetRow(border+padding) 대신 mt-3.5만 사용해 하단 여백 최소화 */}
-                  {(place.added_by || place.created_at) && (
+                  {place.created_at && (
                     <div
                       className={cn(
                         'sm:col-span-2 mt-3.5',
@@ -239,22 +238,14 @@ export function PlaceDetail({ id, initialData, initialEdit, returnTo }: Props) {
                         styles.captionText,
                       )}
                     >
-                      {place.added_by && (
-                        <span className="inline-flex items-center gap-1">
-                          <User className="h-3 w-3 shrink-0" />
-                          {place.added_by}
-                        </span>
-                      )}
-                      {place.created_at && (
-                        <span>
-                          {new Date(place.created_at).toLocaleDateString('ko-KR', {
-                            year: 'numeric',
-                            month: 'long',
-                            day: 'numeric',
-                          })}
-                          에 등록
-                        </span>
-                      )}
+                      <span>
+                        {new Date(place.created_at).toLocaleDateString('ko-KR', {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric',
+                        })}
+                        에 등록
+                      </span>
                     </div>
                   )}
                 </div>

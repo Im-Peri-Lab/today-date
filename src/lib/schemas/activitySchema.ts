@@ -17,7 +17,6 @@ export const activityFormSchema = z.object({
     .refine((v) => isValidReferenceUrl(v ?? ''), {
       message: '올바른 URL 형식이 아닙니다.',
     }),
-  added_by: z.string().optional(),
 })
 
 export type ActivityFormValues = z.infer<typeof activityFormSchema>

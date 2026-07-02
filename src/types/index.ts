@@ -34,7 +34,6 @@ export interface Activity {
   memo: string | null
   reference_url: string | null
   image_urls: string[]
-  added_by: string | null
   status: Status
   visited_at: string | null
   rating: number | null
@@ -53,7 +52,6 @@ export interface Place {
   memo: string | null
   reference_url: string | null
   image_urls: string[]
-  added_by: string | null
   status: Status
   visited_at: string | null
   rating: number | null

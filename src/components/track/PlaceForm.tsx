@@ -42,7 +42,6 @@ export function PlaceForm({ place }: { place?: Place }) {
       category_id: values.category_id || null,
       reference_url: values.reference_url || null,
       memo: values.memo || null,
-      added_by: values.added_by || null,
     }
 
     const res = await fetch(isEdit ? `/api/places/${place!.id}` : '/api/places', {

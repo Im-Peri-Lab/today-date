@@ -49,12 +49,12 @@ export function PlaceFields({ register, errors, watch, setValue }: PlaceFieldsPr
         />
       </FormField>
 
-      <FormField label="위치" htmlFor="location" required error={errors.location?.message}>
+      <FormField label="지역" htmlFor="area" required error={errors.area?.message}>
         <Input
-          id="location"
+          id="area"
           placeholder="예: 서울 성수동, 홍대 근처"
-          {...register('location')}
-          aria-invalid={!!errors.location}
+          {...register('area')}
+          aria-invalid={!!errors.area}
         />
       </FormField>
 

@@ -53,7 +53,7 @@ export function PlaceDetail({ id, initialData, initialEdit, returnTo }: Props) {
     formState: { errors, isSubmitting },
   } = useForm<PlaceFormValues>({
     resolver: zodResolver(placeFormSchema),
-    defaultValues: { title: '', location: '', meal_times: [], memo: '', reference_url: '', category_id: '' },
+    defaultValues: { title: '', area: '', meal_times: [], memo: '', reference_url: '', category_id: '' },
   })
 
   function fillForm() {
@@ -61,7 +61,7 @@ export function PlaceDetail({ id, initialData, initialEdit, returnTo }: Props) {
     reset({
       title: place.title,
       category_id: place.category_id ?? '',
-      location: place.location,
+      area: place.area,
       meal_times: place.meal_times,
       memo: place.memo ?? '',
       reference_url: place.reference_url ?? '',
@@ -182,11 +182,11 @@ export function PlaceDetail({ id, initialData, initialEdit, returnTo }: Props) {
               ) : (
                 /* 짧은 값: 2열 그리드 / 긴 텍스트(메모·링크): wide로 전체폭 / 모바일: 1열 */
                 <div className="grid grid-cols-1 sm:grid-cols-2">
-                  {place.location && (
-                    <DetailRow label="위치">
+                  {place.area && (
+                    <DetailRow label="지역">
                       <span className="inline-flex items-center gap-1.5">
                         <MapPin className={cn('h-3.5 w-3.5 shrink-0', styles.faint)} />
-                        {place.location}
+                        {place.area}
                       </span>
                     </DetailRow>
                   )}

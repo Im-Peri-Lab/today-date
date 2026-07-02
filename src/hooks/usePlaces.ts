@@ -7,7 +7,7 @@ import { fetchJson } from './fetcher'
 export interface PlaceFilters {
   status: Status
   categoryIds?: string[]
-  location?: string
+  area?: string
   meal_time?: string
   q?: string
 }
@@ -18,7 +18,7 @@ function buildPlaceParams(filters: PlaceFilters) {
   if (filters.categoryIds && filters.categoryIds.length > 0) {
     params.set('category_id', filters.categoryIds.join(','))
   }
-  if (filters.location) params.set('location', filters.location)
+  if (filters.area) params.set('area', filters.area)
   if (filters.meal_time) params.set('meal_time', filters.meal_time)
   if (filters.q) params.set('q', filters.q)
   return params.toString()

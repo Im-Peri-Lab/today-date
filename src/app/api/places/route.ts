@@ -6,7 +6,7 @@ import { isValidReferenceUrl } from '@/lib/url'
 const createSchema = z.object({
   title: z.string().min(1, '제목을 입력해 주세요.').max(100, '제목은 100자 이하로 입력해 주세요.'),
   category_id: z.string().uuid().optional().nullable(),
-  location: z.string().min(1, '위치를 입력해 주세요.'),
+  area: z.string().min(1, '지역을 입력해 주세요.'),
   meal_times: z
     .array(z.enum(['lunch', 'dinner']))
     .min(1, '식사 시간을 하나 이상 선택해 주세요.')
@@ -29,7 +29,7 @@ export async function GET(req: NextRequest) {
     const { searchParams } = req.nextUrl
     const status = searchParams.get('status') ?? 'wishlist'
     const category_id = searchParams.get('category_id')
-    const location = searchParams.get('location')
+    const area = searchParams.get('area')
     const meal_time = searchParams.get('meal_time')
     const q = searchParams.get('q')
 
@@ -44,11 +44,11 @@ export async function GET(req: NextRequest) {
       const ids = category_id.split(',').filter(Boolean)
       query = ids.length > 1 ? query.in('category_id', ids) : query.eq('category_id', ids[0])
     }
-    if (location) query = query.ilike('location', `%${location}%`)
+    if (area) query = query.ilike('area', `%${area}%`)
     if (meal_time) query = query.contains('meal_times', [meal_time])
     if (q) {
       const term = q.replace(/[%,]/g, ' ')
-      query = query.or(`title.ilike.%${term}%,memo.ilike.%${term}%,location.ilike.%${term}%`)
+      query = query.or(`title.ilike.%${term}%,memo.ilike.%${term}%,area.ilike.%${term}%`)
     }
 
     const { data, error } = await query

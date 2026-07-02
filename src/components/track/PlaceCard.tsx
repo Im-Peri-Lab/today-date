@@ -86,10 +86,10 @@ export function PlaceCard({ place, hideMenu, actionSlot, returnTo }: PlaceCardPr
         <h3 className={cn('mb-3 line-clamp-1', styles.cardTitle)}>{place.title}</h3>
 
         <div className={cn('mb-1 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-xs', styles.sub)}>
-          {place.location && (
+          {place.area && (
             <span className="inline-flex items-center gap-1 whitespace-nowrap">
               <MapPin className="h-3 w-3 shrink-0" />
-              {place.location}
+              {place.area}
             </span>
           )}
           {place.meal_times && place.meal_times.length > 0 && (

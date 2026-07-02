@@ -10,3 +10,11 @@
 
 alter table activities add column if not exists location text;
 alter table places add column if not exists location text;
+
+-- 컬럼 의도 문서화 (area ↔ location 혼동 방지 — #36 회귀 재발 방지).
+comment on column places.area is
+  '추천 범위를 위한 지역 정보 (예: 성수, 홍대, 여의도)';
+comment on column activities.location is
+  '실제 방문 위치 또는 지도 검색에 사용할 정보. 상호명, 관광지명, 장소명, 주소 모두 허용.';
+comment on column places.location is
+  '실제 방문 위치 또는 지도 검색에 사용할 정보. 상호명, 관광지명, 장소명, 주소 모두 허용.';

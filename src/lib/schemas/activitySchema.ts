@@ -7,7 +7,9 @@ export const activityFormSchema = z.object({
   duration_bucket: z.enum(['half', 'full', 'overnight'], {
     error: '소요시간을 선택해 주세요.',
   }),
-  time_of_day: z.enum(['day', 'night', 'any']),
+  time_of_day: z.enum(['day', 'night', 'any'], {
+    error: '시간대를 선택해 주세요.',
+  }),
   memo: z.string().max(1000, '메모는 1000자 이하로 입력해 주세요.').optional(),
   reference_url: z
     .string()

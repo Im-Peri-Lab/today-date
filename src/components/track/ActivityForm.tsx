@@ -33,7 +33,7 @@ export function ActivityForm({ activity }: { activity?: Activity }) {
           memo: activity.memo ?? '',
           reference_url: activity.reference_url ?? '',
         }
-      : { time_of_day: 'any' },
+      : {},
   })
 
   async function onSubmit(values: ActivityFormValues) {

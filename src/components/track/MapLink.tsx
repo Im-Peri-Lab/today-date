@@ -69,7 +69,9 @@ export function MapLink({ query }: { query: string }) {
   const defaultUrl = effectiveDefault.build(query)
 
   return (
-    <div className="flex w-full items-center gap-2">
+    // items-start: 왼쪽 텍스트를 상단 정렬해 라벨↔내용 여백을 다른 DetailRow(소요시간 등)와
+    // 동일하게 맞춘다(28px 버튼이 행을 키우고 center 정렬로 텍스트가 밀리던 문제 해소).
+    <div className="flex w-full items-start gap-2">
       {/* 왼쪽: 위치 텍스트 (비링크). flex-1 + min-w-0 로 truncate 보장 */}
       <span className="inline-flex min-w-0 flex-1 items-center gap-1.5">
         <MapPin className={cn('h-3.5 w-3.5 shrink-0', styles.faint)} />
@@ -78,8 +80,9 @@ export function MapLink({ query }: { query: string }) {
 
       {/* 오른쪽: 액션 2개 (지도 열기 / 앱 선택) — 한 세트로 인접 배치.
           mapActionBtn(28px)로 박스를 줄여 글리프 여백·우측 끝 여백을 좁힌다.
-          gap 2px, 비겹침 → 탭 오작동 없음. */}
-      <span className="flex shrink-0 items-center gap-0.5">
+          gap 2px, 비겹침 → 탭 오작동 없음.
+          -mt-1: 28px 버튼의 시각 중심을 ~21px 텍스트 줄 중심에 맞춘다(상단 정렬 보정). */}
+      <span className="-mt-1 flex shrink-0 items-center gap-0.5">
         {/* 기본 앱 열기 — 웹은 anchor(새 탭), 앱 스킴은 button(openAppScheme) */}
         {effectiveDefault.requiresApp ? (
           <button

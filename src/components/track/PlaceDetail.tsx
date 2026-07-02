@@ -187,9 +187,11 @@ export function PlaceDetail({ id, initialData, initialEdit, returnTo }: Props) {
                 <div className="grid grid-cols-1 sm:grid-cols-2">
                   {place.meal_times?.length > 0 && (
                     <DetailRow label="식사 시간">
-                      {/* Utensils 아이콘 — faint 톤, 뱃지 그룹 앞에 위치 */}
+                      {/* Utensils 아이콘 — faint 톤, 뱃지 그룹 앞에 위치.
+                          mt-1: 선행 아이콘을 다른 행(소요시간·지역 등 ~3.5px)과 같은
+                          오프셋에 맞춘다(뱃지 pill 대비 세로 중심도 함께 정렬). */}
                       <span className="inline-flex items-start gap-1.5">
-                        <Utensils className={cn('h-3.5 w-3.5 shrink-0 mt-0.5', styles.faint)} />
+                        <Utensils className={cn('h-3.5 w-3.5 shrink-0 mt-1', styles.faint)} />
                         <span className="flex flex-wrap gap-1.5">
                           {place.meal_times.map((m) => (
                             <span key={m} className={styles.mealBadge}>

@@ -8,6 +8,7 @@ const patchSchema = z.object({
   title: z.string().min(1, '제목을 입력해 주세요.').max(100).optional(),
   category_id: z.string().uuid().optional().nullable(),
   area: z.string().min(1).optional(),
+  location: z.string().max(200).optional().nullable(),
   meal_times: z.array(z.enum(['lunch', 'dinner'])).min(1).max(2).optional(),
   memo: z.string().max(1000).optional().nullable(),
   reference_url: z.string().refine(isValidReferenceUrl, '올바른 URL 형식이 아닙니다.').optional().nullable().or(z.literal('')),

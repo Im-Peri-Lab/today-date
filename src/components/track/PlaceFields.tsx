@@ -49,6 +49,15 @@ export function PlaceFields({ register, errors, watch, setValue }: PlaceFieldsPr
         />
       </FormField>
 
+      <FormField label="식사 시간" required error={errors.meal_times?.message as string | undefined}>
+        <SegmentedControl
+          mode="multi"
+          options={MEAL_OPTIONS}
+          value={mealTimesValue as MealTime[]}
+          onChange={(v) => setValue('meal_times', v as MealTime[], { shouldValidate: true })}
+        />
+      </FormField>
+
       <FormField label="지역" htmlFor="area" required error={errors.area?.message}>
         <Input
           id="area"
@@ -58,12 +67,12 @@ export function PlaceFields({ register, errors, watch, setValue }: PlaceFieldsPr
         />
       </FormField>
 
-      <FormField label="식사 시간" required error={errors.meal_times?.message as string | undefined}>
-        <SegmentedControl
-          mode="multi"
-          options={MEAL_OPTIONS}
-          value={mealTimesValue as MealTime[]}
-          onChange={(v) => setValue('meal_times', v as MealTime[], { shouldValidate: true })}
+      <FormField label="위치" htmlFor="location" error={errors.location?.message}>
+        <Input
+          id="location"
+          placeholder="예: 롯데월드, 카페피어라, 서울 성동구 연무장5길 9"
+          {...register('location')}
+          aria-invalid={!!errors.location}
         />
       </FormField>
 

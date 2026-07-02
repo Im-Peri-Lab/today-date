@@ -74,6 +74,15 @@ export function ActivityFields({ register, errors, watch, setValue }: ActivityFi
         />
       </FormField>
 
+      <FormField label="위치" htmlFor="location" error={errors.location?.message}>
+        <Input
+          id="location"
+          placeholder="예: 롯데월드, 카페피어라, 서울 성동구 연무장5길 9"
+          {...register('location')}
+          aria-invalid={!!errors.location}
+        />
+      </FormField>
+
       <FormField label="메모" htmlFor="memo" error={errors.memo?.message}>
         <Textarea
           id="memo"

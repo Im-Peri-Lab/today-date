@@ -7,6 +7,7 @@ const createSchema = z.object({
   title: z.string().min(1, '제목을 입력해 주세요.').max(100, '제목은 100자 이하로 입력해 주세요.'),
   category_id: z.string().uuid().optional().nullable(),
   area: z.string().min(1, '지역을 입력해 주세요.'),
+  location: z.string().max(200, '위치는 200자 이하로 입력해 주세요.').optional().nullable(),
   meal_times: z
     .array(z.enum(['lunch', 'dinner']))
     .min(1, '식사 시간을 하나 이상 선택해 주세요.')

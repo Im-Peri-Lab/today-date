@@ -45,6 +45,7 @@ import {
 import { buildDetailHref, DEFAULT_LIST_RETURN_TO } from '@/lib/listReturn'
 import { cn } from '@/lib/utils'
 import { resolveHref } from '@/lib/url'
+import { MapLink } from './MapLink'
 import styles from '@/components/screens.module.css'
 
 interface Props {
@@ -76,7 +77,7 @@ export function ActivityDetail({ id, initialData, initialEdit, returnTo }: Props
     formState: { errors, isSubmitting },
   } = useForm<ActivityFormValues>({
     resolver: zodResolver(activityFormSchema),
-    defaultValues: { title: '', time_of_day: 'any', memo: '', reference_url: '', category_id: '' },
+    defaultValues: { title: '', time_of_day: 'any', location: '', memo: '', reference_url: '', category_id: '' },
   })
 
   function fillForm() {
@@ -86,6 +87,7 @@ export function ActivityDetail({ id, initialData, initialEdit, returnTo }: Props
       category_id: activity.category_id ?? '',
       duration_bucket: activity.duration_bucket ?? undefined,
       time_of_day: activity.time_of_day,
+      location: activity.location ?? '',
       memo: activity.memo ?? '',
       reference_url: activity.reference_url ?? '',
     })
@@ -146,6 +148,7 @@ export function ActivityDetail({ id, initialData, initialEdit, returnTo }: Props
       ...values,
       category_id: values.category_id || null,
       reference_url: values.reference_url || null,
+      location: values.location || null,
       memo: values.memo || null,
     }
     try {
@@ -231,6 +234,11 @@ export function ActivityDetail({ id, initialData, initialEdit, returnTo }: Props
                       {TIME_OF_DAY_LABELS[activity.time_of_day]}
                     </span>
                   </DetailRow>
+                  {activity.location && (
+                    <DetailRow label="위치" wide>
+                      <MapLink query={activity.location} />
+                    </DetailRow>
+                  )}
                   <DetailRow label="메모" wide>
                     {activity.memo ? (
                       <p className="whitespace-pre-wrap leading-relaxed">{activity.memo}</p>

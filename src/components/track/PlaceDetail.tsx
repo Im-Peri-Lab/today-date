@@ -23,6 +23,7 @@ import { MEAL_LABELS, STATUS_LABELS, STATUS_MENU_LABELS } from '@/lib/labels'
 import { buildDetailHref, DEFAULT_LIST_RETURN_TO } from '@/lib/listReturn'
 import { cn } from '@/lib/utils'
 import { resolveHref } from '@/lib/url'
+import { MapLink } from './MapLink'
 import styles from '@/components/screens.module.css'
 
 interface Props {
@@ -53,7 +54,7 @@ export function PlaceDetail({ id, initialData, initialEdit, returnTo }: Props) {
     formState: { errors, isSubmitting },
   } = useForm<PlaceFormValues>({
     resolver: zodResolver(placeFormSchema),
-    defaultValues: { title: '', area: '', meal_times: [], memo: '', reference_url: '', category_id: '' },
+    defaultValues: { title: '', area: '', location: '', meal_times: [], memo: '', reference_url: '', category_id: '' },
   })
 
   function fillForm() {
@@ -62,6 +63,7 @@ export function PlaceDetail({ id, initialData, initialEdit, returnTo }: Props) {
       title: place.title,
       category_id: place.category_id ?? '',
       area: place.area,
+      location: place.location ?? '',
       meal_times: place.meal_times,
       memo: place.memo ?? '',
       reference_url: place.reference_url ?? '',
@@ -118,6 +120,7 @@ export function PlaceDetail({ id, initialData, initialEdit, returnTo }: Props) {
       ...values,
       category_id: values.category_id || null,
       reference_url: values.reference_url || null,
+      location: values.location || null,
       memo: values.memo || null,
     }
     try {
@@ -182,19 +185,12 @@ export function PlaceDetail({ id, initialData, initialEdit, returnTo }: Props) {
               ) : (
                 /* 짧은 값: 2열 그리드 / 긴 텍스트(메모·링크): wide로 전체폭 / 모바일: 1열 */
                 <div className="grid grid-cols-1 sm:grid-cols-2">
-                  {place.area && (
-                    <DetailRow label="지역">
-                      <span className="inline-flex items-center gap-1.5">
-                        <MapPin className={cn('h-3.5 w-3.5 shrink-0', styles.faint)} />
-                        {place.area}
-                      </span>
-                    </DetailRow>
-                  )}
                   {place.meal_times?.length > 0 && (
                     <DetailRow label="식사 시간">
-                      {/* Utensils 아이콘 — faint 톤, 뱃지 그룹 앞에 위치 */}
-                      <span className="inline-flex items-start gap-1.5">
-                        <Utensils className={cn('h-3.5 w-3.5 shrink-0 mt-0.5', styles.faint)} />
+                      {/* Utensils 아이콘 — faint 톤. items-center 로 뱃지(pill ~25px)
+                          세로 중심에 아이콘을 맞춘다(아이콘이 뱃지보다 떠 보이던 문제 해소). */}
+                      <span className="inline-flex items-center gap-1.5">
+                        <Utensils className={cn('h-3.5 w-3.5 shrink-0', styles.faint)} />
                         <span className="flex flex-wrap gap-1.5">
                           {place.meal_times.map((m) => (
                             <span key={m} className={styles.mealBadge}>
@@ -203,6 +199,19 @@ export function PlaceDetail({ id, initialData, initialEdit, returnTo }: Props) {
                           ))}
                         </span>
                       </span>
+                    </DetailRow>
+                  )}
+                  {place.area && (
+                    <DetailRow label="지역">
+                      <span className="inline-flex items-center gap-1.5">
+                        <MapPin className={cn('h-3.5 w-3.5 shrink-0', styles.faint)} />
+                        {place.area}
+                      </span>
+                    </DetailRow>
+                  )}
+                  {place.location && (
+                    <DetailRow label="위치" wide>
+                      <MapLink query={place.location} />
                     </DetailRow>
                   )}
                   <DetailRow label="메모" wide>

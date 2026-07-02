@@ -65,7 +65,7 @@ export function ActivityFields({ register, errors, watch, setValue }: ActivityFi
         />
       </FormField>
 
-      <FormField label="시간대" error={errors.time_of_day?.message}>
+      <FormField label="시간대" required error={errors.time_of_day?.message}>
         <SegmentedControl
           mode="single"
           options={TIME_OPTIONS}

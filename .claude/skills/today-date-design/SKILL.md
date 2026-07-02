@@ -365,7 +365,7 @@ description: >
 | **소형 컨트롤** | `.segmentBtn` / `.chip` / `.filterToggle` / `.resetBtn` / `.option` / `.tab` / `.backLink` / `.brandLink` / `.ratingStar` / `.dialogCloseBtn` / FAB / auth 버튼 / shadcn `default`·`secondary`·`ghost`·`link`·`outline`·`destructive` | border(또는 color) + 2px glow 알파 0.5 | `box-shadow: var(--s-focus-ring)` |
 | **카드·박스형** | `.cardInteractive` (Link 포함 `:has(a:focus-visible)`) / `.optionCard` | border + 3px glow 알파 0.5 | `box-shadow: var(--s-focus-ring-card)` |
 | **인라인 텍스트 링크** | auth `.link` / `.textLink` / 참고 링크 `<a>` | outline none + accent 색 + 2px underline | CSS underline |
-| **중성 보조** | `.iconBtn` / `.editGhostBtn` / `HomeMenu` / DropdownMenuItem | hover와 동일 중성 면 (글로우 없음) | §7 그대로 유지 |
+| **중성 보조** | `.iconBtn` / `.editGhostBtn` / `.mapActionBtn` / `HomeMenu` / DropdownMenuItem | hover와 동일 중성 면 (글로우 없음) | §7 그대로 유지 |
 
 **규칙:**
 - 모든 `:focus-visible` box-shadow는 `var(--token, fallback)` 참조. 리터럴 `0 0 0 Xpx rgba(...)` 하드코딩 금지.
@@ -534,7 +534,7 @@ description: >
     - **상세 화면(DetailRow 안)**: `styles.faint`(`--s-faint`) 명시 → 카테고리 아이콘(`styles.accent`)보다 한 단계 약한 위계. `className={cn('h-3.5 w-3.5 shrink-0', styles.faint)}` 패턴 사용.
   - 헤더 아이콘 버튼(`styles.iconBtn`): `sub`, hover 시 라이트는 중성 면 `#eceaf3`+`ink`, 다크는 보라 소프트. (유틸리티 도구라 **중성 hover** 유지 — 콘텐츠 요소의 accent hover와 의도적으로 구분, §5-A.)
   - **키보드 포커스(`:focus-visible`) = hover와 동일한 중성 면** (`iconBtn`·`editGhostBtn`): 브라우저 기본 outline을 끄고(`outline:none`) 중성 회색 면으로 표시. **입력 글로우(box-shadow 링) 쓰지 않는다**(글로우는 입력 필드 전용, §5).
-- **유틸 아이콘 글리프 크기 (탭타깃별 통일, 확정)**: **44px 탭타깃 버튼(`.iconBtn` — ⋮케밥·홈·햄버거·로그아웃) → 글리프 20px(`h-5 w-5`)** / **36px 버튼(`.editGhostBtn` 연필) → 글리프 16px(`h-4 w-4`)**. 탭타깃 크기(44/36) 자체는 유지하고 글리프만 이 규칙으로 맞춘다.
+- **유틸 아이콘 글리프 크기 (탭타깃별 통일, 확정)**: **44px 탭타깃 버튼(`.iconBtn` — ⋮케밥·홈·햄버거·로그아웃) → 글리프 20px(`h-5 w-5`)** / **36px 버튼(`.editGhostBtn` 연필) → 글리프 16px(`h-4 w-4`)** / **28px 버튼(`.mapActionBtn` — 위치 행 지도열기/▾ 인라인 액션 쌍, §10-I) → 글리프 16px(`h-4 w-4`)**. 탭타깃 크기(44/36) 자체는 유지하고 글리프만 이 규칙으로 맞춘다. `.mapActionBtn`(28px)은 **한 행에 두 버튼이 인접하는 인라인 액션 쌍 전용**의 컴팩트 예외 — 글리프 좌우 여백을 6px로 좁혀 두 버튼이 한 세트로 읽히게 한다. 단독 유틸 버튼에는 쓰지 않는다(36/44 유지).
 - strokeWidth: 카테고리 `2`, CTA 그라데이션 배지 내부 아이콘 `1.75`.
 - 크기 관례: 리스트 카드 메타 `h-3 w-3`, 상세 화면 DetailRow 메타 `h-3.5 w-3.5`, 헤더/검색 `h-4~5`.
 - 참고: 장식용 하트/💜는 카피(서브카피·빈 상태 문구)에만 등장 — 기능 아이콘 자리에는 절대 넣지 않는다.
@@ -732,8 +732,8 @@ description: >
 | 소요시간 | `Clock` | `styles.faint` | `h-3.5 w-3.5 shrink-0` | |
 | 시간대 주간 | `Sun` | `styles.faint` | `h-3.5 w-3.5 shrink-0` | |
 | 시간대 야간 | `Moon` | `styles.faint` | `h-3.5 w-3.5 shrink-0` | |
-| 위치 | `MapPin` | `styles.faint` | `h-3.5 w-3.5 shrink-0` | |
-| 식사시간 | `Utensils` | `styles.faint` | `h-3.5 w-3.5 shrink-0 mt-0.5` | 뱃지 그룹 앞 |
+| 위치 | `MapPin` | `styles.faint` | `h-3.5 w-3.5 shrink-0` | 텍스트 앞 leading 아이콘. 값·지도 열기는 `MapLink`(§10-I) |
+| 식사시간 | `Utensils` | `styles.faint` | `h-3.5 w-3.5 shrink-0` | 뱃지 그룹 앞. 부모 span `items-center`로 뱃지(pill ~25px) 세로 중심에 정렬(`mt-*` 보정 쓰지 않음) |
 
 복붙:
 ```tsx
@@ -839,6 +839,26 @@ export const STATUS_LABELS: Record<Status, string> = {
 저장 성공:         "수정되었습니다!"
 활동 되돌리기 확인 다이얼로그 제목: "가보고 싶은 곳으로 되돌릴까요?"
 ```
+
+---
+
+### 10-I. 위치 행 (`MapLink`) — 지도 열기
+
+왜: `location`(위치, 지도 검색용 실제 위치)은 값을 보여주기만 하는 게 아니라 지도 앱으로 여는 액션을 갖는다. 한 행 안에서 "값(텍스트)"과 "액션(버튼)"의 역할을 좌우로 분리해 읽기 쉽게 한다. 구현: `src/components/track/MapLink.tsx` (활동·장소 상세의 "위치" `DetailRow` 안에서 사용). `location` 값이 없으면 위치 행 자체를 렌더하지 않는다.
+
+**레이아웃 (좌우 분리):**
+- 루트 `flex w-full items-start` — `items-start`로 왼쪽 텍스트를 상단 정렬해 **라벨↔내용 여백을 다른 DetailRow(소요시간·지역 등)와 동일하게 맞춘다**(28px 버튼이 행을 키우고 center 정렬로 텍스트가 밀리던 문제 방지).
+- **왼쪽(값)**: `inline-flex min-w-0 flex-1 items-center gap-1.5` — `MapPin`(faint) + 위치 텍스트. **순수 텍스트(비링크, 클릭 동작 없음)**, `min-w-0 truncate`로 긴 값 잘림.
+- **오른쪽(액션)**: `flex shrink-0 items-center gap-0.5` + **`-mt-1`** — 지도 열기 아이콘(`Map`) + `▾`(`ChevronDown`) 앱 선택. 두 버튼 모두 `.mapActionBtn`(28px, §7). `gap-0.5`로 두 버튼을 한 세트로 인접(비겹침). **`-mt-1`은 28px 버튼의 시각 중심을 ~21px 텍스트 줄 중심에 맞추는 보정**(상단 정렬로 버튼이 텍스트보다 처지는 것 방지).
+- 접근성: 지도 열기 `aria-label="지도에서 열기"`, `▾` `aria-label="지도 앱 선택"`, 시트 항목별 `${label}에서 열기`.
+
+**지도 앱 config (`src/lib/map.ts`):**
+- `MAP_APPS` 배열로 관리(네이버지도·카카오맵·구글지도·티맵). **새 앱은 배열에 항목만 추가**하면 폼·시트·열기가 자동 반영된다.
+- 열기 방식은 링크 성격으로 분기(`anchorProps`): **웹 URL(http/https)은 새 탭**(`target="_blank"` + `rel="noopener noreferrer"` — 참고 링크와 동일 패턴), **앱 스킴(`tmap://` 등, `requiresApp: true`)은 같은 탭**(OS가 가로채 앱 실행 → 빈 탭 방지).
+- **환경 분기**(`useIsMobile`): `requiresApp` 앱(티맵)은 **데스크탑 시트에서 숨김**(웹에서 안 열림). 모바일에서 앱 스킴 실행 후 `pagehide`/`blur` 미발생 시(미설치 추정) **"○○ 앱을 설치해 주세요." 토스트** 안내. 기억된 기본 앱이 현재 환경에서 숨겨졌으면 첫 노출 앱으로 대체.
+- **마지막 선택 기억**(`useMapAppPreference`): 선택한 앱 id를 localStorage에 저장(기본 `naver`), SSR·차단 환경 안전(try/catch, 첫 렌더는 기본값 → 마운트 후 갱신).
+
+**시트**: 기존 `DropdownMenu`(base-ui, body portal) 재사용 — `globals.css`에서 `--s-card-bg`/`--s-ink`/`--s-accent-soft-bg`로 다크·portal 대응이 이미 처리됨(별도 토큰 재선언 불필요).
 
 ---
 

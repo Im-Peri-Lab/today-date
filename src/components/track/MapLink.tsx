@@ -1,6 +1,7 @@
 'use client'
 
 import { MapPin, Map, ChevronDown } from 'lucide-react'
+import { toast } from 'sonner'
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -8,6 +9,7 @@ import {
   DropdownMenuItem,
 } from '@/components/ui/dropdown-menu'
 import { useMapAppPreference } from '@/hooks/useMapAppPreference'
+import { useIsMobile } from '@/hooks/useIsMobile'
 import { MAP_APPS } from '@/lib/map'
 import { cn } from '@/lib/utils'
 import styles from '@/components/screens.module.css'
@@ -15,11 +17,34 @@ import styles from '@/components/screens.module.css'
 /**
  * 링크 성격에 맞는 anchor 속성.
  * - 웹 URL(http/https): 새 탭(target="_blank" + noopener) — 기존 패턴 재활용.
- * - 앱 스킴(tmap:// 등): 같은 탭. OS가 스킴을 가로채 앱을 실행하므로 페이지는
- *   그대로 남고, target="_blank" 로 인한 빈 탭이 생기지 않는다.
+ * - 앱 스킴(tmap:// 등)은 anchor 로 열지 않고 openAppScheme 로 처리한다.
  */
 function anchorProps(url: string): { target?: '_blank'; rel?: string } {
   return /^https?:/i.test(url) ? { target: '_blank', rel: 'noopener noreferrer' } : {}
+}
+
+/**
+ * 앱 스킴(tmap://)을 실행하고, 앱이 열리지 않으면(=미설치 추정) 안내를 띄운다.
+ * 앱이 열리면 페이지가 백그라운드로 가며 pagehide/blur 가 발생 → 안내를 띄우지 않는다.
+ * (열림을 감지하면 오탐 없이 넘어가고, 아무 이벤트도 없을 때만 미설치로 간주)
+ */
+function openAppScheme(url: string, label: string) {
+  let opened = false
+  const mark = () => {
+    opened = true
+  }
+  window.addEventListener('pagehide', mark, { once: true })
+  window.addEventListener('blur', mark, { once: true })
+
+  window.location.href = url
+
+  window.setTimeout(() => {
+    window.removeEventListener('pagehide', mark)
+    window.removeEventListener('blur', mark)
+    if (!opened && document.visibilityState === 'visible') {
+      toast.info(`${label} 앱을 설치해 주세요.`)
+    }
+  }, 2000)
 }
 
 /**
@@ -28,12 +53,20 @@ function anchorProps(url: string): { target?: '_blank'; rel?: string } {
  * - 오른쪽 끝(우측 정렬):
  *   · 지도 열기 아이콘 버튼 → 기억된 기본 앱으로 열기
  *   · ▾ 버튼 → 앱 선택 시트 → 선택 시 그 앱으로 열고 기본값으로 저장
- * 웹 지도는 새 탭, 앱 스킴(티맵)은 같은 탭으로 연다(anchorProps).
+ * 앱 스킴 전용(티맵)은 데스크탑에서 숨기고, 웹 지도는 새 탭으로 연다.
  * 열기 아이콘은 유틸리티 아이콘이라 중성 hover(mapActionBtn)를 따른다.
  */
 export function MapLink({ query }: { query: string }) {
   const { app: defaultApp, setApp } = useMapAppPreference()
-  const defaultUrl = defaultApp.build(query)
+  const isMobile = useIsMobile()
+
+  // 데스크탑에서는 앱 스킴 전용 앱(티맵)을 목록에서 제외.
+  const visibleApps = MAP_APPS.filter((app) => isMobile || !app.requiresApp)
+
+  // 기억된 기본 앱이 현재 환경에서 숨겨진(=쓸 수 없는) 앱이면 첫 노출 앱으로 대체.
+  const effectiveDefault =
+    visibleApps.find((app) => app.id === defaultApp.id) ?? visibleApps[0]
+  const defaultUrl = effectiveDefault.build(query)
 
   return (
     <div className="flex w-full items-center gap-2">
@@ -47,14 +80,26 @@ export function MapLink({ query }: { query: string }) {
           mapActionBtn(28px)로 박스를 줄여 글리프 여백·우측 끝 여백을 좁힌다.
           gap 2px, 비겹침 → 탭 오작동 없음. */}
       <span className="flex shrink-0 items-center gap-0.5">
-        <a
-          href={defaultUrl}
-          {...anchorProps(defaultUrl)}
-          aria-label="지도에서 열기"
-          className={styles.mapActionBtn}
-        >
-          <Map className="h-4 w-4" />
-        </a>
+        {/* 기본 앱 열기 — 웹은 anchor(새 탭), 앱 스킴은 button(openAppScheme) */}
+        {effectiveDefault.requiresApp ? (
+          <button
+            type="button"
+            className={styles.mapActionBtn}
+            aria-label="지도에서 열기"
+            onClick={() => openAppScheme(defaultUrl, effectiveDefault.label)}
+          >
+            <Map className="h-4 w-4" />
+          </button>
+        ) : (
+          <a
+            href={defaultUrl}
+            {...anchorProps(defaultUrl)}
+            aria-label="지도에서 열기"
+            className={styles.mapActionBtn}
+          >
+            <Map className="h-4 w-4" />
+          </a>
+        )}
 
         <DropdownMenu>
           <DropdownMenuTrigger
@@ -65,21 +110,36 @@ export function MapLink({ query }: { query: string }) {
             <ChevronDown className="h-4 w-4" />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            {MAP_APPS.map((app) => (
-              <DropdownMenuItem
-                key={app.id}
-                onClick={() => setApp(app.id)}
-                render={
-                  <a
-                    href={app.build(query)}
-                    {...anchorProps(app.build(query))}
-                    aria-label={`${app.label}에서 열기`}
-                  />
-                }
-              >
-                {app.label}
-              </DropdownMenuItem>
-            ))}
+            {visibleApps.map((app) => {
+              const url = app.build(query)
+              // 앱 스킴 앱은 button(openAppScheme), 웹 앱은 anchor(새 탭)로 연다.
+              return app.requiresApp ? (
+                <DropdownMenuItem
+                  key={app.id}
+                  aria-label={`${app.label}에서 열기`}
+                  onClick={() => {
+                    setApp(app.id)
+                    openAppScheme(url, app.label)
+                  }}
+                >
+                  {app.label}
+                </DropdownMenuItem>
+              ) : (
+                <DropdownMenuItem
+                  key={app.id}
+                  onClick={() => setApp(app.id)}
+                  render={
+                    <a
+                      href={url}
+                      {...anchorProps(url)}
+                      aria-label={`${app.label}에서 열기`}
+                    />
+                  }
+                >
+                  {app.label}
+                </DropdownMenuItem>
+              )
+            })}
           </DropdownMenuContent>
         </DropdownMenu>
       </span>

@@ -11,8 +11,13 @@ export type MapAppId = string
 export interface MapApp {
   id: MapAppId
   label: string
-  /** 검색어(위치 텍스트)를 받아 새 탭으로 열 URL을 만든다. */
+  /** 검색어(위치 텍스트)를 받아 열 URL을 만든다. (웹 URL 또는 앱 스킴) */
   build: (query: string) => string
+  /**
+   * 웹 페이지가 없어 네이티브 앱 스킴(tmap:// 등)으로만 열리는 앱.
+   * true 면 데스크탑 목록에서 숨기고, 모바일에서 앱 미설치 시 안내를 띄운다.
+   */
+  requiresApp?: boolean
 }
 
 export const MAP_APPS: MapApp[] = [
@@ -37,6 +42,7 @@ export const MAP_APPS: MapApp[] = [
     id: 'tmap',
     label: '티맵',
     build: (q) => `tmap://search?name=${encodeURIComponent(q)}`,
+    requiresApp: true,
   },
 ]
 

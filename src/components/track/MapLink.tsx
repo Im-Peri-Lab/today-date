@@ -33,15 +33,15 @@ export function MapLink({ query }: { query: string }) {
       </span>
 
       {/* 오른쪽: 액션 2개 (지도 열기 / 앱 선택) — 한 세트로 인접 배치.
-          editGhostBtn(36px 탭타깃)을 유지하되 박스를 거의 맞붙여(gap 2px, 비겹침)
-          하나의 액션 세트로 읽히게 한다. 겹치지 않으므로 탭 오작동 없음. */}
+          mapActionBtn(28px)로 박스를 줄여 글리프 여백·우측 끝 여백을 좁힌다.
+          gap 2px, 비겹침 → 탭 오작동 없음. */}
       <span className="flex shrink-0 items-center gap-0.5">
         <a
           href={defaultApp.build(query)}
           target="_blank"
           rel="noopener noreferrer"
           aria-label="지도에서 열기"
-          className={styles.editGhostBtn}
+          className={styles.mapActionBtn}
         >
           <Map className="h-4 w-4" />
         </a>
@@ -49,7 +49,7 @@ export function MapLink({ query }: { query: string }) {
         <DropdownMenu>
           <DropdownMenuTrigger
             render={
-              <button type="button" className={styles.editGhostBtn} aria-label="지도 앱 선택" />
+              <button type="button" className={styles.mapActionBtn} aria-label="지도 앱 선택" />
             }
           >
             <ChevronDown className="h-4 w-4" />

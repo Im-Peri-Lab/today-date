@@ -1148,6 +1148,53 @@
 }
 
 /*
+ * 지도 액션 아이콘 버튼(위치 행의 지도 열기 / ▾ 앱 선택) 전용.
+ * editGhostBtn(36px)보다 박스를 줄여(28px) 글리프 좌우 여백을 6px로 좁힌다 —
+ * 두 버튼이 한 세트로 인접해 보이고 우측 끝 여백도 함께 줄어든다.
+ * 색·hover·focus 는 editGhostBtn 과 동일한 중성 유틸 언어(토큰 참조, §7·§5).
+ */
+.mapActionBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  flex-shrink: 0;
+  border-radius: 0.5rem;
+  color: var(--s-faint, #9ca3af);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition:
+    background 140ms ease,
+    color 140ms ease;
+}
+@media (hover: hover) {
+  .mapActionBtn:hover {
+    background: var(--s-card-border-strong, #eceaf3);
+    color: var(--s-ink, #1a1033);
+  }
+}
+@media (prefers-color-scheme: dark) and (hover: hover) {
+  .mapActionBtn:hover {
+    background: var(--s-accent-soft-bg, #2d2540);
+    color: var(--s-accent, #c084fc);
+  }
+}
+/* 키보드 포커스 = 중성 hover 와 동일(글로우 없음) */
+.mapActionBtn:focus-visible {
+  outline: none;
+  background: var(--s-card-border-strong, #eceaf3);
+  color: var(--s-ink, #1a1033);
+}
+@media (prefers-color-scheme: dark) {
+  .mapActionBtn:focus-visible {
+    background: var(--s-accent-soft-bg, #2d2540);
+    color: var(--s-accent, #c084fc);
+  }
+}
+
+/*
  * Primary 버튼 채움색 — 상세 하단 버튼 + 폼(추가/수정) 제출·저장 버튼 공용.
  *
  * 문제: inline style={{ background: 'var(--s-accent)' }} 사용 시 다크에서 --s-accent 가

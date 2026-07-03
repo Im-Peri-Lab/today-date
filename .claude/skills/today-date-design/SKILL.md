@@ -29,17 +29,16 @@ description: >
 
 ## 적용 현황 (이 기준이 어디까지 반영됐나)
 
-이 문서의 기준값은 **이미 반영된 화면(홈·`/list`)에서 추출**한 것이다. 아래 미반영 화면을 옮길 때 이 문서를 그대로 복붙 레퍼런스로 쓴다.
+이 문서의 기준값은 **실제 반영된 화면에서 추출**한 것이다. 새 화면을 추가하거나 기존 화면을 개편할 때 이 문서를 디자인 레퍼런스로 삼아 토큰·클래스를 그대로 복붙한다.
 
 | 화면 | 상태 | 비고 |
 |---|---|---|
 | `/` (홈) | ✅ 기준 반영 | `styles.page` + `PageHeader` + `--s-*` 토큰 |
 | `/list` (목록) | ✅ 기준 반영 | 기준의 레퍼런스 구현 (`ListView`) |
 | `/activities/[id]`, `/places/[id]` (상세) | ✅ 기준 반영 | DetailBlock 카드·인라인 편집·버튼 위계·상태 태그·메타 아이콘 확정. § 10 참고 |
-| `/activities/[id]/edit` (수정) | ❌ 미반영 | 옛 `bg-gradient-to-br from-violet-50 to-purple-100` 사용 → 금지 규칙 위반 |
-| `/recommend/activity`, `/recommend/place` (추천) | ❌ 미반영 | 동일하게 옛 보라 그라데이션 사용 |
+| `/recommend/activity`, `/recommend/place` (추천) | ✅ 기준 반영 | `styles.page` 래퍼 사용, 옛 보라 그라데이션 제거됨(그라데이션 전역 확장 반영) |
 
-미반영 화면 마이그레이션 순서: ① `<main>` 래퍼를 `styles.page`(또는 `cn(styles.page, styles.pageStatic)`)로 교체 → ② 보라 그라데이션 배경 제거 → ③ 카드/컨트롤/헤더를 아래 1~9 섹션 클래스로 치환.
+새 화면을 추가할 때는 `<main>` 래퍼를 `styles.page`(또는 `cn(styles.page, styles.pageStatic)`)로 두고, 카드/컨트롤/헤더를 아래 1~9 섹션의 토큰·클래스로 구성한다.
 
 ---
 
@@ -80,9 +79,6 @@ description: >
 | `--s-chip-neutral-bg` | `var(--s-card-border-strong)` | `var(--s-card-bg)` | 다녀온 곳 칩 중성 배경 |
 | `--s-label-muted` | `#8b8798` | `#908aa0` | 행 미리보기·중성 칩 텍스트 (sub↔faint 중간 톤; 섹션 라벨은 `--s-sub`) |
 | `--s-icon-muted` | `#c7c3d2` | `#4f4960` | chevron 등 중성 진입 아이콘 |
-| `--s-hint` | `#b5b0bf` | `#635d72` | 빈 상태 안내·visited place 칩 전경 |
-
-> **`--s-hint` vs `--s-placeholder`**: `--s-placeholder`는 폼 입력 placeholder 전용(접근성 대비 기준 유지). `--s-hint`는 UI 안내 텍스트(빈 상태·칩 흐림) 전용 — 어두운 배경 위에서 더 낮은 대비를 허용하는 컨텍스트. 두 토큰을 섞지 않는다.
 
 ---
 
@@ -146,7 +142,7 @@ description: >
 - PC 오버라이드는 토큰 자체 내에 `@media (min-width: 1024px)` 블록으로 정의돼 있어 유틸 클래스에 별도 미디어 쿼리 불필요.
 
 **의도된 예외 (7토큰에 넣지 않음):**
-- 추천 위저드 h1 20px: 키우면 레이아웃 흔들림, 미반영 화면 스코프.
+- 추천 위저드 h1 20px: 위저드 전용 사이즈(키우면 레이아웃 흔들림).
 - 다이얼로그 제목 20px: 페이지 h1과 분리된 전용 사이즈 (§11-A).
 - 카드 메모 미리보기·빈 상태 14px/`--s-faint` (ActivityCard·PlaceCard·VisitRecordBlock): body도 caption도 아닌 "카드 흐린 미리보기" 의도된 조합.
 - DetailBlock h2 블록 제목 14px/500: 필드 라벨 톤, 별도 위계.
@@ -213,7 +209,7 @@ description: >
 
 **radius 통일 이유**: 과거 모바일 `13px` / PC `14px` 분리는 의도 없는 임의값이었다. `0.875rem`(14px)으로 통일. CTA(16px)보다 한 단계 작아 시각적 위계를 유지한다.
 
-**색은 기존 토큰 흡수.** 조연 카드 안의 색(칩·텍스트·아이콘)은 전용 네임스페이스 토큰 없이 전역 시맨틱 토큰(`--s-accent`, `--s-ink`, `--s-label-muted`, `--s-icon-muted`, `--s-hint` 등)을 직접 참조한다. 전용 토큰은 `--s-row-divider`(카드 내 행 구분선 — `--s-divider`보다 연한 톤이 의도)만 남긴다.
+**색은 기존 토큰 흡수.** 조연 카드 안의 색(칩·텍스트·아이콘)은 전용 네임스페이스 토큰 없이 전역 시맨틱 토큰(`--s-accent`, `--s-ink`, `--s-label-muted`, `--s-icon-muted`, `--s-faint` 등)을 직접 참조한다. 전용 토큰은 `--s-row-divider`(카드 내 행 구분선 — `--s-divider`보다 연한 톤이 의도)만 남긴다.
 
 ### 3-A. 홈 레이아웃 확정값 (변경 금지)
 
@@ -274,7 +270,7 @@ description: >
 | 세그먼트 (`styles.option`) | **40px** (`height:2.5rem`) | 10px (`0.625rem`) | `screens.module.css .option` |
 | 카테고리 칩 (`styles.chip`) | **36px** (`height:2.25rem`) | pill (`9999px`) | `screens.module.css .chip` |
 | 추가 화면 하단 Primary (제출) | **48px** (`h-12`) | 10px | `FormLayout.tsx` |
-| 상세 하단 Primary("다녀왔어요"/"되돌리기")·삭제 | **36px** (`h-9`) | 10px | `ActivityDetail`/`PlaceDetail` |
+| 상세 하단 Primary(정방향 "다녀왔어요" / 역방향 "가보고 싶은 곳으로")·삭제 | **36px** (`h-9`) | 10px | `ActivityDetail`/`PlaceDetail` |
 | 인라인 편집 Save·Cancel (`DetailBlock`) | **36px** (`h-9`) | 10px | `DetailBlock.tsx` |
 
 → **액션·컨트롤 사이즈 위계** (한 화면 안에서 정렬):
@@ -791,7 +787,7 @@ export const STATUS_LABELS: Record<Status, string> = {
   {/* 우: Primary — 단색 보라 채움 */}
   <Button className={cn(styles.detailPrimaryBtn, 'gap-1.5 text-white hover:brightness-105')}
     onClick={…}>
-    <CheckCircle2 className="h-4 w-4" />다녀왔어요   {/* or 가보고 싶은 곳으로 되돌리기 */}
+    <CheckCircle2 className="h-4 w-4" />다녀왔어요   {/* 역방향: 가보고 싶은 곳으로 */}
   </Button>
 </div>
 ```
@@ -802,7 +798,7 @@ export const STATUS_LABELS: Record<Status, string> = {
 - ⚠️ `inline style={{ background: ... }}` 사용 금지: CSS 클래스를 항상 이겨 다크 보정 불가
 - 텍스트: `text-white` (대비 ~5.4:1, WCAG AA ✓)
 - 그라데이션(`--s-active-fill`, `--s-grad`) 사용 금지 — FAB·로고 등 소형 액센트 전용
-- 라벨: 미방문 `"다녀왔어요"` / 방문완료 `"가보고 싶은 곳으로 되돌리기"`
+- 라벨: 미방문 `"다녀왔어요"` / 방문완료 `"가보고 싶은 곳으로"`
 
 **삭제 버튼** (`styles.detailDeleteBtn`):
 - 기본: `--s-card-border-strong` 배경 + `--s-faint` 텍스트 (중립 면, 빨강 배경 금지)

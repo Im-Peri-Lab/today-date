@@ -435,3 +435,57 @@
 - **입력 차단 검증을 먼저 본다**: 링크 스킴 보정은 href만 고쳐선 안 되고, 애초에 스킴 없는 입력을 막던 폼·API 검증(zod)을 함께 완화해야 실제 동작. 표면(표시)만 보지 말고 입력 파이프라인 전체 확인
 
 ---
+
+## 2026-07-02 — P0 버그 2건·added_by 제거·location/area 재정의·위치 지도 연동
+
+> 새 세션. P0 버그 2건 처리 후, 지역/실제 위치 개념 분리와 지도 앱 연동까지 진행. 마이그레이션 003·004·005 모두 원격 적용 완료.
+
+### P0 버그 ① 신규 활동 시간대 디폴트 제거 (main 머지)
+- 브랜치 `fix/activity-time-of-day-default` → main 머지
+- `/activities/new`에서 시간대 "아무때나(any)"가 초기 selected로 렌더되던 버그 수정
+- 원인: ActivityForm defaultValues에 `time_of_day: 'any'` 하드코딩 → watch가 이 값을 읽어 SegmentedControl이 선택 상태로 렌더
+- 수정: defaultValue 제거(미선택 시작) + 시간대 required 추가 + 스키마 에러문구. duration_bucket과 동일 패턴. 3파일 5줄 최소 수정
+
+### P0 버그 ② added_by 필드 제거 (PR #35 squash `f0349f7`)
+- 브랜치 `fix/detail-registered-by-label` → main PR #35 squash 머지
+- 상세 등록일시 영역에 `partner_b`·`both` 등 알 수 없는 raw 값 노출
+- 진단: `added_by`는 DB에 default·CHECK 없는 순수 text 컬럼, 폼 UI에 입력 컨트롤 없음, 코드에 리터럴 없음 → 스키마만 준비되고 UI가 연결 안 된 미구현 필드. 노출값은 DB 잔여/수동 데이터
+- 결정: labels.ts 매핑(유령 계약 하드코딩) 대신 필드 자체 제거. 12파일(+35/−48)에서 added_by 제거
+- DB 마이그레이션 003(`003_drop_added_by.sql`): activities·places에서 added_by 컬럼 DROP. 원격 적용 완료(컬럼+잔여 데이터 정리). `app_config.partner_*_name`은 커플 이름 표시용 별개 관심사라 유지
+
+### location → area rename (PR #36 squash `263290a`)
+- 브랜치 `refactor/rename-location-to-area` → main PR #36 squash 머지
+- 진단으로 전제 정정: `location`은 places에만 존재, activities엔 없음 → places 단일 테이블 작업
+- places.location(지역 태그: 성수/홍대)을 area로 rename. 화면 라벨 "위치"→"지역". 14파일 일괄
+- API param/body·query string·usePlaces params·recommend body까지 area로 통일(서버 매핑 코드 회피)
+- DB 마이그레이션 004(`004_rename_location_to_area.sql`): `alter table places rename column location to area`. 기존 데이터 그대로 보존. 원격 적용 완료
+- 배포 순서 주의사항 확인: 코드가 area 조회하므로 머지와 DB rename을 짧은 간격으로 처리
+
+### 위치 필드 + 지도 앱 연동 (PR #37 squash `e9c6cf2`, 12커밋)
+- 브랜치 `feat/add-location-map-link` → main PR #37 squash 머지
+- 004가 비운 location 이름을 "지도 검색용 실제 위치"(상호명·관광지명·주소 모두 허용) 의미로 재도입. activities·places 둘 다 신규 추가, optional
+- DB 마이그레이션 005(`005_add_location.sql`): activities·places에 location text 추가(nullable). 원격 적용 완료. add column이라 비파괴적
+- 지도 앱 config(`lib/map.ts`): MAP_APPS 배열로 관리. 네이버·구글로 시작 → 작업 중 카카오맵·티맵 추가(항목만 추가하면 폼·시트·열기 자동 반영). requiresApp 플래그로 앱스킴 전용(데스크탑 숨김/모바일 미설치 토스트) 처리
+- 마지막 선택 앱 기억: `useMapAppPreference` 훅(localStorage, try/catch SSR·차단 안전, 기본 naver). 코드베이스 최초 localStorage 사용
+- MapLink 컴포넌트: 위치 텍스트(비링크) + 우측 끝 지도 열기 아이콘 + ▾(앱 선택 시트). 시트는 기존 DropdownMenu(base-ui portal) 재활용해 다크·portal 대응 자동
+- 신규 유틸 버튼 `mapActionBtn`(28px): 기존 유틸 아이콘 탭타깃(36/44px)보다 작은 3번째 크기. 인라인 액션 쌍 전용(SKILL.md 미반영 — 후속 문서화 필요)
+- 장소 폼·상세 필드 순서 통일: 제목 → 카테고리 → 식사시간 → 지역 → 위치 → 메모 → 참고링크(지역·위치 인접 배치). 활동은 이미 일치라 무변경
+- 위치 미입력 시 처리: 초기엔 위치 행 미렌더 → 이후 `dc29e8f`(main 직접)로 항상 표시 + "아직 위치가 없어요" faint 빈 상태(메모 빈값과 동일 패턴)로 변경
+
+### 교훈
+- **미구현 필드는 매핑보다 제거**: added_by는 UI가 끝내 안 붙은 유령 필드라, labels.ts에 표시 매핑을 넣는 건 없는 계약을 하드코딩하는 것. 필드 자체를 걷어내는 게 정답
+- **rename은 전제부터 진단**: "activities·places 둘 다"라는 요청 전제가 진단 결과 틀렸음(location은 places만). 작업 착수 전 grep 전수로 실제 범위 확정
+- **같은 이름의 의미 뒤바뀜은 시간차로 분리**: location→area 먼저 완료·배포 후 location 이름을 새 의미로 재도입. 한 브랜치에 섞으면 의미 충돌·데이터 사고 위험
+- **확장은 지금 다 만들지 말고 구조만**: 지도 앱을 config 배열로 빼서, 카카오·티맵은 항목 추가만으로 확장. "확장 대비 설계"는 지금 전부 구현이 아니라 싸게 붙일 구조를 잡는 것
+- **아이콘 간격은 박스가 아니라 내부 여백이 지배**: 탭타깃 유지 시 글리프 간격은 CSS gap으로 못 좁힘. mapActionBtn 28px로 박스를 줄여 해소
+- **main 직접 푸시 지양**: `dc29e8f`가 브랜치 없이 main 직접. Vercel 배포 목록 관리 위해 작은 UI 조정도 PR 경유가 원칙
+
+### Context Change Record — location/area 의미 재정의
+- 원래 방향: places에 location 컬럼 하나. 값은 지역 태그(성수/홍대), 추천 필터용. 화면 라벨 "위치"
+- 새 방향:
+  - places.location → area로 rename(추천 필터용 지역 태그, 라벨 "지역")
+  - location 이름을 "지도 검색용 실제 위치"(상호명·관광지명·주소) 의미로 재도입
+  - activities·places 둘 다 location 신규 추가(optional), 지도 앱 연동
+- 이유: 추천용 지역 태그와 지도 검색용 실제 위치는 성격이 완전히 다른 두 정보인데 하나의 필드·이름에 섞여 있었음. 지도 연동을 추가하며 분리 필요성이 표면화. area(넓은 분류)=어느 동네, location(콕 집은 목적지)=지도로 열 실제 위치
+- 영향: 마이그레이션 004(rename)·005(신규 컬럼). 장소 폼·상세 필드 순서 재정의(식사시간→지역→위치). 지도 앱 config(lib/map.ts) 신설. useMapAppPreference 훅(첫 localStorage 사용). mapActionBtn 28px 신규
+- 후속 고려사항: mapActionBtn 28px SKILL.md 문서화, 뱃지 크기 통일(mealBadge vs visitedTag), 실기기 QA(티맵 앱 열림/미설치 토스트·데스크탑 티맵 숨김·지도 4종 검색)

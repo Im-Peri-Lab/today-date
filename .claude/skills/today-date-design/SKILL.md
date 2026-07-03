@@ -458,6 +458,13 @@ description: >
 ### 카드 ⋮ 메뉴 열림 강조
 - `/list` 카드(`ActivityCard`/`PlaceCard`)는 ⋮ 메뉴가 열린 동안 카드 보더를 **hover와 동일 톤**(`--s-card-hover-border`)으로 유지한다. 트리거의 `aria-expanded="true"`를 카드가 `:has([aria-expanded='true'])`로 반영(`screens.module.css` `.cardInteractive`). **보더만** — 그림자·`translateY` 없음(메뉴 조작 중 카드 들썩임 방지). `@media(hover)` 밖이라 **마우스·터치 모두** 강조. `hideMenu` 결과 카드(추천)는 트리거가 없어 미적용.
 
+### 카드 ⋮ 메뉴 항목 (ItemMenu)
+
+`ActivityCard`/`PlaceCard`의 ⋮ 메뉴(`ItemMenu`) 항목 구성. 문구는 `STATUS_MENU_LABELS`(`src/lib/labels.ts`) 참조.
+
+- **미방문(wishlist)**: 정보 수정 → 다녀온 곳으로 → (구분선) 삭제
+- **방문완료(visited)**: 정보 수정 → 기록 수정 → 가보고 싶은 곳으로 → (구분선) 삭제
+
 ### 토큰 공유 주의
 - `--s-active-fill`/`--s-active-line`은 `/list` 필터 칩·세그먼트·상태 토글과 **공유**된다. 상태 색을 바꿀 땐 토큰 정의값을 건드리지 말고 **사용처 클래스**(`.chipActive` 등)에서만 조정한다 — 토큰값을 바꾸면 StepDots·CTA까지 휩쓸려 회귀한다.
 
@@ -855,6 +862,16 @@ export const STATUS_LABELS: Record<Status, string> = {
 - **마지막 선택 기억**(`useMapAppPreference`): 선택한 앱 id를 localStorage에 저장(기본 `naver`), SSR·차단 환경 안전(try/catch, 첫 렌더는 기본값 → 마운트 후 갱신).
 
 **시트**: 기존 `DropdownMenu`(base-ui, body portal) 재사용 — `globals.css`에서 `--s-card-bg`/`--s-ink`/`--s-accent-soft-bg`로 다크·portal 대응이 이미 처리됨(별도 토큰 재선언 불필요).
+
+---
+
+### 10-J. 폼·상세 필드 순서 (정본)
+
+입력(추가/편집) 화면과 상세 화면의 필드 순서를 **동일하게** 유지한다(불일치는 인지 부하).
+
+- **장소**: 제목 → 카테고리 → 식사시간 → 지역(`area`) → 위치(`location`) → 메모 → 참고링크. 지역·위치는 같은 "어디" 성격이라 인접 배치(식사시간을 위로 올려 분리).
+- **활동**: 제목 → 카테고리 → 소요시간 → 시간대 → 위치(`location`) → 메모 → 참고링크.
+- 폼 라벨은 "참고 URL", 상세 라벨은 "참고 링크"(폼/상세 라벨 차이는 의도).
 
 ---
 

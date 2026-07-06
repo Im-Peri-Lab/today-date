@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { useMapAppPreference } from '@/hooks/useMapAppPreference'
 import { useIsMobile } from '@/hooks/useIsMobile'
+import { useIsIosSafari } from '@/hooks/useIsIosSafari'
 import { MAP_APPS } from '@/lib/map'
 import { cn } from '@/lib/utils'
 import styles from '@/components/screens.module.css'
@@ -24,9 +25,23 @@ function anchorProps(url: string): { target?: '_blank'; rel?: string } {
 }
 
 /**
+ * `requiresApp`(앱 스킴 전용) 지도앱 공통 미설치 안내 문구.
+ * 티맵 하드코딩이 아니라 requiresApp 앱 전체가 이 패턴을 쓴다(향후 추가 앱도 동일).
+ */
+function installPrompt(label: string) {
+  return `${label} 앱을 설치해 주세요.`
+}
+
+/**
  * 앱 스킴(tmap://)을 실행하고, 앱이 열리지 않으면(=미설치 추정) 안내를 띄운다.
  * 앱이 열리면 페이지가 백그라운드로 가며 pagehide/blur 가 발생 → 안내를 띄우지 않는다.
  * (열림을 감지하면 오탐 없이 넘어가고, 아무 이벤트도 없을 때만 미설치로 간주)
+ *
+ * 브라우저별 한계(감지는 best-effort):
+ * - Chrome iOS·Android: 미설치 스킴이 조용히 실패 → 이 timeout 토스트가 정상 동작.
+ * - iOS Safari: 미설치 시 브라우저가 네이티브 오류 모달을 먼저 띄우고, 그 모달이 blur를
+ *   유발해 이 토스트가 억제된다. 그래서 iOS Safari는 아래 openRequiresApp에서 이동 전에
+ *   안내를 먼저 보여준다(warn-first).
  */
 function openAppScheme(url: string, label: string) {
   let opened = false
@@ -42,7 +57,7 @@ function openAppScheme(url: string, label: string) {
     window.removeEventListener('pagehide', mark)
     window.removeEventListener('blur', mark)
     if (!opened && document.visibilityState === 'visible') {
-      toast.info(`${label} 앱을 설치해 주세요.`)
+      toast.info(installPrompt(label))
     }
   }, 2000)
 }
@@ -59,9 +74,27 @@ function openAppScheme(url: string, label: string) {
 export function MapLink({ query }: { query: string }) {
   const { app: defaultApp, setApp } = useMapAppPreference()
   const isMobile = useIsMobile()
+  const isIosSafari = useIsIosSafari()
 
   // 데스크탑에서는 앱 스킴 전용 앱(티맵)을 목록에서 제외.
   const visibleApps = MAP_APPS.filter((app) => isMobile || !app.requiresApp)
+
+  /**
+   * 앱 스킴 전용(requiresApp) 앱 열기.
+   * - iOS Safari: 미설치 시 브라우저가 네이티브 오류를 먼저 띄워 사용자가 당황하므로,
+   *   이동 전에 "설치돼 있어야 열려요" 안내를 먼저 보여주고 [열기] 눌렀을 때 스킴 이동.
+   * - 그 외(Chrome iOS·Android): 기존 동작 유지(바로 이동 + 미설치 timeout 토스트).
+   */
+  const openRequiresApp = (url: string, label: string) => {
+    if (isIosSafari) {
+      toast.info(installPrompt(label), {
+        action: { label: '열기', onClick: () => openAppScheme(url, label) },
+        duration: 6000,
+      })
+      return
+    }
+    openAppScheme(url, label)
+  }
 
   // 기억된 기본 앱이 현재 환경에서 숨겨진(=쓸 수 없는) 앱이면 첫 노출 앱으로 대체.
   const effectiveDefault =
@@ -89,7 +122,7 @@ export function MapLink({ query }: { query: string }) {
             type="button"
             className={styles.mapActionBtn}
             aria-label="지도에서 열기"
-            onClick={() => openAppScheme(defaultUrl, effectiveDefault.label)}
+            onClick={() => openRequiresApp(defaultUrl, effectiveDefault.label)}
           >
             <Map className="h-4 w-4" />
           </button>
@@ -122,7 +155,7 @@ export function MapLink({ query }: { query: string }) {
                   aria-label={`${app.label}에서 열기`}
                   onClick={() => {
                     setApp(app.id)
-                    openAppScheme(url, app.label)
+                    openRequiresApp(url, app.label)
                   }}
                 >
                   {app.label}

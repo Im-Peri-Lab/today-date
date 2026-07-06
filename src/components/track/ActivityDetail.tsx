@@ -44,7 +44,7 @@ import {
   STATUS_MENU_LABELS,
 } from '@/lib/labels'
 import { buildDetailHref, DEFAULT_LIST_RETURN_TO } from '@/lib/listReturn'
-import { stashActivityPrefill, buildCopyTitle } from '@/lib/duplicatePrefill'
+import { stashActivityDuplicate } from '@/lib/duplicatePrefill'
 import { cn } from '@/lib/utils'
 import { resolveHref } from '@/lib/url'
 import { MapLink } from './MapLink'
@@ -136,20 +136,10 @@ export function ActivityDetail({ id, initialData, initialEdit, returnTo }: Props
     setEditingInfo(true)
   }
 
-  // 복사하기: 원본의 "등록 정보"만 stash 하고 신규 폼으로 이동한다.
-  // 방문 기록(status/visited_at/rating/review_note)·생성일·id 는 복사하지 않는다 → 저장 시 wishlist 로 생성.
+  // 복사하기: 등록 정보만 stash 후 신규 폼으로 이동 (리스트 카드와 동일 헬퍼 공유).
   function handleDuplicate() {
     if (!activity) return
-    stashActivityPrefill({
-      title: buildCopyTitle(activity.title),
-      category_id: activity.category_id ?? '',
-      duration_bucket: activity.duration_bucket ?? undefined,
-      time_of_day: activity.time_of_day,
-      location: activity.location ?? '',
-      memo: activity.memo ?? '',
-      reference_url: activity.reference_url ?? '',
-    })
-    router.push('/activities/new?from=copy')
+    router.push(stashActivityDuplicate(activity))
   }
 
   function exitEditInfo() {

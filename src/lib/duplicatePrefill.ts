@@ -1,5 +1,6 @@
 import type { ActivityFormValues } from '@/lib/schemas/activitySchema'
 import type { PlaceFormValues } from '@/lib/schemas/placeSchema'
+import type { Activity, Place } from '@/types'
 
 /**
  * "복사하기" 임시 저장소 (sessionStorage).
@@ -68,4 +69,38 @@ export function stashPlacePrefill(values: PlaceFormValues) {
 
 export function takePlacePrefill(): PlaceFormValues | null {
   return take<PlaceFormValues>(PLACE_KEY)
+}
+
+/**
+ * 원본 활동 → 등록 정보만 stash 하고 신규 활동 폼 경로를 돌려준다 (상세·리스트 카드 공용).
+ * 방문 기록성 데이터(status/visited_at/rating/review_note)·생성일·id 는 복사하지 않는다 → 저장 시 wishlist.
+ */
+export function stashActivityDuplicate(activity: Activity): string {
+  stashActivityPrefill({
+    title: buildCopyTitle(activity.title),
+    category_id: activity.category_id ?? '',
+    duration_bucket: activity.duration_bucket ?? undefined,
+    time_of_day: activity.time_of_day,
+    location: activity.location ?? '',
+    memo: activity.memo ?? '',
+    reference_url: activity.reference_url ?? '',
+  })
+  return '/activities/new?from=copy'
+}
+
+/**
+ * 원본 장소 → 등록 정보만 stash 하고 신규 장소 폼 경로를 돌려준다 (상세·리스트 카드 공용).
+ * area(지역)·location(위치)를 그대로 분리 보존한다.
+ */
+export function stashPlaceDuplicate(place: Place): string {
+  stashPlacePrefill({
+    title: buildCopyTitle(place.title),
+    category_id: place.category_id ?? '',
+    area: place.area,
+    location: place.location ?? '',
+    meal_times: place.meal_times,
+    memo: place.memo ?? '',
+    reference_url: place.reference_url ?? '',
+  })
+  return '/places/new?from=copy'
 }

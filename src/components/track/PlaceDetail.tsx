@@ -22,7 +22,7 @@ import { placeFormSchema, type PlaceFormValues } from '@/lib/schemas/placeSchema
 import type { Place } from '@/types'
 import { MEAL_LABELS, STATUS_LABELS, STATUS_MENU_LABELS } from '@/lib/labels'
 import { buildDetailHref, DEFAULT_LIST_RETURN_TO } from '@/lib/listReturn'
-import { stashPlacePrefill, buildCopyTitle } from '@/lib/duplicatePrefill'
+import { stashPlaceDuplicate } from '@/lib/duplicatePrefill'
 import { cn } from '@/lib/utils'
 import { resolveHref } from '@/lib/url'
 import { MapLink } from './MapLink'
@@ -108,20 +108,10 @@ export function PlaceDetail({ id, initialData, initialEdit, returnTo }: Props) {
     setEditingInfo(true)
   }
 
-  // 복사하기: 원본의 "등록 정보"만 stash 하고 신규 폼으로 이동한다.
-  // 방문 기록(status/visited_at/rating/review_note)·생성일·id 는 복사하지 않는다 → 저장 시 wishlist 로 생성.
+  // 복사하기: 등록 정보만 stash 후 신규 폼으로 이동 (리스트 카드와 동일 헬퍼 공유).
   function handleDuplicate() {
     if (!place) return
-    stashPlacePrefill({
-      title: buildCopyTitle(place.title),
-      category_id: place.category_id ?? '',
-      area: place.area,
-      location: place.location ?? '',
-      meal_times: place.meal_times,
-      memo: place.memo ?? '',
-      reference_url: place.reference_url ?? '',
-    })
-    router.push('/places/new?from=copy')
+    router.push(stashPlaceDuplicate(place))
   }
 
   function exitEditInfo() {

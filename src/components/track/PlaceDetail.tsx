@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { CategoryBadge } from './CategoryBadge'
 import { PlaceFields } from './PlaceFields'
+import { DuplicateMenu } from './DuplicateMenu'
 import { DetailBlock } from './DetailBlock'
 import { DetailRow } from './DetailRow'
 import { VisitRecordBlock } from './VisitRecordBlock'
@@ -21,6 +22,7 @@ import { placeFormSchema, type PlaceFormValues } from '@/lib/schemas/placeSchema
 import type { Place } from '@/types'
 import { MEAL_LABELS, STATUS_LABELS, STATUS_MENU_LABELS } from '@/lib/labels'
 import { buildDetailHref, DEFAULT_LIST_RETURN_TO } from '@/lib/listReturn'
+import { stashPlacePrefill } from '@/lib/duplicatePrefill'
 import { cn } from '@/lib/utils'
 import { resolveHref } from '@/lib/url'
 import { MapLink } from './MapLink'
@@ -106,6 +108,22 @@ export function PlaceDetail({ id, initialData, initialEdit, returnTo }: Props) {
     setEditingInfo(true)
   }
 
+  // 복사하기: 원본의 "등록 정보"만 stash 하고 신규 폼으로 이동한다.
+  // 방문 기록(status/visited_at/rating/review_note)·생성일·id 는 복사하지 않는다 → 저장 시 wishlist 로 생성.
+  function handleDuplicate() {
+    if (!place) return
+    stashPlacePrefill({
+      title: `${place.title} 복사본`,
+      category_id: place.category_id ?? '',
+      area: place.area,
+      location: place.location ?? '',
+      meal_times: place.meal_times,
+      memo: place.memo ?? '',
+      reference_url: place.reference_url ?? '',
+    })
+    router.push('/places/new?from=copy')
+  }
+
   function exitEditInfo() {
     setEditingInfo(false)
     // URL에서 ?edit= 제거 (재내비게이션 없이 히스토리만 교체)
@@ -134,10 +152,13 @@ export function PlaceDetail({ id, initialData, initialEdit, returnTo }: Props) {
 
   return (
     <div className="mx-auto w-full max-w-lg px-5 pb-16 pt-6 lg:pt-10">
-      <Link href={listHref} className={styles.backLink}>
-        <ArrowLeft className="h-4 w-4" />
-        목록으로
-      </Link>
+      <div className="flex items-center justify-between">
+        <Link href={listHref} className={styles.backLink}>
+          <ArrowLeft className="h-4 w-4" />
+          목록으로
+        </Link>
+        {place && !editingInfo && <DuplicateMenu onDuplicate={handleDuplicate} />}
+      </div>
 
       {isLoading ? (
         <div className="mt-4 space-y-4">

@@ -6,9 +6,14 @@ import { PlaceForm } from '@/components/track/PlaceForm'
 import { cn } from '@/lib/utils'
 import styles from '@/components/screens.module.css'
 
-export default async function NewPlacePage() {
+export default async function NewPlacePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ from?: string }>
+}) {
   const session = await getSession()
   if (!session.authenticated) redirect('/lock')
+  const { from } = await searchParams
 
   return (
     <main className={styles.page}>
@@ -22,7 +27,7 @@ export default async function NewPlacePage() {
         <p className={styles.pageSubtitle}>가고 싶은 식당·카페를 위시리스트에 추가해요</p>
 
         <div className="mt-5">
-          <PlaceForm />
+          <PlaceForm prefill={from === 'copy'} />
         </div>
       </div>
     </main>

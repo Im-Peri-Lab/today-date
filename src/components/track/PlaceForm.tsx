@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTopLoader } from 'nextjs-toploader'
 import { useForm } from 'react-hook-form'
@@ -8,10 +9,11 @@ import { toast } from 'sonner'
 import { useQueryClient } from '@tanstack/react-query'
 import { FormLayout } from '@/components/forms/FormLayout'
 import { PlaceFields } from './PlaceFields'
+import { takePlacePrefill } from '@/lib/duplicatePrefill'
 import { placeFormSchema, type PlaceFormValues } from '@/lib/schemas/placeSchema'
 import type { Place } from '@/types'
 
-export function PlaceForm({ place }: { place?: Place }) {
+export function PlaceForm({ place, prefill }: { place?: Place; prefill?: boolean }) {
   const router = useRouter()
   const topLoader = useTopLoader()
   const queryClient = useQueryClient()
@@ -21,6 +23,7 @@ export function PlaceForm({ place }: { place?: Place }) {
     handleSubmit,
     setValue,
     watch,
+    reset,
     formState: { errors, isSubmitting },
   } = useForm<PlaceFormValues>({
     resolver: zodResolver(placeFormSchema),
@@ -36,6 +39,15 @@ export function PlaceForm({ place }: { place?: Place }) {
         }
       : { meal_times: [] },
   })
+
+  // 복사하기 진입(?from=copy): 마운트 후 sessionStorage 의 prefill 값을 읽어(one-shot) 폼에 채운다.
+  // 초기 렌더는 서버와 동일한 빈 폼이라 hydration 불일치가 없다. 저장 전까지 DB 생성 없음.
+  useEffect(() => {
+    if (isEdit || !prefill) return
+    const values = takePlacePrefill()
+    if (values) reset(values)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   async function onSubmit(values: PlaceFormValues) {
     const payload = {

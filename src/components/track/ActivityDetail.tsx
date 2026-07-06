@@ -27,6 +27,7 @@ import {
 } from '@/components/ui/dialog'
 import { CategoryBadge } from './CategoryBadge'
 import { ActivityFields } from './ActivityFields'
+import { DuplicateMenu } from './DuplicateMenu'
 import { DetailBlock } from './DetailBlock'
 import { DetailRow } from './DetailRow'
 import { VisitRecordBlock } from './VisitRecordBlock'
@@ -43,6 +44,7 @@ import {
   STATUS_MENU_LABELS,
 } from '@/lib/labels'
 import { buildDetailHref, DEFAULT_LIST_RETURN_TO } from '@/lib/listReturn'
+import { stashActivityPrefill } from '@/lib/duplicatePrefill'
 import { cn } from '@/lib/utils'
 import { resolveHref } from '@/lib/url'
 import { MapLink } from './MapLink'
@@ -134,6 +136,22 @@ export function ActivityDetail({ id, initialData, initialEdit, returnTo }: Props
     setEditingInfo(true)
   }
 
+  // 복사하기: 원본의 "등록 정보"만 stash 하고 신규 폼으로 이동한다.
+  // 방문 기록(status/visited_at/rating/review_note)·생성일·id 는 복사하지 않는다 → 저장 시 wishlist 로 생성.
+  function handleDuplicate() {
+    if (!activity) return
+    stashActivityPrefill({
+      title: `${activity.title} 복사본`,
+      category_id: activity.category_id ?? '',
+      duration_bucket: activity.duration_bucket ?? undefined,
+      time_of_day: activity.time_of_day,
+      location: activity.location ?? '',
+      memo: activity.memo ?? '',
+      reference_url: activity.reference_url ?? '',
+    })
+    router.push('/activities/new?from=copy')
+  }
+
   function exitEditInfo() {
     setEditingInfo(false)
     // URL에서 ?edit= 제거 (재내비게이션 없이 히스토리만 교체)
@@ -165,10 +183,13 @@ export function ActivityDetail({ id, initialData, initialEdit, returnTo }: Props
 
   return (
     <div className="mx-auto w-full max-w-lg px-5 pb-16 pt-6 lg:pt-10">
-      <Link href={listHref} className={styles.backLink}>
-        <ArrowLeft className="h-4 w-4" />
-        목록으로
-      </Link>
+      <div className="flex items-center justify-between">
+        <Link href={listHref} className={styles.backLink}>
+          <ArrowLeft className="h-4 w-4" />
+          목록으로
+        </Link>
+        {activity && !editingInfo && <DuplicateMenu onDuplicate={handleDuplicate} />}
+      </div>
 
       {isLoading ? (
         <div className="mt-4 space-y-4">

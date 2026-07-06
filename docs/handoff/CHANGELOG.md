@@ -1,8 +1,8 @@
 # Today Date — CHANGELOG
 
-> **마지막 업데이트: 2026-07-02**
+> **마지막 업데이트: 2026-07-06**
 
-> 260531~260702 핸드오프 전체를 날짜순으로 기록한 변경 이력입니다. 새 AI는 일반적으로 `PROJECT_CONTEXT.md`와 `CURRENT_STATE.md`만 먼저 읽고, 과거 판단 근거가 필요할 때 이 문서를 참고하세요.
+> 260531~260706 핸드오프 전체를 날짜순으로 기록한 변경 이력입니다. 새 AI는 일반적으로 `PROJECT_CONTEXT.md`와 `CURRENT_STATE.md`만 먼저 읽고, 과거 판단 근거가 필요할 때 이 문서를 참고하세요.
 
 ---
 
@@ -320,3 +320,9 @@
 - 모두 lint/build PASS + preview 실측
 - location/area 재정의 배경 → PROJECT_CONTEXT §11 / 진단 근거·교훈 → §20
 - 후속 고려사항: mapActionBtn 28px SKILL.md 문서화, 뱃지 크기 통일(mealBadge vs visitedTag), 실기기 QA(티맵 앱 열림/미설치 토스트·데스크탑 티맵 숨김·지도 4종 검색)
+---
+
+## 2026-07-06 — 지도 앱 미설치 UX 보강·복사하기 prefill 기능
+
+- 지도 앱 미설치 UX 보강 (PR #44 squash `66e2094`) — iOS Safari 앱스킴 실패 전 안내, `requiresApp` 공통 설치 안내 문구, `useIsIosSafari.ts` 추가, SKILL.md 문서화. lint/build PASS
+- 복사하기 prefill 기능 추가 (PR #45 squash `4b521c5`) — 상세 상단 ⋮와 리스트 카드 ⋮에 복사하기 추가, `sessionStorage` one-shot prefill, 신규 등록 화면에서 확인·수정 후 저장, 제목 100자 cap, 카드 메뉴 순서 정리, SKILL.md 문서화. lint/build PASS

@@ -16,10 +16,11 @@ export interface MapApp {
   /**
    * 웹 페이지가 없어 네이티브 앱 스킴(tmap:// 등)으로만 열리는 앱.
    * true 면 데스크탑 목록에서 숨긴다(웹에서 안 열림).
-   * 모바일 미설치 UX는 브라우저별 한계가 있어 MapLink에서 분기한다:
-   * - Chrome iOS·Android: 스킴 이동 후 미설치면 timeout 토스트("설치해 주세요").
+   * 모바일 미설치 UX는 브라우저별 한계가 있어 MapLink에서 분기한다(안내 문구는
+   * requiresApp 앱 공통 "{앱명} 앱을 설치해 주세요." — installPrompt):
+   * - Chrome iOS·Android: 스킴 이동 후 미설치면 timeout 토스트로 안내.
    * - iOS Safari: 미설치 시 브라우저 네이티브 오류가 먼저 떠 토스트가 억제되므로,
-   *   이동 전에 "앱이 설치돼 있어야 열려요" 안내를 먼저 보여준다(warn-first).
+   *   이동 전에 같은 안내를 [열기] 액션과 함께 먼저 보여준다(warn-first).
    */
   requiresApp?: boolean
 }

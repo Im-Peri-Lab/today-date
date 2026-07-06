@@ -860,8 +860,9 @@ export const STATUS_LABELS: Record<Status, string> = {
 - 열기 방식은 링크 성격으로 분기(`anchorProps`): **웹 URL(http/https)은 새 탭**(`target="_blank"` + `rel="noopener noreferrer"` — 참고 링크와 동일 패턴), **앱 스킴(`tmap://` 등, `requiresApp: true`)은 같은 탭**(OS가 가로채 앱 실행 → 빈 탭 방지).
 - **환경 분기**(`useIsMobile`): `requiresApp` 앱(티맵)은 **데스크탑 시트에서 숨김**(웹에서 안 열림). 기억된 기본 앱이 현재 환경에서 숨겨졌으면 첫 노출 앱으로 대체.
 - **`requiresApp` 앱 미설치 UX — 브라우저별 한계(감지는 best-effort, `MapLink`)**: 커스텀 스킴(`tmap://`)은 미설치 여부를 표준적으로 감지할 방법이 없어 브라우저마다 동작이 갈린다.
-  - **Chrome iOS·Android**: 스킴 이동 후 `pagehide`/`blur`가 2초 내 미발생하면(미설치 추정) **"○○ 앱을 설치해 주세요." timeout 토스트**(`openAppScheme`).
-  - **iOS Safari**(`useIsIosSafari`): 미설치 스킴으로 top-level 이동하면 Safari가 **네이티브 오류 모달**("주소가 유효하지 않아…")을 먼저 띄우고, 그 모달의 `blur`가 위 timeout 토스트를 오탐 억제한다 → 사용자는 앱 안내 없이 브라우저 오류만 본다. 그래서 iOS Safari에서는 **이동 전에 안내 토스트(`"○○ 앱이 설치되어 있어야 열 수 있어요"` + [열기] 액션)를 먼저 보여주고**, [열기]를 눌렀을 때 스킴으로 이동한다(warn-first). 네이티브 오류를 완전히 막지는 못하지만(스킴 top-level 이동의 구조적 한계) 사용자가 맥락을 먼저 이해하게 한다.
+  - 안내 문구는 requiresApp 앱 공통(`installPrompt`, `MapLink`): **"{앱명} 앱을 설치해 주세요."** — 티맵 하드코딩이 아니라 향후 추가되는 앱 스킴 전용 지도앱도 같은 패턴을 탄다.
+  - **Chrome iOS·Android**: 스킴 이동 후 `pagehide`/`blur`가 2초 내 미발생하면(미설치 추정) 위 문구를 **timeout 토스트**로 안내(`openAppScheme`).
+  - **iOS Safari**(`useIsIosSafari`): 미설치 스킴으로 top-level 이동하면 Safari가 **네이티브 오류 모달**("주소가 유효하지 않아…")을 먼저 띄우고, 그 모달의 `blur`가 위 timeout 토스트를 오탐 억제한다 → 사용자는 앱 안내 없이 브라우저 오류만 본다. 그래서 iOS Safari에서는 **이동 전에 안내 토스트(위 공통 문구 + [열기] 액션)를 먼저 보여주고**, [열기]를 눌렀을 때 스킴으로 이동한다(warn-first). 네이티브 오류를 완전히 막지는 못하지만(스킴 top-level 이동의 구조적 한계) 사용자가 맥락을 먼저 이해하게 한다.
   - **완벽 감지가 아니라 UX 완화가 목표**다. 웹 지도(네이버·카카오·구글, `anchor` 새 탭)는 이 경로와 무관 — 회귀 없음. Galaxy(Android Chrome/삼성인터넷)는 timeout 토스트 경로이나 실기기 미검증.
 - **마지막 선택 기억**(`useMapAppPreference`): 선택한 앱 id를 localStorage에 저장(기본 `naver`), SSR·차단 환경 안전(try/catch, 첫 렌더는 기본값 → 마운트 후 갱신).
 

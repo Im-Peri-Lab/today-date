@@ -25,6 +25,14 @@ function anchorProps(url: string): { target?: '_blank'; rel?: string } {
 }
 
 /**
+ * `requiresApp`(앱 스킴 전용) 지도앱 공통 미설치 안내 문구.
+ * 티맵 하드코딩이 아니라 requiresApp 앱 전체가 이 패턴을 쓴다(향후 추가 앱도 동일).
+ */
+function installPrompt(label: string) {
+  return `${label} 앱을 설치해 주세요.`
+}
+
+/**
  * 앱 스킴(tmap://)을 실행하고, 앱이 열리지 않으면(=미설치 추정) 안내를 띄운다.
  * 앱이 열리면 페이지가 백그라운드로 가며 pagehide/blur 가 발생 → 안내를 띄우지 않는다.
  * (열림을 감지하면 오탐 없이 넘어가고, 아무 이벤트도 없을 때만 미설치로 간주)
@@ -49,7 +57,7 @@ function openAppScheme(url: string, label: string) {
     window.removeEventListener('pagehide', mark)
     window.removeEventListener('blur', mark)
     if (!opened && document.visibilityState === 'visible') {
-      toast.info(`${label} 앱을 설치해 주세요.`)
+      toast.info(installPrompt(label))
     }
   }, 2000)
 }
@@ -79,8 +87,7 @@ export function MapLink({ query }: { query: string }) {
    */
   const openRequiresApp = (url: string, label: string) => {
     if (isIosSafari) {
-      toast.info(`${label} 앱이 설치되어 있어야 열 수 있어요.`, {
-        description: '미설치 시 브라우저 오류가 표시될 수 있어요.',
+      toast.info(installPrompt(label), {
         action: { label: '열기', onClick: () => openAppScheme(url, label) },
         duration: 6000,
       })

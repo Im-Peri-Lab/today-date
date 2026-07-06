@@ -22,7 +22,7 @@ import { placeFormSchema, type PlaceFormValues } from '@/lib/schemas/placeSchema
 import type { Place } from '@/types'
 import { MEAL_LABELS, STATUS_LABELS, STATUS_MENU_LABELS } from '@/lib/labels'
 import { buildDetailHref, DEFAULT_LIST_RETURN_TO } from '@/lib/listReturn'
-import { stashPlacePrefill } from '@/lib/duplicatePrefill'
+import { stashPlacePrefill, buildCopyTitle } from '@/lib/duplicatePrefill'
 import { cn } from '@/lib/utils'
 import { resolveHref } from '@/lib/url'
 import { MapLink } from './MapLink'
@@ -113,7 +113,7 @@ export function PlaceDetail({ id, initialData, initialEdit, returnTo }: Props) {
   function handleDuplicate() {
     if (!place) return
     stashPlacePrefill({
-      title: `${place.title} 복사본`,
+      title: buildCopyTitle(place.title),
       category_id: place.category_id ?? '',
       area: place.area,
       location: place.location ?? '',

@@ -23,6 +23,16 @@ export type ActivityPrefill = Omit<ActivityFormValues, 'duration_bucket'> & {
 const ACTIVITY_KEY = 'today-date:duplicate:activity'
 const PLACE_KEY = 'today-date:duplicate:place'
 
+/** 복사본 제목: `{원본} 복사본`, 단 create schema 의 max(100) 을 넘지 않게 원본만 잘라낸다. */
+const COPY_SUFFIX = ' 복사본'
+const TITLE_MAX = 100
+
+export function buildCopyTitle(original: string): string {
+  const full = `${original}${COPY_SUFFIX}`
+  if (full.length <= TITLE_MAX) return full
+  return `${original.slice(0, TITLE_MAX - COPY_SUFFIX.length)}${COPY_SUFFIX}`
+}
+
 function stash(key: string, value: unknown) {
   if (typeof window === 'undefined') return
   try {

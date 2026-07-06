@@ -44,7 +44,7 @@ import {
   STATUS_MENU_LABELS,
 } from '@/lib/labels'
 import { buildDetailHref, DEFAULT_LIST_RETURN_TO } from '@/lib/listReturn'
-import { stashActivityPrefill } from '@/lib/duplicatePrefill'
+import { stashActivityPrefill, buildCopyTitle } from '@/lib/duplicatePrefill'
 import { cn } from '@/lib/utils'
 import { resolveHref } from '@/lib/url'
 import { MapLink } from './MapLink'
@@ -141,7 +141,7 @@ export function ActivityDetail({ id, initialData, initialEdit, returnTo }: Props
   function handleDuplicate() {
     if (!activity) return
     stashActivityPrefill({
-      title: `${activity.title} 복사본`,
+      title: buildCopyTitle(activity.title),
       category_id: activity.category_id ?? '',
       duration_bucket: activity.duration_bucket ?? undefined,
       time_of_day: activity.time_of_day,

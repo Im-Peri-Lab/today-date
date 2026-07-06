@@ -54,6 +54,11 @@ export function ItemMenu({
             기록 수정
           </DropdownMenuItem>
         )}
+        {/* 복사하기 — 정보/기록 수정과 같은 편집·생성 계열, 상태 변경보다 위 */}
+        <DropdownMenuItem onClick={onDuplicate}>
+          <Copy />
+          복사하기
+        </DropdownMenuItem>
         {isVisited ? (
           <DropdownMenuItem onClick={onRevert}>
             <Undo2 />
@@ -65,11 +70,6 @@ export function ItemMenu({
             {STATUS_MENU_LABELS.visited}
           </DropdownMenuItem>
         )}
-        {/* 복사하기 — 삭제보다 위의 일반 액션 (구분선 위) */}
-        <DropdownMenuItem onClick={onDuplicate}>
-          <Copy />
-          복사하기
-        </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem variant="destructive" onClick={onDelete}>
           <Trash2 />

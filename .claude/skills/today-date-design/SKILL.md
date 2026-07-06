@@ -462,8 +462,10 @@ description: >
 
 `ActivityCard`/`PlaceCard`의 ⋮ 메뉴(`ItemMenu`) 항목 구성. 문구는 `STATUS_MENU_LABELS`(`src/lib/labels.ts`) 참조.
 
-- **미방문(wishlist)**: 정보 수정 → 다녀온 곳으로 → (구분선) 삭제
-- **방문완료(visited)**: 정보 수정 → 기록 수정 → 가보고 싶은 곳으로 → (구분선) 삭제
+- **미방문(wishlist)**: 정보 수정 → 복사하기 → 다녀온 곳으로 → (구분선) 삭제
+- **방문완료(visited)**: 정보 수정 → 기록 수정 → 복사하기 → 가보고 싶은 곳으로 → (구분선) 삭제
+
+**순서 근거**: 정보 수정·기록 수정·복사하기는 편집·생성 계열 일반 액션(상태 변경보다 위), 상태 변경(다녀온 곳으로/가보고 싶은 곳으로)은 그 아래, 삭제는 파괴적 액션이라 맨 끝. **구분선은 삭제 앞 하나만** 둔다(중간 구분선 없음). 복사하기는 상세 상단 ⋮(`DuplicateMenu`)와 동일 액션이며 `stashActivityDuplicate`/`stashPlaceDuplicate`(`src/lib/duplicatePrefill.ts`) 공용 헬퍼로 DB 즉시 생성 없이 신규 폼 prefill 로 이동한다.
 
 ### 토큰 공유 주의
 - `--s-active-fill`/`--s-active-line`은 `/list` 필터 칩·세그먼트·상태 토글과 **공유**된다. 상태 색을 바꿀 땐 토큰 정의값을 건드리지 말고 **사용처 클래스**(`.chipActive` 등)에서만 조정한다 — 토큰값을 바꾸면 StepDots·CTA까지 휩쓸려 회귀한다.

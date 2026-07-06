@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTopLoader } from 'nextjs-toploader'
 import { useForm } from 'react-hook-form'
@@ -8,10 +9,11 @@ import { toast } from 'sonner'
 import { FormLayout } from '@/components/forms/FormLayout'
 import { ActivityFields } from './ActivityFields'
 import { useUpdateActivity } from '@/hooks/useActivities'
+import { takeActivityPrefill } from '@/lib/duplicatePrefill'
 import { activityFormSchema, type ActivityFormValues } from '@/lib/schemas/activitySchema'
 import type { Activity } from '@/types'
 
-export function ActivityForm({ activity }: { activity?: Activity }) {
+export function ActivityForm({ activity, prefill }: { activity?: Activity; prefill?: boolean }) {
   const router = useRouter()
   const topLoader = useTopLoader()
   const update = useUpdateActivity()
@@ -21,6 +23,7 @@ export function ActivityForm({ activity }: { activity?: Activity }) {
     handleSubmit,
     setValue,
     watch,
+    reset,
     formState: { errors, isSubmitting },
   } = useForm<ActivityFormValues>({
     resolver: zodResolver(activityFormSchema),
@@ -36,6 +39,15 @@ export function ActivityForm({ activity }: { activity?: Activity }) {
         }
       : {},
   })
+
+  // 복사하기 진입(?from=copy): 마운트 후 sessionStorage 의 prefill 값을 읽어(one-shot) 폼에 채운다.
+  // 초기 렌더는 서버와 동일한 빈 폼이라 hydration 불일치가 없다. 저장 전까지 DB 생성 없음.
+  useEffect(() => {
+    if (isEdit || !prefill) return
+    const values = takeActivityPrefill()
+    if (values) reset(values)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   async function onSubmit(values: ActivityFormValues) {
     const payload = {

@@ -13,6 +13,7 @@ import { VisitedDialog } from '@/components/VisitedDialog'
 import { useDeletePlace, useUpdatePlace } from '@/hooks/usePlaces'
 import { MEAL_LABELS, STATUS_LABELS } from '@/lib/labels'
 import { buildDetailHref } from '@/lib/listReturn'
+import { stashPlaceDuplicate } from '@/lib/duplicatePrefill'
 import { formatDotDate } from '@/lib/date'
 import { cn } from '@/lib/utils'
 import type { Place } from '@/types'
@@ -66,6 +67,7 @@ export function PlaceCard({ place, hideMenu, actionSlot, returnTo }: PlaceCardPr
             status={place.status}
             onEditInfo={() => router.push(buildDetailHref(detailPath, { edit: 'info', returnTo }))}
             onEditVisit={() => router.push(buildDetailHref(detailPath, { edit: 'visit', returnTo }))}
+            onDuplicate={() => router.push(stashPlaceDuplicate(place))}
             onDelete={() => setDeleteOpen(true)}
             onMarkVisited={() => setVisitedOpen(true)}
             onRevert={handleRevert}

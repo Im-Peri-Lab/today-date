@@ -1,6 +1,6 @@
 'use client'
 
-import { MoreVertical, Pencil, CalendarCheck, Trash2, CheckCircle2, Undo2 } from 'lucide-react'
+import { MoreVertical, Pencil, CalendarCheck, Copy, Trash2, CheckCircle2, Undo2 } from 'lucide-react'
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -18,6 +18,8 @@ interface ItemMenuProps {
   onEditInfo: () => void
   /** 기록 수정 → 상세의 방문 기록 블록을 편집모드로 연다 (다녀온 곳 전용) */
   onEditVisit: () => void
+  /** 복사하기 → 등록 정보만 prefill 한 신규 폼으로 이동 (DB 즉시 생성 없음) */
+  onDuplicate: () => void
   onDelete: () => void
   onMarkVisited: () => void
   onRevert: () => void
@@ -27,6 +29,7 @@ export function ItemMenu({
   status,
   onEditInfo,
   onEditVisit,
+  onDuplicate,
   onDelete,
   onMarkVisited,
   onRevert,
@@ -51,6 +54,11 @@ export function ItemMenu({
             기록 수정
           </DropdownMenuItem>
         )}
+        {/* 복사하기 — 정보/기록 수정과 같은 편집·생성 계열, 상태 변경보다 위 */}
+        <DropdownMenuItem onClick={onDuplicate}>
+          <Copy />
+          복사하기
+        </DropdownMenuItem>
         {isVisited ? (
           <DropdownMenuItem onClick={onRevert}>
             <Undo2 />

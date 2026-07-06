@@ -13,6 +13,7 @@ import { VisitedDialog } from '@/components/VisitedDialog'
 import { useDeleteActivity, useUpdateActivity } from '@/hooks/useActivities'
 import { DURATION_LABELS, TIME_OF_DAY_LABELS, TIME_OF_DAY_ICONS, STATUS_LABELS } from '@/lib/labels'
 import { buildDetailHref } from '@/lib/listReturn'
+import { stashActivityDuplicate } from '@/lib/duplicatePrefill'
 import { formatDotDate } from '@/lib/date'
 import { cn } from '@/lib/utils'
 import type { Activity } from '@/types'
@@ -67,6 +68,7 @@ export function ActivityCard({ activity, hideMenu, actionSlot, returnTo }: Activ
             status={activity.status}
             onEditInfo={() => router.push(buildDetailHref(detailPath, { edit: 'info', returnTo }))}
             onEditVisit={() => router.push(buildDetailHref(detailPath, { edit: 'visit', returnTo }))}
+            onDuplicate={() => router.push(stashActivityDuplicate(activity))}
             onDelete={() => setDeleteOpen(true)}
             onMarkVisited={() => setVisitedOpen(true)}
             onRevert={handleRevert}

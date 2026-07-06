@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { CategoryBadge } from './CategoryBadge'
 import { PlaceFields } from './PlaceFields'
+import { DuplicateMenu } from './DuplicateMenu'
 import { DetailBlock } from './DetailBlock'
 import { DetailRow } from './DetailRow'
 import { VisitRecordBlock } from './VisitRecordBlock'
@@ -21,6 +22,7 @@ import { placeFormSchema, type PlaceFormValues } from '@/lib/schemas/placeSchema
 import type { Place } from '@/types'
 import { MEAL_LABELS, STATUS_LABELS, STATUS_MENU_LABELS } from '@/lib/labels'
 import { buildDetailHref, DEFAULT_LIST_RETURN_TO } from '@/lib/listReturn'
+import { stashPlaceDuplicate } from '@/lib/duplicatePrefill'
 import { cn } from '@/lib/utils'
 import { resolveHref } from '@/lib/url'
 import { MapLink } from './MapLink'
@@ -106,6 +108,12 @@ export function PlaceDetail({ id, initialData, initialEdit, returnTo }: Props) {
     setEditingInfo(true)
   }
 
+  // 복사하기: 등록 정보만 stash 후 신규 폼으로 이동 (리스트 카드와 동일 헬퍼 공유).
+  function handleDuplicate() {
+    if (!place) return
+    router.push(stashPlaceDuplicate(place))
+  }
+
   function exitEditInfo() {
     setEditingInfo(false)
     // URL에서 ?edit= 제거 (재내비게이션 없이 히스토리만 교체)
@@ -134,10 +142,13 @@ export function PlaceDetail({ id, initialData, initialEdit, returnTo }: Props) {
 
   return (
     <div className="mx-auto w-full max-w-lg px-5 pb-16 pt-6 lg:pt-10">
-      <Link href={listHref} className={styles.backLink}>
-        <ArrowLeft className="h-4 w-4" />
-        목록으로
-      </Link>
+      <div className="flex items-center justify-between">
+        <Link href={listHref} className={styles.backLink}>
+          <ArrowLeft className="h-4 w-4" />
+          목록으로
+        </Link>
+        {place && !editingInfo && <DuplicateMenu onDuplicate={handleDuplicate} />}
+      </div>
 
       {isLoading ? (
         <div className="mt-4 space-y-4">

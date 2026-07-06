@@ -6,9 +6,14 @@ import { ActivityForm } from '@/components/track/ActivityForm'
 import { cn } from '@/lib/utils'
 import styles from '@/components/screens.module.css'
 
-export default async function NewActivityPage() {
+export default async function NewActivityPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ from?: string }>
+}) {
   const session = await getSession()
   if (!session.authenticated) redirect('/lock')
+  const { from } = await searchParams
 
   return (
     <main className={styles.page}>
@@ -22,7 +27,7 @@ export default async function NewActivityPage() {
         <p className={styles.pageSubtitle}>함께 하고 싶은 활동을 위시리스트에 추가해요</p>
 
         <div className="mt-5">
-          <ActivityForm />
+          <ActivityForm prefill={from === 'copy'} />
         </div>
       </div>
     </main>

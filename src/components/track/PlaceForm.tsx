@@ -71,11 +71,15 @@ export function PlaceForm({ place, prefill }: { place?: Place; prefill?: boolean
     }
 
     if (isEdit) {
-      queryClient.invalidateQueries({ queryKey: ['places'] })
+      // 리스트는 미마운트 상태에서도 즉시 백그라운드 재조회되도록 refetchType: 'all'.
+      // /list 복귀 시 이전 값 프레임 없이 바로 최신 목록이 보인다.
+      queryClient.invalidateQueries({ queryKey: ['places'], refetchType: 'all' })
       queryClient.invalidateQueries({ queryKey: ['place', place!.id] })
       toast.success('수정되었습니다! ✏️')
       router.push(`/places/${place!.id}`)
     } else {
+      // 신규 등록도 동일: 리스트를 즉시 재조회해 복귀 시 새 항목이 바로 보이도록 한다.
+      queryClient.invalidateQueries({ queryKey: ['places'], refetchType: 'all' })
       toast.success('장소가 등록되었습니다! 📍')
       topLoader.start()
       router.push(`/places/${json.data.id}`)

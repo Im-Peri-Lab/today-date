@@ -60,7 +60,9 @@ export function useUpdateActivity() {
       // 재조회 왕복 없이 저장 후 값이 첫 렌더부터 보이도록 한다(stale-then-fresh 깜빡임 제거).
       if (data?.id) qc.setQueryData(['activity', data.id], data)
       // 리스트는 정렬/필터가 바뀔 수 있으므로 무효화 유지.
-      qc.invalidateQueries({ queryKey: ['activities'] })
+      // 미마운트 상태(사용자가 상세/폼에 있을 때)에서도 즉시 백그라운드 재조회되도록
+      // refetchType: 'all'. /list 복귀 시 stale 프레임 없이 최신 목록이 보인다.
+      qc.invalidateQueries({ queryKey: ['activities'], refetchType: 'all' })
     },
   })
 }

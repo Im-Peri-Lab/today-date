@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState, type ReactNode } from 'react'
 import { toast } from 'sonner'
-import { Clock } from 'lucide-react'
+import { Clock, StickyNote, MapPin } from 'lucide-react'
 import { CategoryBadge } from './CategoryBadge'
 import { ItemMenu } from './ItemMenu'
 import { RatingStars } from './RatingStars'
@@ -53,6 +53,10 @@ export function ActivityCard({ activity, hideMenu, actionSlot, returnTo }: Activ
   const isVisited = activity.status === 'visited'
   const TimeOfDayIcon = TIME_OF_DAY_ICONS[activity.time_of_day]
   const detailPath = `/activities/${activity.id}`
+  // 정보 줄 우선순위: 메모 있으면 메모, 없으면 위치, 둘 다 없으면 빈 슬롯.
+  // 아이콘으로 메모(StickyNote)/위치(MapPin) 구분.
+  const infoText = activity.memo || activity.location
+  const InfoIcon = activity.memo ? StickyNote : activity.location ? MapPin : null
 
   return (
     <div className={cn(styles.card, styles.cardInteractive, 'group relative')}>
@@ -98,9 +102,12 @@ export function ActivityCard({ activity, hideMenu, actionSlot, returnTo }: Activ
           </span>
         </div>
 
-        {activity.memo && (
-          <p className={cn('line-clamp-1 text-sm', styles.faint)}>{activity.memo}</p>
-        )}
+        {/* 정보 줄: 항상 렌더(내용 없어도 min-h-5로 자리 유지) → 메모/위치 유무와 무관하게
+            카드 높이·별점/날짜 줄 위치가 일정하다. 아이콘으로 메모/위치 구분. */}
+        <div className={cn('flex min-h-5 items-center gap-1 text-sm', styles.faint)}>
+          {InfoIcon && <InfoIcon className="h-3 w-3 shrink-0" />}
+          {infoText && <span className="line-clamp-1">{infoText}</span>}
+        </div>
 
         {isVisited && (
           <div className={cn('mt-2.5 flex items-center gap-2 pt-2.5 text-xs', styles.divider, styles.sub)}>

@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState, type ReactNode } from 'react'
 import { toast } from 'sonner'
-import { MapPin, Utensils } from 'lucide-react'
+import { MapPin, Utensils, StickyNote } from 'lucide-react'
 import { CategoryBadge } from './CategoryBadge'
 import { ItemMenu } from './ItemMenu'
 import { RatingStars } from './RatingStars'
@@ -99,9 +99,12 @@ export function PlaceCard({ place, hideMenu, actionSlot, returnTo }: PlaceCardPr
           )}
         </div>
 
-        {place.memo && (
-          <p className={cn('line-clamp-1 text-sm', styles.faint)}>{place.memo}</p>
-        )}
+        {/* 정보 줄: ActivityCard와 동일한 고정 높이 컨테이너(항상 렌더). 장소는 메모만 표시.
+            내용 없어도 min-h-5로 자리 유지 → 메모 유무와 무관하게 카드 높이 일정. */}
+        <div className={cn('flex min-h-5 items-center gap-1 text-sm', styles.faint)}>
+          {place.memo && <StickyNote className="h-3 w-3 shrink-0" />}
+          {place.memo && <span className="line-clamp-1">{place.memo}</span>}
+        </div>
 
         {isVisited && (
           <div className={cn('mt-2.5 flex items-center gap-2 pt-2.5 text-xs', styles.divider, styles.sub)}>

@@ -54,8 +54,11 @@ export function useUpdatePlace() {
         })
       ).data,
     onSuccess: (data) => {
+      // PATCH 응답(조인 포함 전체 레코드, GET과 동일 shape)을 상세 캐시에 즉시 반영해
+      // 재조회 왕복 없이 저장 후 값이 첫 렌더부터 보이도록 한다(stale-then-fresh 깜빡임 제거).
+      if (data?.id) qc.setQueryData(['place', data.id], data)
+      // 리스트는 정렬/필터가 바뀔 수 있으므로 무효화 유지.
       qc.invalidateQueries({ queryKey: ['places'] })
-      if (data?.id) qc.invalidateQueries({ queryKey: ['place', data.id] })
     },
   })
 }

@@ -1,8 +1,8 @@
 # Today Date — CHANGELOG
 
-> **마지막 업데이트: 2026-07-06**
+> **마지막 업데이트: 2026-07-07**
 
-> 260531~260706 핸드오프 전체를 날짜순으로 기록한 변경 이력입니다. 새 AI는 일반적으로 `PROJECT_CONTEXT.md`와 `CURRENT_STATE.md`만 먼저 읽고, 과거 판단 근거가 필요할 때 이 문서를 참고하세요.
+> 260531~260707 핸드오프 전체를 날짜순으로 기록한 변경 이력입니다. 새 AI는 일반적으로 `PROJECT_CONTEXT.md`와 `CURRENT_STATE.md`만 먼저 읽고, 과거 판단 근거가 필요할 때 이 문서를 참고하세요.
 
 ---
 
@@ -326,3 +326,17 @@
 
 - 지도 앱 미설치 UX 보강 (PR #44 squash `66e2094`) — iOS Safari 앱스킴 실패 전 안내, `requiresApp` 공통 설치 안내 문구, `useIsIosSafari.ts` 추가, SKILL.md 문서화. lint/build PASS
 - 복사하기 prefill 기능 추가 (PR #45 squash `4b521c5`) — 상세 상단 ⋮와 리스트 카드 ⋮에 복사하기 추가, `sessionStorage` one-shot prefill, 신규 등록 화면에서 확인·수정 후 저장, 제목 100자 cap, 카드 메뉴 순서 정리, SKILL.md 문서화. lint/build PASS
+
+---
+
+## 2026-07-07 — UI 버그 정리·React Query 캐시 갱신 버그 5건 수정
+
+- 삭제 확인 다이얼로그 버튼 height 표준 정합 (PR #46 squash `8d14c22`) — h-8(32px)→h-9(36px), §4-A 표준 미준수 진단 후 수정. 색상·토큰·아이콘은 §5-A·§5-B 의도된 차이로 유지
+- 상세 저장 후 화면 깜빡임 제거 (PR #47 squash `a487ad4`) — useUpdateActivity/useUpdatePlace onSuccess를 invalidateQueries→setQueryData로 전환, PATCH 응답 즉시 캐시 반영
+- `/list` 복귀 시 생성·수정 항목 반영 지연/깜빡임 제거 (PR #48 squash `457dd5a`) — 생성 경로 리스트 무효화 추가, 생성·수정 무효화에 refetchType:'all' 적용
+- 삭제 시 낙관적 제거로 카드 잔상 제거 (PR #49 squash `8f91140`) — useDeleteActivity/useDeletePlace를 onMutate/onError/onSuccess/onSettled 패턴으로 전환, 실패 시 스냅샷 롤백
+- 등록·삭제 후 페이지 전환 대기 중 버튼 재활성화 깜빡임 제거 (PR #50 squash `a2f2487`) — 등록 폼 2개·삭제 다이얼로그 2개에 navigating 로컬 상태 도입, 삭제 다이얼로그는 open 상태에도 적용
+- 신규 등록 성공 토스트 제거 (PR #51 squash `a9205cd`) — 토스트 사용처 전수조사 후 "목적지 자기확인" 원칙 확정, 등록만 원칙 위반으로 제거·나머지는 유지
+- git 커밋 author 정보 전역 설정(user.name/email) — 코드 변경 아님
+- 모두 lint/build PASS
+- 진단 근거·교훈 → PROJECT_CONTEXT §20

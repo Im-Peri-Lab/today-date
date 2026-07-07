@@ -109,12 +109,9 @@ export function ActivityDetail({ id, initialData, initialEdit, returnTo }: Props
   /* ── 핸들러 ── */
 
   function handleDelete() {
+    // 토스트/에러 처리는 훅에 위임(중복 토스트 방지). 상세는 언마운트되지 않아 onSuccess가 정상 실행됨.
     del.mutate(id, {
-      onSuccess: () => {
-        toast.success('삭제했어요')
-        router.push(listHref)
-      },
-      onError: () => toast.error('삭제 중 오류가 발생했습니다.'),
+      onSuccess: () => router.push(listHref),
     })
   }
 

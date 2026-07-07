@@ -1,8 +1,8 @@
-# Today Date — CHANGELOG
+# CHANGELOG_260707_v2.md
 
-> **마지막 업데이트: 2026-07-07**
+> **마지막 업데이트: 2026-07-07 (v2)**
 
-> 260531~260707 핸드오프 전체를 날짜순으로 기록한 변경 이력입니다. 새 AI는 일반적으로 `PROJECT_CONTEXT.md`와 `CURRENT_STATE.md`만 먼저 읽고, 과거 판단 근거가 필요할 때 이 문서를 참고하세요.
+> 260531~260707(v2 포함) 핸드오프 전체를 날짜순으로 기록한 변경 이력입니다. 새 AI는 일반적으로 `PROJECT_CONTEXT.md`와 `CURRENT_STATE.md`만 먼저 읽고, 과거 판단 근거가 필요할 때 이 문서를 참고하세요.
 
 ---
 
@@ -320,6 +320,7 @@
 - 모두 lint/build PASS + preview 실측
 - location/area 재정의 배경 → PROJECT_CONTEXT §11 / 진단 근거·교훈 → §20
 - 후속 고려사항: mapActionBtn 28px SKILL.md 문서화, 뱃지 크기 통일(mealBadge vs visitedTag), 실기기 QA(티맵 앱 열림/미설치 토스트·데스크탑 티맵 숨김·지도 4종 검색)
+
 ---
 
 ## 2026-07-06 — 지도 앱 미설치 UX 보강·복사하기 prefill 기능
@@ -339,4 +340,24 @@
 - 신규 등록 성공 토스트 제거 (PR #51 squash `a9205cd`) — 토스트 사용처 전수조사 후 "목적지 자기확인" 원칙 확정, 등록만 원칙 위반으로 제거·나머지는 유지
 - git 커밋 author 정보 전역 설정(user.name/email) — 코드 변경 아님
 - 모두 lint/build PASS
+- 진단 근거·교훈 → PROJECT_CONTEXT §20
+
+---
+
+## 2026-07-07 v2 — 리스트 카드 정보 줄 통일·SKILL.md 동기화 프로세스 이슈 발견·수정
+
+- **디자인 방향 세션**: ActivityCard/PlaceCard 정보 줄 비일관성(메모 유무에 따라 카드 높이·별점 줄 위치 출렁임) 진단
+  - 논의 경과: 위치+메모 병행 → 우선순위 fallback → 타입별 분리(activity/place) → "activity=memo 우선·location 보조, place=memo 고정"으로 확정
+  - 확정 근거: place는 제목에 장소명이 들어가 위치가 중복 정보인 반면, activity는 제목이 "무엇을 할지"라 위치·조건 메모가 둘 다 실사용 가치 있음. 배지 줄은 area처럼 짧은 고정 텍스트 전용이라 location(가변 길이)은 정보 줄에 배치
+- **진단(Claude Code)**: 정보 줄이 `{memo && (...)}` 조건부 렌더 + 고정 높이 부재가 원인. location은 쿼리에 이미 select됨. activities.location 채움률 45%(10/22), 신규 fallback으로 노출될 케이스 7건. 아이콘: 위치=MapPin(관례), 메모=StickyNote(신규)
+- **구현 (PR #52 squash `58b07d1`)** — `design/list-card-consistency`
+  - ActivityCard: `infoText = memo || location`, `InfoIcon = memo ? StickyNote : location ? MapPin : null`
+  - ActivityCard/PlaceCard 정보 줄: 조건부 렌더 → 항상 렌더되는 고정 높이(`flex min-h-5 items-center gap-1 text-sm`) 컨테이너로 전환
+  - PlaceCard는 로직 변경 없이 memo 고정 표시, 컨테이너만 통일
+  - 검증: `npm run build` PASS, 정적 레이아웃 픽셀 실측(헤드리스 Chrome)으로 확인. 라이브 프리뷰(세션 인증 뒤)는 확인 못함 — 인증 우회 없이 한계 명시
+- **SKILL.md 동기화 누락 발견 및 사후 수정 (PR #53 squash `5f791c9`)** — `docs/skill-card-info-row-sync`
+  - PR #52 머지 커밋(`58b07d1`)에 SKILL.md 변경이 포함되지 않은 것을 `git show --stat` 진단으로 확인
+  - §8-A를 실제 코드(ActivityCard.tsx/PlaceCard.tsx) 재확인 기준으로 갱신, 코드-문서 1:1 대조 완료
+  - main 반영 완료(`.claude/skills/today-date-design/SKILL.md` 1개 파일, +31/-4, 문서 전용). 원격/로컬 브랜치 정리 완료
+- **프로세스 교훈**: "코드+SKILL.md 동시 갱신" 지시는 완료 보고만으로 검증 끝난 게 아님. 머지 전 `git show --stat`으로 SKILL.md 포함 여부 재확인이 표준 체크리스트에 추가됨
 - 진단 근거·교훈 → PROJECT_CONTEXT §20

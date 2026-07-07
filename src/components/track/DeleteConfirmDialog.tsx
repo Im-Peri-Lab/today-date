@@ -39,8 +39,8 @@ export function DeleteConfirmDialog({
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
-          <DialogClose render={<Button variant="outline" disabled={loading} />}>취소</DialogClose>
-          <Button variant="destructive" onClick={onConfirm} disabled={loading}>
+          <DialogClose render={<Button variant="outline" className="h-9" disabled={loading} />}>취소</DialogClose>
+          <Button variant="destructive" className="h-9" onClick={onConfirm} disabled={loading}>
             {loading ? '삭제 중...' : '삭제'}
           </Button>
         </DialogFooter>

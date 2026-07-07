@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTopLoader } from 'nextjs-toploader'
 import { useForm } from 'react-hook-form'
@@ -18,6 +18,11 @@ export function PlaceForm({ place, prefill }: { place?: Place; prefill?: boolean
   const topLoader = useTopLoader()
   const queryClient = useQueryClient()
   const isEdit = !!place
+  // router.push(App Router)는 비동기 전환이라 즉시 반환된다. 성공 직후 isSubmitting이
+  // false로 풀리면 실제 화면 전환 전까지 버튼이 재활성화되어 잠깐 깜빡인다.
+  // push 직전에 navigating=true로 잠가 전환 완료(=언마운트)까지 비활성을 유지한다.
+  // 페이지가 언마운트되며 자연히 정리되므로 별도 해제 로직은 불필요.
+  const [navigating, setNavigating] = useState(false)
   const {
     register,
     handleSubmit,
@@ -81,6 +86,7 @@ export function PlaceForm({ place, prefill }: { place?: Place; prefill?: boolean
       // 신규 등록도 동일: 리스트를 즉시 재조회해 복귀 시 새 항목이 바로 보이도록 한다.
       queryClient.invalidateQueries({ queryKey: ['places'], refetchType: 'all' })
       toast.success('장소가 등록되었습니다! 📍')
+      setNavigating(true)
       topLoader.start()
       router.push(`/places/${json.data.id}`)
     }
@@ -89,7 +95,7 @@ export function PlaceForm({ place, prefill }: { place?: Place; prefill?: boolean
   return (
     <FormLayout
       onSubmit={handleSubmit(onSubmit)}
-      isSubmitting={isSubmitting}
+      isSubmitting={isSubmitting || navigating}
       submitLabel={isEdit ? '수정 저장하기' : '장소 등록하기'}
     >
       <PlaceFields register={register} errors={errors} watch={watch} setValue={setValue} />

@@ -85,7 +85,6 @@ export function PlaceForm({ place, prefill }: { place?: Place; prefill?: boolean
     } else {
       // 신규 등록도 동일: 리스트를 즉시 재조회해 복귀 시 새 항목이 바로 보이도록 한다.
       queryClient.invalidateQueries({ queryKey: ['places'], refetchType: 'all' })
-      toast.success('장소가 등록되었습니다! 📍')
       setNavigating(true)
       topLoader.start()
       router.push(`/places/${json.data.id}`)

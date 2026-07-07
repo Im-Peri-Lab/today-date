@@ -87,7 +87,6 @@ export function ActivityForm({ activity, prefill }: { activity?: Activity; prefi
       // 리스트는 미마운트 상태(사용자가 상세로 이동)라도 즉시 백그라운드 재조회되도록
       // refetchType: 'all'. 복귀 시 새 항목이 누락되지 않고 바로 보인다.
       queryClient.invalidateQueries({ queryKey: ['activities'], refetchType: 'all' })
-      toast.success('활동이 등록되었습니다! 🎉')
       setNavigating(true)
       topLoader.start()
       router.push(`/activities/${json.data.id}`)

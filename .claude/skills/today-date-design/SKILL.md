@@ -572,20 +572,47 @@ description: >
 </span>
 ```
 
-### 8-A. 카드 내부 수직 간격 (헤더 덩어리 / 정보 덩어리)
+### 8-A. 카드 내부 수직 간격 + 정보 줄 규칙 (헤더 덩어리 / 정보 덩어리)
 
-왜: 카드는 **두 덩어리**로 읽혀야 한다 — "헤더 덩어리(카테고리 + 제목)"와 "정보 덩어리(메타 + 메모)". 간격을 균등하게 주면 모든 요소가 비슷하게 떠 위계가 사라진다. **원칙: "붙을 덴 확 붙이고, 덩어리 사이는 확 띄운다"(균등 간격 금지).** 상세 화면에서 카테고리+제목이 한 헤더로 묶이는 결과 카드도 동일하게 맞춘다.
+왜: 카드는 **두 덩어리**로 읽혀야 한다 — "헤더 덩어리(카테고리 + 제목)"와 "정보 덩어리(메타 + 정보 줄)". 간격을 균등하게 주면 모든 요소가 비슷하게 떠 위계가 사라진다. **원칙: "붙을 덴 확 붙이고, 덩어리 사이는 확 띄운다"(균등 간격 금지).** 상세 화면에서 카테고리+제목이 한 헤더로 묶이는 결과 카드도 동일하게 맞춘다.
 
 | 구간 | 값(Tailwind) | 의미 |
 |---|---|---|
 | 카테고리 → 제목 | `mb-0.5` (2px) | 헤더 덩어리 **내부** — 밀착 |
 | 제목 → 메타 | `mb-3` (12px) | 헤더 덩어리 ↔ 정보 덩어리 **경계** — 확실히 벌림 |
-| 메타 → 메모 | `mb-1` (4px) | 정보 덩어리 **내부** — 밀착 |
-| 메모 → 별점/날짜(구분선 포함) | 기존 유지 (`mt-2.5 pt-2.5` + `styles.divider`) | `isVisited` 시에만, 구분선으로 분리된 별개 푸터 |
+| 메타 → 정보 줄 | `mb-1` (4px, 메타 줄에 부여) | 정보 덩어리 **내부** — 밀착 |
+| 정보 줄 → 별점/날짜(구분선 포함) | 기존 유지 (`mt-2.5 pt-2.5` + `styles.divider`) | `isVisited` 시에만, 구분선으로 분리된 별개 푸터 |
 
 - 출처: `ActivityCard.tsx` / `PlaceCard.tsx`의 인라인 Tailwind 클래스(간격 전용 `--s-*` 토큰은 없음). 카드 Link 패딩은 `p-3.5`(14px) 유지.
 - **ActivityCard / PlaceCard 두 카드는 항상 정확히 같은 값**으로 동기화한다(한쪽만 바꾸지 말 것).
 - 이 간격 클래스에는 `dark:`·`sm:`·`lg:` 프리픽스를 붙이지 않는다 → 라이트/다크·모바일/데스크탑 동일.
+
+#### 정보 줄(메타 아래 한 줄) 내용·구조 (확정)
+
+왜: 예전엔 정보 줄이 `{memo && (...)}` 조건부 렌더라, 메모가 없으면 줄 자체가 사라져 **카드 전체 높이·별점/날짜 줄 위치가 항목마다 들쭉날쭉**했다. 정보 줄을 **항상 렌더되는 고정 높이 슬롯**으로 두어, 내용 유무와 무관하게 카드 높이를 통일한다(별도 앵커 불필요).
+
+- **컨테이너(두 카드 공통, 정확히 동일 클래스)**:
+  ```tsx
+  <div className={cn('flex min-h-5 items-center gap-1 text-sm', styles.faint)}>
+    {InfoIcon && <InfoIcon className="h-3 w-3 shrink-0" />}
+    {infoText && <span className="line-clamp-1">{infoText}</span>}
+  </div>
+  ```
+  - **항상 렌더**(조건부 렌더 금지). `min-h-5`(20px = `text-sm` line-height)로 내용이 없어도 20px 자리를 유지 → 뒤따르는 별점/날짜 푸터 위치가 고정된다.
+  - 텍스트 `text-sm` + `styles.faint`("카드 흐린 미리보기" 의도된 조합, §2-B). 1줄 말줄임은 `<span className="line-clamp-1">`.
+  - 아이콘 `h-3 w-3 shrink-0`, **색 지정 없이 부모(`styles.faint`) 상속**(리스트 카드 메타 아이콘 규칙, §7).
+- **ActivityCard — 우선순위 fallback**: 메모 있으면 메모, 없고 위치(`location`)가 있으면 위치, 둘 다 없으면 빈 슬롯. 종류는 아이콘으로 구분.
+  ```tsx
+  const infoText = activity.memo || activity.location
+  const InfoIcon = activity.memo ? StickyNote : activity.location ? MapPin : null
+  ```
+- **PlaceCard — 메모 고정**: 정보 줄은 **메모만** 표시(위치 fallback 없음). 아이콘은 메모=`StickyNote`로 ActivityCard와 통일.
+  ```tsx
+  {place.memo && <StickyNote className="h-3 w-3 shrink-0" />}
+  {place.memo && <span className="line-clamp-1">{place.memo}</span>}
+  ```
+- **아이콘 의미 매핑(`lucide-react`)**: 메모 = `StickyNote` / 활동 위치(`location`) = `MapPin`.
+- **`area`(장소 지역)와 혼동 금지**: PlaceCard의 `area`는 정보 줄이 아니라 **배지(메타) 줄**에서 `MapPin`으로 별도 노출한다(변경 없음). 즉 `MapPin`은 두 맥락에서 쓰인다 — ActivityCard **정보 줄의 활동 위치**와 PlaceCard **배지 줄의 지역** — 위치(줄)가 달라 역할이 구분된다.
 
 ### 8-B. 시간대(time_of_day) 표시 규칙
 

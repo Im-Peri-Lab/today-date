@@ -66,6 +66,11 @@ export function ActivityDetail({ id, initialData, initialEdit, returnTo }: Props
 
   const [editingInfo, setEditingInfo] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
+  // 삭제 성공 → router.push(목록)은 비동기 전환이라 즉시 반환된다. 이때 del.isPending이
+  // false로 풀리면 실제 전환 전까지 다이얼로그가 열린 채 "삭제" 활성 상태로 깜빡인다.
+  // push 직전 navigating=true로 잠가, 전환 완료(=언마운트)까지 다이얼로그를 열어두고
+  // "삭제 중..." 비활성 상태로 유지한다. 상세 언마운트 시 자연 정리되므로 해제 불필요.
+  const [navigating, setNavigating] = useState(false)
   const [visitedOpen, setVisitedOpen] = useState(false)
   const [revertOpen, setRevertOpen] = useState(false)
   const listHref = returnTo ?? DEFAULT_LIST_RETURN_TO
@@ -111,7 +116,10 @@ export function ActivityDetail({ id, initialData, initialEdit, returnTo }: Props
   function handleDelete() {
     // 토스트/에러 처리는 훅에 위임(중복 토스트 방지). 상세는 언마운트되지 않아 onSuccess가 정상 실행됨.
     del.mutate(id, {
-      onSuccess: () => router.push(listHref),
+      onSuccess: () => {
+        setNavigating(true)
+        router.push(listHref)
+      },
     })
   }
 
@@ -346,10 +354,10 @@ export function ActivityDetail({ id, initialData, initialEdit, returnTo }: Props
 
           {/* ── 다이얼로그 ── */}
           <DeleteConfirmDialog
-            open={deleteOpen}
+            open={deleteOpen || navigating}
             onOpenChange={setDeleteOpen}
             title={activity.title}
-            loading={del.isPending}
+            loading={del.isPending || navigating}
             onConfirm={handleDelete}
           />
           <VisitedDialog

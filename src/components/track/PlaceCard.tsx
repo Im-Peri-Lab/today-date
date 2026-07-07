@@ -44,13 +44,10 @@ export function PlaceCard({ place, hideMenu, actionSlot, returnTo }: PlaceCardPr
   }
 
   function handleDelete() {
-    del.mutate(place.id, {
-      onSuccess: () => {
-        toast.success('삭제했어요')
-        setDeleteOpen(false)
-      },
-      onError: () => toast.error('삭제 중 오류가 발생했습니다.'),
-    })
+    // 낙관적 제거로 카드가 곧 언마운트되므로 다이얼로그를 먼저 닫는다.
+    // 토스트/롤백은 훅(onSuccess/onError)에서 처리 — 언마운트 시 호출부 콜백은 실행되지 않음.
+    setDeleteOpen(false)
+    del.mutate(place.id)
   }
 
   const isVisited = place.status === 'visited'

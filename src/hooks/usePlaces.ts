@@ -1,6 +1,7 @@
 'use client'
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
 import type { Place, Status } from '@/types'
 import { fetchJson } from './fetcher'
 
@@ -69,7 +70,28 @@ export function useDeletePlace() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: async (id: string) => fetchJson(`/api/places/${id}`, { method: 'DELETE' }),
+    // 낙관적 제거: 재조회 왕복을 기다리지 않고 리스트 캐시에서 즉시 항목을 뺀다.
+    onMutate: async (id: string) => {
+      // 진행 중 재조회가 낙관적 상태를 덮어쓰지 않도록 취소
+      await qc.cancelQueries({ queryKey: ['places'] })
+      // 롤백용 스냅샷: ['places', filters] 모든 필터 변형 캐시
+      const prev = qc.getQueriesData<Place[]>({ queryKey: ['places'] })
+      // 모든 변형에서 해당 항목 즉시 제거(복수형 setQueriesData)
+      qc.setQueriesData<Place[]>({ queryKey: ['places'] }, (old) =>
+        old?.filter((p) => p.id !== id)
+      )
+      return { prev }
+    },
+    onError: (_err, _id, ctx) => {
+      // 실패 시 스냅샷 복원(카드가 다시 나타남) + 에러 토스트
+      ctx?.prev?.forEach(([key, data]) => qc.setQueryData(key, data))
+      toast.error('삭제 중 오류가 발생했습니다.')
+    },
     onSuccess: () => {
+      toast.success('삭제했어요')
+    },
+    // 성공/실패 모두 서버 상태와 최종 정합
+    onSettled: () => {
       qc.invalidateQueries({ queryKey: ['places'] })
     },
   })

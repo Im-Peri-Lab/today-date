@@ -100,8 +100,9 @@ export function PlaceCard({ place, hideMenu, actionSlot, returnTo }: PlaceCardPr
         </div>
 
         {/* 정보 줄: ActivityCard와 동일한 고정 높이 컨테이너(항상 렌더). 장소는 메모만 표시.
-            내용 없어도 min-h-5로 자리 유지 → 메모 유무와 무관하게 카드 높이 일정. */}
-        <div className={cn('flex min-h-5 items-center gap-1 text-sm', styles.faint)}>
+            내용 없어도 min-h-5로 자리 유지 → 메모 유무와 무관하게 카드 높이 일정.
+            스타일은 배지(메타) 줄과 동일(text-xs + styles.sub) — 카드 위계 통일. */}
+        <div className={cn('flex min-h-5 items-center gap-1 text-xs', styles.sub)}>
           {place.memo && <StickyNote className="h-3 w-3 shrink-0" />}
           {place.memo && <span className="line-clamp-1">{place.memo}</span>}
         </div>

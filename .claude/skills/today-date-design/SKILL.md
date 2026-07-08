@@ -144,7 +144,7 @@ description: >
 **의도된 예외 (7토큰에 넣지 않음):**
 - 추천 위저드 h1 20px: 위저드 전용 사이즈(키우면 레이아웃 흔들림).
 - 다이얼로그 제목 20px: 페이지 h1과 분리된 전용 사이즈 (§11-A).
-- 카드 메모 미리보기·빈 상태 14px/`--s-faint` (ActivityCard·PlaceCard·VisitRecordBlock): body도 caption도 아닌 "카드 흐린 미리보기" 의도된 조합.
+- 빈 상태 14px/`--s-faint` (VisitRecordBlock "아직 방문 기록이 없어요" 등): body도 caption도 아닌 의도된 조합. (리스트 카드 정보 줄은 예전엔 이 조합이었으나, 배지 줄과 톤을 통일해 `text-xs`+`styles.sub`로 이전 — §8-A. 상세 화면 빈값은 §2-C 위계 참조.)
 - DetailBlock h2 블록 제목 14px/500: 필드 라벨 톤, 별도 위계.
 
 ### 2-C. 라벨 위계 — 섹션 헤더 vs 필드명 (중요)
@@ -593,14 +593,14 @@ description: >
 
 - **컨테이너(두 카드 공통, 정확히 동일 클래스)**:
   ```tsx
-  <div className={cn('flex min-h-5 items-center gap-1 text-sm', styles.faint)}>
+  <div className={cn('flex min-h-5 items-center gap-1 text-xs', styles.sub)}>
     {InfoIcon && <InfoIcon className="h-3 w-3 shrink-0" />}
     {infoText && <span className="line-clamp-1">{infoText}</span>}
   </div>
   ```
-  - **항상 렌더**(조건부 렌더 금지). `min-h-5`(20px = `text-sm` line-height)로 내용이 없어도 20px 자리를 유지 → 뒤따르는 별점/날짜 푸터 위치가 고정된다.
-  - 텍스트 `text-sm` + `styles.faint`("카드 흐린 미리보기" 의도된 조합, §2-B). 1줄 말줄임은 `<span className="line-clamp-1">`.
-  - 아이콘 `h-3 w-3 shrink-0`, **색 지정 없이 부모(`styles.faint`) 상속**(리스트 카드 메타 아이콘 규칙, §7).
+  - **항상 렌더**(조건부 렌더 금지). `min-h-5`(20px)로 내용이 없어도 20px 자리를 유지 → 뒤따르는 별점/날짜 푸터 위치가 고정된다.
+  - 텍스트 `text-xs` + `styles.sub` — **배지(메타) 줄과 완전히 동일한 크기·색**. 카드 정보 밀도가 낮아 위계 구분(예전 `text-sm`+`styles.faint` "흐린 미리보기")이 이질감만 줘, 배지 줄과 톤을 통일한다. 1줄 말줄임은 `<span className="line-clamp-1">`.
+  - 아이콘 `h-3 w-3 shrink-0`, **색 지정 없이 부모(`styles.sub`) 상속**(리스트 카드 메타 아이콘 규칙, §7).
 - **ActivityCard — 우선순위 fallback**: 메모 있으면 메모, 없고 위치(`location`)가 있으면 위치, 둘 다 없으면 빈 슬롯. 종류는 아이콘으로 구분.
   ```tsx
   const infoText = activity.memo || activity.location

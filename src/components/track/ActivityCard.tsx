@@ -103,8 +103,9 @@ export function ActivityCard({ activity, hideMenu, actionSlot, returnTo }: Activ
         </div>
 
         {/* 정보 줄: 항상 렌더(내용 없어도 min-h-5로 자리 유지) → 메모/위치 유무와 무관하게
-            카드 높이·별점/날짜 줄 위치가 일정하다. 아이콘으로 메모/위치 구분. */}
-        <div className={cn('flex min-h-5 items-center gap-1 text-sm', styles.faint)}>
+            카드 높이·별점/날짜 줄 위치가 일정하다. 아이콘으로 메모/위치 구분.
+            스타일은 배지(메타) 줄과 동일(text-xs + styles.sub) — 카드 위계 통일. */}
+        <div className={cn('flex min-h-5 items-center gap-1 text-xs', styles.sub)}>
           {InfoIcon && <InfoIcon className="h-3 w-3 shrink-0" />}
           {infoText && <span className="line-clamp-1">{infoText}</span>}
         </div>

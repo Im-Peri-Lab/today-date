@@ -843,6 +843,8 @@ export const STATUS_LABELS: Record<Status, string> = {
 - 다크값이 더 진한 이유: 이 버튼은 페이지 배경(`#0a0712~#120c1e`)이라 드롭다운/다이얼로그(`#241a36`)보다 어두워, 공통 토큰(`--s-destructive-soft-bg`) 대신 이 표면 전용값을 `@media`로 직접 적용한다(§5-B 표면별 분리). 라이트는 불변.
 - 위치: 좌측 끝(오삭제 방지). Primary와 최대한 분리.
 
+**처리 중 상태 표현**(되돌리기 아이콘 숨김·삭제 확인 스피너 병기·`navigating` 잠금 등)은 여기서 다루지 않는다 → **§12-A(액션 피드백 위계) 참조.**
+
 ---
 
 ### 10-G. 인라인 편집 라디오 옵션
@@ -933,9 +935,11 @@ export const STATUS_LABELS: Record<Status, string> = {
 
 ---
 
-## 12. 화면 전환 로딩 패턴
+## 12. 로딩·액션 피드백
 
 왜: 로딩 방식은 "앱 전반 일관성"이 아니라 **레이아웃 예측 가능성**으로 정한다. 화면마다 레이아웃 특성이 다르므로 같은 패턴을 강제하면 오히려 레이아웃 점프가 생긴다.
+
+이 섹션은 두 층위를 다룬다 — **화면 전환 로딩**(아래 12 본문: 도착 화면을 무엇으로 채울지)과 **액션 피드백 위계**(§12-A: 사용자가 버튼을 눌렀을 때 "지금 처리 중"을 어디에 표시할지).
 
 ### 패턴 선택 기준
 
@@ -968,7 +972,31 @@ try {
 
 **`<Link>` 전환**: `nextjs-toploader` 자동.
 - 앵커 클릭 → `start()` → RSC 완료 후 `pushState` 패치 → `done()`. 추가 코드 불필요.
-- `<DropdownMenuItem onClick={() => router.push(...)}>`처럼 앵커 클릭이 아닌 프로그래매틱 이동은 자동 적용 안 됨. API 대기 없는 즉시 이동이면 막대 없어도 무방.
+- `<DropdownMenuItem onClick={() => router.push(...)}>`처럼 앵커 클릭이 아닌 프로그래매틱 이동은 자동 적용 안 됨 → 아래 "프로그래매틱 이동엔 항상 topLoader" 참조.
+
+### 프로그래매틱 이동엔 항상 topLoader (막대 생략하지 말 것)
+
+옛 지침은 "API 대기 없는 즉시 이동이면 막대 없어도 무방"이었으나, 실사용에서 **즉시 이동도 체감 지연이 있어** 카드 ⋮ 메뉴 이동(복사하기/수정)·상세 ⋮ 복사하기·상세 삭제 확인 후 목록 전환 등 **프로그래매틱 `router.push`에는 모두 topLoader를 적용**하는 것으로 정정한다. `<Link>`가 아닌 이동은 자동 막대가 없으므로 직접 `topLoader.start()`를 호출한다.
+
+**캐시 warm 라우트의 조기 붕괴 + `requestAnimationFrame` 해법**: `nextjs-toploader`는 `history.pushState` 시점에 `done()`한다. 이동 대상이 App Router 캐시에 **warm**하면(이미 방문한 목록 등) `router.push`가 **동기적으로 즉시 커밋**되어, `start()`→`done()`이 브라우저 페인트 한 번 사이에 붕괴한다 → 막대가 아예 안 보인다. 캐시 온도와 무관하게 노출을 보장하려면 `start()` 직후 **한 프레임 뒤에** push 한다:
+
+```tsx
+const href = stashActivityDuplicate(activity)  // href 먼저 확정
+topLoader.start()
+requestAnimationFrame(() => router.push(href)) // 막대가 먼저 페인트된 뒤 push
+```
+
+**`navigating` 상태 (push 후 전환 완료까지 컨트롤 잠금)**: `router.push`는 **비동기이며 즉시 반환**된다. 성공 처리에서 로딩 상태(`isSubmitting`/`isPending`)를 곧바로 해제하면, 실제 화면 전환이 끝나기 전까지 버튼/다이얼로그가 재활성화된 채로 깜빡인다. push 호출 시점부터 전환 완료(=컴포넌트 언마운트)까지 계속 비활성으로 잡아둘 별도 상태를 둔다:
+
+```tsx
+const [navigating, setNavigating] = useState(false)
+// 삭제 성공 콜백에서
+setNavigating(true)
+topLoader.start()
+requestAnimationFrame(() => router.push(listHref))
+// 다이얼로그: open={deleteOpen || navigating}, loading={del.isPending || navigating}
+// 상세가 언마운트되며 자연 정리되므로 navigating 을 다시 false 로 되돌릴 필요 없음
+```
 
 ### 의도된 차이
 
@@ -988,9 +1016,47 @@ try {
 
 전환 방식이 <Link>인가?
   YES → toploader 자동, 추가 코드 없음
-  NO  (router.push + API 대기) → useTopLoader() 수동 제어 (위 코드 패턴 참조)
-  NO  (router.push + 즉시 이동) → 막대 없어도 무방
+  NO  (router.push, API 대기·즉시 이동 무관) → topLoader.start() 수동 호출
+       + 캐시 warm 가능성 있으면 requestAnimationFrame 으로 push 한 프레임 지연
+       + 전환 후에도 원래 화면 컨트롤이 남으면 navigating 상태로 잠금
 ```
+
+---
+
+## 12-A. 액션 피드백 위계
+
+왜: "처리 중"을 어디에 표시할지는 **액션 후 화면이 얼마나 바뀌는가**로 정한다. 화면 전체가 바뀌면 화면 레벨 신호(topLoader), 화면은 그대로고 액션 하나만 도는 거면 그 버튼 자체가 신호를 낸다. 잘못 고르면 신호가 안 보이거나(화면이 사라져 버림) 과하다(멀쩡한 화면에 오버레이).
+
+### 일반 규칙 (먼저 이 표로 분류)
+
+| 상황 | 피드백 |
+|---|---|
+| 화면 **전체 전환**(라우트 이동), 전환 후 조작 UI가 사라짐 | **topLoader만** (§12 프로그래매틱 이동 패턴) |
+| 화면 전환 + 전환 전까지 **만질 수 있는 입력/폼이 남음** | **topLoader + 로컬 disable** (`navigating` 상태로 폼/버튼 잠금 — §12) |
+| 화면 **그대로**, 액션 하나만 처리, 나머지 화면은 계속 유효 | **버튼 자체 상태** (`disabled` + 텍스트 "처리 중..."/"삭제 중..." 등) |
+| 화면 그대로, **콘텐츠 영역 전체가 재생성** | **오버레이 스피너** (추천 위저드의 `Loader2` 오버레이 등) |
+
+**스피너 병기 조건(버튼 상태의 상위 규칙):** 위 "버튼 자체 상태" 중 **되돌릴 수 없는 액션**(삭제 등) 또는 **체감 소요시간이 긴 액션**(네트워크 왕복 등 대략 1초+)이면, 버튼 텍스트 옆에 **작은 스피너를 병기**한다 — `lucide-react`의 `Loader2` + `animate-spin`(앱 공용 스피너, 신규 도입 금지·재사용). 빠르고 되돌리기 쉬운 제자리 액션(인라인 저장 등)은 텍스트만으로 충분하다.
+
+### 사례
+
+**되돌리기 (activity/place 상세 — "가보고 싶은 곳으로"):** 처리 중엔 리딩 `Undo2` 아이콘을 **숨기고 텍스트만** 노출한다("처리 중...").
+
+```tsx
+{update.isPending ? (
+  '처리 중...'
+) : (
+  <><Undo2 className="h-4 w-4" />{STATUS_MENU_LABELS.wishlist}</>
+)}
+```
+
+**삭제 확인 / setup·forgot 메일 발송:** 텍스트 옆에 `Loader2` 스피너를 **병기**한다(되돌릴 수 없는 액션 + 네트워크 왕복). 삭제 확인 다이얼로그는 텍스트 앞에 스피너를 얹고(`{loading && <Loader2 className="animate-spin" />}{loading ? '삭제 중...' : '삭제'}`), 메일 발송 버튼은 선두 `Mail` 아이콘을 **동일 size의 `Loader2`로 스왑**해 레이아웃 시프트를 없앤다.
+
+> ⚠️ **카드 삭제(ActivityCard/PlaceCard 경유)는 스피너가 보이지 않는다 — 버그가 아니다.** 카드 삭제는 낙관적 캐시 제거(`onMutate`에서 `setQueriesData`로 항목 즉시 제거)로 카드가 언마운트되고, 호출부도 `mutate` 직전 `setDeleteOpen(false)`로 다이얼로그를 먼저 닫는다. `del.isPending=true`와 다이얼로그 언마운트가 **같은 커밋에 반영**되어 스피너가 그려질 프레임이 존재하지 않는다(**dead state**). 낙관적 UX상 의도된 결과다. 반면 **상세 화면 삭제**(ActivityDetail/PlaceDetail)는 다이얼로그를 닫지 않고 `navigating`으로 전환 완료까지 열어두므로 스피너가 정상 노출된다.
+
+### "아이콘 숨김(되돌리기)" vs "스피너 병기(삭제·발송)" — 상반돼 보이지만 축이 다름
+
+되돌리기 버튼은 **원래 리딩 아이콘(`Undo2`)이 있어**, 처리 중엔 그 아이콘 **자리를 텍스트에 양보**하는 것(추가 폭 없음). 삭제·발송은 아이콘 자리를 **스피너로 교체(발송)하거나 텍스트 앞에 병기(삭제)**하는 것 — 어느 쪽이든 "되돌릴 수 없거나 긴 액션엔 진행 신호를 준다"는 동일 원칙의 서로 다른 배치일 뿐이다.
 
 ---
 

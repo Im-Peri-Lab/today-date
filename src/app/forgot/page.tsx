@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Mail, MailCheck, ArrowLeft } from 'lucide-react'
+import { Mail, MailCheck, ArrowLeft, Loader2 } from 'lucide-react'
 import { AuthLayout } from '@/components/auth/AuthLayout'
 import styles from '@/components/auth/auth.module.css'
 
@@ -71,7 +71,11 @@ export default function ForgotPage() {
               )}
             </div>
             <button type="submit" disabled={isLoading} className={styles.btnPrimary}>
-              <Mail size={18} strokeWidth={1.75} />
+              {isLoading ? (
+                <Loader2 size={18} strokeWidth={1.75} className="animate-spin" />
+              ) : (
+                <Mail size={18} strokeWidth={1.75} />
+              )}
               {isLoading ? '발송 중...' : '재설정 메일 발송'}
             </button>
           </form>

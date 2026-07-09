@@ -7,7 +7,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { toast } from 'sonner'
-import { Mail, MailCheck } from 'lucide-react'
+import { Mail, MailCheck, Loader2 } from 'lucide-react'
 import { PasscodeInput } from '@/components/PasscodeInput'
 import { AuthLayout } from '@/components/auth/AuthLayout'
 import styles from '@/components/auth/auth.module.css'
@@ -150,7 +150,11 @@ function SetupFlow() {
               )}
             </div>
             <button type="submit" disabled={isLoading} className={styles.btnPrimary}>
-              <Mail size={18} strokeWidth={1.75} />
+              {isLoading ? (
+                <Loader2 size={18} strokeWidth={1.75} className="animate-spin" />
+              ) : (
+                <Mail size={18} strokeWidth={1.75} />
+              )}
               {isLoading ? '발송 중...' : '인증 메일 발송'}
             </button>
           </form>

@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { useTopLoader } from 'nextjs-toploader'
 import { useState, useRef, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -38,6 +39,7 @@ interface Props {
 
 export function PlaceDetail({ id, initialData, initialEdit, returnTo }: Props) {
   const router = useRouter()
+  const topLoader = useTopLoader()
   const { data: place, isLoading, isError } = usePlace(id, initialData)
   const del = useDeletePlace()
   const update = useUpdatePlace()
@@ -114,8 +116,10 @@ export function PlaceDetail({ id, initialData, initialEdit, returnTo }: Props) {
   }
 
   // 복사하기: 등록 정보만 stash 후 신규 폼으로 이동 (리스트 카드와 동일 헬퍼 공유).
+  // router.push 는 프로그레스 바가 자동으로 뜨지 않아 등록/삭제 경로와 동일하게 push 직전에 start().
   function handleDuplicate() {
     if (!place) return
+    topLoader.start()
     router.push(stashPlaceDuplicate(place))
   }
 
@@ -311,9 +315,10 @@ export function PlaceDetail({ id, initialData, initialEdit, returnTo }: Props) {
                 <Button
                   className={cn(styles.detailPrimaryBtn, 'h-9 gap-1.5 text-white hover:brightness-105')}
                   onClick={handleRevert}
+                  disabled={update.isPending}
                 >
                   <Undo2 className="h-4 w-4" />
-                  {STATUS_MENU_LABELS.wishlist}
+                  {update.isPending ? '처리 중...' : STATUS_MENU_LABELS.wishlist}
                 </Button>
               ) : (
                 <Button

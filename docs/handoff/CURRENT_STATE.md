@@ -26,6 +26,6 @@
 - Galaxy 실기기 QA: 하드웨어 미확보로 보류 중
 
 ## 알려진 이슈 · 기술 부채
-- 활동 생성은 raw fetch, 장소 생성은 폼 인라인 로직으로 구조 비대칭. 리스트 캐시 무효화 로직이 두 파일에 각각 존재해 향후 drift 위험. useCreateActivity/useCreatePlace 훅 통일 검토(최소 diff로 보류 중)
+- 생성 로직(활동/장소)이 훅으로 추출되지 않고 두 폼(ActivityForm/PlaceForm)에 raw fetch로 인라인 중복 존재 — 리스트 캐시 무효화(`invalidateQueries`) 로직도 두 파일에 복붙돼 향후 drift 위험. update/delete는 훅(useUpdate*/useDelete*)으로 통일돼 있으나 생성만 미추출. useCreateActivity/useCreatePlace 훅 통일 검토(최소 diff로 보류 중). ※ 과거 "활동 vs 장소 비대칭" 서술은 현재 두 폼이 거울 구조로 대칭화되어 outdated — 260709 실측 정정
 - 삭제 시 다이얼로그 닫힘 애니메이션이 낙관적 제거로 인해 즉시 사라짐(트레이드오프로 수용). DeleteConfirmDialog의 스피너는 이 경로에서 dead state이나 무해 — 상세 삭제 경로에서는 정상 작동 (260709 확인, SKILL §12-A 문서화)
 - (이전 세션 잔여) 검색/필터 URL 동기화, returnTo 배선, spacing 토큰 표준화 등

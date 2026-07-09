@@ -1,16 +1,15 @@
-# CURRENT_STATE_260707_v2.md
-> 마지막 업데이트: 2026-07-07 (v2)
+# CURRENT_STATE.md
+> 마지막 업데이트: 2026-07-08
 
 ## 현재 단계
 유지보수 / 점진적 UX 개선 단계. MVP 기능은 완료 상태이며, 디자인 일관성·캐시 안정성·엣지 케이스 정리가 중심.
 
 ## 현재 한 줄 요약
-UI 버그 정리·React Query 캐시 갱신 버그 5건 수정에 이어, 리스트 카드(ActivityCard/PlaceCard) 정보 줄 비일관성을 디렉팅 논의로 정리하고 구현 완료(PR #52 squash `58b07d1`). 구현 중 발견된 SKILL.md 동기화 누락도 사후 반영 완료(PR #53 squash `5f791c9`). main 최신(`5f791c9`), 작업트리 clean, 코드-문서 SoT 정합 상태.
+리스트 카드(ActivityCard/PlaceCard) 정보 줄 통일(PR #52)에 이어, 정보 줄과 배지 줄의 스타일 위계(폰트 크기·색)까지 통일 완료(PR #54, squash `6f4cb46`). 기존 "카드 흐린 미리보기" 의도된 예외를 철회하고 배지 줄과 동일 톤(12px+`--s-sub`)으로 수렴. main 최신(`6f4cb46`), Vercel production 반영 완료, 작업트리 clean.
 
 ## 브랜치 상태
-- `design/list-card-consistency` → PR #52 squash(`58b07d1`) — main 반영 완료
-- `docs/skill-card-info-row-sync` → PR #53 squash(`5f791c9`) — main 반영 완료, SoT 정합 확인됨
-- 현재 작업 브랜치 없음, main 기준 lint/build PASS, 작업트리 clean
+- `design/unify-card-info-row-tone` → PR #54 squash(`6f4cb46`) — main 반영 완료, 원격/로컬 브랜치 삭제됨
+- 현재 작업 브랜치 없음, main 기준 build PASS, Vercel production 배포 success
 
 ## 구현 완료 (누적, 기존 유지)
 - 인증(이메일 인증 + 6자리 패스코드, `/setup`·`/lock`·`/forgot`·`/reset`)
@@ -20,18 +19,19 @@ UI 버그 정리·React Query 캐시 갱신 버그 5건 수정에 이어, 리스
 - 지도 앱 연동(`MAP_APPS` config, `MapLink`, 미설치 안내)
 - 홈 통계 카드(행 리스트형, 자연어 빈 상태)
 - 타이포 7토큰 표준화
-- **(v2 신규) 리스트 카드 정보 줄 통일**: 아래 표 참조
+- 리스트 카드 정보 줄 우선순위 통일(memo→location fallback, PR #52)
+- **(신규) 리스트 카드 정보 줄 스타일 위계 통일**: 아래 표 참조
 
-## 리스트 카드 정보 줄 규칙 (신규 확정, 260707 v2)
-| 카드 타입 | 정보 줄 우선순위 | 아이콘 | 비고 |
+## 리스트 카드 정보 줄 규칙 (갱신, 260708)
+| 카드 타입 | 정보 줄 우선순위 | 아이콘 | 스타일 |
 |---|---|---|---|
-| ActivityCard | memo 있으면 memo, 없고 location 있으면 location, 둘 다 없으면 빈 슬롯 | memo=StickyNote / location=MapPin | 배지 줄(소요시간·시간대)은 변경 없음 |
-| PlaceCard | memo 고정(location fallback 없음) | memo=StickyNote | area는 배지 줄에서 별도 노출(변경 없음), 위치는 제목과 중복이라 리스트에서 생략 |
+| ActivityCard | memo 있으면 memo, 없고 location 있으면 location, 둘 다 없으면 빈 슬롯 | memo=StickyNote / location=MapPin | text-xs(12px) + `--s-sub` — 배지 줄과 동일 |
+| PlaceCard | memo 고정(location fallback 없음) | memo=StickyNote | text-xs(12px) + `--s-sub` — 배지 줄과 동일 |
 
-- 정보 줄은 항상 렌더되는 고정 높이(`min-h-5`, 20px) 컨테이너 → memo/location 유무와 무관하게 카드 높이·별점/날짜 줄 위치 통일
-- 별점/날짜 줄은 별도 앵커 없이 정보 줄 뒤에 자연스럽게 따라붙는 구조(진단 확인) — 정보 줄만 고정하면 자동 정렬됨
-- 판단 근거(우선순위를 여러 번 뒤집은 논의 경과) → CHANGELOG 2026-07-07 v2 참조, 결론 원칙 → PROJECT_CONTEXT §20
-- SKILL.md §8-A와 코드(ActivityCard.tsx/PlaceCard.tsx) 1:1 정합 확인 완료(260707 v2)
+- 정보 줄은 항상 렌더되는 고정 높이(`min-h-5`, 20px) 컨테이너 유지 (변경 없음)
+- **(변경)** 기존에는 정보 줄이 배지 줄과 다른 위계(14px+`--s-faint`, "흐린 미리보기" 의도된 예외)였으나, 카드 정보 밀도가 낮아 위계 구분이 이질감만 준다는 판단으로 배지 줄과 동일 스타일로 통일
+- SKILL.md §8-A/§2-B에서 해당 "의도된 예외" 항목 제거, 스펙 갱신 완료
+- 판단 근거·논의 경과 → CHANGELOG 2026-07-08 참조
 
 ## 필드 개념 — area vs location (기존, 변경 없음)
 | 필드 | 의미 | 화면 라벨 | 대상 | 추천 사용 |
@@ -78,13 +78,12 @@ UI 버그 정리·React Query 캐시 갱신 버그 5건 수정에 이어, 리스
 ## 배포 상태
 - 플랫폼: Vercel
 - URL: `https://today-date-seven.vercel.app`
-- 현재 브랜치: `main` (최신 `5f791c9`)
+- 현재 브랜치: `main` (최신 `6f4cb46`)
 
 ## 진행 중 / 남은 작업
-- 리스트 카드 변경분 실기기 라이트/다크 육안 확인 (정적 픽셀 실측만 완료, 라이브 프리뷰 미확인)
-- 사용자 요청 7번 다녀온 날짜 기간 입력(단일→시작~종료, DB 변경 대, 추천 로직 영향) — Analysis Mode 설계 권장
+- 사용자 요청 다녀온 날짜 기간 입력(단일→시작~종료, DB 변경 대, 추천 로직 영향) — Analysis Mode 설계 권장
 - 뱃지 크기 통일: mealBadge vs visitedTag 불일치 가능성 실측 후 별도 브랜치
-- Galaxy 실기기 QA: 지도 앱 열림/미설치 안내/지도 4종 검색 확인
+- Galaxy 실기기 QA: 하드웨어 미확보로 보류 중
 
 ## 알려진 이슈 · 기술 부채
 - 활동 생성은 raw fetch, 장소 생성은 폼 인라인 로직으로 구조 비대칭. 리스트 캐시 무효화 로직이 두 파일에 각각 존재해 향후 drift 위험. useCreateActivity/useCreatePlace 훅 통일 검토(최소 diff로 보류 중)

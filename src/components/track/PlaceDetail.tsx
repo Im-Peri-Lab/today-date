@@ -95,7 +95,11 @@ export function PlaceDetail({ id, initialData, initialEdit, returnTo }: Props) {
     del.mutate(id, {
       onSuccess: () => {
         setNavigating(true)
-        router.push(listHref)
+        // 복사하기와 동일: nextjs-toploader 는 history.pushState 시점에 done() 하므로
+        // 이미 캐시된 목록으로의 push 는 바가 페인트되기 전에 끝나버린다.
+        // start() 직후 한 프레임 뒤에 push 해 프로그레스 바가 먼저 보이도록 한다.
+        topLoader.start()
+        requestAnimationFrame(() => router.push(listHref))
       },
     })
   }

@@ -1,8 +1,8 @@
 # CHANGELOG.md
 
-> **마지막 업데이트: 2026-07-08**
+> **마지막 업데이트: 2026-07-09**
 
-> 260531~260708 핸드오프 전체를 날짜순으로 기록한 변경 이력입니다. 새 AI는 일반적으로 `PROJECT_CONTEXT.md`와 `CURRENT_STATE.md`만 먼저 읽고, 과거 판단 근거가 필요할 때 이 문서를 참고하세요.
+> 260531~260709 핸드오프 전체를 날짜순으로 기록한 변경 이력입니다. 새 AI는 일반적으로 `PROJECT_CONTEXT.md`와 `CURRENT_STATE.md`만 먼저 읽고, 과거 판단 근거가 필요할 때 이 문서를 참고하세요.
 
 ---
 
@@ -376,3 +376,25 @@
   - 머지 전 `git show --stat`으로 SKILL.md 포함 여부 재확인 완료(§20 체크리스트 준수)
 - Vercel production 배포 확인 (`6f4cb46`, 2026-07-08 08:15 UTC)
 - 판단 근거·교훈 → PROJECT_CONTEXT §20
+
+---
+
+## 2026-07-09 — 로딩 인디케이터 일관성 정리 (3개 브랜치)
+
+- 기술 부채 3건 정리 (PR #55 squash `55a7845`) — `chore/tech-debt-round1`
+  - place 되돌리기 로딩 피드백 추가(disabled+"처리 중...", 이후 처리 중 아이콘 숨김으로 보정)
+  - 복사하기·카드메뉴 이동 topLoader 확장 (카드 ⋮ / 상세 ⋮ 양쪽)
+  - ActivityForm/PlaceForm dead `isEdit` 분기 제거 (grep 0건 확인 후 제거)
+  - 부가 발견·수정: 상세 ⋮ 복사하기 topLoader 미노출 버그(nextjs-toploader가 warm route에서 pushState 즉시 커밋 → start()→done() 페인트 전 붕괴) — `requestAnimationFrame` 지연으로 해결. 동일 패턴을 상세 삭제 확인에도 적용
+  - 카드 ⋮ 되돌리기 메뉴(인디케이터 전무, 연타 시 중복 요청 여지) 수정
+- 앱 전체 로딩 인디케이터 전수 진단 (19개 지점) — "화면 전환=topLoader / 제자리=버튼 상태" 가설 검증, 17/19 부합. 위중도 축(되돌릴 수 없음/소요시간 김 → 스피너 병기) 추가해 기준 재정의
+- 스피너 아이콘 보강 (PR #56 squash `3892eb0`) — `design/loading-spinner-emphasis`
+  - 카드 삭제 확인·setup/forgot 메일 발송 3곳에 기존 `Loader2`(lucide) 재사용
+  - 발견: 카드 삭제 경로는 낙관적 언마운트+명시적 다이얼로그 닫기가 동일 프레임에 커밋돼 스피너가 dead state — 버그 아님, 상세 삭제 경로는 정상 노출
+- SKILL.md 동기화 (PR #57 squash `b9bc557`) — `docs/skill-loading-feedback-sync`
+  - §12를 "로딩·액션 피드백"으로 확장, 프로그래매틱 이동 "막대 생략 무방" 서술 정정 + rAF 트릭·navigating 상태 문서화
+  - 신규 §12-A "액션 피드백 위계" — 일반 규칙 표 + 사례(되돌리기 아이콘 숨김/삭제·발송 스피너 병기 + 카드삭제 dead state 주석) + "아이콘 숨김 vs 스피너 병기" 축 차이 설명
+  - §10-F에 §12-A 크로스레퍼런스 1줄 추가(중복 방지)
+  - 문서 전용, 코드 변경 0건
+- 모두 lint/build PASS
+- 진단 근거·교훈 → PROJECT_CONTEXT §20

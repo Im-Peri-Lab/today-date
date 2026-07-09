@@ -144,11 +144,14 @@ export function ActivityDetail({ id, initialData, initialEdit, returnTo }: Props
   }
 
   // 복사하기: 등록 정보만 stash 후 신규 폼으로 이동 (리스트 카드와 동일 헬퍼 공유).
-  // router.push 는 프로그레스 바가 자동으로 뜨지 않아 등록/삭제 경로와 동일하게 push 직전에 start().
+  // nextjs-toploader 는 history.pushState 시점에 바를 종료(done)한다. /activities/new 가 이미
+  // 라우터 캐시에 있으면 push 가 거의 즉시 커밋돼 시작된 바가 페인트되기 전에 끝나버린다.
+  // start() 직후 한 프레임 뒤에 push 해, 시작된 프로그레스 바가 먼저 보이도록 한다.
   function handleDuplicate() {
     if (!activity) return
+    const href = stashActivityDuplicate(activity)
     topLoader.start()
-    router.push(stashActivityDuplicate(activity))
+    requestAnimationFrame(() => router.push(href))
   }
 
   function exitEditInfo() {

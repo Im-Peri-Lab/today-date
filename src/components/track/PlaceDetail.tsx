@@ -116,11 +116,14 @@ export function PlaceDetail({ id, initialData, initialEdit, returnTo }: Props) {
   }
 
   // 복사하기: 등록 정보만 stash 후 신규 폼으로 이동 (리스트 카드와 동일 헬퍼 공유).
-  // router.push 는 프로그레스 바가 자동으로 뜨지 않아 등록/삭제 경로와 동일하게 push 직전에 start().
+  // nextjs-toploader 는 history.pushState 시점에 바를 종료(done)한다. /places/new 가 이미
+  // 라우터 캐시에 있으면 push 가 거의 즉시 커밋돼 시작된 바가 페인트되기 전에 끝나버린다.
+  // start() 직후 한 프레임 뒤에 push 해, 시작된 프로그레스 바가 먼저 보이도록 한다.
   function handleDuplicate() {
     if (!place) return
+    const href = stashPlaceDuplicate(place)
     topLoader.start()
-    router.push(stashPlaceDuplicate(place))
+    requestAnimationFrame(() => router.push(href))
   }
 
   function exitEditInfo() {
@@ -317,8 +320,14 @@ export function PlaceDetail({ id, initialData, initialEdit, returnTo }: Props) {
                   onClick={handleRevert}
                   disabled={update.isPending}
                 >
-                  <Undo2 className="h-4 w-4" />
-                  {update.isPending ? '처리 중...' : STATUS_MENU_LABELS.wishlist}
+                  {update.isPending ? (
+                    '처리 중...'
+                  ) : (
+                    <>
+                      <Undo2 className="h-4 w-4" />
+                      {STATUS_MENU_LABELS.wishlist}
+                    </>
+                  )}
                 </Button>
               ) : (
                 <Button

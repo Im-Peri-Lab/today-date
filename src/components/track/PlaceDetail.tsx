@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { useTopLoader } from 'nextjs-toploader'
 import { useState, useRef, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -38,6 +39,7 @@ interface Props {
 
 export function PlaceDetail({ id, initialData, initialEdit, returnTo }: Props) {
   const router = useRouter()
+  const topLoader = useTopLoader()
   const { data: place, isLoading, isError } = usePlace(id, initialData)
   const del = useDeletePlace()
   const update = useUpdatePlace()
@@ -93,7 +95,11 @@ export function PlaceDetail({ id, initialData, initialEdit, returnTo }: Props) {
     del.mutate(id, {
       onSuccess: () => {
         setNavigating(true)
-        router.push(listHref)
+        // 복사하기와 동일: nextjs-toploader 는 history.pushState 시점에 done() 하므로
+        // 이미 캐시된 목록으로의 push 는 바가 페인트되기 전에 끝나버린다.
+        // start() 직후 한 프레임 뒤에 push 해 프로그레스 바가 먼저 보이도록 한다.
+        topLoader.start()
+        requestAnimationFrame(() => router.push(listHref))
       },
     })
   }
@@ -114,9 +120,14 @@ export function PlaceDetail({ id, initialData, initialEdit, returnTo }: Props) {
   }
 
   // 복사하기: 등록 정보만 stash 후 신규 폼으로 이동 (리스트 카드와 동일 헬퍼 공유).
+  // nextjs-toploader 는 history.pushState 시점에 바를 종료(done)한다. /places/new 가 이미
+  // 라우터 캐시에 있으면 push 가 거의 즉시 커밋돼 시작된 바가 페인트되기 전에 끝나버린다.
+  // start() 직후 한 프레임 뒤에 push 해, 시작된 프로그레스 바가 먼저 보이도록 한다.
   function handleDuplicate() {
     if (!place) return
-    router.push(stashPlaceDuplicate(place))
+    const href = stashPlaceDuplicate(place)
+    topLoader.start()
+    requestAnimationFrame(() => router.push(href))
   }
 
   function exitEditInfo() {
@@ -311,9 +322,16 @@ export function PlaceDetail({ id, initialData, initialEdit, returnTo }: Props) {
                 <Button
                   className={cn(styles.detailPrimaryBtn, 'h-9 gap-1.5 text-white hover:brightness-105')}
                   onClick={handleRevert}
+                  disabled={update.isPending}
                 >
-                  <Undo2 className="h-4 w-4" />
-                  {STATUS_MENU_LABELS.wishlist}
+                  {update.isPending ? (
+                    '처리 중...'
+                  ) : (
+                    <>
+                      <Undo2 className="h-4 w-4" />
+                      {STATUS_MENU_LABELS.wishlist}
+                    </>
+                  )}
                 </Button>
               ) : (
                 <Button

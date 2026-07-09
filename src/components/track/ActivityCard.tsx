@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { useTopLoader } from 'nextjs-toploader'
 import { useState, type ReactNode } from 'react'
 import { toast } from 'sonner'
 import { Clock, StickyNote, MapPin } from 'lucide-react'
@@ -28,10 +29,18 @@ interface ActivityCardProps {
 
 export function ActivityCard({ activity, hideMenu, actionSlot, returnTo }: ActivityCardProps) {
   const router = useRouter()
+  const topLoader = useTopLoader()
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [visitedOpen, setVisitedOpen] = useState(false)
   const del = useDeleteActivity()
   const update = useUpdateActivity()
+
+  // 카드 ⋮ 메뉴발 화면 이동: router.push 는 프로그레스 바가 자동으로 뜨지 않아
+  // 등록/삭제 경로와 동일하게 push 직전 topLoader.start()로 진행 표시를 맞춘다.
+  function navigate(href: string) {
+    topLoader.start()
+    router.push(href)
+  }
 
   function handleRevert() {
     update.mutate(
@@ -67,9 +76,9 @@ export function ActivityCard({ activity, hideMenu, actionSlot, returnTo }: Activ
         >
           <ItemMenu
             status={activity.status}
-            onEditInfo={() => router.push(buildDetailHref(detailPath, { edit: 'info', returnTo }))}
-            onEditVisit={() => router.push(buildDetailHref(detailPath, { edit: 'visit', returnTo }))}
-            onDuplicate={() => router.push(stashActivityDuplicate(activity))}
+            onEditInfo={() => navigate(buildDetailHref(detailPath, { edit: 'info', returnTo }))}
+            onEditVisit={() => navigate(buildDetailHref(detailPath, { edit: 'visit', returnTo }))}
+            onDuplicate={() => navigate(stashActivityDuplicate(activity))}
             onDelete={() => setDeleteOpen(true)}
             onMarkVisited={() => setVisitedOpen(true)}
             onRevert={handleRevert}

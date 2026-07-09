@@ -11,13 +11,11 @@ import { FormLayout } from '@/components/forms/FormLayout'
 import { PlaceFields } from './PlaceFields'
 import { takePlacePrefill } from '@/lib/duplicatePrefill'
 import { placeFormSchema, type PlaceFormValues } from '@/lib/schemas/placeSchema'
-import type { Place } from '@/types'
 
-export function PlaceForm({ place, prefill }: { place?: Place; prefill?: boolean }) {
+export function PlaceForm({ prefill }: { prefill?: boolean }) {
   const router = useRouter()
   const topLoader = useTopLoader()
   const queryClient = useQueryClient()
-  const isEdit = !!place
   // router.push(App Router)는 비동기 전환이라 즉시 반환된다. 성공 직후 isSubmitting이
   // false로 풀리면 실제 화면 전환 전까지 버튼이 재활성화되어 잠깐 깜빡인다.
   // push 직전에 navigating=true로 잠가 전환 완료(=언마운트)까지 비활성을 유지한다.
@@ -32,23 +30,13 @@ export function PlaceForm({ place, prefill }: { place?: Place; prefill?: boolean
     formState: { errors, isSubmitting },
   } = useForm<PlaceFormValues>({
     resolver: zodResolver(placeFormSchema),
-    defaultValues: place
-      ? {
-          title: place.title,
-          category_id: place.category_id ?? '',
-          area: place.area,
-          location: place.location ?? '',
-          meal_times: place.meal_times,
-          memo: place.memo ?? '',
-          reference_url: place.reference_url ?? '',
-        }
-      : { meal_times: [] },
+    defaultValues: { meal_times: [] },
   })
 
   // 복사하기 진입(?from=copy): 마운트 후 sessionStorage 의 prefill 값을 읽어(one-shot) 폼에 채운다.
   // 초기 렌더는 서버와 동일한 빈 폼이라 hydration 불일치가 없다. 저장 전까지 DB 생성 없음.
   useEffect(() => {
-    if (isEdit || !prefill) return
+    if (!prefill) return
     const values = takePlacePrefill()
     if (values) reset(values)
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -63,8 +51,8 @@ export function PlaceForm({ place, prefill }: { place?: Place; prefill?: boolean
       memo: values.memo || null,
     }
 
-    const res = await fetch(isEdit ? `/api/places/${place!.id}` : '/api/places', {
-      method: isEdit ? 'PATCH' : 'POST',
+    const res = await fetch('/api/places', {
+      method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
     })
@@ -75,27 +63,19 @@ export function PlaceForm({ place, prefill }: { place?: Place; prefill?: boolean
       return
     }
 
-    if (isEdit) {
-      // 리스트는 미마운트 상태에서도 즉시 백그라운드 재조회되도록 refetchType: 'all'.
-      // /list 복귀 시 이전 값 프레임 없이 바로 최신 목록이 보인다.
-      queryClient.invalidateQueries({ queryKey: ['places'], refetchType: 'all' })
-      queryClient.invalidateQueries({ queryKey: ['place', place!.id] })
-      toast.success('수정되었습니다! ✏️')
-      router.push(`/places/${place!.id}`)
-    } else {
-      // 신규 등록도 동일: 리스트를 즉시 재조회해 복귀 시 새 항목이 바로 보이도록 한다.
-      queryClient.invalidateQueries({ queryKey: ['places'], refetchType: 'all' })
-      setNavigating(true)
-      topLoader.start()
-      router.push(`/places/${json.data.id}`)
-    }
+    // 리스트는 미마운트 상태(사용자가 상세로 이동)라도 즉시 백그라운드 재조회되도록
+    // refetchType: 'all'. 복귀 시 새 항목이 누락되지 않고 바로 보인다.
+    queryClient.invalidateQueries({ queryKey: ['places'], refetchType: 'all' })
+    setNavigating(true)
+    topLoader.start()
+    router.push(`/places/${json.data.id}`)
   }
 
   return (
     <FormLayout
       onSubmit={handleSubmit(onSubmit)}
       isSubmitting={isSubmitting || navigating}
-      submitLabel={isEdit ? '수정 저장하기' : '장소 등록하기'}
+      submitLabel="장소 등록하기"
     >
       <PlaceFields register={register} errors={errors} watch={watch} setValue={setValue} />
     </FormLayout>

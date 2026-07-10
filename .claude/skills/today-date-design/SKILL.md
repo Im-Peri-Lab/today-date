@@ -330,6 +330,32 @@ description: >
 - **알려진 트레이드오프(수용)**: 달력 팝업 UI는 OS 통제라 앱이 못 바꾼다. ① 선택일 강조색이 OS 기본(예: iOS Safari는 파랑)으로 뜨고 앱 보라(`--s-active-*`)로 못 바꾼다. ② "오늘로 점프" 버튼 유무 등 컨트롤이 플랫폼마다 다르다(맥 Chrome엔 "오늘", iOS엔 없음). → portal 잡음·폭 초과 제거의 대가로 의도적으로 수용. 앱 보라색 선택일/오늘 버튼이 꼭 필요하면 커스텀 picker로 회귀해야 하므로 신규 도입 전 트레이드오프를 재검토할 것.
 - 저장값은 ISO(`YYYY-MM-DD`) 그대로. 표시 변환(`formatDotDate`/`formatKoreanDate`)은 문자열 분해로만(`new Date(iso)` 문자열 파싱 금지 — UTC 자정 밀림 방지, `lib/date.ts`와 동일 원칙).
 
+### 4-B. 방문 기간 입력 — 종료일 on/off 스위치 (activities 전용)
+
+**왜:** activities는 여행·축제처럼 하루를 넘는 방문이 있어 "시작~종료" 기간을 받는다. 반면 기본값은 여전히 **하루 방문**이라, 기간 UI를 상시 노출하지 않고 **스위치로 켤 때만 펼치는 점진적 노출(progressive disclosure)**로 둔다. **places는 단일 날짜 그대로** — 기간 UI를 절대 노출하지 않는다.
+
+- **적용 범위 (엄격):** 기간 입력·표시는 **activities 한정**. 공유 컴포넌트(`VisitedDialog`·`VisitRecordBlock`)는 `track` prop으로 분기하며, `track === 'activity'`일 때만 종료일 UI를 렌더하고 `visited_end_at`을 payload에 싣는다. place 경로엔 이 필드가 절대 섞이면 안 된다.
+- **데이터:** `visited_at`(시작일, 기존) + `visited_end_at`(종료일, nullable, activities만). `visited_end_at IS NULL`이면 단일 날짜. 종료일은 시작일 이상(클라·서버·DB CHECK 3단 방어).
+
+**① 종료일 스위치 = iOS식 on/off 토글 (신규 컴포넌트 — 세그먼트 토글과 별개)**
+- **⚠️ "가보고 싶은 곳/다녀온 곳" 세그먼트 토글(`styles.segment`, §4·§5-A)과 혼동 금지.** 세그먼트 = 두 값 중 **택1**(iOS 흰 면 떠오름 + 보라 테두리). 종료일 스위치 = 단일 기능 **on/off**(트랙 + 원형 손잡이). 시각·의미가 다른 **별개 패턴**이며 전용 컴포넌트 `src/components/forms/VisitPeriodToggle.tsx` + 전용 클래스 `styles.periodSwitch*`로 존재한다.
+- **크기·형태:** 트랙 `34×20px`, radius `9999px`, 손잡이 `16×16px`(top/left 2px, on 시 `translateX(14px)`). `role="switch"` + `aria-checked` + `aria-controls`(펼칠 종료일 필드 id).
+- **색 (토큰만, 임의 hex 금지):** off 트랙 = `--s-card-border-strong`(중성), on 트랙 = `--s-active-fill`(accent 보라, 라·다 동일 — Primary/세그먼트 채움과 같은 기준), 손잡이 = `--s-active-on`(흰색). 포커스 = `--s-focus-ring`(소형 컨트롤 2px 링, §5). 트랙·손잡이 `160ms` 트랜지션.
+- **배치:** "방문 날짜/시작일" **라벨 줄 우측**(`flex justify-between`). 스위치 오른쪽에 12px `--s-sub` "종료일" 텍스트(`styles.periodToggleLabel`).
+
+**② 펼침 애니메이션**
+- 종료일 필드는 항상 마운트하고 `styles.periodEnd`(`grid-template-rows: 0fr` → on 시 `periodEndOpen`으로 `1fr`) + 내부 `periodEndInner`(`overflow:hidden`)로 **높이 트랜지션(200ms)**. `prefers-reduced-motion`이면 트랜지션 제거.
+
+**③ 동적 라벨**
+- 토글 **off**: 상단 날짜 필드 라벨 = **"방문 날짜"**.
+- 토글 **on**: 상단 필드 = **"방문 시작일"**, 펼쳐지는 하단 필드 = **"방문 종료일"**.
+
+**④ 표시 포맷 (상세 vs 카드 분리)**
+- **상세 화면**(`VisitRecordBlock`): `formatDotDateRange(start, end)` — 요일 포함 풀 포맷. end 없거나 start와 같으면 단일 날짜(`formatDotDate`), 다르면 `"YYYY.MM.DD (요일) ~ YYYY.MM.DD (요일)"`.
+- **리스트 카드**(`ActivityCard`): `formatDotDateRangeCompact(start, end)` — 풀 포맷이 카드 폭에서 줄바꿈되므로 **기간일 때만** 요일 생략·연도 2자리: `"26.06.25 ~ 26.06.28"`. **단일 날짜(또는 start===end)는 카드 기존 관례(`formatDotDate`, 요일·4자리 연도) 그대로 유지** — 연도는 생략하지 않는다(수년 뒤 올해/작년 구분 필요). 억지로 한 줄에 맞추지 않으며, 두 줄로 감기는 것은 허용.
+- place는 카드·상세 모두 end=null로 호출해 항상 단일 날짜.
+- **리셋:** "가보고 싶은 곳으로 되돌리기"(wishlist 전환) 시 `visited_at`과 함께 `visited_end_at`도 `null`로 리셋한다.
+
 ---
 
 ## 5. 상호작용 표준 (포커스 · 활성 · hover · 눌림)
@@ -613,6 +639,15 @@ description: >
   ```
 - **아이콘 의미 매핑(`lucide-react`)**: 메모 = `StickyNote` / 활동 위치(`location`) = `MapPin`.
 - **`area`(장소 지역)와 혼동 금지**: PlaceCard의 `area`는 정보 줄이 아니라 **배지(메타) 줄**에서 `MapPin`으로 별도 노출한다(변경 없음). 즉 `MapPin`은 두 맥락에서 쓰인다 — ActivityCard **정보 줄의 활동 위치**와 PlaceCard **배지 줄의 지역** — 위치(줄)가 달라 역할이 구분된다.
+
+#### 방문일/기간 표시 포맷 — 카드 레이어는 "요일 생략 · 연도 2자리"로 통일 (확정)
+
+왜: 카드 방문일 푸터는 별점과 한 줄을 나눠 쓰는 좁은 폭이다. 요일+4자리 연도 풀 포맷은 폭을 많이 먹고, 특히 activity 기간 표시(`~`)가 줄바꿈된다. **카드 레이어(ActivityCard·PlaceCard)는 단일 날짜든 기간이든 모두 요일을 생략하고 연도를 2자리로 줄인 문법으로 통일**해, 한 리스트 안에서 날짜 문법이 섞여 보이지 않게 한다.
+
+- **문법(카드 전용):** `YY.MM.DD` (요일 없음, 연도 2자리). 기간은 `YY.MM.DD ~ YY.MM.DD`. **연도는 생략하지 않는다**(수년 뒤 올해/작년 구분 필요 → 2자리로 유지하되 표기).
+- **단일 출처(`lib/date.ts`):** 단일 = `formatDotDateCompact(iso)`, 기간(activity 전용) = `formatDotDateRangeCompact(start, end)`(단일/동일일이면 내부적으로 `formatDotDateCompact`로 축약). 두 카드 모두 이 함수만 쓴다(하드코딩·`formatDotDate` 직접 호출 금지).
+- **ActivityCard:** `visited_end_at` 있으면 `formatDotDateRangeCompact`, 없으면 `formatDotDateCompact`. **PlaceCard:** 기간 기능 없음 → 항상 `formatDotDateCompact`(포맷 통일만, 로직 변경 없음).
+- **상세 화면은 이 규칙에서 제외:** `ActivityDetail`·`PlaceDetail`·`VisitRecordBlock`은 **요일 포함 풀 포맷**(`formatDotDate`/`formatDotDateRange`, `YYYY.MM.DD (요일)`) 그대로 유지한다(§4-B ④). 카드=축약, 상세=풀 — 의도된 레이어 차이.
 
 ### 8-B. 시간대(time_of_day) 표시 규칙
 

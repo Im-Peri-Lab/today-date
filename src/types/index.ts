@@ -37,6 +37,8 @@ export interface Activity {
   image_urls: string[]
   status: Status
   visited_at: string | null
+  /** 방문 종료일(기간 방문). NULL이면 단일 날짜 방문(visited_at만). activities 전용. */
+  visited_end_at: string | null
   rating: number | null
   review_note: string | null
   created_at: string

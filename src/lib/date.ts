@@ -27,3 +27,38 @@ export function formatDotDate(iso?: string | null): string {
   const wd = WEEKDAY_LABELS[new Date(y, m - 1, d).getDay()]
   return `${y}.${String(m).padStart(2, '0')}.${String(d).padStart(2, '0')} (${wd})`
 }
+
+/**
+ * 방문 기간 표시 — 방문일 표시의 단일 출처(카드·상세 공용, activities 기간 방문용).
+ * end 가 없거나 start 와 같으면 단일 날짜(formatDotDate)로 축약, 다르면 "start ~ end".
+ * 저장값(ISO)은 불변이며 각 날짜는 formatDotDate 로 위임(요일·타임존 처리 일원화).
+ */
+export function formatDotDateRange(start?: string | null, end?: string | null): string {
+  if (!start) return ''
+  if (!end || end === start) return formatDotDate(start)
+  return `${formatDotDate(start)} ~ ${formatDotDate(end)}`
+}
+
+/**
+ * 요일 없는 2자리 연도 점 날짜 — "26.07.09". **리스트 카드 단일 날짜 표시 전용.**
+ * 카드 레이어는 activity·place 모두 이 문법(요일 생략·연도 2자리)으로 통일한다(§8-A).
+ * 상세 화면은 이 함수를 쓰지 않고 `formatDotDate`(요일·4자리 연도)를 그대로 쓴다.
+ */
+export function formatDotDateCompact(iso?: string | null): string {
+  if (!iso) return ''
+  const [y, m, d] = iso.split('-').map(Number)
+  if (!y || !m || !d) return iso
+  return `${String(y).slice(-2)}.${String(m).padStart(2, '0')}.${String(d).padStart(2, '0')}`
+}
+
+/**
+ * 리스트 카드 전용 기간 표시 — 카드 폭에서 요일 포함 풀 포맷이 줄바꿈되는 문제 때문에
+ * 요일을 생략하고 연도를 2자리로 줄인다: "26.06.25 ~ 26.06.28".
+ * 단일 날짜(또는 start===end)는 `formatDotDateCompact`로 축약(카드 레이어 문법 통일, §8-A).
+ * 상세 화면은 이 함수를 쓰지 않고 `formatDotDateRange`(요일 포함) 그대로 사용한다.
+ */
+export function formatDotDateRangeCompact(start?: string | null, end?: string | null): string {
+  if (!start) return ''
+  if (!end || end === start) return formatDotDateCompact(start)
+  return `${formatDotDateCompact(start)} ~ ${formatDotDateCompact(end)}`
+}

@@ -15,7 +15,7 @@ import { useDeleteActivity, useUpdateActivity } from '@/hooks/useActivities'
 import { DURATION_LABELS, TIME_OF_DAY_LABELS, TIME_OF_DAY_ICONS, STATUS_LABELS } from '@/lib/labels'
 import { buildDetailHref } from '@/lib/listReturn'
 import { stashActivityDuplicate } from '@/lib/duplicatePrefill'
-import { formatDotDate } from '@/lib/date'
+import { formatDotDateCompact, formatDotDateRangeCompact } from '@/lib/date'
 import { cn } from '@/lib/utils'
 import type { Activity } from '@/types'
 import styles from '@/components/screens.module.css'
@@ -124,7 +124,13 @@ export function ActivityCard({ activity, hideMenu, actionSlot, returnTo }: Activ
             {activity.rating ? (
               <RatingStars value={activity.rating} size="sm" />
             ) : null}
-            {activity.visited_at && <span>{formatDotDate(activity.visited_at)}</span>}
+            {activity.visited_at && (
+              <span>
+                {activity.visited_end_at
+                  ? formatDotDateRangeCompact(activity.visited_at, activity.visited_end_at)
+                  : formatDotDateCompact(activity.visited_at)}
+              </span>
+            )}
           </div>
         )}
       </Link>
@@ -146,6 +152,7 @@ export function ActivityCard({ activity, hideMenu, actionSlot, returnTo }: Activ
         title={activity.title}
         initial={{
           visited_at: activity.visited_at,
+          visited_end_at: activity.visited_end_at,
           rating: activity.rating,
           review_note: activity.review_note,
         }}

@@ -618,6 +618,79 @@
   }
 }
 
+/* ── 방문 기간 스위치 (on/off) ──────────────────────
+ * 세그먼트 토글(.segment — "가보고 싶은 곳/다녀온 곳")과는 별개의 신규 패턴.
+ * 세그먼트=두 값 중 택1(iOS 흰 면 떠오름), 이건=단일 기능 on/off(iOS 스위치).
+ * activities 방문 기록의 "종료일" 노출 토글 전용. §4-B 참조.
+ */
+.periodToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem; /* 스위치 ↔ "종료일" 라벨 간격 */
+  cursor: pointer;
+  user-select: none;
+}
+.periodToggleLabel {
+  font-size: 0.75rem; /* 12px */
+  color: var(--s-sub, #6b7280);
+}
+.periodSwitch {
+  position: relative;
+  flex-shrink: 0;
+  width: 34px;
+  height: 20px;
+  padding: 0;
+  border: none;
+  border-radius: 9999px;
+  background: var(--s-card-border-strong, #eceaf3); /* off: 중성 트랙 */
+  cursor: pointer;
+  transition: background 160ms ease;
+}
+.periodSwitchOn {
+  background: var(--s-active-fill, #7c3aed); /* on: accent 보라(라·다 동일, Primary와 같은 기준) */
+}
+.periodSwitchKnob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 9999px;
+  background: var(--s-active-on, #ffffff); /* 흰색 손잡이 */
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+  transition: transform 160ms ease;
+}
+.periodSwitchOn .periodSwitchKnob {
+  transform: translateX(14px); /* 34 - 2(left) - 16(knob) - 2(right) = 14 */
+}
+.periodSwitch:focus-visible {
+  outline: none;
+  box-shadow: var(--s-focus-ring, 0 0 0 2px rgba(124, 58, 237, 0.5)); /* 소형 컨트롤 링(§5) */
+}
+
+/* ── 방문 종료일 필드 펼침 애니메이션 ──────────────
+ * on 시 종료일 필드가 아래로 부드럽게 펼쳐짐(grid-rows 0fr→1fr, 높이 트랜지션).
+ */
+.periodEnd {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 200ms ease;
+}
+.periodEndOpen {
+  grid-template-rows: 1fr;
+}
+.periodEndInner {
+  overflow: hidden;
+  min-height: 0;
+}
+@media (prefers-reduced-motion: reduce) {
+  .periodSwitch,
+  .periodSwitchKnob,
+  .periodEnd {
+    transition: none;
+  }
+}
+
 /* 검색 / 텍스트 입력 */
 .search {
   position: relative;

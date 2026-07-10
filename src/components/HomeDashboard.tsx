@@ -143,7 +143,7 @@ export function HomeDashboard({ initialStats }: { initialStats?: DashboardStats 
         <CtaCard
           href="/recommend/place"
           icon={<MapPin className="h-5 w-5" strokeWidth={1.75} />}
-          title="오늘 어디갈까?"
+          title="오늘 뭐먹을까?"
           subtitle="장소 추천 받기"
         />
       </div>

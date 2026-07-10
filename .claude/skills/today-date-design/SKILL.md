@@ -648,6 +648,7 @@ description: >
 - **단일 출처(`lib/date.ts`):** 단일 = `formatDotDateCompact(iso)`, 기간(activity 전용) = `formatDotDateRangeCompact(start, end)`(단일/동일일이면 내부적으로 `formatDotDateCompact`로 축약). 두 카드 모두 이 함수만 쓴다(하드코딩·`formatDotDate` 직접 호출 금지).
 - **ActivityCard:** `visited_end_at` 있으면 `formatDotDateRangeCompact`, 없으면 `formatDotDateCompact`. **PlaceCard:** 기간 기능 없음 → 항상 `formatDotDateCompact`(포맷 통일만, 로직 변경 없음).
 - **상세 화면은 이 규칙에서 제외:** `ActivityDetail`·`PlaceDetail`·`VisitRecordBlock`은 **요일 포함 풀 포맷**(`formatDotDate`/`formatDotDateRange`, `YYYY.MM.DD (요일)`) 그대로 유지한다(§4-B ④). 카드=축약, 상세=풀 — 의도된 레이어 차이.
+- **기간 줄바꿈은 3열에서만 — 실측 기반 의도적 수용:** 날짜 한 줄 폭 ≈ **148px**, 날짜 자리 = `카드 안쪽 폭 − 별점 88px − gap 8px`. **모바일 1열(자리 194px)·2열(189px)은 한 줄**, **데스크탑 3열(≥1024px, 카드 265px→자리 111px)만** 148px를 못 담아 `~` 공백에서 **2줄**로 감긴다. 주 기기(모바일)가 한 줄이므로 그대로 둔다. **`whitespace-nowrap` 강제 금지** — 3열에서 별점+날짜(244px)가 행 폭(207px)을 넘겨 ⋮ 케밥 메뉴와 겹침/잘림. 3열도 한 줄로 통일하려면 별점 분리(푸터 2줄화)·별점 축약 등 별도 결정이 필요하다(임의로 nowrap 처리해 회귀시키지 말 것).
 
 ### 8-B. 시간대(time_of_day) 표시 규칙
 

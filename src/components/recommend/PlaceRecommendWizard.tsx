@@ -215,7 +215,7 @@ export function PlaceRecommendWizard() {
           <span className={cn(styles.gradIcon, 'h-8 w-8')}>
             <MapPin className="h-5 w-5" strokeWidth={1.75} />
           </span>
-          <h1 className={cn('mt-3 text-xl font-semibold', styles.ink)}>어디 갈까?</h1>
+          <h1 className={cn('mt-3 text-xl font-semibold', styles.ink)}>뭐 먹을까?</h1>
         </div>
 
         <StepDots step={step} />

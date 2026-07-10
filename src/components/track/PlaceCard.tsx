@@ -15,7 +15,7 @@ import { useDeletePlace, useUpdatePlace } from '@/hooks/usePlaces'
 import { MEAL_LABELS, STATUS_LABELS } from '@/lib/labels'
 import { buildDetailHref } from '@/lib/listReturn'
 import { stashPlaceDuplicate } from '@/lib/duplicatePrefill'
-import { formatDotDate } from '@/lib/date'
+import { formatDotDateCompact } from '@/lib/date'
 import { cn } from '@/lib/utils'
 import type { Place } from '@/types'
 import styles from '@/components/screens.module.css'
@@ -119,7 +119,7 @@ export function PlaceCard({ place, hideMenu, actionSlot, returnTo }: PlaceCardPr
         {isVisited && (
           <div className={cn('mt-2.5 flex items-center gap-2 pt-2.5 text-xs', styles.divider, styles.sub)}>
             {place.rating ? <RatingStars value={place.rating} size="sm" /> : null}
-            {place.visited_at && <span>{formatDotDate(place.visited_at)}</span>}
+            {place.visited_at && <span>{formatDotDateCompact(place.visited_at)}</span>}
           </div>
         )}
       </Link>

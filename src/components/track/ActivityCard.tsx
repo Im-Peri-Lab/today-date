@@ -15,7 +15,7 @@ import { useDeleteActivity, useUpdateActivity } from '@/hooks/useActivities'
 import { DURATION_LABELS, TIME_OF_DAY_LABELS, TIME_OF_DAY_ICONS, STATUS_LABELS } from '@/lib/labels'
 import { buildDetailHref } from '@/lib/listReturn'
 import { stashActivityDuplicate } from '@/lib/duplicatePrefill'
-import { formatDotDateRangeCompact } from '@/lib/date'
+import { formatDotDateCompact, formatDotDateRangeCompact } from '@/lib/date'
 import { cn } from '@/lib/utils'
 import type { Activity } from '@/types'
 import styles from '@/components/screens.module.css'
@@ -125,7 +125,11 @@ export function ActivityCard({ activity, hideMenu, actionSlot, returnTo }: Activ
               <RatingStars value={activity.rating} size="sm" />
             ) : null}
             {activity.visited_at && (
-              <span>{formatDotDateRangeCompact(activity.visited_at, activity.visited_end_at)}</span>
+              <span>
+                {activity.visited_end_at
+                  ? formatDotDateRangeCompact(activity.visited_at, activity.visited_end_at)
+                  : formatDotDateCompact(activity.visited_at)}
+              </span>
             )}
           </div>
         )}

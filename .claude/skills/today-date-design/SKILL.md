@@ -640,6 +640,15 @@ description: >
 - **아이콘 의미 매핑(`lucide-react`)**: 메모 = `StickyNote` / 활동 위치(`location`) = `MapPin`.
 - **`area`(장소 지역)와 혼동 금지**: PlaceCard의 `area`는 정보 줄이 아니라 **배지(메타) 줄**에서 `MapPin`으로 별도 노출한다(변경 없음). 즉 `MapPin`은 두 맥락에서 쓰인다 — ActivityCard **정보 줄의 활동 위치**와 PlaceCard **배지 줄의 지역** — 위치(줄)가 달라 역할이 구분된다.
 
+#### 방문일/기간 표시 포맷 — 카드 레이어는 "요일 생략 · 연도 2자리"로 통일 (확정)
+
+왜: 카드 방문일 푸터는 별점과 한 줄을 나눠 쓰는 좁은 폭이다. 요일+4자리 연도 풀 포맷은 폭을 많이 먹고, 특히 activity 기간 표시(`~`)가 줄바꿈된다. **카드 레이어(ActivityCard·PlaceCard)는 단일 날짜든 기간이든 모두 요일을 생략하고 연도를 2자리로 줄인 문법으로 통일**해, 한 리스트 안에서 날짜 문법이 섞여 보이지 않게 한다.
+
+- **문법(카드 전용):** `YY.MM.DD` (요일 없음, 연도 2자리). 기간은 `YY.MM.DD ~ YY.MM.DD`. **연도는 생략하지 않는다**(수년 뒤 올해/작년 구분 필요 → 2자리로 유지하되 표기).
+- **단일 출처(`lib/date.ts`):** 단일 = `formatDotDateCompact(iso)`, 기간(activity 전용) = `formatDotDateRangeCompact(start, end)`(단일/동일일이면 내부적으로 `formatDotDateCompact`로 축약). 두 카드 모두 이 함수만 쓴다(하드코딩·`formatDotDate` 직접 호출 금지).
+- **ActivityCard:** `visited_end_at` 있으면 `formatDotDateRangeCompact`, 없으면 `formatDotDateCompact`. **PlaceCard:** 기간 기능 없음 → 항상 `formatDotDateCompact`(포맷 통일만, 로직 변경 없음).
+- **상세 화면은 이 규칙에서 제외:** `ActivityDetail`·`PlaceDetail`·`VisitRecordBlock`은 **요일 포함 풀 포맷**(`formatDotDate`/`formatDotDateRange`, `YYYY.MM.DD (요일)`) 그대로 유지한다(§4-B ④). 카드=축약, 상세=풀 — 의도된 레이어 차이.
+
 ### 8-B. 시간대(time_of_day) 표시 규칙
 
 왜: 시간대(`day`/`night`/`any`)는 항상 값이 있는(널 불가, DB `not null default 'any'`) 사용자 선택값이다. 셋 다 표시해 정보 손실을 막되, 라벨·아이콘 출처를 한 곳으로 모아 카드·상세가 갈라지지 않게 한다.

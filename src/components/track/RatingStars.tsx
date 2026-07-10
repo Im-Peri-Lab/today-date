@@ -5,14 +5,16 @@ import styles from '@/components/screens.module.css'
 interface RatingStarsProps {
   value: number
   onChange?: (value: number) => void
-  /** sm=16px(표시) · md=28px · lg=32px(편집 터치 타깃) */
+  /** sm=14px(표시) · md=28px · lg=32px(편집 터치 타깃) */
   size?: 'sm' | 'md' | 'lg'
   className?: string
 }
 
 export function RatingStars({ value, onChange, size = 'md', className }: RatingStarsProps) {
   const interactive = !!onChange
-  const starSize = size === 'sm' ? 'h-4 w-4' : size === 'lg' ? 'h-8 w-8' : 'h-7 w-7'
+  // sm=14px(h-3.5): 리스트 카드 방문완료+별점 줄에서 방문 기간 range("YY.MM.DD ~ YY.MM.DD")가
+  // 날짜 칸 부족(≈1.5px)으로 2줄 감기던 문제를 별점 폭을 줄여 해소(§10-H). md/lg는 불변.
+  const starSize = size === 'sm' ? 'h-3.5 w-3.5' : size === 'lg' ? 'h-8 w-8' : 'h-7 w-7'
   // 편집(lg)은 별 사이 간격을 넓혀 인접 별 오터치 방지
   const gap = size === 'lg' ? 'gap-2' : 'gap-0.5'
 

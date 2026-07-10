@@ -330,15 +330,30 @@ description: >
 - **알려진 트레이드오프(수용)**: 달력 팝업 UI는 OS 통제라 앱이 못 바꾼다. ① 선택일 강조색이 OS 기본(예: iOS Safari는 파랑)으로 뜨고 앱 보라(`--s-active-*`)로 못 바꾼다. ② "오늘로 점프" 버튼 유무 등 컨트롤이 플랫폼마다 다르다(맥 Chrome엔 "오늘", iOS엔 없음). → portal 잡음·폭 초과 제거의 대가로 의도적으로 수용. 앱 보라색 선택일/오늘 버튼이 꼭 필요하면 커스텀 picker로 회귀해야 하므로 신규 도입 전 트레이드오프를 재검토할 것.
 - 저장값은 ISO(`YYYY-MM-DD`) 그대로. 표시 변환(`formatDotDate`/`formatKoreanDate`)은 문자열 분해로만(`new Date(iso)` 문자열 파싱 금지 — UTC 자정 밀림 방지, `lib/date.ts`와 동일 원칙).
 
-### 4-B. 방문 기간 입력 — "종료일 추가" 토글 (activities 전용)
+### 4-B. 방문 기간 입력 — 종료일 on/off 스위치 (activities 전용)
 
-**왜:** activities는 여행·축제처럼 하루를 넘는 방문이 있어 "시작~종료" 기간을 받는다. 반면 기본값은 여전히 **하루 방문**이라, 기간 UI를 상시 노출하지 않고 **필요할 때만 펼치는 점진적 노출(progressive disclosure)**로 둔다. **places는 단일 날짜 그대로** — 기간 UI를 절대 노출하지 않는다.
+**왜:** activities는 여행·축제처럼 하루를 넘는 방문이 있어 "시작~종료" 기간을 받는다. 반면 기본값은 여전히 **하루 방문**이라, 기간 UI를 상시 노출하지 않고 **스위치로 켤 때만 펼치는 점진적 노출(progressive disclosure)**로 둔다. **places는 단일 날짜 그대로** — 기간 UI를 절대 노출하지 않는다.
 
 - **적용 범위 (엄격):** 기간 입력·표시는 **activities 한정**. 공유 컴포넌트(`VisitedDialog`·`VisitRecordBlock`)는 `track` prop으로 분기하며, `track === 'activity'`일 때만 종료일 UI를 렌더하고 `visited_end_at`을 payload에 싣는다. place 경로엔 이 필드가 절대 섞이면 안 된다.
 - **데이터:** `visited_at`(시작일, 기존) + `visited_end_at`(종료일, nullable, activities만). `visited_end_at IS NULL`이면 단일 날짜. 종료일은 시작일 이상(클라·서버·DB CHECK 3단 방어).
-- **토글 버튼:** 별도 새 컨트롤을 만들지 않고 **보조 텍스트 링크 `styles.textLink`** 를 쓴다. 접힘 상태 = leading `Plus` 아이콘 + "종료일 추가", 펼침 상태 = 종료일 라벨 우측에 leading `X` 아이콘 + "종료일 제거". 아이콘 `h-3.5 w-3.5 shrink-0`, `text-xs`, 색은 `styles.textLink`(sub→hover accent) 상속 — **새 색·간격 토큰 없음**.
-- **레이아웃:** 종료일 섹션은 시작일 `DatePickerField` **아래**에 `pt-1.5`로 붙인다. 펼치면 두 번째 `DatePickerField`(§4-A와 동일 외형)가 나오고, 라벨은 시작일이 **"방문 시작일"**, 종료일이 **"방문 종료일"**로 바뀐다(접힘 상태의 단일 입력은 기존 "방문 날짜" 라벨 유지).
-- **표시:** 카드·상세 방문일은 **`formatDotDateRange(start, end)`**(`lib/date.ts`) 단일 출처. end 없거나 start와 같으면 단일 날짜(`formatDotDate`)로 축약, 다르면 `"YYYY.MM.DD (요일) ~ YYYY.MM.DD (요일)"`. place는 항상 end=null로 호출해 단일 날짜.
+
+**① 종료일 스위치 = iOS식 on/off 토글 (신규 컴포넌트 — 세그먼트 토글과 별개)**
+- **⚠️ "가보고 싶은 곳/다녀온 곳" 세그먼트 토글(`styles.segment`, §4·§5-A)과 혼동 금지.** 세그먼트 = 두 값 중 **택1**(iOS 흰 면 떠오름 + 보라 테두리). 종료일 스위치 = 단일 기능 **on/off**(트랙 + 원형 손잡이). 시각·의미가 다른 **별개 패턴**이며 전용 컴포넌트 `src/components/forms/VisitPeriodToggle.tsx` + 전용 클래스 `styles.periodSwitch*`로 존재한다.
+- **크기·형태:** 트랙 `34×20px`, radius `9999px`, 손잡이 `16×16px`(top/left 2px, on 시 `translateX(14px)`). `role="switch"` + `aria-checked` + `aria-controls`(펼칠 종료일 필드 id).
+- **색 (토큰만, 임의 hex 금지):** off 트랙 = `--s-card-border-strong`(중성), on 트랙 = `--s-active-fill`(accent 보라, 라·다 동일 — Primary/세그먼트 채움과 같은 기준), 손잡이 = `--s-active-on`(흰색). 포커스 = `--s-focus-ring`(소형 컨트롤 2px 링, §5). 트랙·손잡이 `160ms` 트랜지션.
+- **배치:** "방문 날짜/시작일" **라벨 줄 우측**(`flex justify-between`). 스위치 오른쪽에 12px `--s-sub` "종료일" 텍스트(`styles.periodToggleLabel`).
+
+**② 펼침 애니메이션**
+- 종료일 필드는 항상 마운트하고 `styles.periodEnd`(`grid-template-rows: 0fr` → on 시 `periodEndOpen`으로 `1fr`) + 내부 `periodEndInner`(`overflow:hidden`)로 **높이 트랜지션(200ms)**. `prefers-reduced-motion`이면 트랜지션 제거.
+
+**③ 동적 라벨**
+- 토글 **off**: 상단 날짜 필드 라벨 = **"방문 날짜"**.
+- 토글 **on**: 상단 필드 = **"방문 시작일"**, 펼쳐지는 하단 필드 = **"방문 종료일"**.
+
+**④ 표시 포맷 (상세 vs 카드 분리)**
+- **상세 화면**(`VisitRecordBlock`): `formatDotDateRange(start, end)` — 요일 포함 풀 포맷. end 없거나 start와 같으면 단일 날짜(`formatDotDate`), 다르면 `"YYYY.MM.DD (요일) ~ YYYY.MM.DD (요일)"`.
+- **리스트 카드**(`ActivityCard`): `formatDotDateRangeCompact(start, end)` — 풀 포맷이 카드 폭에서 줄바꿈되므로 **기간일 때만** 요일 생략·연도 2자리: `"26.06.25 ~ 26.06.28"`. **단일 날짜(또는 start===end)는 카드 기존 관례(`formatDotDate`, 요일·4자리 연도) 그대로 유지** — 연도는 생략하지 않는다(수년 뒤 올해/작년 구분 필요). 억지로 한 줄에 맞추지 않으며, 두 줄로 감기는 것은 허용.
+- place는 카드·상세 모두 end=null로 호출해 항상 단일 날짜.
 - **리셋:** "가보고 싶은 곳으로 되돌리기"(wishlist 전환) 시 `visited_at`과 함께 `visited_end_at`도 `null`로 리셋한다.
 
 ---

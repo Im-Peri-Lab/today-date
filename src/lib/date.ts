@@ -38,3 +38,22 @@ export function formatDotDateRange(start?: string | null, end?: string | null): 
   if (!end || end === start) return formatDotDate(start)
   return `${formatDotDate(start)} ~ ${formatDotDate(end)}`
 }
+
+/** 요일 없는 2자리 연도 점 날짜 — "26.06.25". 리스트 카드 기간 표시 전용 내부 헬퍼. */
+function formatDotDateCompact(iso: string): string {
+  const [y, m, d] = iso.split('-').map(Number)
+  if (!y || !m || !d) return iso
+  return `${String(y).slice(-2)}.${String(m).padStart(2, '0')}.${String(d).padStart(2, '0')}`
+}
+
+/**
+ * 리스트 카드 전용 기간 표시 — 카드 폭에서 요일 포함 풀 포맷이 줄바꿈되는 문제 때문에
+ * **기간일 때만** 요일을 생략하고 연도를 2자리로 줄인다: "26.06.25 ~ 26.06.28".
+ * 단일 날짜(또는 start===end)는 기존 카드 관례를 그대로 유지 — `formatDotDate`(요일·4자리 연도).
+ * 상세 화면은 이 함수를 쓰지 않고 `formatDotDateRange`(요일 포함) 그대로 사용한다.
+ */
+export function formatDotDateRangeCompact(start?: string | null, end?: string | null): string {
+  if (!start) return ''
+  if (!end || end === start) return formatDotDate(start)
+  return `${formatDotDateCompact(start)} ~ ${formatDotDateCompact(end)}`
+}

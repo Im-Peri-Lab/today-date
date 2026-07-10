@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
-import { Plus, X } from 'lucide-react'
+import { VisitPeriodToggle } from '@/components/forms/VisitPeriodToggle'
 import {
   Dialog,
   DialogContent,
@@ -126,38 +126,25 @@ export function VisitedDialog({
 
         <div className="space-y-5">
           <div className="space-y-1.5">
-            {/* activity 기간 방문이면 '시작' 라벨로, 아니면 기존 '방문 날짜' */}
-            <Label htmlFor="visited_at">{isActivity && showEnd ? '방문 시작일' : '방문 날짜'}</Label>
+            <div className="flex items-center justify-between">
+              {/* activity 기간 방문(토글 on)이면 '시작' 라벨로, 아니면 기존 '방문 날짜' */}
+              <Label htmlFor="visited_at">{isActivity && showEnd ? '방문 시작일' : '방문 날짜'}</Label>
+              {isActivity && (
+                <VisitPeriodToggle checked={showEnd} onChange={setShowEnd} controls="visited_end_at" />
+              )}
+            </div>
             <DatePickerField id="visited_at" value={visitedAt} onChange={setVisitedAt} />
-            {isActivity &&
-              (showEnd ? (
-                <div className="space-y-1.5 pt-1.5">
-                  <div className="flex items-center justify-between">
+            {/* 종료일 필드: 토글 on 시 아래로 부드럽게 펼쳐짐(grid-rows 0fr→1fr). activity 한정. */}
+            {isActivity && (
+              <div className={cn(styles.periodEnd, showEnd && styles.periodEndOpen)}>
+                <div className={styles.periodEndInner}>
+                  <div className="space-y-1.5 pt-1.5">
                     <Label htmlFor="visited_end_at">방문 종료일</Label>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setShowEnd(false)
-                        setVisitedEnd('')
-                      }}
-                      className={cn('inline-flex items-center gap-1 text-xs', styles.textLink)}
-                    >
-                      <X className="h-3.5 w-3.5 shrink-0" />
-                      종료일 제거
-                    </button>
+                    <DatePickerField id="visited_end_at" value={visitedEnd} onChange={setVisitedEnd} />
                   </div>
-                  <DatePickerField id="visited_end_at" value={visitedEnd} onChange={setVisitedEnd} />
                 </div>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => setShowEnd(true)}
-                  className={cn('inline-flex items-center gap-1 pt-0.5 text-xs', styles.textLink)}
-                >
-                  <Plus className="h-3.5 w-3.5 shrink-0" />
-                  종료일 추가
-                </button>
-              ))}
+              </div>
+            )}
           </div>
 
           <div className="space-y-1.5">

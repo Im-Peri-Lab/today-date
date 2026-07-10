@@ -14,6 +14,7 @@ const patchSchema = z.object({
   reference_url: z.string().refine(isValidReferenceUrl, '올바른 URL 형식이 아닙니다.').optional().nullable().or(z.literal('')),
   status: z.enum(['wishlist', 'visited', 'archived']).optional(),
   visited_at: z.string().optional().nullable(),
+  visited_end_at: z.string().optional().nullable(),
   rating: z.number().int().min(1).max(5).optional().nullable(),
   review_note: z.string().optional().nullable(),
 })
@@ -44,6 +45,10 @@ export async function PATCH(req: NextRequest, { params }: RouteContext) {
 
     const payload = { ...result.data }
     if (payload.reference_url === '') payload.reference_url = null
+    // 방문 기간: 종료일은 시작일 이상이어야 한다(클라·DB CHECK와 3단 방어의 서버 단).
+    if (payload.visited_end_at && payload.visited_at && payload.visited_end_at < payload.visited_at) {
+      return NextResponse.json({ error: '종료일은 시작일보다 빠를 수 없어요.' }, { status: 400 })
+    }
 
     const supabase = getSupabaseClient()
     const { data, error } = await supabase

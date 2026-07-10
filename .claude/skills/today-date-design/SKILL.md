@@ -330,6 +330,17 @@ description: >
 - **알려진 트레이드오프(수용)**: 달력 팝업 UI는 OS 통제라 앱이 못 바꾼다. ① 선택일 강조색이 OS 기본(예: iOS Safari는 파랑)으로 뜨고 앱 보라(`--s-active-*`)로 못 바꾼다. ② "오늘로 점프" 버튼 유무 등 컨트롤이 플랫폼마다 다르다(맥 Chrome엔 "오늘", iOS엔 없음). → portal 잡음·폭 초과 제거의 대가로 의도적으로 수용. 앱 보라색 선택일/오늘 버튼이 꼭 필요하면 커스텀 picker로 회귀해야 하므로 신규 도입 전 트레이드오프를 재검토할 것.
 - 저장값은 ISO(`YYYY-MM-DD`) 그대로. 표시 변환(`formatDotDate`/`formatKoreanDate`)은 문자열 분해로만(`new Date(iso)` 문자열 파싱 금지 — UTC 자정 밀림 방지, `lib/date.ts`와 동일 원칙).
 
+### 4-B. 방문 기간 입력 — "종료일 추가" 토글 (activities 전용)
+
+**왜:** activities는 여행·축제처럼 하루를 넘는 방문이 있어 "시작~종료" 기간을 받는다. 반면 기본값은 여전히 **하루 방문**이라, 기간 UI를 상시 노출하지 않고 **필요할 때만 펼치는 점진적 노출(progressive disclosure)**로 둔다. **places는 단일 날짜 그대로** — 기간 UI를 절대 노출하지 않는다.
+
+- **적용 범위 (엄격):** 기간 입력·표시는 **activities 한정**. 공유 컴포넌트(`VisitedDialog`·`VisitRecordBlock`)는 `track` prop으로 분기하며, `track === 'activity'`일 때만 종료일 UI를 렌더하고 `visited_end_at`을 payload에 싣는다. place 경로엔 이 필드가 절대 섞이면 안 된다.
+- **데이터:** `visited_at`(시작일, 기존) + `visited_end_at`(종료일, nullable, activities만). `visited_end_at IS NULL`이면 단일 날짜. 종료일은 시작일 이상(클라·서버·DB CHECK 3단 방어).
+- **토글 버튼:** 별도 새 컨트롤을 만들지 않고 **보조 텍스트 링크 `styles.textLink`** 를 쓴다. 접힘 상태 = leading `Plus` 아이콘 + "종료일 추가", 펼침 상태 = 종료일 라벨 우측에 leading `X` 아이콘 + "종료일 제거". 아이콘 `h-3.5 w-3.5 shrink-0`, `text-xs`, 색은 `styles.textLink`(sub→hover accent) 상속 — **새 색·간격 토큰 없음**.
+- **레이아웃:** 종료일 섹션은 시작일 `DatePickerField` **아래**에 `pt-1.5`로 붙인다. 펼치면 두 번째 `DatePickerField`(§4-A와 동일 외형)가 나오고, 라벨은 시작일이 **"방문 시작일"**, 종료일이 **"방문 종료일"**로 바뀐다(접힘 상태의 단일 입력은 기존 "방문 날짜" 라벨 유지).
+- **표시:** 카드·상세 방문일은 **`formatDotDateRange(start, end)`**(`lib/date.ts`) 단일 출처. end 없거나 start와 같으면 단일 날짜(`formatDotDate`)로 축약, 다르면 `"YYYY.MM.DD (요일) ~ YYYY.MM.DD (요일)"`. place는 항상 end=null로 호출해 단일 날짜.
+- **리셋:** "가보고 싶은 곳으로 되돌리기"(wishlist 전환) 시 `visited_at`과 함께 `visited_end_at`도 `null`로 리셋한다.
+
 ---
 
 ## 5. 상호작용 표준 (포커스 · 활성 · hover · 눌림)

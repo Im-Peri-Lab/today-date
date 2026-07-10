@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
+import { Plus, X } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
@@ -34,6 +35,7 @@ interface VisitedDialogProps {
   title: string
   initial?: {
     visited_at?: string | null
+    visited_end_at?: string | null
     rating?: number | null
     review_note?: string | null
   }
@@ -49,7 +51,11 @@ export function VisitedDialog({
   initial,
   onSuccess,
 }: VisitedDialogProps) {
+  // 기간(시작~종료) 방문은 activities 전용. places 는 기존 단일 날짜 그대로.
+  const isActivity = track === 'activity'
   const [visitedAt, setVisitedAt] = useState(initial?.visited_at ?? todayISO())
+  const [visitedEnd, setVisitedEnd] = useState(initial?.visited_end_at ?? '')
+  const [showEnd, setShowEnd] = useState(Boolean(initial?.visited_end_at))
   const [rating, setRating] = useState(initial?.rating ?? 5)
   const [reviewNote, setReviewNote] = useState(initial?.review_note ?? '')
 
@@ -61,6 +67,8 @@ export function VisitedDialog({
   useEffect(() => {
     if (open) {
       setVisitedAt(initial?.visited_at ?? todayISO())
+      setVisitedEnd(initial?.visited_end_at ?? '')
+      setShowEnd(Boolean(initial?.visited_end_at))
       setRating(initial?.rating ?? 5)
       setReviewNote(initial?.review_note ?? '')
     }
@@ -68,9 +76,18 @@ export function VisitedDialog({
   }, [open])
 
   async function handleSave() {
+    const start = visitedAt || todayISO()
+    // 종료일은 activity + 토글 켬 + 값 있을 때만. end < start 는 저장 차단(클라 단 방어).
+    const end = isActivity && showEnd && visitedEnd ? visitedEnd : null
+    if (end && end < start) {
+      toast.error('종료일은 시작일보다 빠를 수 없어요.')
+      return
+    }
     const patch = {
       status: 'visited' as const,
-      visited_at: visitedAt || todayISO(),
+      visited_at: start,
+      // places 경로엔 visited_end_at 을 절대 싣지 않는다(activity 한정).
+      ...(isActivity ? { visited_end_at: end } : {}),
       rating,
       review_note: reviewNote || null,
     }
@@ -109,8 +126,38 @@ export function VisitedDialog({
 
         <div className="space-y-5">
           <div className="space-y-1.5">
-            <Label htmlFor="visited_at">방문 날짜</Label>
+            {/* activity 기간 방문이면 '시작' 라벨로, 아니면 기존 '방문 날짜' */}
+            <Label htmlFor="visited_at">{isActivity && showEnd ? '방문 시작일' : '방문 날짜'}</Label>
             <DatePickerField id="visited_at" value={visitedAt} onChange={setVisitedAt} />
+            {isActivity &&
+              (showEnd ? (
+                <div className="space-y-1.5 pt-1.5">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="visited_end_at">방문 종료일</Label>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowEnd(false)
+                        setVisitedEnd('')
+                      }}
+                      className={cn('inline-flex items-center gap-1 text-xs', styles.textLink)}
+                    >
+                      <X className="h-3.5 w-3.5 shrink-0" />
+                      종료일 제거
+                    </button>
+                  </div>
+                  <DatePickerField id="visited_end_at" value={visitedEnd} onChange={setVisitedEnd} />
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setShowEnd(true)}
+                  className={cn('inline-flex items-center gap-1 pt-0.5 text-xs', styles.textLink)}
+                >
+                  <Plus className="h-3.5 w-3.5 shrink-0" />
+                  종료일 추가
+                </button>
+              ))}
           </div>
 
           <div className="space-y-1.5">

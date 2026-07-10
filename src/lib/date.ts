@@ -27,3 +27,14 @@ export function formatDotDate(iso?: string | null): string {
   const wd = WEEKDAY_LABELS[new Date(y, m - 1, d).getDay()]
   return `${y}.${String(m).padStart(2, '0')}.${String(d).padStart(2, '0')} (${wd})`
 }
+
+/**
+ * 방문 기간 표시 — 방문일 표시의 단일 출처(카드·상세 공용, activities 기간 방문용).
+ * end 가 없거나 start 와 같으면 단일 날짜(formatDotDate)로 축약, 다르면 "start ~ end".
+ * 저장값(ISO)은 불변이며 각 날짜는 formatDotDate 로 위임(요일·타임존 처리 일원화).
+ */
+export function formatDotDateRange(start?: string | null, end?: string | null): string {
+  if (!start) return ''
+  if (!end || end === start) return formatDotDate(start)
+  return `${formatDotDate(start)} ~ ${formatDotDate(end)}`
+}

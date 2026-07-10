@@ -131,7 +131,7 @@ export function ActivityDetail({ id, initialData, initialEdit, returnTo }: Props
 
   function handleRevert() {
     update.mutate(
-      { id, patch: { status: 'wishlist', visited_at: null, rating: null, review_note: null } },
+      { id, patch: { status: 'wishlist', visited_at: null, visited_end_at: null, rating: null, review_note: null } },
       {
         onSuccess: () => {
           setRevertOpen(false)
@@ -321,6 +321,7 @@ export function ActivityDetail({ id, initialData, initialEdit, returnTo }: Props
                 track="activity"
                 id={id}
                 visitedAt={activity.visited_at}
+                visitedEndAt={activity.visited_end_at}
                 rating={activity.rating}
                 reviewNote={activity.review_note}
                 initialEditing={initialEdit === 'visit'}
@@ -379,6 +380,7 @@ export function ActivityDetail({ id, initialData, initialEdit, returnTo }: Props
             title={activity.title}
             initial={{
               visited_at: activity.visited_at,
+              visited_end_at: activity.visited_end_at,
               rating: activity.rating,
               review_note: activity.review_note,
             }}

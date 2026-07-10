@@ -648,7 +648,7 @@ description: >
 - **단일 출처(`lib/date.ts`):** 단일 = `formatDotDateCompact(iso)`, 기간(activity 전용) = `formatDotDateRangeCompact(start, end)`(단일/동일일이면 내부적으로 `formatDotDateCompact`로 축약). 두 카드 모두 이 함수만 쓴다(하드코딩·`formatDotDate` 직접 호출 금지).
 - **ActivityCard:** `visited_end_at` 있으면 `formatDotDateRangeCompact`, 없으면 `formatDotDateCompact`. **PlaceCard:** 기간 기능 없음 → 항상 `formatDotDateCompact`(포맷 통일만, 로직 변경 없음).
 - **상세 화면은 이 규칙에서 제외:** `ActivityDetail`·`PlaceDetail`·`VisitRecordBlock`은 **요일 포함 풀 포맷**(`formatDotDate`/`formatDotDateRange`, `YYYY.MM.DD (요일)`) 그대로 유지한다(§4-B ④). 카드=축약, 상세=풀 — 의도된 레이어 차이.
-- **기간 줄바꿈은 3열에서만 — 실측 기반 의도적 수용:** 날짜 한 줄 폭 ≈ **148px**, 날짜 자리 = `카드 안쪽 폭 − 별점 88px − gap 8px`. **모바일 1열(자리 194px)·2열(189px)은 한 줄**, **데스크탑 3열(≥1024px, 카드 265px→자리 111px)만** 148px를 못 담아 `~` 공백에서 **2줄**로 감긴다. 주 기기(모바일)가 한 줄이므로 그대로 둔다. **`whitespace-nowrap` 강제 금지** — 3열에서 별점+날짜(244px)가 행 폭(207px)을 넘겨 ⋮ 케밥 메뉴와 겹침/잘림. 3열도 한 줄로 통일하려면 별점 분리(푸터 2줄화)·별점 축약 등 별도 결정이 필요하다(임의로 nowrap 처리해 회귀시키지 말 것).
+- **기간 한 줄 표시 — 별점 sm 폭 축소로 확보(실측):** 날짜 자리 = `행 폭 − 별점 − gap 8px`. 데스크탑 3열(≥1024px, 카드 266.66px → 행 폭 206.66px)에서 별점 sm을 **16px→14px(폭 88→78px, §10-H)** 로 줄여 날짜 자리를 **120.66px** 확보 → range 최장 케이스(`YY.MM.DD ~ YY.MM.DD`, 자연폭 **112.20px**)가 **1줄**(여유 ≈8.5px). 축소 전엔 자리 110.66px로 **1.55px 부족 → 2줄** 감김이었다. 모바일 1·2열은 원래 여유. **`whitespace-nowrap` 강제 금지** — nowrap이면 별점+날짜가 행 폭을 넘겨 ⋮ 케밥 메뉴와 겹침/잘림. 별점 축약으로 해소했으므로 nowrap은 불필요하며, 회귀시키지 말 것.
 
 ### 8-B. 시간대(time_of_day) 표시 규칙
 
@@ -900,7 +900,7 @@ export const STATUS_LABELS: Record<Status, string> = {
 
 **방문일 아이콘**: `Calendar` (`lucide-react`) + `styles.accent` 색 — 완료 이벤트 강조.
 
-**별점 사이즈 위계**: 표시(읽기)는 **`size="sm"`(16px)** — 카드·상세 뷰의 `<RatingStars value={...} size="sm" />`. 편집(인터랙티브, `onChange` 있음)은 **`size="lg"`(32px)** + 넓은 간격(`gap-2`) — `VisitRecordBlock` 편집·`VisitedDialog`. 근거: 손가락 터치 타깃 확보(별 32px + 간격으로 인접 별 오터치 방지, HIG 44pt에 근사). 색은 채움 `--s-accent` / 빈 별 `--s-faint` 동일.
+**별점 사이즈 위계**: 표시(읽기)는 **`size="sm"`(14px, `h-3.5` + `gap-0.5`, 폭 78px)** — 카드·상세 뷰의 `<RatingStars value={...} size="sm" />`. 편집(인터랙티브, `onChange` 있음)은 **`size="lg"`(32px)** + 넓은 간격(`gap-2`) — `VisitRecordBlock` 편집·`VisitedDialog`. 근거: 손가락 터치 타깃 확보(별 32px + 간격으로 인접 별 오터치 방지, HIG 44pt에 근사). **sm이 16px→14px인 이유**: 리스트 카드 3열에서 별점+방문기간 range가 한 줄에 들어가도록 별점 폭을 줄여 날짜 자리를 확보(§8-A). md(28px, 기본 표시)는 불변. 색은 채움 `--s-accent` / 빈 별 `--s-faint` 동일.
 
 **토스트 문구**:
 ```

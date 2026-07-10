@@ -352,8 +352,8 @@ description: >
 
 **④ 표시 포맷 (상세 vs 카드 분리)**
 - **상세 화면**(`VisitRecordBlock`): `formatDotDateRange(start, end)` — 요일 포함 풀 포맷. end 없거나 start와 같으면 단일 날짜(`formatDotDate`), 다르면 `"YYYY.MM.DD (요일) ~ YYYY.MM.DD (요일)"`.
-- **리스트 카드**(`ActivityCard`): `formatDotDateRangeCompact(start, end)` — 풀 포맷이 카드 폭에서 줄바꿈되므로 **기간일 때만** 요일 생략·연도 2자리: `"26.06.25 ~ 26.06.28"`. **단일 날짜(또는 start===end)는 카드 기존 관례(`formatDotDate`, 요일·4자리 연도) 그대로 유지** — 연도는 생략하지 않는다(수년 뒤 올해/작년 구분 필요). 억지로 한 줄에 맞추지 않으며, 두 줄로 감기는 것은 허용.
-- place는 카드·상세 모두 end=null로 호출해 항상 단일 날짜.
+- **리스트 카드**: 단일·기간 **모두 요일 생략·연도 2자리로 통일**(`ActivityCard` 단일 = `formatDotDateCompact`, 기간 = `formatDotDateRangeCompact` → `"26.06.25 ~ 26.06.28"`). 연도는 생략하지 않고 2자리로 표기한다(수년 뒤 올해/작년 구분). 억지로 한 줄에 맞추지 않으며 두 줄로 감기는 것은 허용. **상세 규칙과 실측 근거는 §8-A 참조**(단일 출처).
+- place는 상세는 end=null로 항상 단일 날짜, 카드는 `formatDotDateCompact`(§8-A).
 - **리셋:** "가보고 싶은 곳으로 되돌리기"(wishlist 전환) 시 `visited_at`과 함께 `visited_end_at`도 `null`로 리셋한다.
 
 ---

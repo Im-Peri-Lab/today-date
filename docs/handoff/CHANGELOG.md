@@ -399,3 +399,19 @@
 - 모두 lint/build PASS
 - 기술 부채 재검증: "활동/장소 생성 구조 비대칭" 항목이 outdated임을 확인(코드 실측 결과 두 생성 경로 이미 대칭, 실제 부채는 훅 미추출·중복만) → CURRENT_STATE 서술 정정
 - 진단 근거·교훈 → PROJECT_CONTEXT §20
+
+---
+
+## 2026-07-10 — activity 방문 기간(시작~종료) 입력 지원
+
+- 사용자 요청 기능 설계 논의: 방문 기간 필요 이유 확인(재방문 이력 아님, 여행처럼 여러 날 걸친 단일 방문) → 단순 기간 확장으로 결정, place는 식음료 단일 방문 컨셉이라 범위 제외
+- 진단(Claude Code): `visited_at`이 필터·정렬·통계 어디에도 미사용, 순수 표시/입력용 확인 → 스키마 확장 리스크 낮음 판정
+- 마이그레이션 006 (`visited_end_at` date nullable, activities만 + CHECK 제약) Supabase 원격 적용
+- Claude(어드바이저)와 목업(Visualizer)으로 토글 UI 3안 비교 후 신규 스위치 컴포넌트(VisitPeriodToggle)로 확정 — 구체 스펙은 SKILL §4-B
+- PR #58 squash 머지 (`a618107`), 3커밋 순차 반영 — `feature/activity-visited-date-range`
+  - 커밋1(`8f75d91`): 스키마·API·기본 UI, 실 API 레벨 3단 방어(클라/서버/DB) 검증
+  - 커밋2(`34ac5c7`): 토글 UI 재설계(신규 스위치 컴포넌트), 카드 기간 표시 축약 포맷 1차
+  - 커밋3(`00ea247`): 카드 단일 날짜도 축약 포맷 통일(activity·place 공통, `formatDotDateCompact`)
+- 실렌더 실측: 카드 날짜 줄 2줄 감김이 3열 데스크탑(≥1024px)에서만 발생, 모바일·2열은 한 줄 확인 → 현행 유지로 확정. 구체 근거는 SKILL §8-A
+- 모두 lint/build PASS, DB 마이그레이션 원격 적용 검증 완료
+- 진단 근거·설계 비교 과정 → PROJECT_CONTEXT §11 및 §20

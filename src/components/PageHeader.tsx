@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { Home } from 'lucide-react'
 import { MiniHeart } from '@/components/BrandMark'
 import { HomeMenu } from '@/components/HomeMenu'
+import { HomeSearchButton } from '@/components/HomeSearchButton'
 import { cn } from '@/lib/utils'
 import styles from '@/components/screens.module.css'
 
@@ -39,6 +40,8 @@ export function PageHeader({
           <div className="flex items-center gap-2.5">{brand}</div>
         )}
         <div className="flex items-center gap-1">
+          {/* 검색 진입점은 홈 전용(homeNav=false). 하위 화면(/list 등)에는 노출하지 않는다. */}
+          {!homeNav && <HomeSearchButton />}
           {homeNav && (
             <Link href="/" className={styles.iconBtn} aria-label="홈으로">
               <Home className="h-5 w-5" />

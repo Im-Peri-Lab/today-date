@@ -541,7 +541,7 @@ description: >
 // 홈에서는 homeNav 생략(로고가 링크 아님), 하위 화면은 homeNav={true}
 ```
 
-- **브랜드 줄**: `MiniHeart`(보라→핑크 그라데이션 하트, `h-6 w-6` / lg `h-7 w-7`) + `Today Date` 텍스트(`styles.brand`: `1rem`/weight 500/letter-spacing `-0.01em`, lg `text-lg`), 둘 사이 `gap-2.5`. 우측에 홈 버튼(하위 화면) + 햄버거 메뉴(`HomeMenu`).
+- **브랜드 줄**: `MiniHeart`(보라→핑크 그라데이션 하트, `h-6 w-6` / lg `h-7 w-7`) + `Today Date` 텍스트(`styles.brand`: `1rem`/weight 500/letter-spacing `-0.01em`, lg `text-lg`), 둘 사이 `gap-2.5`. 우측 아이콘 그룹(`flex items-center gap-1`)은 **검색 버튼(`HomeSearchButton`, 홈 전용 = `homeNav=false`)** + 홈 버튼(하위 화면 = `homeNav=true`) + 햄버거 메뉴(`HomeMenu`). 검색과 홈 버튼은 상호 배타(검색=홈, 홈 버튼=하위 화면). 검색 버튼은 클릭 시 검색어 입력 오버레이(§11 입력 폼 다이얼로그)를 띄운다.
 - **제목 블록 간격**: 헤더 → 제목 블록 `mt-6 lg:mt-8`(24/32px, 공용 `PageHeader`).
 - **서브카피 아래 간격(다음 요소에 맞춰 조정)**: 다음 요소의 **자체 패딩까지 고려**해 두 화면이 비슷한 시각적 공백으로 읽히게 한다.
   - 홈(`/`)처럼 서브카피 바로 아래 **카드**(자체 상단 패딩 없음)가 오면 `mt-5`(20px) — `HomeDashboard` CTA 그리드(`lg:mt-5`).
@@ -565,7 +565,7 @@ description: >
     - **상세 화면(DetailRow 안)**: `styles.faint`(`--s-faint`) 명시 → 카테고리 아이콘(`styles.accent`)보다 한 단계 약한 위계. `className={cn('h-3.5 w-3.5 shrink-0', styles.faint)}` 패턴 사용.
   - 헤더 아이콘 버튼(`styles.iconBtn`): `sub`, hover 시 라이트는 중성 면 `#eceaf3`+`ink`, 다크는 보라 소프트. (유틸리티 도구라 **중성 hover** 유지 — 콘텐츠 요소의 accent hover와 의도적으로 구분, §5-A.)
   - **키보드 포커스(`:focus-visible`) = hover와 동일한 중성 면** (`iconBtn`·`editGhostBtn`): 브라우저 기본 outline을 끄고(`outline:none`) 중성 회색 면으로 표시. **입력 글로우(box-shadow 링) 쓰지 않는다**(글로우는 입력 필드 전용, §5).
-- **유틸 아이콘 글리프 크기 (탭타깃별 통일, 확정)**: **44px 탭타깃 버튼(`.iconBtn` — ⋮케밥·홈·햄버거·로그아웃) → 글리프 20px(`h-5 w-5`)** / **36px 버튼(`.editGhostBtn` 연필) → 글리프 16px(`h-4 w-4`)** / **28px 버튼(`.mapActionBtn` — 위치 행 지도열기/▾ 인라인 액션 쌍, §10-I) → 글리프 16px(`h-4 w-4`)**. 탭타깃 크기(44/36) 자체는 유지하고 글리프만 이 규칙으로 맞춘다. `.mapActionBtn`(28px)은 **한 행에 두 버튼이 인접하는 인라인 액션 쌍 전용**의 컴팩트 예외 — 글리프 좌우 여백을 6px로 좁혀 두 버튼이 한 세트로 읽히게 한다. 단독 유틸 버튼에는 쓰지 않는다(36/44 유지).
+- **유틸 아이콘 글리프 크기 (탭타깃별 통일, 확정)**: **44px 탭타깃 버튼(`.iconBtn` — ⋮케밥·홈·햄버거·로그아웃·검색) → 글리프 20px(`h-5 w-5`)** / **36px 버튼(`.editGhostBtn` 연필) → 글리프 16px(`h-4 w-4`)** / **28px 버튼(`.mapActionBtn` — 위치 행 지도열기/▾ 인라인 액션 쌍, §10-I) → 글리프 16px(`h-4 w-4`)**. 탭타깃 크기(44/36) 자체는 유지하고 글리프만 이 규칙으로 맞춘다. `.mapActionBtn`(28px)은 **한 행에 두 버튼이 인접하는 인라인 액션 쌍 전용**의 컴팩트 예외 — 글리프 좌우 여백을 6px로 좁혀 두 버튼이 한 세트로 읽히게 한다. 단독 유틸 버튼에는 쓰지 않는다(36/44 유지).
 - strokeWidth: 카테고리 `2`, CTA 그라데이션 배지 내부 아이콘 `1.75`.
 - 크기 관례: 리스트 카드 메타 `h-3 w-3`, 상세 화면 DetailRow 메타 `h-3.5 w-3.5`, 헤더/검색 `h-4~5`.
 - 참고: 장식용 하트/💜는 카피(서브카피·빈 상태 문구)에만 등장 — 기능 아이콘 자리에는 절대 넣지 않는다.
@@ -951,7 +951,7 @@ export const STATUS_LABELS: Record<Status, string> = {
 
 왜: 닫기 수단(상단 `X` + 하단 "취소")이 한 다이얼로그에 둘 다 있으면 중복이라 시선이 분산된다. **닫기 수단은 다이얼로그 종류에 따라 하나만** 둔다.
 
-- **입력 폼 다이얼로그** (`VisitedDialog` 등 — 데이터를 입력해 저장): **상단 `X`만** 유지(`DialogContent`의 기본 `showCloseButton={true}`). 하단엔 "취소" 버튼을 두지 않고 **CTA(저장하기) 하나만** 남겨 유일한 주행동으로 또렷하게 한다. → 닫기는 도구(`X`)로, 풋터는 주행동 전용.
+- **입력 폼 다이얼로그** (`VisitedDialog`(저장)·`HomeSearchButton`(검색 후 이동) 등 — 값을 입력해 하나의 주행동을 실행): **상단 `X`만** 유지(`DialogContent`의 기본 `showCloseButton={true}`). 하단엔 "취소" 버튼을 두지 않고 **CTA(저장하기/검색) 하나만** 남겨 유일한 주행동으로 또렷하게 한다. → 닫기는 도구(`X`)로, 풋터는 주행동 전용. CTA는 데이터 생성이 아니어도(예: 검색→이동) 이 "입력 다이얼로그의 단 하나의 주행동" 자리이므로 `styles.detailPrimaryBtn` 풀폭 48px(`VisitedDialog` 패턴)을 공유한다.
 - **결정 다이얼로그** (`DeleteConfirmDialog` 등 — 확인/취소 두 결정 중 택1): **하단 "취소" 버튼만** 유지. 상단 `X`는 제거(`DialogContent`에 `showCloseButton={false}`). iOS Action Sheet 표준대로 **확인(삭제 등)·취소 두 결정을 풋터에 나란히 명시**해 동등한 선택지로 읽히게 한다.
 - 판단 기준: **"이 다이얼로그가 입력을 받는가, 결정을 묻는가?"** 입력 폼 → `X`만(CTA 명시) / 결정 다이얼로그 → 취소 버튼만(확인/취소 두 결정 명시).
 

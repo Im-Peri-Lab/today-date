@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useSearchParams } from 'next/navigation'
-import { Search, Filter, X } from 'lucide-react'
+import { Search, Filter, X, ChevronDown } from 'lucide-react'
 import { ActivityCard } from './ActivityCard'
 import { PlaceCard } from './PlaceCard'
 import { CategoryIcon } from './categoryIcon'
@@ -126,6 +126,8 @@ function FilterBar({
           필터
           {/* 접혔을 때만 개수 뱃지 (펼치면 칩 색으로 구분) */}
           {count > 0 && !open && <span className={styles.filterCount}>{count}</span>}
+          {/* 펼침 어포던스 — MapLink/Select와 동일하게 고정 셰브런(회전 없음), 우측 끝 */}
+          <ChevronDown className="h-4 w-4" />
         </button>
         {count > 0 && (
           <button type="button" onClick={onReset} className={styles.resetBtn}>

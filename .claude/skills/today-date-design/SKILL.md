@@ -243,6 +243,7 @@ description: >
   - height `2.5rem`(40px), radius `0.75rem`, 보더 `1px var(--s-card-border-strong)`, bg `card-bg`, font `0.875rem`. 포커스 = 보더 `--s-active-line` + 3px 글로우(입력 전용, §5 포커스 역할 분리).
 - **필터 토글 버튼** `styles.filterToggle`(+`styles.filterToggleActive`)
   - height `2.5rem`(40px — 토글·검색바와 통일), radius `0.75rem`(검색바 정합), `0.8125rem`/weight 500. **너비는 내용폭(컴팩트) 유지 — 가로로 꽉 채우지 않는다.**
+  - 구성(좌→우): `Filter`(h-4 w-4) + "필터" + [접힘 시 개수 뱃지] + **`ChevronDown`(h-4 w-4) 펼침 어포던스**. 셰브런은 **우측 끝 고정**(MapLink/Select 관례대로 **회전 없음**) — 펼침 상태는 `aria-expanded`·`filterToggleActive` 색으로만 표현(§7).
 - **필터 칩** `styles.chip`(+`styles.chipActive`)
   - height `2.25rem`(36px), radius `9999px`(pill), padding `0 0.75rem`, font `0.8125rem`, 보더 `1px var(--s-card-border-strong)`. 선택 = 틴트(**§5-A**).
 - **초기화 버튼** `styles.resetBtn` (height 36px 작은 pill, `X` 아이콘 + 텍스트)
@@ -566,6 +567,7 @@ description: >
   - 헤더 아이콘 버튼(`styles.iconBtn`): `sub`, hover 시 라이트는 중성 면 `#eceaf3`+`ink`, 다크는 보라 소프트. (유틸리티 도구라 **중성 hover** 유지 — 콘텐츠 요소의 accent hover와 의도적으로 구분, §5-A.)
   - **키보드 포커스(`:focus-visible`) = hover와 동일한 중성 면** (`iconBtn`·`editGhostBtn`): 브라우저 기본 outline을 끄고(`outline:none`) 중성 회색 면으로 표시. **입력 글로우(box-shadow 링) 쓰지 않는다**(글로우는 입력 필드 전용, §5).
 - **유틸 아이콘 글리프 크기 (탭타깃별 통일, 확정)**: **44px 탭타깃 버튼(`.iconBtn` — ⋮케밥·홈·햄버거·로그아웃·검색) → 글리프 20px(`h-5 w-5`)** / **36px 버튼(`.editGhostBtn` 연필) → 글리프 16px(`h-4 w-4`)** / **28px 버튼(`.mapActionBtn` — 위치 행 지도열기/▾ 인라인 액션 쌍, §10-I) → 글리프 16px(`h-4 w-4`)**. 탭타깃 크기(44/36) 자체는 유지하고 글리프만 이 규칙으로 맞춘다. `.mapActionBtn`(28px)은 **한 행에 두 버튼이 인접하는 인라인 액션 쌍 전용**의 컴팩트 예외 — 글리프 좌우 여백을 6px로 좁혀 두 버튼이 한 세트로 읽히게 한다. 단독 유틸 버튼에는 쓰지 않는다(36/44 유지).
+- **펼침/드롭다운 셰브런**: 접었다 펴는 UI(지도앱 선택 `MapLink`, `ui/select`, **리스트 필터 토글**)는 `ChevronDown`(`h-4 w-4`, 16px)을 **우측 끝에 고정**으로 둔다. **열림 시 180° 회전 등 회전 애니메이션은 넣지 않는다** — 펼침 상태는 색/`aria-expanded`로만 표현(앱 공용 관례, 신규 회전 언어 도입 금지).
 - strokeWidth: 카테고리 `2`, CTA 그라데이션 배지 내부 아이콘 `1.75`.
 - 크기 관례: 리스트 카드 메타 `h-3 w-3`, 상세 화면 DetailRow 메타 `h-3.5 w-3.5`, 헤더/검색 `h-4~5`.
 - 참고: 장식용 하트/💜는 카피(서브카피·빈 상태 문구)에만 등장 — 기능 아이콘 자리에는 절대 넣지 않는다.

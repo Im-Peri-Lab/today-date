@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTopLoader } from 'nextjs-toploader'
-import { Menu, LogOut } from 'lucide-react'
+import { Menu, LogOut, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import {
   DropdownMenu,
@@ -52,7 +52,7 @@ export function HomeMenu() {
           disabled={isLoading}
           onClick={handleLogout}
         >
-          <LogOut />
+          {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <LogOut />}
           {isLoading ? '로그아웃 중...' : '로그아웃'}
         </DropdownMenuItem>
       </DropdownMenuContent>

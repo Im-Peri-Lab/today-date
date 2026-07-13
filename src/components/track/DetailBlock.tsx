@@ -1,7 +1,7 @@
 'use client'
 
 import { ReactNode } from 'react'
-import { Pencil } from 'lucide-react'
+import { Pencil, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import styles from '@/components/screens.module.css'
@@ -118,6 +118,7 @@ export function DetailBlock({
             disabled={saving}
             className={cn(styles.detailPrimaryBtn, 'h-9 gap-1.5 px-4 text-white hover:brightness-105')}
           >
+            {saving && <Loader2 className="h-4 w-4 animate-spin" />}
             {saving ? '저장 중...' : '저장'}
           </Button>
           <Button type="button" variant="outline" onClick={onCancel} disabled={saving} className="h-9 px-4">

@@ -7,7 +7,7 @@ import { useState, useRef, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
-import { ArrowLeft, Trash2, CheckCircle2, Undo2, MapPin, ExternalLink, Utensils } from 'lucide-react'
+import { ArrowLeft, Trash2, CheckCircle2, Undo2, MapPin, ExternalLink, Utensils, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { CategoryBadge } from './CategoryBadge'
@@ -325,7 +325,10 @@ export function PlaceDetail({ id, initialData, initialEdit, returnTo }: Props) {
                   disabled={update.isPending}
                 >
                   {update.isPending ? (
-                    '처리 중...'
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      처리 중...
+                    </>
                   ) : (
                     <>
                       <Undo2 className="h-4 w-4" />

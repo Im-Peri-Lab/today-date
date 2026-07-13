@@ -14,6 +14,7 @@ import {
   ExternalLink,
   Undo2,
   Clock,
+  Loader2,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -398,6 +399,7 @@ export function ActivityDetail({ id, initialData, initialEdit, returnTo }: Props
                   취소
                 </DialogClose>
                 <Button onClick={handleRevert} disabled={update.isPending}>
+                  {update.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
                   {update.isPending ? '처리 중...' : '되돌리기'}
                 </Button>
               </DialogFooter>

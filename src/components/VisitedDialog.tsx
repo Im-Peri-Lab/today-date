@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
+import { Loader2 } from 'lucide-react'
 import { VisitPeriodToggle } from '@/components/forms/VisitPeriodToggle'
 import {
   Dialog,
@@ -175,6 +176,7 @@ export function VisitedDialog({
             disabled={isPending}
             className={cn(styles.detailPrimaryBtn, 'h-12 w-full text-white hover:brightness-105')}
           >
+            {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
             {isPending ? '저장 중...' : '저장하기'}
           </Button>
         </DialogFooter>

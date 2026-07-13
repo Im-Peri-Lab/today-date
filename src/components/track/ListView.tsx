@@ -164,11 +164,14 @@ export function ListView() {
   const searchParams = useSearchParams()
   const initialTab = searchParams.get('tab')
   const initialStatus = searchParams.get('status')
+  // 홈 검색에서 넘어온 검색어(?q=)를 SearchBox 초기값으로 prefill.
+  // useDebounced 는 초기값을 그대로 debounced 로 시작하므로 진입 즉시 이 검색어로 조회된다.
+  const initialQuery = searchParams.get('q') ?? ''
   const [track, setTrack] = useState<Track>(isListTab(initialTab) ? initialTab : 'activity')
   const [status, setStatus] = useState<ListStatus>(
     isListStatus(initialStatus) ? initialStatus : 'wishlist'
   )
-  const [search, setSearch] = useState('')
+  const [search, setSearch] = useState(initialQuery)
   const [filtersOpen, setFiltersOpen] = useState(false)
 
   // 활동 필터

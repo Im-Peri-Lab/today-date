@@ -105,7 +105,7 @@ export function HomeSearchButton() {
                 enterKeyHint="search"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="제목·메모·지역 검색"
+                placeholder="제목·메모 검색"
                 className={styles.searchInput}
                 disabled={submitting}
               />

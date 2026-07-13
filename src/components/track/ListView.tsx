@@ -340,7 +340,7 @@ export function ListView() {
               <EmptyState
                 noResults
                 message="찾으시는 항목이 없어요 💜"
-                hint="다른 필터로 시도해보세요"
+                hint="다른 검색어나 필터로 시도해보세요"
               />
             ) : (
               <EmptyState
@@ -412,7 +412,7 @@ export function ListView() {
               <EmptyState
                 noResults
                 message="찾으시는 항목이 없어요 💜"
-                hint="다른 필터로 시도해보세요"
+                hint="다른 검색어나 필터로 시도해보세요"
               />
             ) : (
               <EmptyState

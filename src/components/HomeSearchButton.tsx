@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTopLoader } from 'nextjs-toploader'
-import { Search } from 'lucide-react'
+import { Search, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import {
   Dialog,
@@ -118,6 +118,7 @@ export function HomeSearchButton() {
                 disabled={submitting}
                 className={cn(styles.detailPrimaryBtn, 'h-12 w-full text-white hover:brightness-105')}
               >
+                {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
                 {submitting ? '검색 중...' : '검색'}
               </Button>
             </DialogFooter>

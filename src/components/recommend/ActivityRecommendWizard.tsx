@@ -415,7 +415,11 @@ export function ActivityRecommendWizard() {
                 onClick={() => run()}
                 disabled={recommend.isPending}
               >
-                <Sparkles className="h-4 w-4" />
+                {recommend.isPending ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Sparkles className="h-4 w-4" />
+                )}
                 {recommend.isPending ? '추천 받는 중...' : '추천 받기'}
               </Button>
               <Button

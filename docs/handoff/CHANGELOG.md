@@ -1,6 +1,6 @@
 # CHANGELOG.md
 
-> **마지막 업데이트: 2026-07-10**
+> **마지막 업데이트: 2026-07-10_v2**
 
 > 260531~260710 핸드오프 전체를 날짜순으로 기록한 변경 이력입니다. 새 AI는 일반적으로 `PROJECT_CONTEXT.md`와 `CURRENT_STATE.md`만 먼저 읽고, 과거 판단 근거가 필요할 때 이 문서를 참고하세요.
 
@@ -415,3 +415,16 @@
 - 실렌더 실측: 카드 날짜 줄 2줄 감김이 3열 데스크탑(≥1024px)에서만 발생, 모바일·2열은 한 줄 확인 → 현행 유지로 확정. 구체 근거는 SKILL §8-A
 - 모두 lint/build PASS, DB 마이그레이션 원격 적용 검증 완료
 - 진단 근거·설계 비교 과정 → PROJECT_CONTEXT §11 및 §20
+
+---
+
+## 2026-07-10 v2 — PC 카드 그리드 폭 진단·방문 기간 range 감김 해소
+
+- PC 화면 폭 고민(리스트/추천결과 컨테이너·카드 폭 불일치 의심) 진단 — 세 화면(list/recommend-activity/recommend-place) 컨테이너 896px, 카드 267px로 완전 동일 확인. "들쭉날쭉해 보임"은 정렬·메뉴버튼 유무 등 시각 요인, 폭 정책 문제 아님으로 판정. 그리드 구현(list=CSS Grid, 추천 2종=flex 중복)은 비공유이나 렌더 결과 동일 → 백로그로만 등록
+- 방문 기간 range 2줄 감김 원인 진단 — 열 개수 아닌 "메뉴 거터(44px)+별점(88px)" 조합에서만 발생하는 1.55px 경계 초과로 확인
+- 별점 sm 크기 축소로 해소 (PR #63 squash `31b243b`) — `design/fix-visited-date-wrap-star-size`
+  - `RatingStars.tsx` size=sm: 16px→14px (88px→78px, 별점 md/lg/gap/카드 거터 불변)
+  - 사용처 3곳(ActivityCard/PlaceCard/VisitRecordBlock) 전수 확인, 리스트 외 화면 픽셀 영향 없음 확인
+  - SKILL.md §10-H(별점 크기)·§8-A(기간 줄바꿈 서술을 "의도적 수용 2줄"→"1줄 해소"로) 갱신, git show --stat으로 반영 확인
+  - 실제 토큰·Geist 폰트로 카드 재현 측정(라이브 인증 우회 대신)으로 검증
+- lint/build PASS

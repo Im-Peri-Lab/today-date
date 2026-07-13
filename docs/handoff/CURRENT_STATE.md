@@ -1,32 +1,35 @@
 # CURRENT_STATE.md
 
-> **마지막 업데이트: 2026-07-10**
+> **마지막 업데이트: 2026-07-10_v2**
 
 ## 현재 단계
 유지보수 / 점진적 UX 개선 단계.
 
 ## 현재 한 줄 요약
-activity 방문 기간(시작~종료) 입력 기능 반영 완료(PR #58 squash `a618107`). 신규 스위치 토글(VisitPeriodToggle) + 카드 날짜 포맷 activity/place 통일(YY.MM.DD, 요일 생략) + SKILL.md §4-B·§8-A 동기화까지 마무리. main 최신(`a618107`), 마이그레이션 006 Supabase 원격 적용 완료, 작업트리 clean.
+place 추천 문구 통일(PR #61/62) + PC 카드 그리드 폭 진단·방문 기간 range 감김 해소(PR #63)까지 반영 완료. main 최신(`31b243b`), 작업트리 clean.
 
 ## 브랜치 상태
 - 현재 작업 브랜치 없음, main 기준 build PASS
 
 ## 구현 완료 (누적, 기존 유지)
 (기존 항목 전체 유지)
-- **(신규) activity 방문 기간 입력**: `visited_end_at` 컬럼(activities만) 추가, 신규 스위치 컴포넌트(`VisitPeriodToggle`)로 시작일/종료일 토글 입력. 종료일 없으면 단일 날짜와 100% 동일 동작. 구체 스펙 → SKILL §4-B
-- **(신규) 카드 날짜 포맷 통일**: activity·place 리스트 카드 모두 `YY.MM.DD`(요일 생략) 문법으로 통일, 상세화면은 기존 요일 포함 풀포맷 유지. 3열 데스크탑에서 기간 표시 2줄 감김은 실측 근거로 의도적 수용 확정. 구체 스펙 → SKILL §8-A
+- **(신규) place 추천 문구 통일**: 홈 place 추천 카드 "오늘 어디갈까?" → "오늘 뭐먹을까?", 추천 위저드 "어디 갈까?" → "뭐 먹을까?" (PR #61 squash `f0bd150`, PR #62 squash `2a1bfb8`). place 카테고리(양식/일식/한식/중식/카페/바/디저트/미분류)가 전부 식음료 성격임을 확인 후 진행. activity("오늘 뭐할까?")와 완전 대칭
+- **(신규) PC 카드 그리드 폭 진단**: `/list`·추천결과 2종 PC 컨테이너·카드 폭 실측 결과 896px/267px로 완전 동일(의도적 정책) 확인. "폭 들쭉날쭉해 보임"은 정렬·메뉴버튼 유무 등 시각 요인, 폭 문제 아님으로 판정. 그리드 구현(list=CSS Grid, 추천 2종=flex 중복)은 비공유이나 렌더 결과 동일 → 백로그 등록
+- **(신규) 방문 기간 range 2줄 감김 해소**: 원인이 열 개수가 아닌 "메뉴 거터(44px)+별점(88px)" 조합의 1.55px 경계 초과임을 실측으로 확인. 별점 sm 크기 16→14px 축소로 해소 (PR #63 squash `31b243b`). SKILL §8-A(기간 줄바꿈 서술 갱신)·§10-H(별점 크기) 동기화 완료
 
 ## 배포 상태
 - 플랫폼: Vercel
 - URL: `https://today-date-seven.vercel.app`
-- 현재 브랜치: `main` (최신 `a618107`)
+- 현재 브랜치: `main` (최신 `31b243b`)
 
 ## 진행 중 / 남은 작업
 - 뱃지 크기 통일: mealBadge vs visitedTag 불일치 가능성 실측 후 별도 브랜치
 - Galaxy 실기기 QA: 하드웨어 미확보로 보류 중
 - useCreateActivity/useCreatePlace 훅 통일 검토(최소 diff로 보류 중)
+- (신규) 카드 그리드 구현 방식 통합 검토(list=Grid vs 추천=flex 중복, 렌더 동일해 우선순위 낮음)
 
 ## 알려진 이슈 · 기술 부채
 - 생성 로직(활동/장소)이 훅으로 추출되지 않고 두 폼(ActivityForm/PlaceForm)에 raw fetch로 인라인 중복 존재. update/delete는 훅으로 통일돼 있으나 생성만 미추출.
 - 삭제 시 다이얼로그 닫힘 애니메이션이 낙관적 제거로 인해 즉시 사라짐(트레이드오프로 수용). DeleteConfirmDialog의 스피너는 이 경로에서 dead state이나 무해.
+- (신규) 카드 그리드가 `/list`(CSS Grid)와 추천결과 2종(flex-wrap 하드코딩 중복)으로 비공유 구현 — 렌더 결과는 동일해 시급하진 않음
 - (이전 세션 잔여) 검색/필터 URL 동기화, returnTo 배선, spacing 토큰 표준화 등

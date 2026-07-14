@@ -542,7 +542,7 @@ description: >
 // 홈에서는 homeNav 생략(로고가 링크 아님), 하위 화면은 homeNav={true}
 ```
 
-- **브랜드 줄**: `MiniHeart`(보라→핑크 그라데이션 하트, `h-6 w-6` / lg `h-7 w-7`) + `Today Date` 텍스트(`styles.brand`: `1rem`/weight 500/letter-spacing `-0.01em`, lg `text-lg`), 둘 사이 `gap-2.5`. 우측 아이콘 그룹(`flex items-center gap-1`)은 **검색 버튼(`HomeSearchButton`, 홈 전용 = `homeNav=false`)** + 홈 버튼(하위 화면 = `homeNav=true`) + 햄버거 메뉴(`HomeMenu`). 검색과 홈 버튼은 상호 배타(검색=홈, 홈 버튼=하위 화면). 검색 버튼은 클릭 시 검색어 입력 오버레이(§11 입력 폼 다이얼로그)를 띄운다.
+- **브랜드 줄**: `MiniHeart`(보라→핑크 그라데이션 하트, `h-6 w-6` / lg `h-7 w-7`) + `Today Date` 텍스트(`styles.brand`: `1rem`/weight 500/letter-spacing `-0.01em`, lg `text-lg`), 둘 사이 `gap-2.5`. 우측 아이콘 그룹(`flex items-center gap-0`)은 **검색 버튼(`HomeSearchButton`, 홈 전용 = `homeNav=false`)** + 홈 버튼(하위 화면 = `homeNav=true`) + 햄버거 메뉴(`HomeMenu`). **아이콘 간 gap은 0px** — 각 아이콘의 44px 탭타깃(`.iconBtn`) 자체는 그대로 두고 사이 간격만 붙여 시각적으로 조밀하게 한다(탭타깃이 이미 44px라 gap 0에서도 글리프 20px 사이 여백은 충분). 검색과 홈 버튼은 상호 배타(검색=홈, 홈 버튼=하위 화면). 검색 버튼은 클릭 시 검색어 입력 오버레이(§11 입력 폼 다이얼로그)를 띄운다.
 - **제목 블록 간격**: 헤더 → 제목 블록 `mt-6 lg:mt-8`(24/32px, 공용 `PageHeader`).
 - **서브카피 아래 간격(다음 요소에 맞춰 조정)**: 다음 요소의 **자체 패딩까지 고려**해 두 화면이 비슷한 시각적 공백으로 읽히게 한다.
   - 홈(`/`)처럼 서브카피 바로 아래 **카드**(자체 상단 패딩 없음)가 오면 `mt-5`(20px) — `HomeDashboard` CTA 그리드(`lg:mt-5`).

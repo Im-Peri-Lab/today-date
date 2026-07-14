@@ -39,7 +39,7 @@ export function PageHeader({
         ) : (
           <div className="flex items-center gap-2.5">{brand}</div>
         )}
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-0">
           {/* 검색 진입점은 홈 전용(homeNav=false). 하위 화면(/list 등)에는 노출하지 않는다. */}
           {!homeNav && <HomeSearchButton />}
           {homeNav && (

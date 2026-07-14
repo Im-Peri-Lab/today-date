@@ -966,9 +966,9 @@ export const STATUS_LABELS: Record<Status, string> = {
 
 ### 11-B. 다크모드 식별성 (오버레이 · 팝업 분리)
 
-왜: 다크에서 페이지(`#0a0712`)가 이미 어두워, 라이트용 오버레이(검정 10%)로는 거의 안 눌려 팝업 경계가 안 보인다. 라이트 식별성은 유지하면서 다크만 강화한다.
+왜: 다크에서 페이지(`#0a0712`)가 이미 어두워, 라이트용 오버레이(검정 10%)로는 거의 안 눌려 팝업 경계가 안 보인다. 다크는 55%로 강화한다. 라이트도 기존 10%는 배경-다이얼로그 분리가 약해 실기기 확인 후 35%로 상향 조정(260714).
 
-- **오버레이**(`styles.dialogOverlay`, `screens.module.css`): 라이트 `rgba(0,0,0,0.10)`(기존 `bg-black/10`과 동일) / 다크 `rgba(0,0,0,0.55)`. `@media (prefers-color-scheme: dark)`로 직접 분기(backdrop은 portal로 나가 `--s-*` 상속 불가). CSS module 클래스라 Tailwind utilities 레이어를 이긴다.
+- **오버레이**(`styles.dialogOverlay`, `screens.module.css`): 라이트 `rgba(0,0,0,0.35)` / 다크 `rgba(0,0,0,0.55)`. `@media (prefers-color-scheme: dark)`로 직접 분기(backdrop은 portal로 나가 `--s-*` 상속 불가). CSS module 클래스라 Tailwind utilities 레이어를 이긴다.
 - **팝업 가장자리**(`styles.dialogPopup` 다크 블록): ring 색 토큰 `--s-card-border`를 다크에서 `#3a2f4e`(= border-strong)로 끌어올려 카드면(`#241a36`)과 분리 + `box-shadow: 0 16px 48px -12px rgba(0,0,0,0.7)`로 깊이를 준다. **라이트는 box-shadow를 두지 않아 기존 ring-only 외형 그대로**(무변화).
 
 ---

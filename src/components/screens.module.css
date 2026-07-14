@@ -975,12 +975,12 @@
 /*
  * 다이얼로그 backdrop. base-ui Backdrop 은 portal(body)로 나가 .page 다크 토큰을 못 받으므로
  * 라이트/다크 분기를 미디어쿼리로 직접 둔다(토큰 상속 아님 → portal 위치 무관하게 적용).
- * 라이트: 흰 페이지 대비 검정 10%(기존 bg-black/10 과 동일, 라이트 무변화).
+ * 라이트: 흰 페이지 대비 검정 35%. 기존 10%는 배경-다이얼로그 분리가 약해 실기기 확인 후 상향(260714).
  * 다크: 이미 어두운 페이지(#0a0712) 위에서 10%는 거의 안 눌려 경계 식별이 안 되므로 55%로 진하게
  *       눌러 팝업이 떠 보이게 한다. CSS module 클래스라 Tailwind utilities 레이어를 항상 이긴다.
  */
 .dialogOverlay {
-  background: rgba(0, 0, 0, 0.1);
+  background: rgba(0, 0, 0, 0.35);
 }
 
 @media (prefers-color-scheme: dark) {

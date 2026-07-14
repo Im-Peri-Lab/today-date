@@ -711,7 +711,7 @@
   border: 1px solid var(--s-card-border-strong, #c9b8e4);
   background: var(--s-card-bg, #ffffff);
   color: var(--s-ink, #1a1033);
-  font-size: 0.875rem;
+  font-size: 1rem;
   outline: none;
   padding: 0 0.875rem 0 2.25rem;
   transition:

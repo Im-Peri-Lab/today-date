@@ -82,7 +82,7 @@ export function HomeSearchButton() {
       </button>
 
       <Dialog open={open} onOpenChange={handleOpenChange}>
-        <DialogContent className="px-5 pt-6 pb-5">
+        <DialogContent className="max-w-xs px-5 pt-6 pb-5">
           <DialogHeader className="mb-1 gap-0">
             <DialogTitle>검색</DialogTitle>
             <DialogDescription className={styles.pageSubtitle}>

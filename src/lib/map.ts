@@ -14,13 +14,17 @@ export interface MapApp {
   /** 검색어(위치 텍스트)를 받아 열 URL을 만든다. (웹 URL 또는 앱 스킴) */
   build: (query: string) => string
   /**
+   * iOS Safari에서 사용할 공식 HTTPS 앱 연결 페이지.
+   * 커스텀 스킴의 설치 여부를 Safari에서 직접 판별할 수 없을 때만 사용한다.
+   */
+  buildIosSafari?: (query: string) => string
+  /**
    * 웹 페이지가 없어 네이티브 앱 스킴(tmap:// 등)으로만 열리는 앱.
    * true 면 데스크탑 목록에서 숨긴다(웹에서 안 열림).
    * 모바일 미설치 UX는 브라우저별 한계가 있어 MapLink에서 분기한다(안내 문구는
    * requiresApp 앱 공통 "{앱명} 앱을 설치해 주세요." — installPrompt):
    * - Chrome iOS·Android: 스킴 이동 후 미설치면 timeout 토스트로 안내.
-   * - iOS Safari: 미설치 시 브라우저 네이티브 오류가 먼저 떠 토스트가 억제되므로,
-   *   이동 전에 같은 안내를 [열기] 액션과 함께 먼저 보여준다(warn-first).
+   * - iOS Safari: 앱이 제공하는 공식 HTTPS 브리지에서 앱 실행/다운로드를 처리.
    */
   requiresApp?: boolean
 }
@@ -42,11 +46,14 @@ export const MAP_APPS: MapApp[] = [
     build: (q) => `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q)}`,
   },
   {
-    // 티맵은 웹 검색 페이지가 없어 앱 스킴만 지원한다.
-    // 모바일에서 티맵 앱이 설치돼 있을 때만 열리고, 데스크탑/미설치 환경에서는 동작하지 않는다.
+    // Android·기타 모바일 브라우저는 앱 스킴을 직접 실행한다.
+    // iOS Safari는 TMAP 공식 브리지가 올바른 iOS 스킴(tmap://?search=...)을 실행하고,
+    // 미설치 시 공식 다운로드 안내 화면을 제공한다.
     id: 'tmap',
     label: '티맵',
     build: (q) => `tmap://search?name=${encodeURIComponent(q)}`,
+    buildIosSafari: (q) =>
+      `https://www.tmap.co.kr/tmap2/mobile/search.jsp?name=${encodeURIComponent(q)}`,
     requiresApp: true,
   },
 ]

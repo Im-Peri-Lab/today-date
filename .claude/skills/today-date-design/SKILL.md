@@ -271,21 +271,22 @@ description: >
 | 세그먼트 (`styles.option`) | **40px** (`height:2.5rem`) | 10px (`0.625rem`) | `screens.module.css .option` |
 | 카테고리 칩 (`styles.chip`) | **36px** (`height:2.25rem`) | pill (`9999px`) | `screens.module.css .chip` |
 | 추가 화면 하단 Primary (제출) | **48px** (`h-12`) | 10px | `FormLayout.tsx` |
+| 추가 화면 하단 연속 등록 Secondary | **40px** (`h-10`) | 10px | `FormLayout.tsx` outline 버튼 |
 | 상세 하단 Primary(정방향 "다녀왔어요" / 역방향 "가보고 싶은 곳으로")·삭제 | **36px** (`h-9`) | 10px | `ActivityDetail`/`PlaceDetail` |
 | 인라인 편집 Save·Cancel (`DetailBlock`) | **36px** (`h-9`) | 10px | `DetailBlock.tsx` |
 
 → **액션·컨트롤 사이즈 위계** (한 화면 안에서 정렬):
 - **48px** — 신규 생성 마무리 CTA(추가 화면 Primary `h-12` **전용**). 인라인엔 쓰지 않는다.
-- **40px** — 일반 입력/선택 컨트롤(`Input`·`Textarea`·세그먼트·카테고리 외 컨트롤·날짜 박스 `dateTrigger`)·컨트롤 줄(토글·검색바·필터, §4).
+- **40px** — 일반 입력/선택 컨트롤(`Input`·`Textarea`·세그먼트·카테고리 외 컨트롤·날짜 박스 `dateTrigger`)·컨트롤 줄(토글·검색바·필터, §4) + 신규 생성 Primary와 짝을 이루는 연속 등록 outline 보조 액션.
 - **36px** — 카테고리 칩 + **인라인 액션(저장·취소·삭제·전환)**.
 - **인라인 액션 = 36px (`h-9`, 확정)**: 상세 하단 Primary/삭제·인라인 Save/Cancel 모두 `h-9` 명시(예전 32px `h-8`에서 상향). 글자만인 Save/Cancel은 정사각 옹색함을 피하려 `px-4`로 통통하게, 아이콘+글자인 삭제/전환은 Button 기본 `px-2.5` 유지(이미 폭 있음). 한 화면(인라인 편집)에서 Save/Cancel·하단 Primary/삭제가 같은 36px로 정렬.
 - 인라인 액션(36px)은 카드 안 일반 컨트롤(40px)보다 **한 단계 작은 "보조 액션"** 결. Save 채움은 단색 액센트(`styles.detailPrimaryBtn`) 유지.
 
 **페이지 높이/하단 여백**: 상세 페이지는 `cn(styles.page, styles.pageStatic)`로 `min-height:auto`(100dvh spacer 없음) → 콘텐츠 자연 높이. 짧은 콘텐츠 아래는 고정 배경(`.page::before`)이 채워 흰 빈칸이 없다(별도 spacer 금지).
 
-### 액션 버튼 2종 패턴 (거버넌스)
+### 액션 버튼 패턴 (거버넌스)
 
-이 앱의 액션 버튼은 **두 가지 패턴만** 사용한다. 새 화면을 추가할 때도 아래 두 패턴 외 **새 사이즈 도입 금지**.
+이 앱의 액션 버튼은 아래 **두 기본 패턴 + 신규 생성 폼의 짝 보조 액션 예외**만 사용한다. 새 화면을 추가할 때도 이 범위 밖의 **새 사이즈 도입 금지**.
 
 **1) 풀폭 Primary CTA** — **48px / `w-full` / radius 10px / 단색 채움(`--s-active-fill` via `styles.detailPrimaryBtn`)**
 - 용도: "새 항목 생성 완료" — 데이터 추가가 발생하는 마무리 액션.
@@ -295,9 +296,23 @@ description: >
 - 용도: "기존 항목에 작용" — 수정·전환·삭제 등 데이터 가공 액션.
 - 적용처: 인라인 편집 Save/Cancel(`DetailBlock` 내부) · 상세 하단 전환 액션("다녀왔어요"/"가보고 싶은 곳으로" — 역방향만 `STATUS_MENU_LABELS.wishlist` 공유) · 상세 하단 삭제(ghost variant + destructive 톤) · 카드 메뉴 액션 · (향후) 다중 선택 액션 등.
 
-**판단 기준 — "이 행위가 새 데이터를 만드는가?"**
-- YES → 풀폭 Primary (48px)
-- NO (수정·전환·삭제·취소) → 콘텐츠폭 액션 (36px)
+**신규 생성 폼의 짝 보조 액션 예외** — **40px / `w-full` / radius 10px / outline**
+- 용도: 새 항목은 만들지만 현재 폼 흐름을 끝내지 않는 보조 제출. `/activities/new`·`/places/new`의 "저장하고 계속 등록하기"가 기준 구현이다.
+- 배치: 풀폭 Primary 바로 아래, 같은 액션 묶음 안에서 `space-y-2`(8px). **Primary를 먼저**, outline Secondary를 나중에 둔다.
+- 위계: 두 버튼이 모두 생성 액션이어도 단색 채움은 현재 흐름을 끝내는 Primary 하나만 사용한다. 연속 등록 버튼에 `detailPrimaryBtn`·그라데이션을 적용하지 않는다.
+
+**판단 기준 — "이 액션이 현재 흐름을 끝내는 최종 주행동인가?"**
+- YES → 풀폭 Primary (48px). 신규 생성 완료·다음 화면 이동 등 현재 흐름을 마무리한다.
+- NO, 신규 생성 후 같은 폼에서 계속 작업 → 풀폭 outline Secondary (40px, 위 예외).
+- NO, 기존 항목에 작용(수정·전환·삭제·취소) → 콘텐츠폭 액션 (36px).
+
+#### 연속 등록 제출 동작 (`FormLayout` 기준)
+
+- 두 버튼은 각각 `react-hook-form`의 `handleSubmit`으로 감싼 별도 콜백을 받되, 실제 생성 요청·오류 처리·쿼리 무효화는 한 제출 함수에서 **한 번만** 실행하고 성공 이후만 분기한다.
+- "저장하고 계속 등록하기": 인자 없는 `reset()`으로 폼을 완전 초기화하고 성공 토스트를 표시한다. 화면이 유지되므로 `navigating`·`topLoader`·`router.push`는 실행하지 않는다.
+- 연속 등록을 한 번도 쓰지 않은 Primary 제출은 기존처럼 방금 만든 상세로 이동한다. 한 번 이상 연속 등록한 뒤 최종 Primary 제출은 해당 목록 탭(`/list?tab=activity` 또는 `/list?tab=place`)으로 이동한다.
+- 두 버튼은 `isSubmitting || navigating`을 함께 참조해 동시에 잠근다. 실제로 누른 버튼만 `Loader2` + "저장 중..."을 표시하고, 함께 잠긴 다른 버튼은 원래 라벨을 유지한다(§12-A).
+- 복사하기 prefill은 마운트 시 one-shot `reset(values)`이고, 연속 등록의 `reset()`은 이후 사용자 제출 성공 시 실행되므로 서로 충돌하지 않는다.
 
 일반 컨트롤(입력바·세그먼트 등 **40px**)·카테고리 칩(**36px**)은 위 액션 버튼과 별개의 표준으로 유지한다(위 §4-A 높이 표 참조).
 
@@ -461,7 +476,7 @@ description: >
 왜: hover와 "선택됨"을 요소마다 다르게 칠하지 않도록 **두 축**(① 채움 위계 ② hover 언어)을 한 원칙으로 고정한다. 추천 화면·`/list`·추가/수정 폼이 모두 같은 결로 읽혀야 한다.
 
 ### 채움 위계 (단색은 CTA 하나에만)
-- **단색 채움**(`--s-active-fill`/`--s-active-line` 솔리드 + 흰 글씨): **"지금 누를 단 하나의 CTA"에만.** 등록(`/activities/new`·`/places/new` 제출)·저장(인라인/상세 Primary)·추천 "다른 추천 보기" — `styles.detailPrimaryBtn`(`--s-active-line`).
+- **단색 채움**(`--s-active-fill`/`--s-active-line` 솔리드 + 흰 글씨): **"지금 누를 단 하나의 CTA"에만.** 등록(`/activities/new`·`/places/new`의 흐름을 끝내는 Primary)·저장(인라인/상세 Primary)·추천 "다른 추천 보기" — `styles.detailPrimaryBtn`(`--s-active-line`). 같은 생성 폼의 "저장하고 계속 등록하기"는 흐름을 유지하는 보조 액션이므로 outline(§4-A).
 - **그라데이션 채움**(`styles.gradIcon`, `--s-grad`): **단독 진입 버튼에만** — 빈상태 "첫 활동/장소 추가하기"(`EmptyState`)·추천0개 "활동/장소 추가하기"(추천 위저드, **버튼이 1개일 때만**). 버튼이 2개인 박스(예: 활동 추천0개 "더 짧은 일정도 볼까요?" + "추가하기")는 **둘 다 그라데이션 금지** — Primary는 `detailPrimaryBtn` 단색, 보조는 outline.
 - **선택됨/활성**(옵션 카드·칩·세그먼트·필터 칩): **단색 채움 금지** → `--s-accent-soft-bg` 틴트 + `--s-active-line` accent 보더 + `--s-active-text` accent 글씨/체크 + **weight 500**. (`styles.chipActive`/`styles.optionActive`/`styles.optionCardActive`)
   - **다크 틴트 밝기 규칙(확정)**: 다크 `--s-accent-soft-bg`는 카드면(`--s-card-bg` `#241a36`)보다 **분명히 밝아야** 한다(현재 `#573f7f`) — 보라 테두리에만 의존하지 않고 **면 색만으로도 선택이 구분**되도록. 라이트는 비선택 흰 배경과 또렷이 구분되는 연보라(fallback `#f6f1ff`). 비선택과 위계가 깨질 만큼 과하게 올리지는 않는다.
@@ -910,6 +925,9 @@ export const STATUS_LABELS: Record<Status, string> = {
 되돌리기 성공:     "가보고 싶은 곳으로 옮겼어요"
 삭제 성공:         "삭제했어요"
 저장 성공:         "수정되었습니다!"
+일반 신규 등록:    성공 토스트 없음 (상세 화면 전환이 성공 신호)
+활동 연속 등록:    "활동이 등록됐어요! 계속 등록해보세요 🎉"
+장소 연속 등록:    "장소가 등록됐어요! 계속 등록해보세요 🎉"
 활동 되돌리기 확인 다이얼로그 제목: "가보고 싶은 곳으로 되돌릴까요?"
 ```
 
@@ -1076,6 +1094,8 @@ requestAnimationFrame(() => router.push(listHref))
 | 화면 그대로, **콘텐츠 영역 전체가 재생성** | **오버레이 스피너** (추천 위저드의 `Loader2` 오버레이 등) |
 
 **스피너 병기(모든 로딩 버튼 공통 규칙):** 로딩(`disabled`) 상태가 되는 **모든 버튼**은 예외 없이 텍스트 **왼쪽에 작은 스피너를 병기**한다 — `lucide-react`의 `Loader2` + `animate-spin`(`h-4 w-4`, 앱 공용 스피너, 신규 도입 금지·재사용). 되돌릴 수 없음/소요시간 길이와 **무관하게** 인라인 저장·로그아웃 등 제자리 액션도 동일하게 병기한다(옛 "제자리 액션은 텍스트만/아이콘 숨김" 예외는 **폐지**). 리딩 아이콘이 이미 있는 버튼(`Undo2` 되돌리기, `LogOut` 로그아웃, `Mail` 메일, `Sparkles` 추천 받기)은 그 아이콘 슬롯을 동일 size의 `Loader2`로 **스왑**하고, 리딩 아이콘이 없는 버튼(폼 제출·인라인 저장·방문기록 저장·홈 검색·삭제 확인 등)은 텍스트 앞에 **프리펜드**한다. 마크업은 `DeleteConfirmDialog`(`{loading && <Loader2 className="h-4 w-4 animate-spin" />}{loading ? '…중...' : '…'}`)를 복제하고 새 스타일을 발명하지 않는다.
+
+**복수 제출 버튼의 공통 잠금 vs 개별 로딩 표시:** 같은 요청의 중복 실행을 막으려고 여러 버튼이 함께 `disabled`되어도, 스피너·"처리 중..." 라벨은 **실제로 요청을 시작한 버튼 하나에만** 표시한다. `FormLayout`처럼 제출 의도(`submit`/`continue`)를 로컬 상태로 기록하고, `isSubmitting || navigating`은 두 버튼의 잠금에 공통 적용한다. 함께 잠겼지만 요청을 시작하지 않은 버튼은 원래 라벨을 유지한다.
 
 ### 사례
 

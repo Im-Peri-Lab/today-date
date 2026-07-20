@@ -21,6 +21,7 @@ export function ActivityForm({ prefill }: { prefill?: boolean }) {
   // push 직전에 navigating=true로 잠가 전환 완료(=언마운트)까지 비활성을 유지한다.
   // 페이지가 언마운트되며 자연히 정리되므로 별도 해제 로직은 불필요.
   const [navigating, setNavigating] = useState(false)
+  const [hasContinuedRegistration, setHasContinuedRegistration] = useState(false)
   const {
     register,
     handleSubmit,
@@ -42,7 +43,7 @@ export function ActivityForm({ prefill }: { prefill?: boolean }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  async function onSubmit(values: ActivityFormValues) {
+  async function onSubmit(values: ActivityFormValues, continueAdding: boolean) {
     const payload = {
       ...values,
       category_id: values.category_id || null,
@@ -64,14 +65,23 @@ export function ActivityForm({ prefill }: { prefill?: boolean }) {
     // 리스트는 미마운트 상태(사용자가 상세로 이동)라도 즉시 백그라운드 재조회되도록
     // refetchType: 'all'. 복귀 시 새 항목이 누락되지 않고 바로 보인다.
     queryClient.invalidateQueries({ queryKey: ['activities'], refetchType: 'all' })
+
+    if (continueAdding) {
+      reset()
+      setHasContinuedRegistration(true)
+      toast.success('활동이 등록됐어요! 계속 등록해보세요 🎉')
+      return
+    }
+
     setNavigating(true)
     topLoader.start()
-    router.push(`/activities/${json.data.id}`)
+    router.push(hasContinuedRegistration ? '/list?tab=activity' : `/activities/${json.data.id}`)
   }
 
   return (
     <FormLayout
-      onSubmit={handleSubmit(onSubmit)}
+      onSubmit={handleSubmit((values) => onSubmit(values, false))}
+      onSubmitAndContinue={handleSubmit((values) => onSubmit(values, true))}
       isSubmitting={isSubmitting || navigating}
       submitLabel="활동 등록하기"
     >

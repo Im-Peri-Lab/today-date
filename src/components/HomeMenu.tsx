@@ -42,9 +42,9 @@ export function HomeMenu() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
-        render={<button type="button" className={styles.iconBtn} aria-label="메뉴" />}
+        render={<button type="button" className={styles.headerNavBtn} aria-label="메뉴" />}
       >
-        <Menu className="h-5 w-5" />
+        <Menu className="h-[22px] w-[22px]" />
       </DropdownMenuTrigger>
       <DropdownMenuContent>
         <DropdownMenuItem

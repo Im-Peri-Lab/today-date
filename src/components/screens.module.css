@@ -485,6 +485,52 @@
   }
 }
 
+/*
+ * 헤더 내비게이션 클러스터 전용(검색/홈/햄버거) — .iconBtn과 탭타깃(44px)은 동일하나
+ * 글리프만 22px로 확대 + 서로 gap 0으로 밀착. 카드 ⋮ 메뉴·로그아웃은 .iconBtn 그대로 유지.
+ * §7 참고.
+ */
+.headerNavBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 0.75rem;
+  color: var(--s-sub, #6b7280);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition:
+    background 140ms ease,
+    color 140ms ease;
+}
+.headerNavBtn:hover:not(:disabled) {
+  background: var(--s-card-border-strong, #eceaf3);
+  color: var(--s-ink, #1a1033);
+}
+@media (prefers-color-scheme: dark) {
+  .headerNavBtn:hover:not(:disabled) {
+    background: var(--s-accent-soft-bg, #f5f0ff);
+    color: var(--s-accent, #7c3aed);
+  }
+}
+.headerNavBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.headerNavBtn:focus-visible {
+  outline: none;
+  background: var(--s-card-border-strong, #eceaf3);
+  color: var(--s-ink, #1a1033);
+}
+@media (prefers-color-scheme: dark) {
+  .headerNavBtn:focus-visible {
+    background: var(--s-accent-soft-bg, #f5f0ff);
+    color: var(--s-accent, #7c3aed);
+  }
+}
+
 /* ── 보조 텍스트 링크 ──────────────────────────── */
 .textLink {
   color: var(--s-sub, #6b7280);

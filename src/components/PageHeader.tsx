@@ -39,12 +39,12 @@ export function PageHeader({
         ) : (
           <div className="flex items-center gap-2.5">{brand}</div>
         )}
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-0">
           {/* 검색 진입점은 홈 전용(homeNav=false). 하위 화면(/list 등)에는 노출하지 않는다. */}
           {!homeNav && <HomeSearchButton />}
           {homeNav && (
-            <Link href="/" className={styles.iconBtn} aria-label="홈으로">
-              <Home className="h-5 w-5" />
+            <Link href="/" className={styles.headerNavBtn} aria-label="홈으로">
+              <Home className="h-[22px] w-[22px]" />
             </Link>
           )}
           <HomeMenu />

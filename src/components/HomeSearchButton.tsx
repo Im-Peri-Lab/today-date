@@ -74,11 +74,11 @@ export function HomeSearchButton() {
     <>
       <button
         type="button"
-        className={styles.iconBtn}
+        className={styles.headerNavBtn}
         aria-label="검색"
         onClick={() => setOpen(true)}
       >
-        <Search className="h-5 w-5" />
+        <Search className="h-[22px] w-[22px]" />
       </button>
 
       <Dialog open={open} onOpenChange={handleOpenChange}>

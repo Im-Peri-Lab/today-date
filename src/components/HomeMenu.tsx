@@ -44,7 +44,7 @@ export function HomeMenu() {
       <DropdownMenuTrigger
         render={<button type="button" className={styles.headerNavBtn} aria-label="메뉴" />}
       >
-        <Menu className="h-6 w-6" />
+        <Menu className="h-[22px] w-[22px]" />
       </DropdownMenuTrigger>
       <DropdownMenuContent>
         <DropdownMenuItem

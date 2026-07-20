@@ -44,7 +44,7 @@ export function PageHeader({
           {!homeNav && <HomeSearchButton />}
           {homeNav && (
             <Link href="/" className={styles.headerNavBtn} aria-label="홈으로">
-              <Home className="h-6 w-6" />
+              <Home className="h-[22px] w-[22px]" />
             </Link>
           )}
           <HomeMenu />

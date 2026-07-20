@@ -78,7 +78,7 @@ export function HomeSearchButton() {
         aria-label="검색"
         onClick={() => setOpen(true)}
       >
-        <Search className="h-6 w-6" />
+        <Search className="h-[22px] w-[22px]" />
       </button>
 
       <Dialog open={open} onOpenChange={handleOpenChange}>

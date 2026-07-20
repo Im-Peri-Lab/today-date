@@ -7,11 +7,9 @@ import { useEffect, useState } from 'react'
  *
  * 왜 Safari만 따로 보는가:
  * - iOS Safari는 미설치 커스텀 스킴(`tmap://`)으로 top-level 이동하면
- *   "주소가 유효하지 않아…" **네이티브 오류 모달**을 즉시 띄운다. 이 모달이 `blur`를
- *   유발해 우리 timeout 토스트(openAppScheme)가 오탐으로 억제된다 → 사용자는
- *   앱 안내 없이 브라우저 오류만 본다.
+ *   "주소가 유효하지 않아…" **네이티브 오류 모달**을 즉시 띄운다.
  * - Chrome iOS(CriOS)·Android는 미설치 스킴이 조용히 실패 → 기존 timeout 토스트가 정상 동작.
- * 따라서 iOS Safari에서만 이동 전에 안내(warn-first)를 먼저 보여준다.
+ * 따라서 iOS Safari에서만 지도 앱이 제공하는 공식 HTTPS 브리지로 연결한다.
  *
  * 판정: iOS 기기(또는 UA가 Mac으로 보고되는 iPadOS 13+ 를 터치포인트로 보정) +
  * Safari 엔진 + Chrome/Firefox/Edge/Opera/구글앱 등 in-app·대체 브라우저 제외.

@@ -26,7 +26,13 @@ export default async function NewPlacePage({
         <h1 className={cn('mt-4', styles.pageTitle)}>장소 추가</h1>
         <p className={styles.pageSubtitle}>가고 싶은 식당·카페를 위시리스트에 추가해요</p>
 
-        <div className="mt-5">
+        <div
+          className={cn(
+            styles.card,
+            styles.detailCard,
+            'mt-5 px-5 pt-5 pb-4 lg:px-6 lg:pt-6 lg:pb-5',
+          )}
+        >
           <PlaceForm prefill={from === 'copy'} />
         </div>
       </div>

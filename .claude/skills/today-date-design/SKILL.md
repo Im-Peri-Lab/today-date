@@ -36,6 +36,7 @@ description: >
 | `/` (홈) | ✅ 기준 반영 | `styles.page` + `PageHeader` + `--s-*` 토큰 |
 | `/list` (목록) | ✅ 기준 반영 | 기준의 레퍼런스 구현 (`ListView`) |
 | `/activities/[id]`, `/places/[id]` (상세) | ✅ 기준 반영 | DetailBlock 카드·인라인 편집·버튼 위계·상태 태그·메타 아이콘 확정. § 10 참고 |
+| `/activities/new`, `/places/new` (신규 등록) | ✅ 기준 반영 | 상세 `DetailBlock`과 동일한 카드 표면·패딩. § 10-A 참고 |
 | `/recommend/activity`, `/recommend/place` (추천) | ✅ 기준 반영 | `styles.page` 래퍼 사용, 옛 보라 그라데이션 제거됨(그라데이션 전역 확장 반영) |
 
 새 화면을 추가할 때는 `<main>` 래퍼를 `styles.page`(또는 `cn(styles.page, styles.pageStatic)`)로 두고, 카드/컨트롤/헤더를 아래 1~9 섹션의 토큰·클래스로 구성한다.
@@ -332,7 +333,7 @@ description: >
 **인라인 편집 컨텍스트 규칙 (`DetailBlock`):**
 - `DetailBlock` 안의 편집 폼(`ActivityFields`/`PlaceFields`/`VisitRecordBlock`)은 추가 화면 `FormLayout`(`space-y-5`)과 동일한 필드 간 리듬을 직접 제공해야 한다 → `DetailBlock`이 editing 모드 children 래퍼에 `space-y-5` 부여(읽기 모드는 영향 없음), `VisitRecordBlock`의 편집 폼 래퍼도 `space-y-5`. `FormField`/필드 묶음 내부 `space-y-1.5`(라벨↔컨트롤)만으로는 필드↔필드 간격이 0이 되어 어긋난다.
 - 섹션 라벨(`<h2>`)이 보이는 블록(방문 기록)은 editing 시 헤더↔폼 간격을 `mt-5`(읽기 모드는 `mt-3` 유지)로 둔다. 상세 두 블록 사이 간격도 `space-y-5`(`ActivityDetail`/`PlaceDetail` 래퍼)로 폼 리듬과 통일.
-- 인라인 폼 카드는 페이지 패딩 + 카드 `px-5`로 추가 화면보다 좌우 각 20px 좁다(카드 정체상 정상, 오버플로 아님).
+- 인라인 편집과 신규 등록 폼은 모두 페이지 `px-5` + 카드 `px-5`(데스크탑 `px-6`)를 공유한다. 이 이중 패딩은 카드 표면을 분리하는 공통 구조이며 오버플로가 아니다.
 
 **날짜 입력(네이티브 date 입력 — `src/components/forms/DatePickerField.tsx`):**
 - **달력 팝업은 OS 네이티브(`<input type="date">`)를 쓴다.** 박스/leading 아이콘/표시 텍스트만 우리 토큰으로 유지하고, 달력 UI 자체는 OS에 위임한다. (과거 base-ui `Popover` + 자체 월 그리드를 썼으나, 다이얼로그 안 portal 잡음·데스크탑 고정폭(`17rem`) 캘린더 폭 초과·다크 토큰 재선언 부담 때문에 네이티브로 전환.)
@@ -733,8 +734,10 @@ description: >
 
 카드 클래스: `styles.card` + `styles.detailCard`
 - `styles.card`: `border-radius: 1rem`, 보더, 그림자 (공용)
-- `styles.detailCard`: `border-radius: 1.5rem` (24px) — `.card` 위에 덮어씀, 상세 전용
+- `styles.detailCard`: `border-radius: 1.5rem` (24px) — `.card` 위에 덮어씀, 상세 블록·신규 등록 폼 공용
 - 패딩: `px-5 pt-5 pb-4` / lg `px-6 pt-6 pb-5`
+
+신규 등록 폼(`/activities/new`·`/places/new`)은 페이지 제목·설명·"홈으로" 링크를 카드 밖에 두고, `ActivityForm`/`PlaceForm`만 위 카드 클래스·패딩으로 감싼다. `FormLayout` 자체는 카드화하지 않으며 내부 `space-y-5`와 버튼 위계를 그대로 유지한다(§4-A).
 
 편집 모드 진입 시: `blockTitle` 있는 블록(등록 정보)은 헤더 전체 숨김 → 폼이 카드 최상단에서 즉시 시작.
 

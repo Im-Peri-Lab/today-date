@@ -17,6 +17,7 @@ import { useDebounced } from '@/hooks/useDebounced'
 import { DURATION_OPTIONS, TIME_OPTIONS, MEAL_OPTIONS, STATUS_LABELS } from '@/lib/labels'
 import {
   buildListReturnTo,
+  buildDetailHref,
   isListStatus,
   isListTab,
   type ListStatus,
@@ -369,7 +370,7 @@ export function ListView() {
                     : '아직 다녀온 활동이 없어요'
                 }
                 hint="함께 하고 싶은 활동을 추가해 보세요"
-                addHref="/activities/new"
+                addHref={buildDetailHref('/activities/new', { returnTo: currentListReturnTo })}
                 addLabel="첫 활동 추가하기"
               />
             )}
@@ -441,7 +442,7 @@ export function ListView() {
                     : '아직 다녀온 장소가 없어요'
                 }
                 hint="가고 싶은 장소를 추가해 보세요"
-                addHref="/places/new"
+                addHref={buildDetailHref('/places/new', { returnTo: currentListReturnTo })}
                 addLabel="첫 장소 추가하기"
               />
             )}
@@ -450,7 +451,7 @@ export function ListView() {
       )}
 
       {/* FAB — 홈과 동일 (활동/장소 추가 메뉴) */}
-      <HomeFab />
+      <HomeFab returnTo={currentListReturnTo} />
     </div>
   )
 }

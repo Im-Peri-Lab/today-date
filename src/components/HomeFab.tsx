@@ -8,10 +8,11 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from '@/components/ui/dropdown-menu'
+import { buildDetailHref } from '@/lib/listReturn'
 import styles from '@/components/screens.module.css'
 
 /** 우하단 FAB — 클릭 시 활동/장소 추가 메뉴를 위로 펼침 */
-export function HomeFab() {
+export function HomeFab({ returnTo }: { returnTo?: string }) {
   const router = useRouter()
 
   return (
@@ -22,11 +23,15 @@ export function HomeFab() {
         <Plus className="h-6 w-6" />
       </DropdownMenuTrigger>
       <DropdownMenuContent side="top" align="end" sideOffset={12}>
-        <DropdownMenuItem onClick={() => router.push('/activities/new')}>
+        <DropdownMenuItem
+          onClick={() => router.push(buildDetailHref('/activities/new', { returnTo }))}
+        >
           <Sparkles />
           활동 추가
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => router.push('/places/new')}>
+        <DropdownMenuItem
+          onClick={() => router.push(buildDetailHref('/places/new', { returnTo }))}
+        >
           <MapPin />
           장소 추가
         </DropdownMenuItem>

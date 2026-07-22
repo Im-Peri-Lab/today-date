@@ -53,7 +53,9 @@ description: >
 | 페이지 고정 배경 레이어 | `--s-page-gradient-light` = `linear-gradient(#ffffff→#f4f0fa)` — 홈·인증 공유 | radial(보라)+radial(핑크)+linear `#0a0712→#120c1e` | `.pageHome background` (라이트) / `.page::before` (다크) |
 | 카드 표면 `--s-card-bg` | `#ffffff` | `#241a36` | `styles.card` |
 | 컨트롤 표면(검색/필터/세그먼트) | `#ffffff` | 세그먼트 트랙 `#1b1430`, 검색/필터 `#241a36` | `styles.search*/filterToggle/segment` |
-| 소프트 강조 배경 `--s-accent-soft-bg` | `#f6f1ff` | `#2d2540` | `styles.statCardAccent/visitedTag/visitBox` |
+| 소프트 강조 배경 `--s-accent-soft-bg` | `#f6f1ff` | `#2d2540` | `styles.statCardAccent/visitBox` |
+
+상세 상태 태그(`styles.visitedTag*`)의 배경은 상태별 modifier가 결정한다. `visitedTagVisited`는 중립 면 `--s-card-border-strong`, `visitedTagWishlist`는 accent 계열을 사용하므로 한 소프트 배경 계열로 묶지 않는다. 정확한 조합은 §10-E를 따른다.
 
 복붙:
 - 일반 화면(리스트/상세): `styles.page` — `.page::before`(z-index:-1)가 `#fafafb` 배경 적용.
@@ -597,12 +599,14 @@ description: >
 
 - **카테고리 뱃지** `CategoryBadge` → `styles.labelBadge`: **배경 pill 없음**. 인라인 `아이콘 + 텍스트`, gap `0.3rem`, font `0.8125rem`/weight 500, color `sub`. 아이콘만 보라(`catIcon`).
 - **메타 줄**(소요시간/시간대/위치/식사시간): `flex flex-wrap items-center gap-x-2.5 gap-y-1 text-xs` + `styles.sub`, 각 항목 `inline-flex items-center gap-1` 아이콘(`h-3 w-3`)+텍스트.
-- 식사시간 등 보조 pill이 꼭 필요할 때만 `styles.mealBadge`(track 배경, radius full).
+- 식사시간 등 보조 pill이 꼭 필요할 때만 `styles.mealBadge`(`--s-card-border-strong` 배경, radius full).
 
 **`.mealBadge` 의도된 예외** (`/places/[id]` `PlaceDetail.tsx` 전용):
 - `font-size: var(--type-caption)` (12px 토큰 참조, `.captionText` 유틸 통째 적용 금지 — color는 기존 `--s-sub` 유지)
+- `font-weight: 400` — `DetailRow`의 `.bodyText`에서 상속하며 별도 굵기를 덮어쓰지 않음
 - `padding: 0.25rem 0.625rem` (4px 상하 / 10px 좌우) — spacing 전용 토큰 없어 직접 지정
 - `line-height: 1.4` 명시, `border-radius: 9999px` pill 유지, `height` 고정 없음
+- `background: var(--s-card-border-strong)`, `color: var(--s-sub)`, border 없음
 - **카테고리 칩(`.chip`, height 36px / 컨트롤)과 달리 정보 표시 전용 뱃지**라 height 고정 패턴 미적용
 
 **spacing 토큰 표준화 백로그 신호** (현행 유지, 미작업):
@@ -864,6 +868,17 @@ export const STATUS_LABELS: Record<Status, string> = {
 |---|---|---|---|---|
 | `visitedTagVisited` | `--s-card-border-strong` (`#eceaf3`) | `--s-sub` (`#6b7280`) | `#3a2f4e` (cascade) | `#a8a0b8` (cascade) |
 | `visitedTagWishlist` | `rgba(124,58,237,0.08)` (`--s-accent` 8%) | `--s-accent` (`#7c3aed`) | `--s-accent-soft-bg` (`#2d2540`) | `#c084fc` (cascade) |
+
+#### 역할별 배지 변형 (`.mealBadge` vs `.visitedTagVisited`)
+
+두 요소는 중립 색상과 pill 형태를 공유하지만, **복수 정보값과 단일 상태 강조라는 역할 차이에 따라 padding·font-weight를 의도적으로 분리**한다. 크기를 서로 맞추지 않는다.
+
+| 요소 | 역할·노출 위치 | font-size / weight | padding | 공통 시각 속성 |
+|---|---|---|---|---|
+| `.mealBadge` | 정보값 badge — 장소 상세 등록정보의 "식사 시간" 행에서 복수 노출 가능 | 12px / 400 (`DetailRow` `.bodyText` 상속) | 4px 10px | `--s-card-border-strong` 배경, `--s-sub` 텍스트, pill, border 없음 |
+| `.visitedTag` + `.visitedTagVisited` | 상태 tag — 활동·장소 상세 카드 헤더에서 단독 노출 | 12px / 500 | 2px 8px | `--s-card-border-strong` 배경, `--s-sub` 텍스트, pill, border 없음 |
+
+공통 토큰은 두 요소가 같은 중립 배지 계열임을 나타내고, 서로 다른 density와 weight는 각 정보 역할을 나타내는 의도된 변형이다. `.mealBadge`의 상세값은 §8, 상태별 `.visitedTag*` 색 조합은 위 표를 따른다.
 
 ---
 

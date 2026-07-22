@@ -505,11 +505,13 @@
     background 140ms ease,
     color 140ms ease;
 }
-.headerNavBtn:hover:not(:disabled) {
-  background: var(--s-card-border-strong, #eceaf3);
-  color: var(--s-ink, #1a1033);
+@media (hover: hover) {
+  .headerNavBtn:hover:not(:disabled) {
+    background: var(--s-card-border-strong, #eceaf3);
+    color: var(--s-ink, #1a1033);
+  }
 }
-@media (prefers-color-scheme: dark) {
+@media (prefers-color-scheme: dark) and (hover: hover) {
   .headerNavBtn:hover:not(:disabled) {
     background: var(--s-accent-soft-bg, #f5f0ff);
     color: var(--s-accent, #7c3aed);

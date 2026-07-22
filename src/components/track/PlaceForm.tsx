@@ -10,9 +10,10 @@ import { useQueryClient } from '@tanstack/react-query'
 import { FormLayout } from '@/components/forms/FormLayout'
 import { PlaceFields } from './PlaceFields'
 import { takePlacePrefill } from '@/lib/duplicatePrefill'
+import { buildDetailHref } from '@/lib/listReturn'
 import { placeFormSchema, type PlaceFormValues } from '@/lib/schemas/placeSchema'
 
-export function PlaceForm({ prefill }: { prefill?: boolean }) {
+export function PlaceForm({ prefill, returnTo }: { prefill?: boolean; returnTo?: string }) {
   const router = useRouter()
   const topLoader = useTopLoader()
   const queryClient = useQueryClient()
@@ -77,7 +78,11 @@ export function PlaceForm({ prefill }: { prefill?: boolean }) {
 
     setNavigating(true)
     topLoader.start()
-    router.push(hasContinuedRegistration ? '/list?tab=place' : `/places/${json.data.id}`)
+    router.push(
+      hasContinuedRegistration
+        ? returnTo ?? '/list?tab=place'
+        : buildDetailHref(`/places/${json.data.id}`, { returnTo })
+    )
   }
 
   return (

@@ -10,9 +10,10 @@ import { useQueryClient } from '@tanstack/react-query'
 import { FormLayout } from '@/components/forms/FormLayout'
 import { ActivityFields } from './ActivityFields'
 import { takeActivityPrefill } from '@/lib/duplicatePrefill'
+import { buildDetailHref } from '@/lib/listReturn'
 import { activityFormSchema, type ActivityFormValues } from '@/lib/schemas/activitySchema'
 
-export function ActivityForm({ prefill }: { prefill?: boolean }) {
+export function ActivityForm({ prefill, returnTo }: { prefill?: boolean; returnTo?: string }) {
   const router = useRouter()
   const topLoader = useTopLoader()
   const queryClient = useQueryClient()
@@ -75,7 +76,11 @@ export function ActivityForm({ prefill }: { prefill?: boolean }) {
 
     setNavigating(true)
     topLoader.start()
-    router.push(hasContinuedRegistration ? '/list?tab=activity' : `/activities/${json.data.id}`)
+    router.push(
+      hasContinuedRegistration
+        ? returnTo ?? '/list?tab=activity'
+        : buildDetailHref(`/activities/${json.data.id}`, { returnTo })
+    )
   }
 
   return (

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { Search, Filter, X, ChevronDown } from 'lucide-react'
 import { ActivityCard } from './ActivityCard'
@@ -169,7 +169,9 @@ export function ListView() {
   // 홈 검색에서 넘어온 검색어(?q=)를 SearchBox 초기값으로 prefill.
   // useDebounced 는 초기값을 그대로 debounced 로 시작하므로 진입 즉시 이 검색어로 조회된다.
   const initialQuery = searchParams.get('q') ?? ''
-  const [track, setTrack] = useState<Track>(isListTab(initialTab) ? initialTab : 'activity')
+  const initialTrack: Track = isListTab(initialTab) ? initialTab : 'activity'
+  const initialCategoryIds = searchParams.get('category_id')?.split(',').filter(Boolean) ?? []
+  const [track, setTrack] = useState<Track>(initialTrack)
   const [status, setStatus] = useState<ListStatus>(
     isListStatus(initialStatus) ? initialStatus : 'wishlist'
   )
@@ -177,13 +179,23 @@ export function ListView() {
   const [filtersOpen, setFiltersOpen] = useState(false)
 
   // 활동 필터
-  const [actCats, setActCats] = useState<string[]>([])
-  const [actDuration, setActDuration] = useState('')
-  const [actTime, setActTime] = useState('')
+  const [actCats, setActCats] = useState<string[]>(
+    initialTrack === 'activity' ? initialCategoryIds : []
+  )
+  const [actDuration, setActDuration] = useState(
+    initialTrack === 'activity' ? searchParams.get('duration_bucket') ?? '' : ''
+  )
+  const [actTime, setActTime] = useState(
+    initialTrack === 'activity' ? searchParams.get('time_of_day') ?? '' : ''
+  )
 
   // 장소 필터
-  const [placeCats, setPlaceCats] = useState<string[]>([])
-  const [placeMeal, setPlaceMeal] = useState('')
+  const [placeCats, setPlaceCats] = useState<string[]>(
+    initialTrack === 'place' ? initialCategoryIds : []
+  )
+  const [placeMeal, setPlaceMeal] = useState(
+    initialTrack === 'place' ? searchParams.get('meal_time') ?? '' : ''
+  )
 
   const debouncedSearch = useDebounced(search, 300)
 
@@ -215,19 +227,12 @@ export function ListView() {
     setter(list.includes(id) ? list.filter((c) => c !== id) : [...list, id])
   }
 
-  function replaceListUrl(nextTrack: Track, nextStatus: ListStatus) {
-    if (typeof window === 'undefined') return
-    window.history.replaceState(null, '', buildListReturnTo(window.location.search, nextTrack, nextStatus))
-  }
-
   function handleTrackChange(nextTrack: Track) {
     setTrack(nextTrack)
-    replaceListUrl(nextTrack, status)
   }
 
   function handleStatusChange(nextStatus: ListStatus) {
     setStatus(nextStatus)
-    replaceListUrl(track, nextStatus)
   }
 
   // 현재 탭의 모든 필터 + 검색 해제 (UI 상태만 초기화, 필터 로직은 그대로)
@@ -248,7 +253,19 @@ export function ListView() {
   const placeFilterCount = placeCats.length + (placeMeal ? 1 : 0)
   const activityFiltering = Boolean(debouncedSearch) || activityFilterCount > 0
   const placeFiltering = Boolean(debouncedSearch) || placeFilterCount > 0
-  const currentListReturnTo = buildListReturnTo(searchParams.toString(), track, status)
+  const currentListReturnTo = buildListReturnTo({
+    tab: track,
+    status,
+    q: search || undefined,
+    categoryIds: track === 'activity' ? actCats : placeCats,
+    duration_bucket: track === 'activity' ? actDuration || undefined : undefined,
+    time_of_day: track === 'activity' ? actTime || undefined : undefined,
+    meal_time: track === 'place' ? placeMeal || undefined : undefined,
+  })
+
+  useEffect(() => {
+    window.history.replaceState(null, '', currentListReturnTo)
+  }, [currentListReturnTo])
 
   return (
     <div className={cn(styles.listBottom, 'mx-auto w-full max-w-4xl px-5 pt-6 lg:px-8 lg:pt-12')}>

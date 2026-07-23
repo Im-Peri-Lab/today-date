@@ -285,7 +285,7 @@ description: >
 - **인라인 액션 = 36px (`h-9`, 확정)**: 상세 하단 Primary/삭제·인라인 Save/Cancel 모두 `h-9` 명시(예전 32px `h-8`에서 상향). 글자만인 Save/Cancel은 정사각 옹색함을 피하려 `px-4`로 통통하게, 아이콘+글자인 삭제/전환은 Button 기본 `px-2.5` 유지(이미 폭 있음). 한 화면(인라인 편집)에서 Save/Cancel·하단 Primary/삭제가 같은 36px로 정렬.
 - 인라인 액션(36px)은 카드 안 일반 컨트롤(40px)보다 **한 단계 작은 "보조 액션"** 결. Save 채움은 단색 액센트(`styles.detailPrimaryBtn`) 유지.
 
-**페이지 높이/하단 여백**: 상세 페이지는 `cn(styles.page, styles.pageStatic)`로 `min-height:auto`(100dvh spacer 없음) → 콘텐츠 자연 높이. 짧은 콘텐츠 아래는 고정 배경(`.page::before`)이 채워 흰 빈칸이 없다(별도 spacer 금지).
+**페이지 높이/하단 여백**: 상세 페이지는 `cn(styles.page, styles.pageStatic)`를 써서 `.page`의 `min-height:100svh`는 유지하고, `.pageStatic`으로 하단 safe-area padding만 제거한다. 짧은 콘텐츠에서도 페이지 자체와 고정 배경(`.page::before`)이 뷰포트를 채우므로 별도 spacer를 두지 않는다.
 
 ### 액션 버튼 패턴 (거버넌스)
 
@@ -313,7 +313,8 @@ description: >
 
 - 두 버튼은 각각 `react-hook-form`의 `handleSubmit`으로 감싼 별도 콜백을 받되, 실제 생성 요청·오류 처리·쿼리 무효화는 한 제출 함수에서 **한 번만** 실행하고 성공 이후만 분기한다.
 - "저장하고 계속 등록하기": 인자 없는 `reset()`으로 폼을 완전 초기화하고 성공 토스트를 표시한다. 화면이 유지되므로 `navigating`·`topLoader`·`router.push`는 실행하지 않는다.
-- 연속 등록을 한 번도 쓰지 않은 Primary 제출은 기존처럼 방금 만든 상세로 이동한다. 한 번 이상 연속 등록한 뒤 최종 Primary 제출은 해당 목록 탭(`/list?tab=activity` 또는 `/list?tab=place`)으로 이동한다.
+- 연속 등록을 한 번도 쓰지 않은 Primary 제출은 방금 만든 상세로 이동한다. 유효한 `returnTo`가 있으면 상세 URL에 그대로 전달해 상세의 "목록으로"가 원래 목록 조건을 복원하고, 없으면 `returnTo` 없는 상세로 이동한다.
+- 한 번 이상 연속 등록한 뒤 최종 Primary 제출은 유효한 `returnTo`가 있으면 그 목록 URL로 바로 이동하고, 없으면 해당 목록 탭(`/list?tab=activity` 또는 `/list?tab=place`)으로 이동한다.
 - 두 버튼은 `isSubmitting || navigating`을 함께 참조해 동시에 잠근다. 실제로 누른 버튼만 `Loader2` + "저장 중..."을 표시하고, 함께 잠긴 다른 버튼은 원래 라벨을 유지한다(§12-A).
 - 복사하기 prefill은 마운트 시 one-shot `reset(values)`이고, 연속 등록의 `reset()`은 이후 사용자 제출 성공 시 실행되므로 서로 충돌하지 않는다.
 
@@ -497,7 +498,8 @@ description: >
 
 ### hover 언어 — "콘텐츠 vs 유틸리티" (의도된 구분)
 - **콘텐츠 요소**(카드·칩·옵션 카드 — 사용자가 *고르는* 대상): hover = **accent 보더**. 카드 `--s-card-hover-border`(라벤더 알파), 칩·옵션 비활성 `--s-active-line` 보더. **추천 위저드 옵션 카드(`.optionCard`)는 hover 시 리스트 카드(`.cardInteractive`)와 동일한 부상**(`translateY(-2px)` + `--s-card-shadow-hover`, `@media(hover)` 한정·`:active`에서 `translateY(0)`).
-- **유틸리티 아이콘 버튼**(도구 — `.iconBtn` ⋮케밥/홈/햄버거, `.editGhostBtn` 연필, ghost `X` 닫기): hover = **중성 회색**(라이트 `#eceaf3`=`--s-card-border-strong`, 다크 보라 소프트 `--s-accent-soft-bg`). §7·§10-B·금지규칙 4 그대로 유지 — accent로 **바꾸지 않는다**.
+- **유틸리티 아이콘 버튼**(도구 — `.headerNavBtn` 검색/홈/메뉴, `.iconBtn` ⋮케밥/로그아웃, `.editGhostBtn` 연필, ghost `X` 닫기): hover = **중성 회색**(라이트 `#eceaf3`=`--s-card-border-strong`, 다크 보라 소프트 `--s-accent-soft-bg`). §7·§10-B·금지규칙 4 그대로 유지 — accent로 **바꾸지 않는다**.
+- **모바일 sticky hover 방어**: `.headerNavBtn:hover`는 반드시 `@media (hover: hover)` 안에서만 적용한다. iOS WebKit에서 터치 후 클라이언트 라우팅으로 같은 좌표의 헤더 버튼이 재사용될 때 hover 시각 상태가 남는 것을 막기 위한 공용 규칙이며, 검색·홈·메뉴에 모두 적용된다. `:focus-visible`은 키보드 접근성 상태이므로 hover 미디어쿼리와 합치지 않고 항상 별도로 유지한다.
 - **둘이 다른 건 버그가 아니라 의도**다: 고르는 콘텐츠는 accent로 "선택 가능"을 암시, 도구 버튼은 중성으로 차분하게. (하단 삭제 `styles.detailDeleteBtn`만 destructive 틴트 — 별도 예외.)
 
 ### 카드 ⋮ 메뉴 열림 강조
@@ -582,10 +584,10 @@ description: >
   - 메타 줄 아이콘(Clock/Sun/Moon/MapPin/Utensils 등):
     - **리스트 카드(ActivityCard/PlaceCard)**: 아이콘 색 지정 없이 부모 div(`styles.sub`) 상속.
     - **상세 화면(DetailRow 안)**: `styles.faint`(`--s-faint`) 명시 → 카테고리 아이콘(`styles.accent`)보다 한 단계 약한 위계. `className={cn('h-3.5 w-3.5 shrink-0', styles.faint)}` 패턴 사용.
-  - 헤더 아이콘 버튼(`styles.iconBtn`): `sub`, hover 시 라이트는 중성 면 `#eceaf3`+`ink`, 다크는 보라 소프트. (유틸리티 도구라 **중성 hover** 유지 — 콘텐츠 요소의 accent hover와 의도적으로 구분, §5-A.)
-  - **키보드 포커스(`:focus-visible`) = hover와 동일한 중성 면** (`iconBtn`·`editGhostBtn`): 브라우저 기본 outline을 끄고(`outline:none`) 중성 회색 면으로 표시. **입력 글로우(box-shadow 링) 쓰지 않는다**(글로우는 입력 필드 전용, §5).
+  - 유틸리티 아이콘 버튼(`styles.headerNavBtn` / `styles.iconBtn`): `sub`, hover 시 라이트는 중성 면 `#eceaf3`+`ink`, 다크는 보라 소프트. `.headerNavBtn`은 검색·홈·메뉴 헤더 내비게이션 전용이고, `.iconBtn`은 카드 ⋮케밥·로그아웃용이다. (유틸리티 도구라 **중성 hover** 유지 — 콘텐츠 요소의 accent hover와 의도적으로 구분, §5-A.)
+  - **키보드 포커스(`:focus-visible`) = hover와 동일한 중성 면** (`headerNavBtn`·`iconBtn`·`editGhostBtn`): 브라우저 기본 outline을 끄고(`outline:none`) 중성 회색 면으로 표시. **입력 글로우(box-shadow 링) 쓰지 않는다**(글로우는 입력 필드 전용, §5). `.headerNavBtn:hover`만 `@media (hover: hover)`로 제한하며 `:focus-visible`은 그 밖에 유지한다.
 - **유틸 아이콘 글리프 크기 (탭타깃별 통일, 확정)**: **44px 탭타깃 버튼(`.iconBtn` — ⋮케밥·로그아웃) → 글리프 20px(`h-5 w-5`)** / **36px 버튼(`.editGhostBtn` 연필) → 글리프 16px(`h-4 w-4`)** / **28px 버튼(`.mapActionBtn` — 위치 행 지도열기/▾ 인라인 액션 쌍, §10-I) → 글리프 16px(`h-4 w-4`)**. 탭타깃 크기(44/36) 자체는 유지하고 글리프만 이 규칙으로 맞춘다. `.mapActionBtn`(28px)은 **한 행에 두 버튼이 인접하는 인라인 액션 쌍 전용**의 컴팩트 예외 — 글리프 좌우 여백을 6px로 좁혀 두 버튼이 한 세트로 읽히게 한다. 단독 유틸 버튼에는 쓰지 않는다(36/44 유지).
-- **`.headerNavBtn` (헤더 내비게이션 클러스터 전용, 신설 260714)**: 홈 화면 헤더(검색+메뉴), 그 외 화면 헤더(홈+메뉴) 2종 조합 전용. 탭타깃은 `.iconBtn`과 동일한 44px을 유지하되(리스크 없음), **글리프만 22px(`h-[22px] w-[22px]`)로 확대**하고 버튼 간 `gap`도 4px→0px로 좁힌다. 도입 배경: 헤더 아이콘 간격이 헐렁해 보인다는 관찰을 진단한 결과, **탭타깃이 헐거운 게 아니라 44px 박스 안 20px 글리프의 여백 비율이 커 보이는 것**으로 판정 — 탭타깃을 줄이는 대신 글리프 비율을 키워 해소. 카드 ⋮ 메뉴·로그아웃(`.iconBtn`, 20px 글리프)은 헤더와 별개 컨텍스트라 이 변경의 영향을 받지 않는다.
+- **`.headerNavBtn` (헤더 내비게이션 클러스터 전용, 신설 260714)**: 홈 화면 헤더(검색+메뉴), 그 외 화면 헤더(홈+메뉴) 2종 조합 전용. 탭타깃은 `.iconBtn`과 동일한 44px을 유지하되(리스크 없음), **글리프만 22px(`h-[22px] w-[22px]`)로 확대**하고 버튼 간 `gap`도 4px→0px로 좁힌다. 도입 배경: 헤더 아이콘 간격이 헐렁해 보인다는 관찰을 진단한 결과, **탭타깃이 헐거운 게 아니라 44px 박스 안 20px 글리프의 여백 비율이 커 보이는 것**으로 판정 — 탭타깃을 줄이는 대신 글리프 비율을 키워 해소. 카드 ⋮ 메뉴·로그아웃(`.iconBtn`, 20px 글리프)은 헤더와 별개 컨텍스트라 이 변경의 영향을 받지 않는다. `.headerNavBtn:hover`는 모바일 sticky hover 방지를 위해 `@media (hover: hover)` 안에 두고, `:focus-visible`은 별도 규칙으로 미디어쿼리 밖에 유지한다(§5-A).
 - **펼침/드롭다운 셰브런**: 접었다 펴는 UI(지도앱 선택 `MapLink`, `ui/select`, **리스트 필터 토글**)는 `ChevronDown`(`h-4 w-4`, 16px)을 **우측 끝에 고정**으로 둔다. **열림 시 180° 회전 등 회전 애니메이션은 넣지 않는다** — 펼침 상태는 색/`aria-expanded`로만 표현(앱 공용 관례, 신규 회전 언어 도입 금지).
 - strokeWidth: 카테고리 `2`, CTA 그라데이션 배지 내부 아이콘 `1.75`.
 - 크기 관례: 리스트 카드 메타 `h-3 w-3`, 상세 화면 DetailRow 메타 `h-3.5 w-3.5`, 헤더 내비게이션(`.headerNavBtn`) `h-[22px] w-[22px]`, 카드 ⋮ 메뉴(`.iconBtn`) `h-5`.
@@ -741,11 +743,11 @@ description: >
 - `styles.detailCard`: `border-radius: 1.5rem` (24px) — `.card` 위에 덮어씀, 상세 블록·신규 등록 폼 공용
 - 패딩: `px-5 pt-5 pb-4` / lg `px-6 pt-6 pb-5`
 
-신규 등록 폼(`/activities/new`·`/places/new`)은 페이지 제목·설명·"홈으로" 링크를 카드 밖에 두고, `ActivityForm`/`PlaceForm`만 위 카드 클래스·패딩으로 감싼다. `FormLayout` 자체는 카드화하지 않으며 내부 `space-y-5`와 버튼 위계를 그대로 유지한다(§4-A).
+신규 등록 폼(`/activities/new`·`/places/new`)은 페이지 제목·설명·상단 복귀 링크를 카드 밖에 두고, `ActivityForm`/`PlaceForm`만 위 카드 클래스·패딩으로 감싼다. 유효한 `returnTo`가 있으면 복귀 링크는 "목록으로"와 해당 경로를 사용하고, 없으면 "홈으로"와 `/`를 사용한다. `FormLayout` 자체는 카드화하지 않으며 내부 `space-y-5`와 버튼 위계를 그대로 유지한다(§4-A).
 
 편집 모드 진입 시: `blockTitle` 있는 블록(등록 정보)은 헤더 전체 숨김 → 폼이 카드 최상단에서 즉시 시작.
 
-페이지 높이: 상세 페이지(`/activities/[id]`·`/places/[id]`)의 `<main>`은 `cn(styles.page, styles.pageStatic)`를 쓴다(`/list`와 동일). 순수 `styles.page`(`min-height:100dvh`)만 쓰면 콘텐츠가 짧을 때(특히 편집 모드로 하단 버튼이 숨겨질 때) 카드 아래 큰 빈 여백이 남으므로, `pageStatic`(`min-height:auto`)로 콘텐츠 주도 높이를 쓴다. 배경은 `.page::before`(fixed)가 채우므로 영향 없음.
+페이지 높이: 상세 페이지(`/activities/[id]`·`/places/[id]`)의 `<main>`은 `cn(styles.page, styles.pageStatic)`를 쓴다(`/list`와 동일). `styles.page`의 `min-height:100svh`는 유지하고, `pageStatic`은 하단 safe-area padding만 제거한다. 콘텐츠가 짧아도 페이지와 `.page::before`(fixed)가 뷰포트를 채우므로 별도 spacer는 두지 않는다.
 
 복붙(등록 정보 블록):
 ```tsx
@@ -1158,11 +1160,6 @@ requestAnimationFrame(() => router.push(listHref))
 
 ## 백로그 (별도 작업 필요 — 미해결)
 
-- ~~**식사시간 칩(`.mealBadge`) 크기 개선**~~ ✅ 완료 (`design/meal-badge-size`): 12px(`--type-caption`) / padding 4px 10px / `line-height: 1.4` / pill. 의도된 예외 및 spacing 백로그 신호는 §8, `.visitedTagVisited`와의 역할별 변형은 §10-E 참고.
-- **다이얼로그가 OS 다크 미대응** (`VisitedDialog`·`DeleteConfirmDialog` 등 `DialogContent`): 다이얼로그 표면·텍스트·hover가 shadcn HSL 토큰(`--popover`/`--popover-foreground`/`--muted`/`--foreground`)에 의존하는데, 이 토큰들은 `globals.css`에서 **`.dark` 클래스 전용**으로만 다크값을 갖는다. 이 앱은 `.dark`를 부착하지 않고 `@media (prefers-color-scheme: dark)` + `--s-*`로만 다크를 처리하므로, **OS 다크에서 다이얼로그 전체가 라이트(흰 표면)로 고정**된다. ghost `X` 닫기의 `dark:hover:bg-muted/50`도 같은 이유로 죽은 규칙. (금지규칙 12와 동일 원인.) → 해결: `DialogContent` 표면·닫기 버튼을 `--s-card-bg`/`--s-ink`/`--s-card-border-strong` 등 `--s-*` 토큰으로 치환하는 별도 작업 필요. 단순 hover 패치가 아니라 다이얼로그 다크 테마 전반의 작업이라 범위를 따로 잡는다.
-- **라이트 `--s-*` 토큰 정식 정의 미비 — 앱 전역 토큰 정리** (`docs/design-token-audit.md` 참조): 라이트는 핵심 토큰(`--s-active-*`/`--s-card-bg`/`--s-card-border-strong`/`--s-input`/`--s-card-shadow`)만 `.page`에 정의돼 있고, `--s-accent-soft-bg`·`--s-sub`·`--s-faint`·`--s-ink`·`--s-accent`·`--s-grad`·`--s-grad-shadow`·`--s-card-shadow-hover` 등은 **라이트 값이 없어 각 클래스의 `var(--token, fallback)` fallback에 의존**한다(다크만 `@media`로 정의). 동작엔 문제없지만 단일 출처가 약함. → 라이트 `.page`에 정식 정의를 추가하는 정리 작업(시각 변경 아님, 1:1 유지 확인 필요).
-- **`--s-faint` fallback 불일치**: 같은 토큰인데 `.searchIcon`은 `#9ca3af`, `.searchInput::placeholder`는 `#b0aabe` — 라이트에서 둘 다 live라 실제로 다른 회색으로 렌더된다. 의미 분리(아이콘=기능 신호 / placeholder=임시 안내)인지 단순 불일치인지 정리 필요. (`--s-card-border-strong`·`--s-active-line` fallback도 선언마다 다르나 토큰이 정의돼 있어 렌더 영향은 없음 — 소스 표기만 통일하면 됨.)
-- **드롭다운 portal 리터럴 토큰화**: `globals.css`의 `[data-slot='dropdown-menu-*']`은 body로 portal 렌더돼 `.page` `--s-*`를 못 받아 색·그림자가 직접 리터럴(`#eceaf3`·`#241a36`·`#3a2f4e`·`#2c2442` 등). 토큰화하려면 다이얼로그 `.dialogPopup` 패턴처럼 portal 루트에 토큰 재선언 필요. (위 다이얼로그 다크 대응과 묶어 처리 가능.) ※ **삭제 항목 hover 배경만 `--s-destructive-soft-bg`로 토큰화 완료**(§5-B) — 나머지(콘텐츠 배경·보더·구분선·일반 항목 hover)는 아직 리터럴.
 - **`.detailDeleteBtn` 라이트 hover 불투명도 불일치**: 라이트 hover가 `/0.15`로, 공통 토큰 base(`--s-destructive-soft-bg` 라이트 `/0.1`)와 다르다. 본래 있던 불일치이며, 통일하면 라이트 hover가 `0.15→0.1`로 묽어지는 **라이트 시각 변경**이라 별도 사인오프 필요. (다크는 §5-B대로 이미 이 표면 전용값 `/0.20`·`/0.26`으로 분리 적용됨.)
 
 ---

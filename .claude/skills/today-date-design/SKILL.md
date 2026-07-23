@@ -53,7 +53,7 @@ description: >
 | 페이지 고정 배경 레이어 | `--s-page-gradient-light` = `linear-gradient(#ffffff→#f4f0fa)` — 홈·인증 공유 | radial(보라)+radial(핑크)+linear `#0a0712→#120c1e` | `.pageHome background` (라이트) / `.page::before` (다크) |
 | 카드 표면 `--s-card-bg` | `#ffffff` | `#241a36` | `styles.card` |
 | 컨트롤 표면(검색/필터/세그먼트) | `#ffffff` | 세그먼트 트랙 `#1b1430`, 검색/필터 `#241a36` | `styles.search*/filterToggle/segment` |
-| 소프트 강조 배경 `--s-accent-soft-bg` | `#f6f1ff` | `#2d2540` | `styles.statCardAccent/visitBox` |
+| 소프트 강조 배경 `--s-accent-soft-bg` | `#f6f1ff` | `#573f7f` | `styles.chipActive/optionActive/optionCardActive` |
 
 상세 상태 태그(`styles.visitedTag*`)의 배경은 상태별 modifier가 결정한다. `visitedTagVisited`는 중립 면 `--s-card-border-strong`, `visitedTagWishlist`는 accent 계열을 사용하므로 한 소프트 배경 계열로 묶지 않는다. 정확한 조합은 §10-E를 따른다.
 
@@ -789,7 +789,7 @@ description: >
 |---|---|---|
 | 기본 | 투명 | `--s-faint` (`#9ca3af` / `#8c84a0`) |
 | hover 라이트 | `--s-card-border-strong` (`#eceaf3`) | `--s-ink` (`#1a1033`) |
-| hover 다크 | `--s-accent-soft-bg` (`#2d2540`) | `--s-accent` (`#c084fc`) |
+| hover 다크 | `--s-accent-soft-bg` (`#573f7f`) | `--s-accent` (`#c084fc`) |
 
 헤더 콘텐츠 영역에 `pr-10` 추가해 버튼과 텍스트 겹침 방지.
 
@@ -867,7 +867,7 @@ export const STATUS_LABELS: Record<Status, string> = {
 | 클래스 | 배경 | 텍스트 | 다크 배경 | 다크 텍스트 |
 |---|---|---|---|---|
 | `visitedTagVisited` | `--s-card-border-strong` (`#eceaf3`) | `--s-sub` (`#6b7280`) | `#3a2f4e` (cascade) | `#a8a0b8` (cascade) |
-| `visitedTagWishlist` | `rgba(124,58,237,0.08)` (`--s-accent` 8%) | `--s-accent` (`#7c3aed`) | `--s-accent-soft-bg` (`#2d2540`) | `#c084fc` (cascade) |
+| `visitedTagWishlist` | `rgba(124,58,237,0.08)` (`--s-accent` 8%) | `--s-accent` (`#7c3aed`) | `--s-accent-soft-bg` (`#573f7f`) | `#c084fc` (cascade) |
 
 #### 역할별 배지 변형 (`.mealBadge` vs `.visitedTagVisited`)
 
@@ -1158,7 +1158,7 @@ requestAnimationFrame(() => router.push(listHref))
 
 ## 백로그 (별도 작업 필요 — 미해결)
 
-- ~~**식사시간 칩(`.mealBadge`) 크기 개선**~~ ✅ 완료 (`design/meal-badge-size`): 12px(`--type-caption`) / padding 4px 10px / `line-height: 1.4` / pill. 의도된 예외 및 spacing 백로그 신호는 §8 참고.
+- ~~**식사시간 칩(`.mealBadge`) 크기 개선**~~ ✅ 완료 (`design/meal-badge-size`): 12px(`--type-caption`) / padding 4px 10px / `line-height: 1.4` / pill. 의도된 예외 및 spacing 백로그 신호는 §8, `.visitedTagVisited`와의 역할별 변형은 §10-E 참고.
 - **다이얼로그가 OS 다크 미대응** (`VisitedDialog`·`DeleteConfirmDialog` 등 `DialogContent`): 다이얼로그 표면·텍스트·hover가 shadcn HSL 토큰(`--popover`/`--popover-foreground`/`--muted`/`--foreground`)에 의존하는데, 이 토큰들은 `globals.css`에서 **`.dark` 클래스 전용**으로만 다크값을 갖는다. 이 앱은 `.dark`를 부착하지 않고 `@media (prefers-color-scheme: dark)` + `--s-*`로만 다크를 처리하므로, **OS 다크에서 다이얼로그 전체가 라이트(흰 표면)로 고정**된다. ghost `X` 닫기의 `dark:hover:bg-muted/50`도 같은 이유로 죽은 규칙. (금지규칙 12와 동일 원인.) → 해결: `DialogContent` 표면·닫기 버튼을 `--s-card-bg`/`--s-ink`/`--s-card-border-strong` 등 `--s-*` 토큰으로 치환하는 별도 작업 필요. 단순 hover 패치가 아니라 다이얼로그 다크 테마 전반의 작업이라 범위를 따로 잡는다.
 - **라이트 `--s-*` 토큰 정식 정의 미비 — 앱 전역 토큰 정리** (`docs/design-token-audit.md` 참조): 라이트는 핵심 토큰(`--s-active-*`/`--s-card-bg`/`--s-card-border-strong`/`--s-input`/`--s-card-shadow`)만 `.page`에 정의돼 있고, `--s-accent-soft-bg`·`--s-sub`·`--s-faint`·`--s-ink`·`--s-accent`·`--s-grad`·`--s-grad-shadow`·`--s-card-shadow-hover` 등은 **라이트 값이 없어 각 클래스의 `var(--token, fallback)` fallback에 의존**한다(다크만 `@media`로 정의). 동작엔 문제없지만 단일 출처가 약함. → 라이트 `.page`에 정식 정의를 추가하는 정리 작업(시각 변경 아님, 1:1 유지 확인 필요).
 - **`--s-faint` fallback 불일치**: 같은 토큰인데 `.searchIcon`은 `#9ca3af`, `.searchInput::placeholder`는 `#b0aabe` — 라이트에서 둘 다 live라 실제로 다른 회색으로 렌더된다. 의미 분리(아이콘=기능 신호 / placeholder=임시 안내)인지 단순 불일치인지 정리 필요. (`--s-card-border-strong`·`--s-active-line` fallback도 선언마다 다르나 토큰이 정의돼 있어 렌더 영향은 없음 — 소스 표기만 통일하면 됨.)

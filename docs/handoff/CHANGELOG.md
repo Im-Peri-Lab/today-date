@@ -1,8 +1,8 @@
 # CHANGELOG.md
 
-> **마지막 업데이트: 2026-07-21**
+> **마지막 업데이트: 2026-07-22**
 
-> 260531~260721 핸드오프 전체를 날짜순으로 기록한 변경 이력입니다. 새 AI는 일반적으로 `PROJECT_CONTEXT.md`와 `CURRENT_STATE.md`만 먼저 읽고, 과거 판단 근거가 필요할 때 이 문서를 참고하세요.
+> 260531~260722 핸드오프 전체를 날짜순으로 기록한 변경 이력입니다. 새 AI는 일반적으로 `PROJECT_CONTEXT.md`와 `CURRENT_STATE.md`만 먼저 읽고, 과거 판단 근거가 필요할 때 이 문서를 참고하세요.
 
 ---
 
@@ -464,3 +464,15 @@
   - 발단이었던 outline 버튼 가시성 문제는 버튼 스타일 변경이 아니라, 신규 등록 폼을 상세 화면과 동일한 카드(`.card`/`.detailCard`)로 통일하는 근본 해결로 처리 — 상세 편집과 신규 등록이 동일 필드 컴포넌트를 쓰면서도 표면만 달랐던 비대칭 해소
 - git 머지 검증 방식 정정 — "Fast-forward" 로그 한 줄만으로 표준 위반 단정 금지, `git show -s --format='%cn %s' <main-tip>`로 committer/`(#숫자)` 접미사 확인이 확정 기준
 - 모두 lint/build PASS
+
+---
+
+## 2026-07-22 — 뱃지 역할 문서화·리스트 URL 동기화·신규 등록 returnTo·헤더 아이콘 sticky hover 수정
+
+- `.mealBadge`/`.visitedTag` 역할별 배지 변형 SKILL.md 명시 (PR #71 squash `af87e82`) — 코드 변경 없음, 문서 전용. 실측 결과 두 요소는 색상 토큰(`--s-card-border-strong`/`--s-sub`) 동일, padding·font-weight만 다름을 확인. "복수 정보값 vs 단일 상태 강조"라는 역할 차이에 따른 의도된 변형으로 확정. §1·§8·§10-E 정합화
+- SKILL.md 후속 점검에서 `--s-accent-soft-bg` 다크값의 옛 표기(`#2d2540`)를 실제 토큰값 `#573f7f`로 정정하고, 삭제된 `statCardAccent/visitBox` 사용처를 현존하는 `chipActive/optionActive/optionCardActive`로 교체
+- `editGhostBtn` 다크 hover와 `visitedTagWishlist` 표의 같은 토큰값도 함께 정정하고, 완료 백로그에서 §10-E 역할별 변형으로 교차참조 추가
+- `/list` 검색·필터 URL 동기화 (PR #72 squash `83db5c1`) — 검색어(`q`, 탭 간 공유 유지)·세부 필터(현재 보고 있는 탭만)를 URL에 실시간 반영, `returnTo` 생성 기준을 최초 진입 URL이 아닌 라이브 상태로 변경
+- 신규 등록 흐름에 목록 `returnTo` 연결 (PR #73 squash `5d83504`) — FAB·빈 목록 CTA·저장 후 이동(상세 이동·연속 등록 최종 이동 모두 포함) 경로에 원래 목록 URL 전달. 복사하기 흐름은 이번 범위 제외, 기존 동작 유지
+- `.headerNavBtn` 모바일 sticky hover 잔상 수정 (PR #74 squash `c17b4e0`) — `hover` 규칙을 `@media (hover: hover)`로 제한(카드·칩·통계 행에 이미 적용된 기존 패턴과 동일하게 맞춤). 검색·홈·메뉴 공용 버그. iOS WebKit sticky hover + 홈/검색 아이콘 좌표 공유 조합이 원인으로 진단됨
+- 모두 lint/build PASS. `.headerNavBtn` 건은 브라우저 에뮬레이션(hover:none 시뮬레이션)으로만 검증, iOS 실기기 미검증(Galaxy 실기기 QA와 같은 보류 성격)

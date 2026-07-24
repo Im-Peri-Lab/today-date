@@ -167,7 +167,7 @@ export function PlaceRecommendWizard() {
           )}
         </div>
 
-        {/* 하단 액션: 활동 화면과 동일한 max-w-md 세로 스택(동일 높이 40px). 다른 추천 보기 → 처음부터 */}
+        {/* 하단 액션: 액티비티 화면과 동일한 max-w-md 세로 스택(동일 높이 40px). 다른 추천 보기 → 처음부터 */}
         <div className="mx-auto mt-6 flex w-full flex-col gap-2 sm:max-w-xs">
           {result.poolSize > 3 && (
             <Button
@@ -186,7 +186,7 @@ export function PlaceRecommendWizard() {
             variant="ghost"
             className={cn(
               'h-10 w-full bg-transparent text-[color:var(--s-sub,#6b7280)]',
-              // 활동 화면과 동일: 회색 채움 hover 폐기 → 투명 유지 + accent 글씨
+              // 액티비티 화면과 동일: 회색 채움 hover 폐기 → 투명 유지 + accent 글씨
               'hover:bg-transparent hover:text-[color:var(--s-active-text,#7c3aed)]'
             )}
             onClick={reset}

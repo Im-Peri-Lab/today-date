@@ -72,7 +72,7 @@ export function takePlacePrefill(): PlaceFormValues | null {
 }
 
 /**
- * 원본 활동 → 등록 정보만 stash 하고 신규 활동 폼 경로를 돌려준다 (상세·리스트 카드 공용).
+ * 원본 액티비티 → 등록 정보만 stash 하고 신규 액티비티 폼 경로를 돌려준다 (상세·리스트 카드 공용).
  * 방문 기록성 데이터(status/visited_at/rating/review_note)·생성일·id 는 복사하지 않는다 → 저장 시 wishlist.
  */
 export function stashActivityDuplicate(activity: Activity): string {
@@ -89,7 +89,7 @@ export function stashActivityDuplicate(activity: Activity): string {
 }
 
 /**
- * 원본 장소 → 등록 정보만 stash 하고 신규 장소 폼 경로를 돌려준다 (상세·리스트 카드 공용).
+ * 원본 다이닝 → 등록 정보만 stash 하고 신규 다이닝 폼 경로를 돌려준다 (상세·리스트 카드 공용).
  * area(지역)·location(위치)를 그대로 분리 보존한다.
  */
 export function stashPlaceDuplicate(place: Place): string {

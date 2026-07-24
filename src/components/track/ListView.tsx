@@ -179,7 +179,7 @@ export function ListView() {
   const [search, setSearch] = useState(initialQuery)
   const [filtersOpen, setFiltersOpen] = useState(false)
 
-  // 활동 필터
+  // 액티비티 필터
   const [actCats, setActCats] = useState<string[]>(
     initialTrack === 'activity' ? initialCategoryIds : []
   )
@@ -190,7 +190,7 @@ export function ListView() {
     initialTrack === 'activity' ? searchParams.get('time_of_day') ?? '' : ''
   )
 
-  // 장소 필터
+  // 다이닝 필터
   const [placeCats, setPlaceCats] = useState<string[]>(
     initialTrack === 'place' ? initialCategoryIds : []
   )
@@ -295,7 +295,7 @@ export function ListView() {
         </button>
       </div>
 
-      {/* ── 활동 탭 ── */}
+      {/* ── 액티비티 탭 ── */}
       {track === 'activity' && (
         <div className="mt-4">
           <StatusToggle value={status} onChange={handleStatusChange} />
@@ -378,7 +378,7 @@ export function ListView() {
         </div>
       )}
 
-      {/* ── 장소 탭 ── */}
+      {/* ── 다이닝 탭 ── */}
       {track === 'place' && (
         <div className="mt-4">
           <StatusToggle value={status} onChange={handleStatusChange} />
@@ -450,7 +450,7 @@ export function ListView() {
         </div>
       )}
 
-      {/* FAB — 홈과 동일 (활동/장소 추가 메뉴) */}
+      {/* FAB — 홈과 동일 (액티비티/다이닝 추가 메뉴) */}
       <HomeFab returnTo={currentListReturnTo} />
     </div>
   )

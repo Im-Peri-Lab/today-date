@@ -10,6 +10,7 @@ const createSchema = z.object({
     error: '소요시간을 선택해 주세요.',
   }),
   time_of_day: z.enum(['day', 'night', 'any']).optional().default('any'),
+  location_type: z.enum(['indoor', 'outdoor']).optional().nullable(),
   location: z.string().max(200, '위치는 200자 이하로 입력해 주세요.').optional().nullable(),
   memo: z.string().max(1000, '메모는 1000자 이하로 입력해 주세요.').optional().nullable(),
   reference_url: z.string().refine(isValidReferenceUrl, '올바른 URL 형식이 아닙니다.').optional().nullable().or(z.literal('')),
@@ -31,6 +32,7 @@ export async function GET(req: NextRequest) {
     const category_id = searchParams.get('category_id')
     const duration_bucket = searchParams.get('duration_bucket')
     const time_of_day = searchParams.get('time_of_day')
+    const location_type = searchParams.get('location_type')
     const q = searchParams.get('q')
 
     const supabase = getSupabaseClient()
@@ -46,6 +48,7 @@ export async function GET(req: NextRequest) {
     }
     if (duration_bucket) query = query.eq('duration_bucket', duration_bucket)
     if (time_of_day) query = query.eq('time_of_day', time_of_day)
+    if (location_type) query = query.eq('location_type', location_type)
     if (q) {
       const term = q.replace(/[%,]/g, ' ')
       query = query.or(`title.ilike.%${term}%,memo.ilike.%${term}%`)

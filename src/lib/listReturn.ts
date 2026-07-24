@@ -11,6 +11,7 @@ export interface ListUrlState {
   categoryIds?: string[]
   duration_bucket?: string
   time_of_day?: string
+  location_type?: string
   meal_time?: string
 }
 
@@ -36,6 +37,7 @@ export function buildListReturnTo(state: ListUrlState) {
   if (state.tab === 'activity') {
     if (state.duration_bucket) params.set('duration_bucket', state.duration_bucket)
     if (state.time_of_day) params.set('time_of_day', state.time_of_day)
+    if (state.location_type) params.set('location_type', state.location_type)
   } else if (state.meal_time) {
     params.set('meal_time', state.meal_time)
   }

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { cn } from '@/lib/utils'
-import { getCategoryIcon } from '@/components/forms/categoryIcons'
+import { getCategoryIcon } from '@/lib/categoryIcons'
 import styles from '@/components/screens.module.css'
 import type { ActivityCategory, PlaceCategory } from '@/types'
 
@@ -48,7 +48,7 @@ export function CategorySelect({ track, value, onChange, disabled, error }: Cate
     <div className="flex flex-col gap-1.5">
       <div className="flex flex-wrap gap-2">
         {categories.map((cat) => {
-          const Icon = getCategoryIcon(track, cat.name)
+          const Icon = getCategoryIcon(cat.name)
           const active = value === cat.id
           return (
             <button

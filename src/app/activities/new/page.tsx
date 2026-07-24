@@ -25,8 +25,8 @@ export default async function NewActivityPage({
           {listReturnTo ? '목록으로' : '홈으로'}
         </Link>
 
-        <h1 className={cn('mt-4', styles.pageTitle)}>활동 추가</h1>
-        <p className={styles.pageSubtitle}>함께 하고 싶은 활동을 위시리스트에 추가해요</p>
+        <h1 className={cn('mt-4', styles.pageTitle)}>액티비티 추가</h1>
+        <p className={styles.pageSubtitle}>함께 하고 싶은 액티비티를 위시리스트에 추가해요</p>
 
         <div
           className={cn(

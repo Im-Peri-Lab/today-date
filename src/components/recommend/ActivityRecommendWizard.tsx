@@ -155,7 +155,7 @@ export function ActivityRecommendWizard() {
               >
                 <MiniHeart className="h-10 w-10 lg:h-10 lg:w-10" />
                 <p className={cn('mt-3 font-medium', styles.ink)}>
-                  {canShorten ? '조건을 넓히거나 새 활동을 더해보세요' : '새 활동을 더해보세요'}
+                  {canShorten ? '조건을 넓히거나 새 액티비티를 더해보세요' : '새 액티비티를 더해보세요'}
                 </p>
 
                 <div className="mx-auto mt-6 flex w-full flex-col gap-2 sm:max-w-xs">
@@ -175,7 +175,7 @@ export function ActivityRecommendWizard() {
                       <Link href="/activities/new" className="block w-full">
                         <Button variant="outline" className="h-10 w-full gap-1.5">
                           <Plus className="h-4 w-4" />
-                          활동 추가하기
+                          액티비티 추가하기
                         </Button>
                       </Link>
                     </>
@@ -188,7 +188,7 @@ export function ActivityRecommendWizard() {
                         )}
                       >
                         <Plus className="h-4 w-4" />
-                        활동 추가하기
+                        액티비티 추가하기
                       </Button>
                     </Link>
                   )}

@@ -172,7 +172,7 @@ export function PlaceDetail({ id, initialData, initialEdit, returnTo }: Props) {
           <Skeleton className={cn(styles.card, 'h-28 w-full')} />
         </div>
       ) : isError || !place ? (
-        <div className={cn(styles.empty, 'mt-4', styles.sub)}>장소를 찾을 수 없어요.</div>
+        <div className={cn(styles.empty, 'mt-4', styles.sub)}>다이닝을 찾을 수 없어요.</div>
       ) : (
         <>
           <div className="mt-5 space-y-5">

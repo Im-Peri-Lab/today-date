@@ -86,7 +86,7 @@ export function HomeSearchButton() {
           <DialogHeader className="mb-1 gap-0">
             <DialogTitle>검색</DialogTitle>
             <DialogDescription className={styles.pageSubtitle}>
-              찾고 싶은 활동이나 장소를 검색해 보세요.
+              찾고 싶은 액티비티나 다이닝을 검색해 보세요.
             </DialogDescription>
           </DialogHeader>
 

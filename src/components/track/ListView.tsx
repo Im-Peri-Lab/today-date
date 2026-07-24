@@ -282,7 +282,7 @@ export function ListView() {
           onClick={() => handleTrackChange('activity')}
           className={cn(styles.tab, track === 'activity' && styles.tabActive)}
         >
-          활동
+          액티비티
         </button>
         <button
           type="button"
@@ -291,7 +291,7 @@ export function ListView() {
           onClick={() => handleTrackChange('place')}
           className={cn(styles.tab, track === 'place' && styles.tabActive)}
         >
-          장소
+          다이닝
         </button>
       </div>
 
@@ -366,12 +366,12 @@ export function ListView() {
               <EmptyState
                 message={
                   status === 'wishlist'
-                    ? '아직 가보고 싶은 활동이 없어요'
-                    : '아직 다녀온 활동이 없어요'
+                    ? '아직 가보고 싶은 액티비티가 없어요'
+                    : '아직 다녀온 액티비티가 없어요'
                 }
-                hint="함께 하고 싶은 활동을 추가해 보세요"
+                hint="함께 하고 싶은 액티비티를 추가해 보세요"
                 addHref={buildDetailHref('/activities/new', { returnTo: currentListReturnTo })}
-                addLabel="첫 활동 추가하기"
+                addLabel="첫 액티비티 추가하기"
               />
             )}
           </div>
@@ -438,12 +438,12 @@ export function ListView() {
               <EmptyState
                 message={
                   status === 'wishlist'
-                    ? '아직 가보고 싶은 장소가 없어요'
-                    : '아직 다녀온 장소가 없어요'
+                    ? '아직 가보고 싶은 다이닝이 없어요'
+                    : '아직 다녀온 다이닝이 없어요'
                 }
-                hint="가고 싶은 장소를 추가해 보세요"
+                hint="가고 싶은 다이닝을 추가해 보세요"
                 addHref={buildDetailHref('/places/new', { returnTo: currentListReturnTo })}
-                addLabel="첫 장소 추가하기"
+                addLabel="첫 다이닝 추가하기"
               />
             )}
           </div>

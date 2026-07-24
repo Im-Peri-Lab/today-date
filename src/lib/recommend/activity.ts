@@ -80,12 +80,12 @@ export async function recommendActivities(
 
 function buildReason(input: ActivityRecommendInput, count: number): string {
   if (count === 0) {
-    return '조건에 맞는 활동을 찾지 못했어요.'
+    return '조건에 맞는 액티비티를 찾지 못했어요.'
   }
   const duration = DURATION_LABELS[input.duration_bucket]
   const tod = input.time_of_day ?? 'any'
   if (tod !== 'any') {
-    return `${duration} · ${TIME_OF_DAY_LABELS[tod]} 조건에 맞는 활동이에요 💜`
+    return `${duration} · ${TIME_OF_DAY_LABELS[tod]} 조건에 맞는 액티비티예요 💜`
   }
-  return `${duration} 동안 즐기기 좋은 활동이에요 💜`
+  return `${duration} 동안 즐기기 좋은 액티비티예요 💜`
 }

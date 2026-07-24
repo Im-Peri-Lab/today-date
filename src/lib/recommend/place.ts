@@ -75,12 +75,12 @@ export async function recommendPlaces(
 
 function buildReason(input: PlaceRecommendInput, count: number): string {
   if (count === 0) {
-    return '조건에 맞는 장소를 찾지 못했어요.'
+    return '조건에 맞는 다이닝을 찾지 못했어요.'
   }
   const meal = MEAL_LABELS[input.meal_time]
   const area = input.area?.trim()
   if (area) {
-    return `${area} 근처 ${meal} 장소를 찾아봤어요 💜`
+    return `${area} 근처 ${meal} 다이닝을 찾아봤어요 💜`
   }
-  return `${meal}에 가기 좋은 장소예요 💜`
+  return `${meal}에 가기 좋은 다이닝이에요 💜`
 }

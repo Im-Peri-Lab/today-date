@@ -140,7 +140,7 @@ export function PlaceRecommendWizard() {
                     )}
                   >
                     <Plus className="h-4 w-4" />
-                    장소 추가하기
+                    다이닝 추가하기
                   </Button>
                 </Link>
               </div>

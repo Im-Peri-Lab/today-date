@@ -24,7 +24,7 @@ export async function GET(_req: NextRequest, { params }: RouteContext) {
   const { id } = await params
   try {
     const data = await getPlaceById(id)
-    if (!data) return NextResponse.json({ error: '장소를 찾을 수 없습니다.' }, { status: 404 })
+    if (!data) return NextResponse.json({ error: '다이닝을 찾을 수 없습니다.' }, { status: 404 })
     return NextResponse.json({ data })
   } catch (err) {
     console.error('[GET /api/places/[id]]', err)
@@ -54,7 +54,7 @@ export async function PATCH(req: NextRequest, { params }: RouteContext) {
       .single()
 
     if (error) {
-      return NextResponse.json({ error: '장소를 찾을 수 없습니다.' }, { status: 404 })
+      return NextResponse.json({ error: '다이닝을 찾을 수 없습니다.' }, { status: 404 })
     }
     return NextResponse.json({ data })
   } catch (err) {
@@ -70,7 +70,7 @@ export async function DELETE(_req: NextRequest, { params }: RouteContext) {
     const { error } = await supabase.from('places').delete().eq('id', id)
 
     if (error) {
-      return NextResponse.json({ error: '장소를 찾을 수 없습니다.' }, { status: 404 })
+      return NextResponse.json({ error: '다이닝을 찾을 수 없습니다.' }, { status: 404 })
     }
     return NextResponse.json({ success: true })
   } catch (err) {

@@ -42,7 +42,7 @@ export function ActivityFields({ register, errors, watch, setValue }: ActivityFi
       <FormField label="제목" htmlFor="title" required error={errors.title?.message}>
         <Input
           id="title"
-          placeholder="활동 이름을 입력해 주세요"
+          placeholder="액티비티 이름을 입력해 주세요"
           {...register('title')}
           aria-invalid={!!errors.title}
         />
@@ -86,7 +86,7 @@ export function ActivityFields({ register, errors, watch, setValue }: ActivityFi
       <FormField label="메모" htmlFor="memo" error={errors.memo?.message}>
         <Textarea
           id="memo"
-          placeholder="활동에 대한 메모를 남겨보세요"
+          placeholder="액티비티에 대한 메모를 남겨보세요"
           rows={3}
           {...register('memo')}
           aria-invalid={!!errors.memo}

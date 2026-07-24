@@ -335,6 +335,19 @@ export function ListView() {
                   </Chip>
                 ))}
               </FilterGroup>
+              <FilterGroup label="실내/실외">
+                {LOCATION_TYPE_OPTIONS.map((o) => (
+                  <Chip
+                    key={o.value}
+                    active={actLocationType === o.value}
+                    onClick={() =>
+                      setActLocationType(actLocationType === o.value ? '' : o.value)
+                    }
+                  >
+                    {o.label}
+                  </Chip>
+                ))}
+              </FilterGroup>
               <FilterGroup label="소요시간">
                 {DURATION_OPTIONS.map((o) => (
                   <Chip
@@ -352,19 +365,6 @@ export function ListView() {
                     key={o.value}
                     active={actTime === o.value}
                     onClick={() => setActTime(actTime === o.value ? '' : o.value)}
-                  >
-                    {o.label}
-                  </Chip>
-                ))}
-              </FilterGroup>
-              <FilterGroup label="실내/실외">
-                {LOCATION_TYPE_OPTIONS.map((o) => (
-                  <Chip
-                    key={o.value}
-                    active={actLocationType === o.value}
-                    onClick={() =>
-                      setActLocationType(actLocationType === o.value ? '' : o.value)
-                    }
                   >
                     {o.label}
                   </Chip>

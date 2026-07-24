@@ -70,7 +70,7 @@ export function ActivityForm({ prefill, returnTo }: { prefill?: boolean; returnT
     if (continueAdding) {
       reset()
       setHasContinuedRegistration(true)
-      toast.success('활동이 등록됐어요! 계속 등록해보세요 🎉')
+      toast.success('액티비티가 등록됐어요! 계속 등록해보세요 🎉')
       return
     }
 
@@ -88,7 +88,7 @@ export function ActivityForm({ prefill, returnTo }: { prefill?: boolean; returnT
       onSubmit={handleSubmit((values) => onSubmit(values, false))}
       onSubmitAndContinue={handleSubmit((values) => onSubmit(values, true))}
       isSubmitting={isSubmitting || navigating}
-      submitLabel="활동 등록하기"
+      submitLabel="액티비티 등록하기"
     >
       <ActivityFields register={register} errors={errors} watch={watch} setValue={setValue} />
     </FormLayout>

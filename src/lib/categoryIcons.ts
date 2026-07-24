@@ -27,14 +27,14 @@ import {
  * 중식=CookingPot, 바=Martini, 미분류=Pin.
  */
 export const CATEGORY_ICONS: Record<string, LucideIcon> = {
-  // 활동
+  // 액티비티
   레저: Waves,
   체험: Puzzle,
   문화: Drama,
   축제: PartyPopper,
   자연: Leaf,
   여행: Plane,
-  // 장소
+  // 다이닝
   양식: Utensils,
   일식: Fish,
   한식: Soup,

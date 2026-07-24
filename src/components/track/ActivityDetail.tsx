@@ -204,7 +204,7 @@ export function ActivityDetail({ id, initialData, initialEdit, returnTo }: Props
           <Skeleton className={cn(styles.card, 'h-28 w-full')} />
         </div>
       ) : isError || !activity ? (
-        <div className={cn(styles.empty, 'mt-4', styles.sub)}>활동을 찾을 수 없어요.</div>
+        <div className={cn(styles.empty, 'mt-4', styles.sub)}>액티비티를 찾을 수 없어요.</div>
       ) : (
         <>
           <div className="mt-5 space-y-5">

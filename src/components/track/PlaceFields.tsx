@@ -35,7 +35,7 @@ export function PlaceFields({ register, errors, watch, setValue }: PlaceFieldsPr
       <FormField label="제목" htmlFor="title" required error={errors.title?.message}>
         <Input
           id="title"
-          placeholder="장소 이름을 입력해 주세요"
+          placeholder="다이닝 이름을 입력해 주세요"
           {...register('title')}
           aria-invalid={!!errors.title}
         />
@@ -79,7 +79,7 @@ export function PlaceFields({ register, errors, watch, setValue }: PlaceFieldsPr
       <FormField label="메모" htmlFor="memo" error={errors.memo?.message}>
         <Textarea
           id="memo"
-          placeholder="장소에 대한 메모를 남겨보세요"
+          placeholder="다이닝에 대한 메모를 남겨보세요"
           rows={3}
           {...register('memo')}
           aria-invalid={!!errors.memo}

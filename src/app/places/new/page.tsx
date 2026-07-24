@@ -25,7 +25,7 @@ export default async function NewPlacePage({
           {listReturnTo ? '목록으로' : '홈으로'}
         </Link>
 
-        <h1 className={cn('mt-4', styles.pageTitle)}>장소 추가</h1>
+        <h1 className={cn('mt-4', styles.pageTitle)}>다이닝 추가</h1>
         <p className={styles.pageSubtitle}>가고 싶은 식당·카페를 위시리스트에 추가해요</p>
 
         <div

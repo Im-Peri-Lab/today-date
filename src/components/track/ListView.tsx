@@ -179,7 +179,7 @@ export function ListView() {
   const [search, setSearch] = useState(initialQuery)
   const [filtersOpen, setFiltersOpen] = useState(false)
 
-  // 활동 필터
+  // 액티비티 필터
   const [actCats, setActCats] = useState<string[]>(
     initialTrack === 'activity' ? initialCategoryIds : []
   )
@@ -190,7 +190,7 @@ export function ListView() {
     initialTrack === 'activity' ? searchParams.get('time_of_day') ?? '' : ''
   )
 
-  // 장소 필터
+  // 다이닝 필터
   const [placeCats, setPlaceCats] = useState<string[]>(
     initialTrack === 'place' ? initialCategoryIds : []
   )
@@ -282,7 +282,7 @@ export function ListView() {
           onClick={() => handleTrackChange('activity')}
           className={cn(styles.tab, track === 'activity' && styles.tabActive)}
         >
-          활동
+          액티비티
         </button>
         <button
           type="button"
@@ -291,11 +291,11 @@ export function ListView() {
           onClick={() => handleTrackChange('place')}
           className={cn(styles.tab, track === 'place' && styles.tabActive)}
         >
-          장소
+          다이닝
         </button>
       </div>
 
-      {/* ── 활동 탭 ── */}
+      {/* ── 액티비티 탭 ── */}
       {track === 'activity' && (
         <div className="mt-4">
           <StatusToggle value={status} onChange={handleStatusChange} />
@@ -366,19 +366,19 @@ export function ListView() {
               <EmptyState
                 message={
                   status === 'wishlist'
-                    ? '아직 가보고 싶은 활동이 없어요'
-                    : '아직 다녀온 활동이 없어요'
+                    ? '아직 가보고 싶은 액티비티가 없어요'
+                    : '아직 다녀온 액티비티가 없어요'
                 }
-                hint="함께 하고 싶은 활동을 추가해 보세요"
+                hint="함께 하고 싶은 액티비티를 추가해 보세요"
                 addHref={buildDetailHref('/activities/new', { returnTo: currentListReturnTo })}
-                addLabel="첫 활동 추가하기"
+                addLabel="첫 액티비티 추가하기"
               />
             )}
           </div>
         </div>
       )}
 
-      {/* ── 장소 탭 ── */}
+      {/* ── 다이닝 탭 ── */}
       {track === 'place' && (
         <div className="mt-4">
           <StatusToggle value={status} onChange={handleStatusChange} />
@@ -438,19 +438,19 @@ export function ListView() {
               <EmptyState
                 message={
                   status === 'wishlist'
-                    ? '아직 가보고 싶은 장소가 없어요'
-                    : '아직 다녀온 장소가 없어요'
+                    ? '아직 가보고 싶은 다이닝이 없어요'
+                    : '아직 다녀온 다이닝이 없어요'
                 }
-                hint="가고 싶은 장소를 추가해 보세요"
+                hint="가고 싶은 다이닝을 추가해 보세요"
                 addHref={buildDetailHref('/places/new', { returnTo: currentListReturnTo })}
-                addLabel="첫 장소 추가하기"
+                addLabel="첫 다이닝 추가하기"
               />
             )}
           </div>
         </div>
       )}
 
-      {/* FAB — 홈과 동일 (활동/장소 추가 메뉴) */}
+      {/* FAB — 홈과 동일 (액티비티/다이닝 추가 메뉴) */}
       <HomeFab returnTo={currentListReturnTo} />
     </div>
   )

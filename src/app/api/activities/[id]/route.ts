@@ -25,7 +25,7 @@ export async function GET(_req: NextRequest, { params }: RouteContext) {
   const { id } = await params
   try {
     const data = await getActivityById(id)
-    if (!data) return NextResponse.json({ error: '활동을 찾을 수 없습니다.' }, { status: 404 })
+    if (!data) return NextResponse.json({ error: '액티비티를 찾을 수 없습니다.' }, { status: 404 })
     return NextResponse.json({ data })
   } catch (err) {
     console.error('[GET /api/activities/[id]]', err)
@@ -59,7 +59,7 @@ export async function PATCH(req: NextRequest, { params }: RouteContext) {
       .single()
 
     if (error) {
-      return NextResponse.json({ error: '활동을 찾을 수 없습니다.' }, { status: 404 })
+      return NextResponse.json({ error: '액티비티를 찾을 수 없습니다.' }, { status: 404 })
     }
     return NextResponse.json({ data })
   } catch (err) {
@@ -75,7 +75,7 @@ export async function DELETE(_req: NextRequest, { params }: RouteContext) {
     const { error } = await supabase.from('activities').delete().eq('id', id)
 
     if (error) {
-      return NextResponse.json({ error: '활동을 찾을 수 없습니다.' }, { status: 404 })
+      return NextResponse.json({ error: '액티비티를 찾을 수 없습니다.' }, { status: 404 })
     }
     return NextResponse.json({ success: true })
   } catch (err) {

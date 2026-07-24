@@ -49,11 +49,11 @@ function StatRow({
   const label =
     type === 'activity'
       ? status === 'wishlist'
-        ? '가보고 싶은 활동'
-        : '다녀온 활동'
+        ? '가보고 싶은 액티비티'
+        : '다녀온 액티비티'
       : status === 'wishlist'
-        ? '가보고 싶은 장소'
-        : '다녀온 장소'
+        ? '가보고 싶은 다이닝'
+        : '다녀온 다이닝'
 
   const href = `/list?tab=${type === 'activity' ? 'activity' : 'place'}&status=${status}`
   const preview = buildPreview(type, status, count, previewTitles)
@@ -138,13 +138,13 @@ export function HomeDashboard({ initialStats }: { initialStats?: DashboardStats 
           href="/recommend/activity"
           icon={<Sparkles className="h-5 w-5" strokeWidth={1.75} />}
           title="오늘 뭐할까?"
-          subtitle="활동 추천 받기"
+          subtitle="액티비티 추천 받기"
         />
         <CtaCard
           href="/recommend/place"
           icon={<MapPin className="h-5 w-5" strokeWidth={1.75} />}
           title="오늘 뭐먹을까?"
-          subtitle="장소 추천 받기"
+          subtitle="다이닝 추천 받기"
         />
       </div>
 

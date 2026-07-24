@@ -21,7 +21,7 @@ import styles from '@/components/screens.module.css'
 
 /**
  * 홈 상단바 검색 진입점 — 아이콘 버튼 + 검색어 입력 오버레이.
- * 제출 시 활동/장소 매치 유무를 병렬로 확인해 매치가 있는 탭이 선택된 `/list`로 이동한다.
+ * 제출 시 액티비티/다이닝 매치 유무를 병렬로 확인해 매치가 있는 탭이 선택된 `/list`로 이동한다.
  * 입력 폼 다이얼로그이므로 닫기 수단은 상단 X 하나만(스킬 §11), 하단엔 검색 CTA만 둔다.
  */
 export function HomeSearchButton() {
@@ -86,7 +86,7 @@ export function HomeSearchButton() {
           <DialogHeader className="mb-1 gap-0">
             <DialogTitle>검색</DialogTitle>
             <DialogDescription className={styles.pageSubtitle}>
-              찾고 싶은 활동이나 장소를 검색해 보세요.
+              찾고 싶은 액티비티나 다이닝을 검색해 보세요.
             </DialogDescription>
           </DialogHeader>
 

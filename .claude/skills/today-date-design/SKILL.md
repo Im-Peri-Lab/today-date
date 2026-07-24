@@ -578,7 +578,7 @@ description: >
 왜: 아이콘은 `lucide-react` 단색 선으로 통일해 톤을 맞춘다. DB에 저장된 카테고리 이모지는 화면 아이콘으로 쓰지 않는다.
 
 - 라이브러리: **`lucide-react`만** 사용. 기능 아이콘으로 **이모지 사용 금지**.
-- 카테고리 아이콘은 이름→lucide 매핑(`src/components/track/categoryIcon.tsx`)으로만 고른다. DB `category.icon`(이모지)은 렌더하지 않는다.
+- 카테고리 아이콘은 이름→lucide 매핑(`src/lib/categoryIcons.ts`, `CategoryIcon` 컴포넌트로 렌더 — `src/components/track/categoryIcon.tsx`)으로만 고른다. DB `category.icon`(이모지)은 렌더하지 않는다.
 - **아이콘 색 기준**:
   - 카테고리 아이콘 `styles.catIcon`: `--s-accent`(라이트 `#7c3aed` / 다크 `#c084fc`). 활성 칩 안에서는 `--s-active-on`(흰)으로 전환.
   - 메타 줄 아이콘(Clock/Sun/Moon/MapPin/Utensils 등):

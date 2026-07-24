@@ -99,7 +99,7 @@ export function ActivityDetail({ id, initialData, initialEdit, returnTo }: Props
       category_id: activity.category_id ?? '',
       duration_bucket: activity.duration_bucket ?? undefined,
       time_of_day: activity.time_of_day,
-      location_type: activity.location_type ?? undefined,
+      location_type: activity.location_type,
       location: activity.location ?? '',
       memo: activity.memo ?? '',
       reference_url: activity.reference_url ?? '',
@@ -190,9 +190,7 @@ export function ActivityDetail({ id, initialData, initialEdit, returnTo }: Props
 
   /* ── 렌더 ── */
   const TimeOfDayIcon = activity ? TIME_OF_DAY_ICONS[activity.time_of_day] : null
-  const LocationTypeIcon = activity?.location_type
-    ? LOCATION_TYPE_ICONS[activity.location_type]
-    : null
+  const LocationTypeIcon = activity ? LOCATION_TYPE_ICONS[activity.location_type] : null
 
   return (
     <div className="mx-auto w-full max-w-lg px-5 pb-16 pt-6 lg:pt-10">
@@ -250,6 +248,15 @@ export function ActivityDetail({ id, initialData, initialEdit, returnTo }: Props
               ) : (
                 /* 짧은 값: 2열 그리드 / 긴 텍스트(메모·링크): wide로 전체폭 / 모바일: 1열 */
                 <div className="grid grid-cols-1 sm:grid-cols-2">
+                  <DetailRow label="실내/실외">
+                    {/* Home(실내)/Trees(실외) — faint 톤. 필수 필드라 duration_bucket과 달리 항상 렌더 */}
+                    <span className="inline-flex items-center gap-1.5">
+                      {LocationTypeIcon && (
+                        <LocationTypeIcon className={cn('h-3.5 w-3.5 shrink-0', styles.faint)} />
+                      )}
+                      {LOCATION_TYPE_LABELS[activity.location_type]}
+                    </span>
+                  </DetailRow>
                   {activity.duration_bucket && (
                     <DetailRow label="소요시간">
                       {/* Clock 아이콘 — faint 톤(카테고리 보라보다 약하게, 위계 유지) */}
@@ -268,17 +275,6 @@ export function ActivityDetail({ id, initialData, initialEdit, returnTo }: Props
                       {TIME_OF_DAY_LABELS[activity.time_of_day]}
                     </span>
                   </DetailRow>
-                  {activity.location_type && (
-                    <DetailRow label="실내/실외">
-                      {/* Home(실내)/Trees(실외) — faint 톤, duration_bucket과 동일하게 값 없으면 행 자체 숨김 */}
-                      <span className="inline-flex items-center gap-1.5">
-                        {LocationTypeIcon && (
-                          <LocationTypeIcon className={cn('h-3.5 w-3.5 shrink-0', styles.faint)} />
-                        )}
-                        {LOCATION_TYPE_LABELS[activity.location_type]}
-                      </span>
-                    </DetailRow>
-                  )}
                   <DetailRow label="위치" wide>
                     {activity.location ? (
                       <MapLink query={activity.location} />

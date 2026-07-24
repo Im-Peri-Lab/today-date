@@ -62,6 +62,15 @@ export function ActivityFields({ register, errors, watch, setValue }: ActivityFi
         />
       </FormField>
 
+      <FormField label="실내/실외" required error={errors.location_type?.message}>
+        <SegmentedControl
+          mode="single"
+          options={LOCATION_TYPE_OPTIONS}
+          value={locationTypeValue}
+          onChange={(v) => setValue('location_type', v, { shouldValidate: true })}
+        />
+      </FormField>
+
       <FormField label="소요시간" required error={errors.duration_bucket?.message}>
         <SegmentedControl
           mode="single"
@@ -77,15 +86,6 @@ export function ActivityFields({ register, errors, watch, setValue }: ActivityFi
           options={TIME_OPTIONS}
           value={timeValue}
           onChange={(v) => setValue('time_of_day', v, { shouldValidate: true })}
-        />
-      </FormField>
-
-      <FormField label="실내/실외" error={errors.location_type?.message}>
-        <SegmentedControl
-          mode="single"
-          options={LOCATION_TYPE_OPTIONS}
-          value={locationTypeValue}
-          onChange={(v) => setValue('location_type', v, { shouldValidate: true })}
         />
       </FormField>
 

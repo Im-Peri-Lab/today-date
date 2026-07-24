@@ -6,11 +6,13 @@ import { isValidReferenceUrl } from '@/lib/url'
 const createSchema = z.object({
   title: z.string().min(1, '제목을 입력해 주세요.').max(100, '제목은 100자 이하로 입력해 주세요.'),
   category_id: z.string().uuid().optional().nullable(),
+  location_type: z.enum(['indoor', 'outdoor'], {
+    error: '실내/실외를 선택해 주세요.',
+  }),
   duration_bucket: z.enum(['half', 'full', 'overnight'], {
     error: '소요시간을 선택해 주세요.',
   }),
   time_of_day: z.enum(['day', 'night', 'any']).optional().default('any'),
-  location_type: z.enum(['indoor', 'outdoor']).optional().nullable(),
   location: z.string().max(200, '위치는 200자 이하로 입력해 주세요.').optional().nullable(),
   memo: z.string().max(1000, '메모는 1000자 이하로 입력해 주세요.').optional().nullable(),
   reference_url: z.string().refine(isValidReferenceUrl, '올바른 URL 형식이 아닙니다.').optional().nullable().or(z.literal('')),

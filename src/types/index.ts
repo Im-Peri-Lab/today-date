@@ -32,7 +32,7 @@ export interface Activity {
   category_id: string | null
   duration_bucket: DurationBucket | null
   time_of_day: TimeOfDay
-  location_type: LocationType | null
+  location_type: LocationType
   location: string | null
   memo: string | null
   reference_url: string | null

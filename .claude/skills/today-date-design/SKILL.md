@@ -983,22 +983,22 @@ export const STATUS_LABELS: Record<Status, string> = {
 입력(추가/편집) 화면과 상세 화면의 필드 순서를 **동일하게** 유지한다(불일치는 인지 부하).
 
 - **다이닝**: 제목 → 카테고리 → 식사시간 → 지역(`area`) → 위치(`location`) → 메모 → 참고링크. 지역·위치는 같은 "어디" 성격이라 인접 배치(식사시간을 위로 올려 분리).
-- **액티비티**: 제목 → 카테고리 → 소요시간 → 시간대 → 실내/실외(`location_type`) → 위치(`location`) → 메모 → 참고링크. 실내/실외는 시간대와 같은 "조건형 SegmentedControl 단일선택" 계열이라 시간대 바로 다음, 위치 앞에 배치(§10-K).
+- **액티비티**: 제목 → 카테고리 → 실내/실외(`location_type`) → 소요시간 → 시간대 → 위치(`location`) → 메모 → 참고링크. 실내/실외는 카테고리에서 분리해 나온 별도 속성이라 카테고리 바로 다음, 소요시간 앞에 배치(§10-K).
 - 폼 라벨은 "참고 URL", 상세 라벨은 "참고 링크"(폼/상세 라벨 차이는 의도).
 
 ---
 
 ### 10-K. 실내/실외(`location_type`) — 액티비티 전용 필드 스펙
 
-왜: "무엇을 하는가"(카테고리)·"언제"(시간대)·"얼마나"(소요시간)에 이어 "어디 성격"(실내/실외)까지 조건형 필드로 추가. `duration_bucket`과 동일 계열(2-value, nullable, "무관" 값 없음 — 미입력은 그냥 NULL).
+왜: 카테고리에 섞여 있던 "실내" 성격을 분리해 별도 속성으로 옮김. 카테고리별로 애매해 보였던 케이스도 개별 액티비티 단위로는 명확히 판단 가능하다는 게 확인돼, **필수(NOT NULL) 2-value 필드**로 확정(무관 값 없음).
 
-- **DB**: `activities.location_type` — 네이티브 pg enum(`location_type` 타입, `'indoor'|'outdoor'`), nullable, 기본값 없음. `duration_bucket`처럼 "값이 있을 수도 없을 수도 있는 조건형 컬럼" 계열이라 이 패턴을 따름(반대 사례: `time_of_day`는 NOT NULL + 기본값 `'any'`). places는 대상 아님(액티비티 전용).
-- **폼 위치**: 시간대 다음, 위치 앞(§10-J). 시간대와 동일한 `SegmentedControl mode="single"` 컴포넌트 재사용, 필수 아님(에러 메시지 없음).
-- **상세 표시**: `DetailRow`에 아이콘+텍스트(`inline-flex items-center gap-1.5` + `h-3.5 w-3.5 shrink-0 faint` 아이콘). `duration_bucket`과 동일하게 **값이 없으면 `DetailRow` 자체를 렌더하지 않음**(`{activity.location_type && (...)}`) — `time_of_day`처럼 아이콘만 숨기고 라벨은 항상 표시하는 방식이 아님.
+- **DB**: `activities.location_type` — 네이티브 pg enum(`location_type` 타입, `'indoor'|'outdoor'`), **NOT NULL**. 기존 47건 전체를 title 기준 실측 재분류(마이그레이션 011)한 뒤에만 NOT NULL 제약을 걸었다 — 검증 없이 제약부터 걸지 않는 순서(재분류 UPDATE → 건수/매칭 검증 DO 블록 → 검증 통과 후 `alter column ... set not null`). `time_of_day`(NOT NULL + 기본값 `'any'`)와 같은 "항상 값이 있는" 계열로 재분류됨(초안의 `duration_bucket`류 nullable 설계에서 변경). places는 대상 아님(액티비티 전용).
+- **폼 위치**: 카테고리 다음, 소요시간 앞(§10-J). 카테고리에서 분리해 나온 속성이라는 취지를 살려 카테고리 바로 다음에 배치. 시간대와 동일한 `SegmentedControl mode="single"` 컴포넌트 재사용, **필수**(미선택 시 "실내/실외를 선택해 주세요." 검증 에러).
+- **상세 표시**: `DetailRow`에 아이콘+텍스트(`inline-flex items-center gap-1.5` + `h-3.5 w-3.5 shrink-0 faint` 아이콘). 필수 필드라 `duration_bucket`처럼 조건부로 행을 숨기지 않고 **항상 렌더**(`time_of_day`와 동일한 always-render 방식).
 - **라벨/아이콘**(`src/lib/labels.ts`): `LOCATION_TYPE_LABELS`(실내/실외), `LOCATION_TYPE_ICONS`(실내=`Home`, 실외=`Trees`), `LOCATION_TYPE_OPTIONS`(SegmentedControl·필터 Chip 공용).
-- **`/list` 필터**: 소요시간·시간대와 동일한 단일 선택 토글 Chip(`FilterGroup label="실내/실외"`). 같은 값 재클릭 시 해제(`''`) = 필터 미적용(전체 노출) — area 필터와 동일한 "미선택 시 전체 노출" 관례.
+- **`/list` 필터**: 소요시간·시간대와 동일한 단일 선택 토글 Chip(`FilterGroup label="실내/실외"`). 필드 자체는 필수지만 **필터는 여전히 선택적** — 같은 값 재클릭 시 해제(`''`) = 필터 미적용(전체 노출), area 필터와 동일한 "미선택 시 전체 노출" 관례. 데이터 필수 여부와 필터 선택 여부는 무관한 별개 관심사.
 - **카드 배지**: 이번 스코프 제외. `ActivityCard`의 기존 메타 줄(소요시간·시간대 표시 줄)에 세 번째 인라인 항목으로 추가할 여유는 있으나(실측 후 판단), 지금은 폼·상세·필터까지만.
-- **알려진 제약**: `SegmentedControl mode="single"`은 선택 해제(toggle-off) 동작이 없다(시간대·소요시간처럼 필수 필드 전제로 만들어진 컴포넌트). 실내/실외는 옵션형이라 한 번 선택하면 폼 안에서 다시 "미선택"으로 되돌릴 UI가 없음 — 값을 지우려면 현재는 별도 처리가 필요(이번 구현에는 포함 안 함).
+- ~~알려진 제약: SegmentedControl 선택 해제 불가~~ — 필수 필드로 확정되며 해소됨. 애초에 "미선택 상태로 되돌릴 UI"가 필요 없어졌으므로(값이 항상 있어야 함) 별도 해제 기능은 구현하지 않는다.
 
 ---
 

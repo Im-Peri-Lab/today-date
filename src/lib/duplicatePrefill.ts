@@ -79,6 +79,7 @@ export function stashActivityDuplicate(activity: Activity): string {
   stashActivityPrefill({
     title: buildCopyTitle(activity.title),
     category_id: activity.category_id ?? '',
+    location_type: activity.location_type,
     duration_bucket: activity.duration_bucket ?? undefined,
     time_of_day: activity.time_of_day,
     location: activity.location ?? '',

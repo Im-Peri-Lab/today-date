@@ -120,10 +120,10 @@ description: >
 | 화면 | 구현 | 현재값 | 표준 적용 여부 |
 |---|---|---|---|
 | 홈 `.statSectionHeader` | `screens.module.css` | 12px / 600 / `--s-sub` | ✅ 적용됨 |
-| `/list` `FilterGroup` 라벨 | `ListView.tsx` `text-xs + styles.faint` | 12px / 400 / `--s-faint` (`#9ca3af`) | ⏳ 별도 작업 — `styles.sub` + 600으로 통합 권장 |
+| `/list` `FilterGroup` 라벨 | `ListView.tsx` `styles.sectionLabel` | 12px / 600 / `--s-sub` (`#6b7280`) | ✅ 적용됨 |
 | 추천 위저드 질문 라벨 | `ActivityRecommendWizard.tsx` `text-sm + styles.sub` | 14px / 400 / `--s-sub` | ⏳ 별도 작업 — 14px가 적합한지 재검토 후 결정 |
 
-통합 시 주의: `/list` `FilterGroup`은 동일 표준(12px/600/`--s-sub`) 직접 적용 가능. 위저드 질문 라벨은 "질문 텍스트" 역할상 14px 유지 여부를 먼저 검토한 뒤 통합.
+통합 시 주의: 추천 위저드 질문 라벨은 "질문 텍스트" 역할상 14px 유지 여부를 먼저 검토한 뒤 통합.
 
 ### 2-B. 타이포그래피 스케일 — 7역할 토큰 체계 (feat/typography-scale 완료)
 

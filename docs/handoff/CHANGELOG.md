@@ -1,8 +1,8 @@
 # CHANGELOG.md
 
-> **마지막 업데이트: 2026-07-22**
+> **마지막 업데이트: 2026-07-24**
 
-> 260531~260722 핸드오프 전체를 날짜순으로 기록한 변경 이력입니다. 새 AI는 일반적으로 `PROJECT_CONTEXT.md`와 `CURRENT_STATE.md`만 먼저 읽고, 과거 판단 근거가 필요할 때 이 문서를 참고하세요.
+> 260531~260724 핸드오프 전체를 날짜순으로 기록한 변경 이력입니다. 새 AI는 일반적으로 `PROJECT_CONTEXT.md`와 `CURRENT_STATE.md`만 먼저 읽고, 과거 판단 근거가 필요할 때 이 문서를 참고하세요.
 
 ---
 
@@ -476,3 +476,17 @@
 - 신규 등록 흐름에 목록 `returnTo` 연결 (PR #73 squash `5d83504`) — FAB·빈 목록 CTA·저장 후 이동(상세 이동·연속 등록 최종 이동 모두 포함) 경로에 원래 목록 URL 전달. 복사하기 흐름은 이번 범위 제외, 기존 동작 유지
 - `.headerNavBtn` 모바일 sticky hover 잔상 수정 (PR #74 squash `c17b4e0`) — `hover` 규칙을 `@media (hover: hover)`로 제한(카드·칩·통계 행에 이미 적용된 기존 패턴과 동일하게 맞춤). 검색·홈·메뉴 공용 버그. iOS WebKit sticky hover + 홈/검색 아이콘 좌표 공유 조합이 원인으로 진단됨
 - 모두 lint/build PASS. `.headerNavBtn` 건은 브라우저 에뮬레이션(hover:none 시뮬레이션)으로만 검증, iOS 실기기 미검증(Galaxy 실기기 QA와 같은 보류 성격)
+
+---
+
+## 2026-07-24 — Supabase 보안 이슈 2건 해소 (RLS 미설정·함수 search_path 고정)
+
+- Supabase Security Advisor에서 public 앱 테이블 7개의 RLS 미설정 Critical 에러 확인. 프로젝트 생성 당시 레거시 기본 권한이 남아있을 가능성과 `email_tokens` 쓰기 권한을 악용한 패스코드 재설정 위험을 진단
+- RLS 활성화, 정책 미추가 (PR #76 squash `a2bb098`)
+  - `007_enable_rls.sql`: public 앱 테이블 7개에 RLS 활성화. 정책은 만들지 않아 anon/authenticated 접근을 차단하고 기존 service-role-only 서버 동작 유지
+  - 원격 `rls_enabled=true` 7건, 로그인·목록 조회·신규 등록·추천 스모크 테스트 4/4 PASS, Security Advisor Errors 7→0건 확인
+- 후속 점검에서 `public.touch_updated_at` 트리거 함수의 search_path 미고정 Warning 확인
+- search_path 고정 (PR #77 squash `83f3fe2`)
+  - `008_pin_function_search_path.sql`: `search_path = public, pg_temp` 고정, 함수 본문과 트리거 로직 무변경
+  - `updated_at` 갱신 스모크 테스트 PASS, Security Advisor CLI·Dashboard 최종 Errors 0 / Warnings 0 확인
+- 진단 근거·교훈 → PROJECT_CONTEXT §20

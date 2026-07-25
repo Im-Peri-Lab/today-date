@@ -25,6 +25,11 @@ const TIME_OPTIONS = [
   { value: 'any' as const, label: '아무때나' },
 ]
 
+const LOCATION_TYPE_OPTIONS = [
+  { value: 'indoor' as const, label: '실내' },
+  { value: 'outdoor' as const, label: '실외' },
+]
+
 interface ActivityFieldsProps {
   register: UseFormRegister<ActivityFormValues>
   errors: FieldErrors<ActivityFormValues>
@@ -35,6 +40,7 @@ interface ActivityFieldsProps {
 export function ActivityFields({ register, errors, watch, setValue }: ActivityFieldsProps) {
   const durationValue = watch('duration_bucket')
   const timeValue = watch('time_of_day')
+  const locationTypeValue = watch('location_type')
   const categoryValue = watch('category_id') ?? ''
 
   return (
@@ -53,6 +59,15 @@ export function ActivityFields({ register, errors, watch, setValue }: ActivityFi
           track="activity"
           value={categoryValue}
           onChange={(v) => setValue('category_id', v)}
+        />
+      </FormField>
+
+      <FormField label="실내/실외" required error={errors.location_type?.message}>
+        <SegmentedControl
+          mode="single"
+          options={LOCATION_TYPE_OPTIONS}
+          value={locationTypeValue}
+          onChange={(v) => setValue('location_type', v, { shouldValidate: true })}
         />
       </FormField>
 

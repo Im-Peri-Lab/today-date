@@ -1,5 +1,5 @@
-import { Sun, Moon, type LucideIcon } from 'lucide-react'
-import type { DurationBucket, TimeOfDay, MealTime, Status } from '@/types'
+import { Sun, Moon, Home, Trees, type LucideIcon } from 'lucide-react'
+import type { DurationBucket, TimeOfDay, MealTime, Status, LocationType } from '@/types'
 
 export const STATUS_LABELS: Record<Status, string> = {
   wishlist: '가보고 싶은 곳',
@@ -51,6 +51,17 @@ export const MEAL_LABELS: Record<MealTime, string> = {
   dinner: '저녁',
 }
 
+export const LOCATION_TYPE_LABELS: Record<LocationType, string> = {
+  indoor: '실내',
+  outdoor: '실외',
+}
+
+/** 실내/실외 → lucide 아이콘 (카드·상세 공용). 값이 NULL(미입력)이면 필드 자체를 렌더하지 않는다. */
+export const LOCATION_TYPE_ICONS: Record<LocationType, LucideIcon> = {
+  indoor: Home,
+  outdoor: Trees,
+}
+
 export const DURATION_OPTIONS = [
   { value: 'half', label: DURATION_LABELS.half },
   { value: 'full', label: DURATION_LABELS.full },
@@ -66,4 +77,9 @@ export const TIME_OPTIONS = [
 export const MEAL_OPTIONS = [
   { value: 'lunch', label: MEAL_LABELS.lunch },
   { value: 'dinner', label: MEAL_LABELS.dinner },
+] as const
+
+export const LOCATION_TYPE_OPTIONS = [
+  { value: 'indoor', label: LOCATION_TYPE_LABELS.indoor },
+  { value: 'outdoor', label: LOCATION_TYPE_LABELS.outdoor },
 ] as const

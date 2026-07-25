@@ -14,7 +14,13 @@ import { useActivities } from '@/hooks/useActivities'
 import { usePlaces } from '@/hooks/usePlaces'
 import { useActivityCategories, usePlaceCategories } from '@/hooks/useCategories'
 import { useDebounced } from '@/hooks/useDebounced'
-import { DURATION_OPTIONS, TIME_OPTIONS, MEAL_OPTIONS, STATUS_LABELS } from '@/lib/labels'
+import {
+  DURATION_OPTIONS,
+  TIME_OPTIONS,
+  LOCATION_TYPE_OPTIONS,
+  MEAL_OPTIONS,
+  STATUS_LABELS,
+} from '@/lib/labels'
 import {
   buildListReturnTo,
   buildDetailHref,
@@ -189,6 +195,9 @@ export function ListView() {
   const [actTime, setActTime] = useState(
     initialTrack === 'activity' ? searchParams.get('time_of_day') ?? '' : ''
   )
+  const [actLocationType, setActLocationType] = useState(
+    initialTrack === 'activity' ? searchParams.get('location_type') ?? '' : ''
+  )
 
   // 다이닝 필터
   const [placeCats, setPlaceCats] = useState<string[]>(
@@ -209,6 +218,7 @@ export function ListView() {
       categoryIds: actCats,
       duration_bucket: actDuration || undefined,
       time_of_day: actTime || undefined,
+      location_type: actLocationType || undefined,
       q: debouncedSearch || undefined,
     },
     track === 'activity'
@@ -241,6 +251,7 @@ export function ListView() {
     setActCats([])
     setActDuration('')
     setActTime('')
+    setActLocationType('')
     setSearch('')
   }
   function resetPlaceFilters() {
@@ -250,7 +261,8 @@ export function ListView() {
   }
 
   // 활성 필터 개수 / 검색·필터 사용 여부 (빈 상태 카피 분기용)
-  const activityFilterCount = actCats.length + (actDuration ? 1 : 0) + (actTime ? 1 : 0)
+  const activityFilterCount =
+    actCats.length + (actDuration ? 1 : 0) + (actTime ? 1 : 0) + (actLocationType ? 1 : 0)
   const placeFilterCount = placeCats.length + (placeMeal ? 1 : 0)
   const activityFiltering = Boolean(debouncedSearch) || activityFilterCount > 0
   const placeFiltering = Boolean(debouncedSearch) || placeFilterCount > 0
@@ -261,6 +273,7 @@ export function ListView() {
     categoryIds: track === 'activity' ? actCats : placeCats,
     duration_bucket: track === 'activity' ? actDuration || undefined : undefined,
     time_of_day: track === 'activity' ? actTime || undefined : undefined,
+    location_type: track === 'activity' ? actLocationType || undefined : undefined,
     meal_time: track === 'place' ? placeMeal || undefined : undefined,
   })
 
@@ -319,6 +332,19 @@ export function ListView() {
                   >
                     <CategoryIcon name={c.name} className="h-3.5 w-3.5" />
                     {c.name}
+                  </Chip>
+                ))}
+              </FilterGroup>
+              <FilterGroup label="실내/실외">
+                {LOCATION_TYPE_OPTIONS.map((o) => (
+                  <Chip
+                    key={o.value}
+                    active={actLocationType === o.value}
+                    onClick={() =>
+                      setActLocationType(actLocationType === o.value ? '' : o.value)
+                    }
+                  >
+                    {o.label}
                   </Chip>
                 ))}
               </FilterGroup>

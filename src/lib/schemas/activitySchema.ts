@@ -4,6 +4,9 @@ import { isValidReferenceUrl } from '@/lib/url'
 export const activityFormSchema = z.object({
   title: z.string().min(1, '제목을 입력해 주세요.').max(100, '제목은 100자 이하로 입력해 주세요.'),
   category_id: z.string().optional(),
+  location_type: z.enum(['indoor', 'outdoor'], {
+    error: '실내/실외를 선택해 주세요.',
+  }),
   duration_bucket: z.enum(['half', 'full', 'overnight'], {
     error: '소요시간을 선택해 주세요.',
   }),

@@ -10,6 +10,7 @@ export interface ActivityFilters {
   categoryIds?: string[]
   duration_bucket?: string
   time_of_day?: string
+  location_type?: string
   q?: string
 }
 
@@ -21,6 +22,7 @@ function buildActivityParams(filters: ActivityFilters) {
   }
   if (filters.duration_bucket) params.set('duration_bucket', filters.duration_bucket)
   if (filters.time_of_day) params.set('time_of_day', filters.time_of_day)
+  if (filters.location_type) params.set('location_type', filters.location_type)
   if (filters.q) params.set('q', filters.q)
   return params.toString()
 }

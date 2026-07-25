@@ -6,6 +6,9 @@ import { isValidReferenceUrl } from '@/lib/url'
 const createSchema = z.object({
   title: z.string().min(1, '제목을 입력해 주세요.').max(100, '제목은 100자 이하로 입력해 주세요.'),
   category_id: z.string().uuid().optional().nullable(),
+  location_type: z.enum(['indoor', 'outdoor'], {
+    error: '실내/실외를 선택해 주세요.',
+  }),
   duration_bucket: z.enum(['half', 'full', 'overnight'], {
     error: '소요시간을 선택해 주세요.',
   }),
@@ -31,6 +34,7 @@ export async function GET(req: NextRequest) {
     const category_id = searchParams.get('category_id')
     const duration_bucket = searchParams.get('duration_bucket')
     const time_of_day = searchParams.get('time_of_day')
+    const location_type = searchParams.get('location_type')
     const q = searchParams.get('q')
 
     const supabase = getSupabaseClient()
@@ -46,6 +50,7 @@ export async function GET(req: NextRequest) {
     }
     if (duration_bucket) query = query.eq('duration_bucket', duration_bucket)
     if (time_of_day) query = query.eq('time_of_day', time_of_day)
+    if (location_type) query = query.eq('location_type', location_type)
     if (q) {
       const term = q.replace(/[%,]/g, ' ')
       query = query.or(`title.ilike.%${term}%,memo.ilike.%${term}%`)

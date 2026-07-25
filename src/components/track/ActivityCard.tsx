@@ -12,7 +12,14 @@ import { RatingStars } from './RatingStars'
 import { DeleteConfirmDialog } from './DeleteConfirmDialog'
 import { VisitedDialog } from '@/components/VisitedDialog'
 import { useDeleteActivity, useUpdateActivity } from '@/hooks/useActivities'
-import { DURATION_LABELS, TIME_OF_DAY_LABELS, TIME_OF_DAY_ICONS, STATUS_LABELS } from '@/lib/labels'
+import {
+  DURATION_LABELS,
+  TIME_OF_DAY_LABELS,
+  TIME_OF_DAY_ICONS,
+  LOCATION_TYPE_LABELS,
+  LOCATION_TYPE_ICONS,
+  STATUS_LABELS,
+} from '@/lib/labels'
 import { buildDetailHref } from '@/lib/listReturn'
 import { stashActivityDuplicate } from '@/lib/duplicatePrefill'
 import { formatDotDateCompact, formatDotDateRangeCompact } from '@/lib/date'
@@ -61,6 +68,7 @@ export function ActivityCard({ activity, hideMenu, actionSlot, returnTo }: Activ
 
   const isVisited = activity.status === 'visited'
   const TimeOfDayIcon = TIME_OF_DAY_ICONS[activity.time_of_day]
+  const LocationTypeIcon = LOCATION_TYPE_ICONS[activity.location_type]
   const detailPath = `/activities/${activity.id}`
   // 정보 줄 우선순위: 메모 있으면 메모, 없으면 위치, 둘 다 없으면 빈 슬롯.
   // 아이콘으로 메모(StickyNote)/위치(MapPin) 구분.
@@ -99,6 +107,10 @@ export function ActivityCard({ activity, hideMenu, actionSlot, returnTo }: Activ
         <h3 className={cn('mb-3 line-clamp-1', styles.cardTitle)}>{activity.title}</h3>
 
         <div className={cn('mb-1 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-xs', styles.sub)}>
+          <span className="inline-flex items-center gap-1 whitespace-nowrap">
+            <LocationTypeIcon className="h-3 w-3 shrink-0" />
+            {LOCATION_TYPE_LABELS[activity.location_type]}
+          </span>
           {activity.duration_bucket && (
             <span className="inline-flex items-center gap-1 whitespace-nowrap">
               <Clock className="h-3 w-3 shrink-0" />

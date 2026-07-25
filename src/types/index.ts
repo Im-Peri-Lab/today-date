@@ -2,6 +2,7 @@ export type DurationBucket = 'half' | 'full' | 'overnight'
 export type TimeOfDay = 'day' | 'night' | 'any'
 export type MealTime = 'lunch' | 'dinner'
 export type Status = 'wishlist' | 'visited' | 'archived'
+export type LocationType = 'indoor' | 'outdoor'
 
 export interface ActivityCategory {
   id: string
@@ -31,6 +32,7 @@ export interface Activity {
   category_id: string | null
   duration_bucket: DurationBucket | null
   time_of_day: TimeOfDay
+  location_type: LocationType
   location: string | null
   memo: string | null
   reference_url: string | null

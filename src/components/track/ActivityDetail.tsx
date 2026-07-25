@@ -248,8 +248,9 @@ export function ActivityDetail({ id, initialData, initialEdit, returnTo }: Props
               ) : (
                 /* 짧은 값: 2열 그리드 / 긴 텍스트(메모·링크): wide로 전체폭 / 모바일: 1열 */
                 <div className="grid grid-cols-1 sm:grid-cols-2">
-                  <DetailRow label="실내/실외">
-                    {/* Home(실내)/Trees(실외) — faint 톤. 필수 필드라 duration_bucket과 달리 항상 렌더 */}
+                  <DetailRow label="실내/실외" wide>
+                    {/* Home(실내)/Trees(실외) — faint 톤. 필수 필드라 duration_bucket과 달리 항상 렌더.
+                        wide로 단독 줄 차지 → 다음 줄에서 소요시간+시간대가 자연스럽게 짝지어짐(둘 다 "시간" 성격). */}
                     <span className="inline-flex items-center gap-1.5">
                       {LocationTypeIcon && (
                         <LocationTypeIcon className={cn('h-3.5 w-3.5 shrink-0', styles.faint)} />

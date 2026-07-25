@@ -994,7 +994,7 @@ export const STATUS_LABELS: Record<Status, string> = {
 
 - **DB**: `activities.location_type` — 네이티브 pg enum(`location_type` 타입, `'indoor'|'outdoor'`), **NOT NULL**. 기존 47건 전체를 title 기준 실측 재분류(마이그레이션 011)한 뒤에만 NOT NULL 제약을 걸었다 — 검증 없이 제약부터 걸지 않는 순서(재분류 UPDATE → 건수/매칭 검증 DO 블록 → 검증 통과 후 `alter column ... set not null`). `time_of_day`(NOT NULL + 기본값 `'any'`)와 같은 "항상 값이 있는" 계열로 재분류됨(초안의 `duration_bucket`류 nullable 설계에서 변경). places는 대상 아님(액티비티 전용).
 - **폼 위치**: 카테고리 다음, 소요시간 앞(§10-J). 카테고리에서 분리해 나온 속성이라는 취지를 살려 카테고리 바로 다음에 배치. 시간대와 동일한 `SegmentedControl mode="single"` 컴포넌트 재사용, **필수**(미선택 시 "실내/실외를 선택해 주세요." 검증 에러).
-- **상세 표시**: `DetailRow`에 아이콘+텍스트(`inline-flex items-center gap-1.5` + `h-3.5 w-3.5 shrink-0 faint` 아이콘). 필수 필드라 `duration_bucket`처럼 조건부로 행을 숨기지 않고 **항상 렌더**(`time_of_day`와 동일한 always-render 방식).
+- **상세 표시**: `DetailRow`에 아이콘+텍스트(`inline-flex items-center gap-1.5` + `h-3.5 w-3.5 shrink-0 faint` 아이콘). 필수 필드라 `duration_bucket`처럼 조건부로 행을 숨기지 않고 **항상 렌더**(`time_of_day`와 동일한 always-render 방식). 2열 그리드에서 **`wide`로 단독 줄**을 차지한다 — 그래야 바로 다음 줄에서 소요시간+시간대가 짝지어져 보인다("얼마나"+"언제" 같은 시간 성격끼리 인접, "어디 성격"인 실내/실외는 분리). `wide` 없이 순서대로만 두면 실내/실외+소요시간이 우연히 한 줄에 묶여버려 의도한 그룹핑이 아니게 된다.
 - **라벨/아이콘**(`src/lib/labels.ts`): `LOCATION_TYPE_LABELS`(실내/실외), `LOCATION_TYPE_ICONS`(실내=`Home`, 실외=`Trees`), `LOCATION_TYPE_OPTIONS`(SegmentedControl·필터 Chip 공용).
 - **`/list` 필터**: 소요시간·시간대와 동일한 단일 선택 토글 Chip(`FilterGroup label="실내/실외"`). 필드 자체는 필수지만 **필터는 여전히 선택적** — 같은 값 재클릭 시 해제(`''`) = 필터 미적용(전체 노출), area 필터와 동일한 "미선택 시 전체 노출" 관례. 데이터 필수 여부와 필터 선택 여부는 무관한 별개 관심사.
 - **카드 배지**: 이번 스코프 제외. `ActivityCard`의 기존 메타 줄(소요시간·시간대 표시 줄)에 세 번째 인라인 항목으로 추가할 여유는 있으나(실측 후 판단), 지금은 폼·상세·필터까지만.

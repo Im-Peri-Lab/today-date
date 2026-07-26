@@ -10,6 +10,7 @@ const schema = z.object({
     error: '소요시간을 선택해 주세요.',
   }),
   time_of_day: z.enum(['day', 'night', 'any']).optional(),
+  location_type: z.enum(['indoor', 'outdoor']).optional(),
   category_ids: z.array(z.string().uuid()).optional(),
   include_visited: z.boolean().optional(),
   include_shorter: z.boolean().optional(),

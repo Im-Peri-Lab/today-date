@@ -433,14 +433,16 @@ export function ActivityRecommendWizard() {
             </div>
             <div className="space-y-2 pt-2">
               <Button
-                variant="outline"
-                className="h-10 w-full"
+                className={cn(
+                  'h-10 w-full text-white hover:brightness-105',
+                  styles.detailPrimaryBtn
+                )}
                 onClick={() => {
                   setLocationType(null)
                   setStep(4)
                 }}
               >
-                상관없어요
+                다음
               </Button>
               <Button
                 variant="outline"

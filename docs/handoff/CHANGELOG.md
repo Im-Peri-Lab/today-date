@@ -493,54 +493,24 @@
 
 ---
 
-## 2026-07-24 v2 — 카테고리 체계 개편(액티비티·다이닝)·최상위 타입 표시 라벨 rename
+## 2026-07-24 v2 — 카테고리 체계 개편·최상위 타입 표시 라벨 rename
 
-- 활동 카테고리 개편 (PR #78 squash `266c30d`) — `feature/activity-category-rework`
-  - `009_activity_category_rework.sql`: `체험` 신규 시드, `액티비티`→`레저` rename, 기존 활동 15건을 제목 기준으로 문화/체험/여행/레저에 재분류, `실내`/`계절` 참조 0건 검증 후 삭제, 최종 정렬 순서(레저·체험·문화·축제·자연·여행·미분류) 확정. 원격 적용·검증 완료(재분류 15건 title/category 조인 확인, `실내`/`계절` 삭제 확인)
-  - 이원화돼 있던 카테고리 아이콘 맵(`components/forms/categoryIcons.ts`·`components/track/categoryIcon.tsx`)을 `src/lib/categoryIcons.ts` 단일 출처로 통합, 두 맵이 갈리던 항목은 사용처가 더 넓고 SKILL.md가 기준으로 지목하던 `track/categoryIcon.tsx` 쪽 값을 채택(축제=PartyPopper, 양식=Utensils, 중식=CookingPot, 바=Martini, 미분류=Pin), 체험용 Puzzle 아이콘 추가
-  - `activity-categories`/`place-categories` API 라우트에 `dynamic = 'force-dynamic'` 추가 — 마이그레이션 직후 필터 패널·카테고리 선택 칩이 이전 카테고리를 계속 보여주는 stale 캐시 버그 발견 후 조치(`dashboard/stats`/`recommend/*` 라우트와 동일 관례로 통일)
-  - SKILL.md 아이콘 매핑 출처 포인터를 `lib/categoryIcons.ts`로 정정
-- 장소 카테고리 개편 (PR #79 squash `167338e`) — `feature/place-category-rework`
-  - `010_place_category_rework.sql`: `고기`(구이·고깃집) 신규 시드, 한식에서 5건·`전축` 1건(→바)을 제목 기준으로 재분류, 6건 반영 검증 후 최종 정렬 순서(한식·고기·일식·중식·양식·카페·디저트·바·미분류) 확정. 원격 적용·검증 완료(9행 순서 확인, 6건 재분류 title/category 조인 확인)
-  - `src/lib/categoryIcons.ts`에 `고기: Beef` 추가
-  - **후속 캐시 버그 재발견**: PR #78의 `force-dynamic`만으로는 부족함을 확인 — Supabase API Gateway 로그에 `/rest/v1/place_categories` 요청 자체가 0건으로 찍혀, Next.js Data Cache가 supabase-js의 내부 fetch를 네트워크 도달 전에 가로채고 있었음이 원인. `src/lib/supabase/client.ts`에서 모든 Supabase 요청에 `cache: 'no-store'`를 강제하는 fetch 오버라이드를 주입해 라우트 세그먼트 설정과 무관하게 근본 해결. 재배포 후 정상 동작 확인
-- 최상위 타입 표시 라벨 rename: 활동→액티비티, 장소→다이닝 (PR #80 squash `fd5963f`) — `feature/type-name-rework`
-  - FAB 추가 메뉴·홈 검색 다이얼로그·추천 위저드(빈 상태/CTA/reason 문구)·리스트 탭/빈 상태/필터 섹션 주석·등록·수정 폼(플레이스홀더/토스트/제출 버튼)·상세 not-found 상태·API 404 에러 메시지·홈 대시보드 통계 라벨/CTA 부제 등 표시 텍스트 전반에 적용
-  - **DB 스키마·URL 라우트·변수/타입명·API 엔드포인트는 무변경** — `activities`/`places` 테이블, `/activities`/`/places` 라우트 등은 그대로 유지. 코드베이스 내부 용어로는 계속 활동/장소를 사용
-  - 활동 카테고리 rename(액티비티→레저, PR #78)보다 의도적으로 나중에 진행 — 순서를 바꾸면 신규 최상위 타입 "액티비티"와 구 활동 카테고리 "액티비티"가 이름 충돌을 일으켰을 시점이 존재했음
-  - 후속 커밋에서 활동/장소를 가리키는 잔여 코드 주석(탭/필터/화면/메뉴 구획 표시)도 새 라벨에 맞춰 정리. 활동/장소를 일반 명사로 쓰는 주석과 무관한 단어 저장소(부분 문자열 장소 포함)는 그대로 둠
-  - 전수 grep 감사로 사용자 노출 문자열에 활동/장소 잔존이 없음을 확인, 순수 텍스트/주석 변경이라 CSS 영향 없어 라이트/다크 렌더 불변
-- 모두 `npm run build`/`npm run lint` PASS
-- 진단 근거·교훈 → PROJECT_CONTEXT §20
+- 활동 카테고리 개편 (PR #78 squash `266c30d`) — `feature/activity-category-rework`: 카테고리를 레저·체험·문화·축제·자연·여행·미분류 7종으로 재편, 등록/편집 폼·`/list` 필터·카드 아이콘에 반영. `npm run build`/`npm run lint` PASS, Supabase 원격 적용·재분류 검증 완료
+- 장소 카테고리 개편 (PR #79 squash `167338e`) — `feature/place-category-rework`: 카테고리에 고기를 추가하고 한식 일부를 재분류, 최종 9종 확정. 카테고리 API의 stale 캐시 버그도 함께 수정. `npm run build`/`npm run lint` PASS, Supabase 원격 적용·검증 완료
+- 최상위 타입 표시 라벨 rename (PR #80 squash `fd5963f`) — `feature/type-name-rework`: 활동→액티비티, 장소→다이닝으로 앱 전체 표시 텍스트 변경(DB·라우트·변수명은 무변경). `npm run build`/`npm run lint` PASS, 전수 grep 감사로 잔존 문자열 없음 확인
+- 배경·설계 근거 → PROJECT_CONTEXT §5·§20
 
 ---
 
-## 2026-07-25 — 활동 실내/실외 속성(location_type) 추가·다이닝 카드 정보 줄 위치 폴백
+## 2026-07-25 — 활동 실내/실외 속성 추가·다이닝 카드 정보 줄 위치 폴백
 
-- 활동 전용 실내/실외 속성 추가 (PR #81 squash `706c917`) — `feature/activity-indoor-outdoor`, 3커밋 순차 반영
-  - `011_activity_indoor_outdoor.sql`: nullable pg enum `location_type`(`'indoor'|'outdoor'`)으로 시작해 기존 활동 47건 전체를 제목 기준 실측 재분류(22실내/25실외, 최초 집계 "24실외"가 실제 나열된 25건과 불일치해 사용자 확인 후 정정) → 건수/매칭 검증 DO 블록 → 검증 통과 후 `NOT NULL` 승격. 원격 적용·검증 완료
-  - 필수(NOT NULL) 필드로 확정되며 폼/API zod 스키마(POST 필수·PATCH는 partial이라 optional이나 nullable 아님)·`types/index.ts`(`LocationType`, null 허용 제거)·복사(duplicate/prefill) 흐름까지 end-to-end 반영
-  - `ActivityFields`: 필드 순서를 카테고리 → 실내/실외 → 소요시간 → 시간대로 확정(카테고리에서 분리된 속성이라는 취지로 카테고리 바로 다음 배치), 시간대와 동일한 `SegmentedControl mode="single"` 재사용
-  - `ActivityDetail`: `time_of_day`처럼 항상 렌더되는 `DetailRow`(필수 필드라 `duration_bucket`처럼 조건부 숨김 아님), `wide`로 단독 줄을 차지해 소요시간+시간대가 다음 줄에서 짝지어지도록 조정
-  - `/list` 활동 필터: 소요시간·시간대와 동일한 단일 선택 토글 Chip, 카테고리 바로 다음 위치로 필터 그룹 순서도 재정렬 — 필드 자체는 필수지만 필터 선택은 계속 선택적(미선택=전체 노출)
-  - `ActivityCard`: 메타 줄 맨 앞(소요시간 앞)에 실내/실외 배지 추가, 필수 필드라 조건부 렌더 없이 항상 표시
-  - `labels.ts`: `LOCATION_TYPE_LABELS`/`LOCATION_TYPE_ICONS`(실내=Home, 실외=Trees)/`LOCATION_TYPE_OPTIONS`
-  - SKILL.md §10-J·§10-K를 최종 반영 상태(필수 필드·순서·wide 상세 행·카드 배지 포함)로 갱신
-  - 47건 백필 title/value 정확 일치 검증, 등록/수정 폼 순서·필수 검증, 상세 always-render·페어링, 복사 흐름 prefill, `/list` 필터, 카드 배지, 라이트/다크 모두 확인 완료
-- 다이닝 카드 정보 줄에 위치 폴백 추가 (PR #82 squash `bdbdc47`) — `claude/dining-card-memo-location-2zjso7`
-  - `PlaceCard` 정보 줄이 메모만 표시하던 것을 `ActivityCard`와 동일한 규칙(메모 있으면 메모, 없으면 `place.location`, 아이콘도 StickyNote/MapPin으로 동일 전환)으로 대칭화
-  - `npx tsc --noEmit`·`npx eslint`·`npm run build` PASS
-- 진단 근거·교훈 → PROJECT_CONTEXT §20
+- 활동 실내/실외 속성 추가 (PR #81 squash `706c917`) — `feature/activity-indoor-outdoor`: `location_type` 필드를 활동 전용 필수값으로 신규 도입, 등록/수정 폼·상세 화면·`/list` 필터·카드 배지에 반영. `npm run build`/`npm run lint` PASS, 기존 데이터 재분류·제약 적용까지 Supabase 원격 검증 완료
+- 다이닝 카드 정보 줄 위치 폴백 (PR #82 squash `bdbdc47`) — `claude/dining-card-memo-location-2zjso7`: 다이닝 카드 정보 줄이 메모 없을 때 위치를 대신 보여주도록 액티비티 카드와 동일하게 맞춤. 빌드·린트·타입체크 PASS
+- 배경·설계 근거 → PROJECT_CONTEXT §5·§11·§12·§20
 
 ---
 
 ## 2026-07-27 — 활동 추천 위저드에 실내/실외 단계 추가
 
-- 활동 추천 위저드 실내/실외 스텝 추가 (PR #83 squash `202797d`) — `feature/activity-indoor-outdoor-recommend`, 2커밋 순차 반영
-  - 위저드 스텝을 1(소요시간)→2(시간대)→3(실내/실외, 신규)→4(카테고리)로 확장. 카테고리("무엇을 하는가")와 실내/실외("조건")는 서로 다른 축이라 한 화면에 섞지 않는다는 원칙(카테고리 개편 때 확립)에 따라 독립 단계로 분리
-  - 실내/실외 칩은 소요시간·시간대 단계와 동일하게 선택 시 자동 진행. 저장값은 필수(NOT NULL)지만 추천 단계에서는 area 필터와 동일하게 선택적이어야 해, 스킵용 명시적 버튼을 병행 — 최초엔 아웃라인 "상관없어요"로 구현했다가, 같은 세션 내 후속 커밋에서 장소 위저드의 지역(area) 스킵 버튼과 스타일·문구를 통일(`detailPrimaryBtn` 보라색 CTA + "다음")
-  - `duration==='overnight'`(1박 이상) 선택 시 시간대 단계를 건너뛰는 기존 로직 유지, 건너뛴 뒤 도착지만 새 실내/실외 단계(3)로 조정. `steps` 표시 배열도 `[1,3,4]`로 조정
-  - `/api/recommend/activity` zod 스키마·`recommendActivities()` 필터 로직(`area`와 동일한 truthy 체크로 미선택 시 필터 스킵)·`buildReason()` 문구에 `location_type` 반영
-  - SKILL.md §10-K에 위저드 배치 근거(축 분리 원칙, overnight 스킵 로직 변화, 필터가 선택적인 이유, 버튼 스타일 통일 배경) 추가
-  - `npm run build`/`npm run lint` PASS. 스텝 전환·필터 로직은 코드 추적으로 검증 — 이 세션은 Supabase 자격증명이 없는 샌드박스라 실브라우저 클릭 테스트는 미실행(문서화된 한계)
-- 진단 근거·교훈 → PROJECT_CONTEXT §20
+- 활동 추천 위저드 실내/실외 스텝 추가 (PR #83 squash `202797d`, 2커밋) — `feature/activity-indoor-outdoor-recommend`: 위저드에 실내/실외 선택 단계 신규 추가, 추천 API 필터·문구에도 반영. `npm run build`/`npm run lint` PASS. 실제 Supabase 환경 브라우저 클릭 테스트는 미실행(세션 환경 제약)
+- 배경·설계 근거 → PROJECT_CONTEXT §13·§20

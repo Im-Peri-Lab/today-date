@@ -1,20 +1,25 @@
 # CURRENT_STATE.md
 
-> **마지막 업데이트: 2026-07-24**
+> **마지막 업데이트: 2026-07-27**
 
 ## 현재 단계
 유지보수 / 점진적 UX 개선 단계.
 
 ## 현재 한 줄 요약
-Supabase Security Advisor 보안 이슈 2건 해소(RLS 미설정 7건 → PR #76, 함수 search_path
-미고정 → PR #77) 반영 완료. Security Advisor Errors/Warnings 모두 0건. 기능 기준 커밋
-`83f3fe2`.
+카테고리 체계 개편(활동→레저·체험 신규, 장소→고기 신규 PR #78·#79)·최상위 타입 표시 라벨
+rename(활동→액티비티, 장소→다이닝 PR #80)·활동 실내/실외 필수 속성 신규(location_type
+PR #81)·다이닝 카드 정보 줄 위치 폴백(PR #82)·활동 추천 위저드 실내/실외 단계 추가(PR
+#83) 반영 완료. 기능 기준 커밋 `202797d`.
 
 ## 브랜치 상태
 - 현재 작업 브랜치 없음, main 기준 build PASS
 
 ## 구현 완료 (누적, 기존 유지)
 (기존 항목 전체 유지)
+- **(신규) 활동 추천 위저드 실내/실외 단계 추가**: 위저드 스텝을 1(소요시간)→2(시간대)→3(실내/실외, 신규)→4(카테고리)로 확장. 카테고리("무엇을 하는가")·실내/실외("조건") 축 분리 원칙에 따라 독립 단계로 배치, 시간대 뒤·카테고리 앞. 칩 선택 시 자동 진행(기존 소요시간/시간대와 동일 패턴), 저장값은 필수지만 필터는 area와 동일하게 선택적이라 스킵용 "다음" 버튼(장소 위저드 지역 스킵과 동일 스타일) 병행. overnight 선택 시 시간대 스킵 로직은 유지, 도착지만 새 단계로 조정. `/api/recommend/activity` 필터·문구에도 `location_type` 반영 (PR #83 squash `202797d`)
+- **(신규) 다이닝 카드 정보 줄 위치 폴백**: `PlaceCard` 정보 줄이 메모만 표시하던 것을 `ActivityCard`와 동일한 규칙(메모 있으면 메모, 없으면 `location`, 아이콘도 StickyNote/MapPin 동일 전환)으로 대칭화 (PR #82 squash `bdbdc47`)
+- **(신규) 활동 실내/실외 필수 속성(location_type)**: 네이티브 pg enum(`'indoor'|'outdoor'`), 기존 47건 title 기준 실측 재분류(22실내/25실외) 후 NOT NULL 승격(마이그레이션 011, 원격 적용·검증 완료). 폼 순서 카테고리→실내/실외→소요시간→시간대, 상세 always-render+wide 단독 줄, `/list` 단일 선택 토글 필터(선택은 계속 선택적), 카드 메타 줄 맨 앞 배지 — end to end 반영 (PR #81 squash `706c917`)
+- **(신규) 카테고리 체계 개편 + 최상위 타입 표시 라벨 rename**: 활동 카테고리를 레저(舊 액티비티 rename)·체험(신규)·문화·축제·자연·여행·미분류 7종으로, 장소 카테고리를 한식·고기(신규)·일식·중식·양식·카페·디저트·바·미분류 9종으로 재편(마이그레이션 009·010, 원격 적용·검증 완료). 두 아이콘 맵을 `src/lib/categoryIcons.ts` 단일 출처로 통합. 이어서 최상위 타입 표시 라벨을 활동→액티비티, 장소→다이닝으로 변경(표시 텍스트만 — DB 스키마·라우트·변수명 무변경, 코드 내부 용어는 계속 활동/장소). 카테고리 API 캐시 stale 버그 2건(라우트 `force-dynamic` 미흡 → Supabase client fetch에 `cache: 'no-store'` 강제로 근본 해결) 발견·수정 포함 (PR #78 squash `266c30d`, PR #79 squash `167338e`, PR #80 squash `fd5963f`)
 - **(신규) Supabase RLS 미설정 해소**: public 스키마 7개 테이블(email_tokens, activities,
   places, activity_categories, place_categories, recommendations_log, app_config)에
   RLS 활성화, 정책은 추가하지 않음. service_role은 RLS 자동 우회하므로 서버 코드 무변경,
@@ -38,9 +43,10 @@ Supabase Security Advisor 보안 이슈 2건 해소(RLS 미설정 7건 → PR #7
 ## 배포 상태
 - 플랫폼: Vercel
 - URL: `https://today-date-seven.vercel.app`
-- 현재 브랜치: `main` (PR #77 기능 기준 `83f3fe2`)
+- 현재 브랜치: `main` (PR #83 기능 기준 `202797d`)
 
 ## 진행 중 / 남은 작업
+- 활동 추천 위저드 실내/실외 단계(PR #83) 실제 Supabase 환경 브라우저 클릭 테스트 — 작업 세션이 DB 자격증명 없는 샌드박스라 미실행, build/lint·코드 추적 검증만 완료(다음 세션 실사용 확인 권장)
 - "저장하고 계속 등록하기" 후속 — 복사하기 흐름 `returnTo` 배선 통합 검토(다음 작업 후보)
 - Galaxy 실기기 QA: 하드웨어 미확보로 보류 중
 - useCreateActivity/useCreatePlace 훅 통일 검토(최소 diff로 보류 중)
@@ -52,4 +58,5 @@ Supabase Security Advisor 보안 이슈 2건 해소(RLS 미설정 7건 → PR #7
 - 카드 그리드가 `/list`(CSS Grid)와 추천결과 2종(flex-wrap 하드코딩 중복)으로 비공유 구현 — 렌더 결과는 동일해 시급하진 않음
 - `.headerNavBtn` sticky hover 수정은 브라우저 에뮬레이션만 검증됨, iOS 실기기 미확인 (Galaxy 실기기 QA와 같은 보류 성격)
 - 복사하기 흐름은 목록 returnTo 배선에 포함되지 않음(기존 자체 prefill 경로 유지) — 필요시 별도 확인 후 통합 검토
+- F-10 카테고리 관리(Phase 2 후보, PROJECT_CONTEXT §19)는 여전히 미착수 — PR #78·#79는 카테고리 목록 자체의 재편(마이그레이션)이었고, 사용자가 카테고리를 직접 추가/수정하는 관리 UI는 별개로 남아있음
 - (이전 세션 잔여) spacing 토큰 표준화 등

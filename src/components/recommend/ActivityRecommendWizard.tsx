@@ -25,10 +25,16 @@ import {
   useRecommendActivity,
   type ActivityRecommendResponse,
 } from '@/hooks/useRecommend'
-import { TIME_OPTIONS, TIME_OF_DAY_ICONS, TIME_OF_DAY_LABELS } from '@/lib/labels'
+import {
+  TIME_OPTIONS,
+  TIME_OF_DAY_ICONS,
+  TIME_OF_DAY_LABELS,
+  LOCATION_TYPE_OPTIONS,
+  LOCATION_TYPE_ICONS,
+} from '@/lib/labels'
 import { cn } from '@/lib/utils'
 import styles from '@/components/screens.module.css'
-import type { DurationBucket, TimeOfDay } from '@/types'
+import type { DurationBucket, TimeOfDay, LocationType } from '@/types'
 
 const DURATIONS: { value: DurationBucket; icon: LucideIcon; label: string; sub: string }[] = [
   { value: 'half', icon: Hourglass, label: '반나절', sub: '2~4시간 가볍게' },
@@ -55,10 +61,11 @@ function StepDots({ step, steps }: { step: number; steps: number[] }) {
 }
 
 export function ActivityRecommendWizard() {
-  const [step, setStep] = useState<1 | 2 | 3>(1)
+  const [step, setStep] = useState<1 | 2 | 3 | 4>(1)
   const [showResult, setShowResult] = useState(false)
   const [duration, setDuration] = useState<DurationBucket | null>(null)
   const [timeOfDay, setTimeOfDay] = useState<TimeOfDay | null>(null)
+  const [locationType, setLocationType] = useState<LocationType | null>(null)
   const [categoryIds, setCategoryIds] = useState<string[]>([])
   const [includeShorter, setIncludeShorter] = useState(false)
   const [result, setResult] = useState<ActivityRecommendResponse | null>(null)
@@ -66,8 +73,8 @@ export function ActivityRecommendWizard() {
   const cats = useActivityCategories()
   const recommend = useRecommendActivity()
 
-  // overnight(1박 이상)은 시간대 단계를 건너뛴다 → 표시 단계도 2개([1,3])
-  const steps = duration === 'overnight' ? [1, 3] : [1, 2, 3]
+  // overnight(1박 이상)은 시간대 단계를 건너뛴다 → 표시 단계도 3개([1,3,4])
+  const steps = duration === 'overnight' ? [1, 3, 4] : [1, 2, 3, 4]
 
   function run(overrideCategories?: string[], overrideShorter?: boolean) {
     if (!duration) return
@@ -77,6 +84,7 @@ export function ActivityRecommendWizard() {
       {
         duration_bucket: duration,
         time_of_day: timeOfDay ?? undefined,
+        location_type: locationType ?? undefined,
         category_ids: ids.length > 0 ? ids : undefined,
         include_shorter: shorter || undefined,
       },
@@ -104,6 +112,7 @@ export function ActivityRecommendWizard() {
     setResult(null)
     setDuration(null)
     setTimeOfDay(null)
+    setLocationType(null)
     setCategoryIds([])
     setIncludeShorter(false)
   }
@@ -314,7 +323,7 @@ export function ActivityRecommendWizard() {
                     onClick={() => {
                       setDuration(d.value)
                       if (d.value === 'overnight') {
-                        // 1박 이상은 낮/밤 구분이 무의미 → 시간대 단계 건너뛰고 바로 카테고리로
+                        // 1박 이상은 낮/밤 구분이 무의미 → 시간대 단계 건너뛰고 바로 실내/실외로
                         setTimeOfDay(null)
                         setStep(3)
                       } else {
@@ -391,6 +400,64 @@ export function ActivityRecommendWizard() {
         {step === 3 && (
           <div className="space-y-4">
             <p className={cn('text-center text-sm', styles.sub)}>
+              어디서 즐기고 싶어요? <span className={styles.faint}>(선택)</span>
+            </p>
+            <div className="grid grid-cols-2 gap-2">
+              {LOCATION_TYPE_OPTIONS.map((o) => {
+                const active = locationType === o.value
+                const Icon = LOCATION_TYPE_ICONS[o.value]
+                return (
+                  <button
+                    key={o.value}
+                    type="button"
+                    onClick={() => {
+                      setLocationType(o.value)
+                      setStep(4)
+                    }}
+                    className={cn(
+                      'flex flex-col items-center justify-center gap-1 rounded-xl border p-3 transition-all',
+                      styles.optionCard,
+                      active && styles.optionCardActive
+                    )}
+                  >
+                    <Icon
+                      className={cn('h-6 w-6 shrink-0', !active && styles.accent)}
+                      strokeWidth={2}
+                    />
+                    <span className={cn('text-sm font-medium', !active && styles.ink)}>
+                      {o.label}
+                    </span>
+                  </button>
+                )
+              })}
+            </div>
+            <div className="space-y-2 pt-2">
+              <Button
+                className={cn(
+                  'h-10 w-full text-white hover:brightness-105',
+                  styles.detailPrimaryBtn
+                )}
+                onClick={() => {
+                  setLocationType(null)
+                  setStep(4)
+                }}
+              >
+                다음
+              </Button>
+              <Button
+                variant="outline"
+                className="h-10 w-full"
+                onClick={() => setStep(duration === 'overnight' ? 1 : 2)}
+              >
+                이전
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {step === 4 && (
+          <div className="space-y-4">
+            <p className={cn('text-center text-sm', styles.sub)}>
               카테고리를 골라볼까요? <span className={styles.faint}>(선택)</span>
             </p>
             <div className="flex flex-wrap justify-center gap-2">
@@ -425,7 +492,7 @@ export function ActivityRecommendWizard() {
               <Button
                 variant="outline"
                 className="h-10 w-full"
-                onClick={() => setStep(duration === 'overnight' ? 1 : 2)}
+                onClick={() => setStep(3)}
               >
                 이전
               </Button>

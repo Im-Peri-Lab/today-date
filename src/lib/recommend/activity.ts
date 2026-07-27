@@ -1,11 +1,12 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
-import type { Activity, DurationBucket, TimeOfDay } from '@/types'
-import { DURATION_LABELS, DURATION_RANK, TIME_OF_DAY_LABELS } from '@/lib/labels'
+import type { Activity, DurationBucket, TimeOfDay, LocationType } from '@/types'
+import { DURATION_LABELS, DURATION_RANK, TIME_OF_DAY_LABELS, LOCATION_TYPE_LABELS } from '@/lib/labels'
 import { recommendedIdSets, pickTopWithShuffle } from './shared'
 
 export interface ActivityRecommendInput {
   duration_bucket: DurationBucket
   time_of_day?: TimeOfDay
+  location_type?: LocationType
   category_ids?: string[]
   include_visited?: boolean
   /** true면 고른 값보다 더 짧은 일정도 후보에 포함. 기본은 고른 값만(엄격). */
@@ -38,6 +39,11 @@ export async function recommendActivities(
   // 시간대 필터: day/night면 정확히 일치하거나 'any'인 항목만
   if (tod !== 'any') {
     pool = pool.filter((a) => a.time_of_day === tod || a.time_of_day === 'any')
+  }
+
+  // 실내/실외 필터: 값이 필수 필드지만 필터는 선택적 — 미선택 시 전체 노출(area 필터와 동일 관례)
+  if (input.location_type) {
+    pool = pool.filter((a) => a.location_type === input.location_type)
   }
 
   // 카테고리 필터 (선택)
@@ -84,8 +90,11 @@ function buildReason(input: ActivityRecommendInput, count: number): string {
   }
   const duration = DURATION_LABELS[input.duration_bucket]
   const tod = input.time_of_day ?? 'any'
-  if (tod !== 'any') {
-    return `${duration} · ${TIME_OF_DAY_LABELS[tod]} 조건에 맞는 액티비티예요 💜`
+  const parts = [duration]
+  if (tod !== 'any') parts.push(TIME_OF_DAY_LABELS[tod])
+  if (input.location_type) parts.push(LOCATION_TYPE_LABELS[input.location_type])
+  if (parts.length > 1) {
+    return `${parts.join(' · ')} 조건에 맞는 액티비티예요 💜`
   }
   return `${duration} 동안 즐기기 좋은 액티비티예요 💜`
 }

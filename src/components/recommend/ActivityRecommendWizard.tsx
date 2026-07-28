@@ -494,14 +494,27 @@ export function ActivityRecommendWizard() {
   // ── 마법사 화면 ──
   return (
     <div className="mx-auto w-full max-w-lg px-5 py-10 lg:py-14">
-      <button
-        type="button"
-        onClick={reset}
-        className={cn('mb-3 inline-flex items-center gap-1.5 text-sm', styles.backLink)}
-      >
-        <ArrowLeft className="h-4 w-4" />
-        처음부터
-      </button>
+      {/* 1단계는 아직 아무 선택도 하지 않아 리셋할 대상이 없다 — 유일한 동작은 홈 이탈
+          자체이므로 목적지 이동형("홈으로"+Link). 2단계부터는 이미 선택한 값이 있어
+          되돌릴 대상이 생기므로 상태 리셋형("처음부터"+reset())으로 분기(§13). */}
+      {step === 1 ? (
+        <Link
+          href="/"
+          className={cn('mb-3 inline-flex items-center gap-1.5 text-sm', styles.backLink)}
+        >
+          <ArrowLeft className="h-4 w-4" />
+          홈으로
+        </Link>
+      ) : (
+        <button
+          type="button"
+          onClick={reset}
+          className={cn('mb-3 inline-flex items-center gap-1.5 text-sm', styles.backLink)}
+        >
+          <ArrowLeft className="h-4 w-4" />
+          처음부터
+        </button>
+      )}
 
       <div className={cn(styles.card, 'px-6 py-8 lg:px-8 lg:py-10')}>
         <div className="mb-6 text-center">

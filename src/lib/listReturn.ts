@@ -17,6 +17,10 @@ export interface ListUrlState {
 
 export const DEFAULT_LIST_RETURN_TO = '/list'
 
+// 추천위저드 결과 화면 경로 — getSafeListReturnTo 화이트리스트와 isRecommendReturnTo 판별이
+// 공유하는 단일 출처. 새 위저드 경로가 추가되면 여기에만 더한다.
+export const RECOMMEND_RETURN_PATHS = ['/recommend/activity', '/recommend/place'] as const
+
 export function isListTab(value: string | null): value is ListTab {
   return value === 'activity' || value === 'place'
 }
@@ -65,7 +69,12 @@ export function getSafeListReturnTo(value: string | string[] | null | undefined)
   try {
     const base = new URL('https://today-date.local')
     const url = new URL(raw, base)
-    if (url.origin !== base.origin || url.pathname !== DEFAULT_LIST_RETURN_TO) {
+    // 오픈 리다이렉트 방지: 오리진이 같고, 경로가 허용 목록(목록 화면 + 추천위저드 결과 화면)
+    // 중 하나일 때만 통과시킨다. 새 반환 대상 화면을 추가할 땐 이 배열만 늘린다.
+    const isAllowedPath =
+      url.pathname === DEFAULT_LIST_RETURN_TO ||
+      (RECOMMEND_RETURN_PATHS as readonly string[]).includes(url.pathname)
+    if (url.origin !== base.origin || !isAllowedPath) {
       return undefined
     }
 
@@ -73,4 +82,12 @@ export function getSafeListReturnTo(value: string | string[] | null | undefined)
   } catch {
     return undefined
   }
+}
+
+/** returnTo가 목록이 아니라 추천위저드 결과 화면을 가리키는지 — 상세 화면의 복귀 버튼 라벨 분기에 사용. */
+export function isRecommendReturnTo(value: string | undefined): boolean {
+  if (!value) return false
+  return (RECOMMEND_RETURN_PATHS as readonly string[]).some(
+    (p) => value === p || value.startsWith(`${p}?`)
+  )
 }

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { toast } from 'sonner'
 import {
@@ -24,6 +24,7 @@ import {
   useRecommendPlace,
   type PlaceRecommendResponse,
 } from '@/hooks/useRecommend'
+import { readPlaceResult, stashPlaceResult } from '@/lib/recommend/resultCache'
 import { cn } from '@/lib/utils'
 import styles from '@/components/screens.module.css'
 import type { MealTime } from '@/types'
@@ -71,6 +72,13 @@ function buildPlaceWizardQuery(s: PlaceWizardUrlState): string {
   return params.toString()
 }
 
+// 결과 캐시(resultCache.ts) 무효화 키 — 선택 조건만으로 구성(step은 항상 고정값이라 무관).
+function placeConditionsKey(
+  s: Pick<PlaceWizardUrlState, 'meal' | 'area' | 'categoryIds'>
+): string {
+  return buildPlaceWizardQuery({ step: 'result', ...s })
+}
+
 // 단계 전환은 실제 화면 전환에 대응하므로 next/navigation 라우터(RSC 재요청 유발) 대신
 // 히스토리 API를 직접 사용해 엔트리를 쌓는다 — ListView의 필터 URL 동기화와 동일한 패턴.
 // 모든 전환(다음/이전/처음부터)이 항상 push만 사용 → 뒤로가기 한 번 = 직전에 보였던 화면으로 복귀.
@@ -108,26 +116,68 @@ function StepDots({ step }: { step: number }) {
 }
 
 export function PlaceRecommendWizard() {
-  // 히스토리 back/forward로 이 화면에 처음 진입할 때(예: 새로고침)는 URL의 선택값을 그대로
-  // 초기 state로 복원한다. result 데이터는 URL에 담기지 않으므로 result 단계로는 복원하지 않는다.
-  const initialUrlStateRef = useRef<PlaceWizardUrlState | null>(null)
-  if (initialUrlStateRef.current === null && typeof window !== 'undefined') {
-    initialUrlStateRef.current = readPlaceWizardUrlState(window.location.search)
-  }
-  const initialUrlState = initialUrlStateRef.current
-
-  const [step, setStep] = useState<1 | 2 | 3>(() => {
-    const s = initialUrlState?.step ?? 1
-    return s === 'result' ? 3 : s
-  })
+  const [step, setStep] = useState<1 | 2 | 3>(1)
   const [showResult, setShowResult] = useState(false)
-  const [meal, setMeal] = useState<MealTime | null>(() => initialUrlState?.meal ?? null)
-  const [area, setArea] = useState(() => initialUrlState?.area ?? '')
-  const [categoryIds, setCategoryIds] = useState<string[]>(() => initialUrlState?.categoryIds ?? [])
+  const [meal, setMeal] = useState<MealTime | null>(null)
+  const [area, setArea] = useState('')
+  const [categoryIds, setCategoryIds] = useState<string[]>([])
   const [result, setResult] = useState<PlaceRecommendResponse | null>(null)
 
   const cats = usePlaceCategories()
   const recommend = useRecommendPlace()
+
+  // 조건만으로 결과를 다시 조회 — 마운트 시 URL이 이미 step=result인데 sessionStorage
+  // 캐시가 없을 때(사생활 보호 모드 등 저장이 막혔거나 최초 진입 등)의 폴백 전용.
+  // 이 시점엔 result가 항상 비어 있으므로(새로 마운트된 인스턴스) run()과 달리 재조회 여부를
+  // 따질 필요 없이 바로 호출하며, 히스토리도 건드리지 않는다(이미 그 URL에 있으므로).
+  function fetchResultForUrlState(next: PlaceWizardUrlState) {
+    if (!next.meal) return
+    recommend.mutate(
+      {
+        meal_time: next.meal,
+        area: next.area.trim() || undefined,
+        category_ids: next.categoryIds.length > 0 ? next.categoryIds : undefined,
+      },
+      {
+        onSuccess: (data) => {
+          setResult(data)
+          setShowResult(true)
+          stashPlaceResult(placeConditionsKey(next), data)
+        },
+        onError: (e) =>
+          toast.error(e instanceof Error ? e.message : '추천 중 오류가 발생했습니다.'),
+      }
+    )
+  }
+
+  // 마운트 시 URL → state 1회 동기화. `window.location`은 next/link의 클라이언트 사이드
+  // 전환(예: 상세 화면 "추천 결과로" 복귀) 중에는 렌더 시점에 아직 갱신되지 않은 경우가 있어
+  // useState 지연 초기화 대신 커밋 이후 실행되는 이펙트에서 읽어야 안전하다. URL이 이미
+  // step=result면(결과 카드 → 상세 → 복귀 등, 실제 페이지 이동이라 새로 마운트되는 경우)
+  // result 데이터 자체는 URL에 담기지 않으므로 먼저 sessionStorage 캐시에서 복원을
+  // 시도한다 — 재조회하면 pickTopWithShuffle이 매번 다른 카드를 뽑을 수 있어 "정확히 그
+  // 결과 화면으로 복귀"가 깨지기 때문. 캐시가 없을 때만(조건이 바뀌었거나 저장이 막힌 경우)
+  // 실제 재조회로 폴백한다.
+  useEffect(() => {
+    const next = readPlaceWizardUrlState(window.location.search)
+    setMeal(next.meal)
+    setArea(next.area)
+    setCategoryIds(next.categoryIds)
+
+    if (next.step === 'result') {
+      setStep(3)
+      const cached = readPlaceResult(placeConditionsKey(next))
+      if (cached) {
+        setResult(cached)
+        setShowResult(true)
+      } else {
+        fetchResultForUrlState(next)
+      }
+    } else {
+      setStep(next.step)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   // 브라우저/OS 뒤로가기(모바일 스와이프 포함) 시 URL → state 역동기화.
   // result 데이터가 메모리에 없는 채로 step=result를 만나면(새로고침 등) 결과 화면 대신
@@ -161,7 +211,9 @@ export function PlaceRecommendWizard() {
     const ids = overrideCategories ?? categoryIds
     // run()은 step3→결과 진입과 결과 화면 내 재조회("다른 추천 보기") 모두에서 호출된다 —
     // 히스토리 엔트리는 "결과 화면 진입" 그 자체에서만 한 번 쌓아야 하므로, 호출 시점에
-    // 아직 결과 화면이 아니었을 때만(=최초 진입) push 한다.
+    // 아직 결과 화면이 아니었을 때만(=최초 진입) push 한다. (URL이 이미 step=result인 채로
+    // 마운트될 때의 재조회는 별도의 fetchResultForUrlState가 담당하며 run()을 거치지
+    // 않으므로 여기서 고려하지 않아도 된다.)
     const enteringResult = !showResult
     recommend.mutate(
       {
@@ -173,6 +225,9 @@ export function PlaceRecommendWizard() {
         onSuccess: (data) => {
           setResult(data)
           setShowResult(true)
+          // 트랙당 슬롯 하나뿐이라 매 성공 응답이 그대로 최신값으로 덮어쓴다 — "다른 추천
+          // 보기"로 화면이 갱신될 때도 다음 뒤로가기 복귀가 그 최신 화면을 그대로 복원하게 한다.
+          stashPlaceResult(placeConditionsKey({ meal, area, categoryIds: ids }), data)
           if (enteringResult) {
             pushPlaceWizardState({ step: 'result', meal, area, categoryIds: ids })
           }
@@ -205,6 +260,12 @@ export function PlaceRecommendWizard() {
 
   // ── 결과 화면 ──
   if (showResult && result) {
+    // 결과 카드 → 상세 진입 후 "추천 결과로" 복귀 시 정확히 이 결과 화면(선택 조건 포함)으로
+    // 돌아오게 하는 returnTo. 위저드는 순수 History API로만 URL을 관리하므로(§ pushPlaceWizardState)
+    // 현재 주소를 그대로 읽으면 된다 — 이 분기는 항상 클라이언트 상호작용 이후에만 렌더되므로
+    // window 접근이 안전하다(SSR에서는 도달하지 않음).
+    const resultReturnTo =
+      typeof window !== 'undefined' ? `${window.location.pathname}${window.location.search}` : undefined
     return (
       <div className="mx-auto w-full max-w-4xl px-5 py-10 lg:px-8 lg:py-14">
         <button
@@ -261,7 +322,7 @@ export function PlaceRecommendWizard() {
                     key={p.id}
                     className="w-full sm:w-[calc(50%-0.5rem)] sm:max-w-[280px] lg:w-[calc(33.333%-0.667rem)]"
                   >
-                    <PlaceCard place={p} hideMenu />
+                    <PlaceCard place={p} hideMenu returnTo={resultReturnTo} />
                   </div>
                 ))}
               </div>
@@ -310,13 +371,14 @@ export function PlaceRecommendWizard() {
   // ── 마법사 화면 ──
   return (
     <div className="mx-auto w-full max-w-lg px-5 py-10 lg:py-14">
-      <Link
-        href="/"
+      <button
+        type="button"
+        onClick={reset}
         className={cn('mb-3 inline-flex items-center gap-1.5 text-sm', styles.backLink)}
       >
         <ArrowLeft className="h-4 w-4" />
-        홈으로
-      </Link>
+        처음부터
+      </button>
 
       <div className={cn(styles.card, 'px-6 py-8 lg:px-8 lg:py-10')}>
         <div className="mb-6 text-center">

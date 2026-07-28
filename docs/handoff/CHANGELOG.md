@@ -519,23 +519,6 @@
 
 ## 2026-07-27 v2 — Android PWA 스플래시 아이콘에 브랜드 하트 추가
 
-- 사용자 요청: 앱 최초 실행 시 뜨는 "이름만 보이는 화면"(OS 자동 생성 스플래시)에
-  패스코드 화면과 같은 하트를 추가하고 싶다는 요청에서 출발
-- 진단① : 해당 화면은 앱 코드가 그리는 화면이 아니라 `manifest.json`(이름/배경색/아이콘)
-  기반으로 OS/브라우저가 자동 생성하는 정적 화면임을 확인. 애니메이션 적용 불가 판정
-  → 정적 하트만 추가하는 방향으로 스코프 축소(사용자 확정)
-- 진단② : iOS는 manifest 기반 스플래시 자동 생성을 지원하지 않음(Safari·Chrome 등
-  iOS 내 모든 브라우저가 WebKit 엔진 사용 의무라 동일 제약) → Android만 반영,
-  iOS는 범위 제외로 확정
-- 진단③ : `manifest.json`이 `icon-192.png`/`icon-512.png`를 참조하지만 실물 파일이
-  존재하지 않던 기존 이슈 확인 → 이번 작업으로 함께 해소
-- 목업 3종(56px/36px/26px 비율) 비교 후 26px 비율안 확정
-- 구현 (PR #87 squash `e382af2`) — `fix/android-splash-icon-heart`
-  - `public/icon-192.png`, `icon-512.png` 신규 생성
-  - 하트 path·viewBox·그라데이션은 `BrandHeader.tsx` 실측값 그대로 재사용(좌표/색상 변경 없음)
-  - manifest icon `purpose` 미지정(`any` 기본값) 확인 후 세이프존 66% 강제 규칙 대신
-    60~65% 분기 적용, 62%(중간값) 채택 — icon-192 하트 박스 119.04px, icon-512 317.44px
-  - 배경색(`#f5f3ff`)·앱 이름 표시 로직 변경 없음, 정적 이미지
-- 검증: `npm run build` PASS, 생성된 PNG 파일 사용자 직접 확인(스크린샷)
-- 실기기 Android 홈 화면 스플래시 확인은 세션 환경 제약으로 미실행 — 다음 세션 권장
+- Android 홈 화면 실행 시 뜨는 manifest 기반 자동 스플래시에 패스코드 화면과 동일한 브랜드 하트 반영, `manifest.json`이 참조하던 `icon-192.png`/`icon-512.png` 실물 파일 누락 이슈도 함께 해소 (PR #87 squash `e382af2`) — `fix/android-splash-icon-heart`. 정적 이미지, 배경색·앱 이름 표시 로직 변경 없음. iOS는 manifest 기반 자동 스플래시 미지원으로 범위 제외
+- `npm run build` PASS, 생성 PNG 사용자 직접 확인(스크린샷). 실기기 Android 홈 화면 스플래시 확인은 세션 환경 제약으로 미실행(다음 세션 권장)
 - 진단 근거·교훈 → PROJECT_CONTEXT §20

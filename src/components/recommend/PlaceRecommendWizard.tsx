@@ -24,6 +24,7 @@ import {
   useRecommendPlace,
   type PlaceRecommendResponse,
 } from '@/hooks/useRecommend'
+import { readPlaceResult, stashPlaceResult } from '@/lib/recommend/resultCache'
 import { cn } from '@/lib/utils'
 import styles from '@/components/screens.module.css'
 import type { MealTime } from '@/types'
@@ -69,6 +70,13 @@ function buildPlaceWizardQuery(s: PlaceWizardUrlState): string {
   if (s.area) params.set('area', s.area)
   if (s.categoryIds.length > 0) params.set('cats', s.categoryIds.join(','))
   return params.toString()
+}
+
+// 결과 캐시(resultCache.ts) 무효화 키 — 선택 조건만으로 구성(step은 항상 고정값이라 무관).
+function placeConditionsKey(
+  s: Pick<PlaceWizardUrlState, 'meal' | 'area' | 'categoryIds'>
+): string {
+  return buildPlaceWizardQuery({ step: 'result', ...s })
 }
 
 // 단계 전환은 실제 화면 전환에 대응하므로 next/navigation 라우터(RSC 재요청 유발) 대신
@@ -118,7 +126,8 @@ export function PlaceRecommendWizard() {
   const cats = usePlaceCategories()
   const recommend = useRecommendPlace()
 
-  // 조건만으로 결과를 다시 조회 — 마운트 시 URL이 이미 step=result인 경우 전용(아래 이펙트).
+  // 조건만으로 결과를 다시 조회 — 마운트 시 URL이 이미 step=result인데 sessionStorage
+  // 캐시가 없을 때(사생활 보호 모드 등 저장이 막혔거나 최초 진입 등)의 폴백 전용.
   // 이 시점엔 result가 항상 비어 있으므로(새로 마운트된 인스턴스) run()과 달리 재조회 여부를
   // 따질 필요 없이 바로 호출하며, 히스토리도 건드리지 않는다(이미 그 URL에 있으므로).
   function fetchResultForUrlState(next: PlaceWizardUrlState) {
@@ -133,6 +142,7 @@ export function PlaceRecommendWizard() {
         onSuccess: (data) => {
           setResult(data)
           setShowResult(true)
+          stashPlaceResult(placeConditionsKey(next), data)
         },
         onError: (e) =>
           toast.error(e instanceof Error ? e.message : '추천 중 오류가 발생했습니다.'),
@@ -144,7 +154,10 @@ export function PlaceRecommendWizard() {
   // 전환(예: 상세 화면 "추천 결과로" 복귀) 중에는 렌더 시점에 아직 갱신되지 않은 경우가 있어
   // useState 지연 초기화 대신 커밋 이후 실행되는 이펙트에서 읽어야 안전하다. URL이 이미
   // step=result면(결과 카드 → 상세 → 복귀 등, 실제 페이지 이동이라 새로 마운트되는 경우)
-  // result 데이터 자체는 URL에 담기지 않으므로 같은 조건으로 다시 조회해 결과 화면을 복원한다.
+  // result 데이터 자체는 URL에 담기지 않으므로 먼저 sessionStorage 캐시에서 복원을
+  // 시도한다 — 재조회하면 pickTopWithShuffle이 매번 다른 카드를 뽑을 수 있어 "정확히 그
+  // 결과 화면으로 복귀"가 깨지기 때문. 캐시가 없을 때만(조건이 바뀌었거나 저장이 막힌 경우)
+  // 실제 재조회로 폴백한다.
   useEffect(() => {
     const next = readPlaceWizardUrlState(window.location.search)
     setMeal(next.meal)
@@ -153,7 +166,13 @@ export function PlaceRecommendWizard() {
 
     if (next.step === 'result') {
       setStep(3)
-      fetchResultForUrlState(next)
+      const cached = readPlaceResult(placeConditionsKey(next))
+      if (cached) {
+        setResult(cached)
+        setShowResult(true)
+      } else {
+        fetchResultForUrlState(next)
+      }
     } else {
       setStep(next.step)
     }
@@ -206,6 +225,9 @@ export function PlaceRecommendWizard() {
         onSuccess: (data) => {
           setResult(data)
           setShowResult(true)
+          // 트랙당 슬롯 하나뿐이라 매 성공 응답이 그대로 최신값으로 덮어쓴다 — "다른 추천
+          // 보기"로 화면이 갱신될 때도 다음 뒤로가기 복귀가 그 최신 화면을 그대로 복원하게 한다.
+          stashPlaceResult(placeConditionsKey({ meal, area, categoryIds: ids }), data)
           if (enteringResult) {
             pushPlaceWizardState({ step: 'result', meal, area, categoryIds: ids })
           }

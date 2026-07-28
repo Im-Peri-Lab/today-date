@@ -25,6 +25,7 @@ import {
   useRecommendActivity,
   type ActivityRecommendResponse,
 } from '@/hooks/useRecommend'
+import { readActivityResult, stashActivityResult } from '@/lib/recommend/resultCache'
 import {
   TIME_OPTIONS,
   TIME_OF_DAY_ICONS,
@@ -93,6 +94,14 @@ function buildActivityWizardQuery(s: ActivityWizardUrlState): string {
   return params.toString()
 }
 
+// 결과 캐시(resultCache.ts) 무효화 키 — 선택 조건만으로 구성(step은 항상 고정값이라 무관).
+// includeShorter는 조건이 아니라 같은 조건 안에서의 표시 옵션이라 키에 넣지 않는다(별도 저장).
+function activityConditionsKey(
+  s: Pick<ActivityWizardUrlState, 'duration' | 'timeOfDay' | 'locationType' | 'categoryIds'>
+): string {
+  return buildActivityWizardQuery({ step: 'result', ...s })
+}
+
 // 단계 전환은 실제 화면 전환에 대응하므로 next/navigation 라우터(RSC 재요청 유발) 대신
 // 히스토리 API를 직접 사용해 엔트리를 쌓는다 — ListView의 필터 URL 동기화와 동일한 패턴.
 // 모든 전환(다음/이전/처음부터)이 항상 push만 사용 → 뒤로가기 한 번 = 직전에 보였던 화면으로 복귀.
@@ -142,7 +151,8 @@ export function ActivityRecommendWizard() {
   const cats = useActivityCategories()
   const recommend = useRecommendActivity()
 
-  // 조건만으로 결과를 다시 조회 — 마운트 시 URL이 이미 step=result인 경우 전용(아래 이펙트).
+  // 조건만으로 결과를 다시 조회 — 마운트 시 URL이 이미 step=result인데 sessionStorage
+  // 캐시가 없을 때(사생활 보호 모드 등 저장이 막혔거나 최초 진입 등)의 폴백 전용.
   // 이 시점엔 result가 항상 비어 있으므로(새로 마운트된 인스턴스) run()과 달리 재조회 여부를
   // 따질 필요 없이 바로 호출하며, 히스토리도 건드리지 않는다(이미 그 URL에 있으므로).
   function fetchResultForUrlState(next: ActivityWizardUrlState) {
@@ -158,6 +168,7 @@ export function ActivityRecommendWizard() {
         onSuccess: (data) => {
           setResult(data)
           setShowResult(true)
+          stashActivityResult(activityConditionsKey(next), false, data)
         },
         onError: (e) =>
           toast.error(e instanceof Error ? e.message : '추천 중 오류가 발생했습니다.'),
@@ -169,7 +180,10 @@ export function ActivityRecommendWizard() {
   // 전환(예: 상세 화면 "추천 결과로" 복귀) 중에는 렌더 시점에 아직 갱신되지 않은 경우가 있어
   // useState 지연 초기화 대신 커밋 이후 실행되는 이펙트에서 읽어야 안전하다. URL이 이미
   // step=result면(결과 카드 → 상세 → 복귀 등, 실제 페이지 이동이라 새로 마운트되는 경우)
-  // result 데이터 자체는 URL에 담기지 않으므로 같은 조건으로 다시 조회해 결과 화면을 복원한다.
+  // result 데이터 자체는 URL에 담기지 않으므로 먼저 sessionStorage 캐시에서 복원을
+  // 시도한다 — 재조회하면 pickTopWithShuffle이 매번 다른 카드를 뽑을 수 있어 "정확히 그
+  // 결과 화면으로 복귀"가 깨지기 때문. 캐시가 없을 때만(조건이 바뀌었거나 저장이 막힌 경우)
+  // 실제 재조회로 폴백한다.
   useEffect(() => {
     const next = readActivityWizardUrlState(window.location.search)
     setDuration(next.duration)
@@ -179,7 +193,14 @@ export function ActivityRecommendWizard() {
 
     if (next.step === 'result') {
       setStep(4)
-      fetchResultForUrlState(next)
+      const cached = readActivityResult(activityConditionsKey(next))
+      if (cached) {
+        setIncludeShorter(cached.includeShorter)
+        setResult(cached.data)
+        setShowResult(true)
+      } else {
+        fetchResultForUrlState(next)
+      }
     } else {
       setStep(next.step)
     }
@@ -241,6 +262,14 @@ export function ActivityRecommendWizard() {
           setShowResult(true)
           // 토글 상태는 요청 성공 후에 확정 — 로딩 중엔 직전 상태(라벨/색) 유지, 실패 시 불변
           setIncludeShorter(shorter)
+          // 트랙당 슬롯 하나뿐이라 매 성공 응답이 그대로 최신값으로 덮어쓴다 — "다른 추천
+          // 보기"/"더 짧은 일정"으로 화면이 갱신될 때도 다음 뒤로가기 복귀가 그 최신
+          // 화면을 그대로 복원하게 한다.
+          stashActivityResult(
+            activityConditionsKey({ duration, timeOfDay, locationType, categoryIds: ids }),
+            shorter,
+            data
+          )
           if (enteringResult) {
             pushActivityWizardState({
               step: 'result',

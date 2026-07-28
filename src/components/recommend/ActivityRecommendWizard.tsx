@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { toast } from 'sonner'
 import {
@@ -130,36 +130,61 @@ function StepDots({ step, steps }: { step: number; steps: number[] }) {
 }
 
 export function ActivityRecommendWizard() {
-  // 히스토리 back/forward로 이 화면에 처음 진입할 때(예: 새로고침)는 URL의 선택값을 그대로
-  // 초기 state로 복원한다. result 데이터는 URL에 담기지 않으므로 result 단계로는 복원하지 않는다.
-  const initialUrlStateRef = useRef<ActivityWizardUrlState | null>(null)
-  if (initialUrlStateRef.current === null && typeof window !== 'undefined') {
-    initialUrlStateRef.current = readActivityWizardUrlState(window.location.search)
-  }
-  const initialUrlState = initialUrlStateRef.current
-
-  const [step, setStep] = useState<1 | 2 | 3 | 4>(() => {
-    const s = initialUrlState?.step ?? 1
-    return s === 'result' ? 4 : s
-  })
+  const [step, setStep] = useState<1 | 2 | 3 | 4>(1)
   const [showResult, setShowResult] = useState(false)
-  const [duration, setDuration] = useState<DurationBucket | null>(
-    () => initialUrlState?.duration ?? null
-  )
-  const [timeOfDay, setTimeOfDay] = useState<TimeOfDay | null>(
-    () => initialUrlState?.timeOfDay ?? null
-  )
-  const [locationType, setLocationType] = useState<LocationType | null>(
-    () => initialUrlState?.locationType ?? null
-  )
-  const [categoryIds, setCategoryIds] = useState<string[]>(
-    () => initialUrlState?.categoryIds ?? []
-  )
+  const [duration, setDuration] = useState<DurationBucket | null>(null)
+  const [timeOfDay, setTimeOfDay] = useState<TimeOfDay | null>(null)
+  const [locationType, setLocationType] = useState<LocationType | null>(null)
+  const [categoryIds, setCategoryIds] = useState<string[]>([])
   const [includeShorter, setIncludeShorter] = useState(false)
   const [result, setResult] = useState<ActivityRecommendResponse | null>(null)
 
   const cats = useActivityCategories()
   const recommend = useRecommendActivity()
+
+  // 조건만으로 결과를 다시 조회 — 마운트 시 URL이 이미 step=result인 경우 전용(아래 이펙트).
+  // 이 시점엔 result가 항상 비어 있으므로(새로 마운트된 인스턴스) run()과 달리 재조회 여부를
+  // 따질 필요 없이 바로 호출하며, 히스토리도 건드리지 않는다(이미 그 URL에 있으므로).
+  function fetchResultForUrlState(next: ActivityWizardUrlState) {
+    if (!next.duration) return
+    recommend.mutate(
+      {
+        duration_bucket: next.duration,
+        time_of_day: next.timeOfDay ?? undefined,
+        location_type: next.locationType ?? undefined,
+        category_ids: next.categoryIds.length > 0 ? next.categoryIds : undefined,
+      },
+      {
+        onSuccess: (data) => {
+          setResult(data)
+          setShowResult(true)
+        },
+        onError: (e) =>
+          toast.error(e instanceof Error ? e.message : '추천 중 오류가 발생했습니다.'),
+      }
+    )
+  }
+
+  // 마운트 시 URL → state 1회 동기화. `window.location`은 next/link의 클라이언트 사이드
+  // 전환(예: 상세 화면 "추천 결과로" 복귀) 중에는 렌더 시점에 아직 갱신되지 않은 경우가 있어
+  // useState 지연 초기화 대신 커밋 이후 실행되는 이펙트에서 읽어야 안전하다. URL이 이미
+  // step=result면(결과 카드 → 상세 → 복귀 등, 실제 페이지 이동이라 새로 마운트되는 경우)
+  // result 데이터 자체는 URL에 담기지 않으므로 같은 조건으로 다시 조회해 결과 화면을 복원한다.
+  useEffect(() => {
+    const next = readActivityWizardUrlState(window.location.search)
+    setDuration(next.duration)
+    setTimeOfDay(next.timeOfDay)
+    setLocationType(next.locationType)
+    setCategoryIds(next.categoryIds)
+
+    if (next.step === 'result') {
+      setStep(4)
+      fetchResultForUrlState(next)
+    } else {
+      setStep(next.step)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   // 브라우저/OS 뒤로가기(모바일 스와이프 포함) 시 URL → state 역동기화.
   // result 데이터가 메모리에 없는 채로 step=result를 만나면(새로고침 등) 결과 화면 대신
@@ -198,7 +223,9 @@ export function ActivityRecommendWizard() {
     const shorter = overrideShorter ?? includeShorter
     // run()은 step4→결과 진입과 결과 화면 내 재조회(다른 추천 보기/더 짧은 일정) 모두에서
     // 호출된다 — 히스토리 엔트리는 "결과 화면 진입" 그 자체에서만 한 번 쌓아야 하므로,
-    // 호출 시점에 아직 결과 화면이 아니었을 때만(=최초 진입) push 한다.
+    // 호출 시점에 아직 결과 화면이 아니었을 때만(=최초 진입) push 한다. (URL이 이미
+    // step=result인 채로 마운트될 때의 재조회는 별도의 fetchResultForUrlState가 담당하며
+    // run()을 거치지 않으므로 여기서 고려하지 않아도 된다.)
     const enteringResult = !showResult
     recommend.mutate(
       {
@@ -265,6 +292,12 @@ export function ActivityRecommendWizard() {
 
   // ── 결과 화면 ──
   if (showResult && result) {
+    // 결과 카드 → 상세 진입 후 "추천 결과로" 복귀 시 정확히 이 결과 화면(선택 조건 포함)으로
+    // 돌아오게 하는 returnTo. 위저드는 순수 History API로만 URL을 관리하므로(§ pushActivityWizardState)
+    // 현재 주소를 그대로 읽으면 된다 — 이 분기는 항상 클라이언트 상호작용 이후에만 렌더되므로
+    // window 접근이 안전하다(SSR에서는 도달하지 않음).
+    const resultReturnTo =
+      typeof window !== 'undefined' ? `${window.location.pathname}${window.location.search}` : undefined
     const hasResults = result.recommendations.length > 0
     // 결과가 있을 때만 상태 토글을 박스 밖에 노출. 반나절은 더 짧은 게 없어 제외.
     const showResultToggle = hasResults && duration !== 'half'
@@ -354,7 +387,7 @@ export function ActivityRecommendWizard() {
                     key={a.id}
                     className="w-full sm:w-[calc(50%-0.5rem)] sm:max-w-[280px] lg:w-[calc(33.333%-0.667rem)]"
                   >
-                    <ActivityCard activity={a} hideMenu />
+                    <ActivityCard activity={a} hideMenu returnTo={resultReturnTo} />
                   </div>
                 ))}
               </div>
@@ -432,13 +465,14 @@ export function ActivityRecommendWizard() {
   // ── 마법사 화면 ──
   return (
     <div className="mx-auto w-full max-w-lg px-5 py-10 lg:py-14">
-      <Link
-        href="/"
+      <button
+        type="button"
+        onClick={reset}
         className={cn('mb-3 inline-flex items-center gap-1.5 text-sm', styles.backLink)}
       >
         <ArrowLeft className="h-4 w-4" />
-        홈으로
-      </Link>
+        처음부터
+      </button>
 
       <div className={cn(styles.card, 'px-6 py-8 lg:px-8 lg:py-10')}>
         <div className="mb-6 text-center">

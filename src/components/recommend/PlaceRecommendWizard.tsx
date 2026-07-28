@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { toast } from 'sonner'
 import {
@@ -33,6 +33,62 @@ const MEALS: { value: MealTime; icon: LucideIcon; label: string; sub: string }[]
   { value: 'dinner', icon: Sunset, label: '저녁', sub: '분위기 있게' },
 ]
 
+type PlaceWizardStep = 1 | 2 | 3 | 'result'
+
+interface PlaceWizardUrlState {
+  step: PlaceWizardStep
+  meal: MealTime | null
+  area: string
+  categoryIds: string[]
+}
+
+function parseMealParam(v: string | null): MealTime | null {
+  return v === 'lunch' || v === 'dinner' ? v : null
+}
+function parseCategoryIdsParam(v: string | null): string[] {
+  return v ? v.split(',').filter(Boolean) : []
+}
+
+function readPlaceWizardUrlState(search: string): PlaceWizardUrlState {
+  const params = new URLSearchParams(search)
+  const stepParam = params.get('step')
+  const step: PlaceWizardStep =
+    stepParam === 'result' ? 'result' : stepParam === '2' || stepParam === '3' ? (Number(stepParam) as 2 | 3) : 1
+  return {
+    step,
+    meal: parseMealParam(params.get('meal')),
+    area: params.get('area') ?? '',
+    categoryIds: parseCategoryIdsParam(params.get('cats')),
+  }
+}
+
+function buildPlaceWizardQuery(s: PlaceWizardUrlState): string {
+  const params = new URLSearchParams()
+  params.set('step', String(s.step))
+  if (s.meal) params.set('meal', s.meal)
+  if (s.area) params.set('area', s.area)
+  if (s.categoryIds.length > 0) params.set('cats', s.categoryIds.join(','))
+  return params.toString()
+}
+
+// 단계 전환은 실제 화면 전환에 대응하므로 next/navigation 라우터(RSC 재요청 유발) 대신
+// 히스토리 API를 직접 사용해 엔트리를 쌓는다 — ListView의 필터 URL 동기화와 동일한 패턴.
+// 모든 전환(다음/이전/처음부터)이 항상 push만 사용 → 뒤로가기 한 번 = 직전에 보였던 화면으로 복귀.
+function pushPlaceWizardState(s: PlaceWizardUrlState) {
+  const qs = buildPlaceWizardQuery(s)
+  window.history.pushState(null, '', `${window.location.pathname}?${qs}`)
+}
+
+// 같은 단계에 머문 채 선택값만 바뀔 때(직전 단계 엔트리에 방금 고른 값을 반영할 때,
+// 동네 입력·카테고리 토글처럼 화면 전환 없이 값만 바뀔 때) 사용 — 새 엔트리를 쌓지 않고
+// "현재 엔트리"를 갱신한다. 이걸 거치지 않으면 어떤 단계를 처음 지나칠 때 저장된
+// (아직 선택 전) 엔트리가 그대로 남아, 뒤로가기로 그 단계에 돌아왔을 때 선택이
+// 안 된 것처럼 보인다.
+function replacePlaceWizardState(s: PlaceWizardUrlState) {
+  const qs = buildPlaceWizardQuery(s)
+  window.history.replaceState(null, '', `${window.location.pathname}?${qs}`)
+}
+
 function StepDots({ step }: { step: number }) {
   return (
     <div className="mb-6 flex justify-center gap-1.5">
@@ -52,19 +108,61 @@ function StepDots({ step }: { step: number }) {
 }
 
 export function PlaceRecommendWizard() {
-  const [step, setStep] = useState<1 | 2 | 3>(1)
+  // 히스토리 back/forward로 이 화면에 처음 진입할 때(예: 새로고침)는 URL의 선택값을 그대로
+  // 초기 state로 복원한다. result 데이터는 URL에 담기지 않으므로 result 단계로는 복원하지 않는다.
+  const initialUrlStateRef = useRef<PlaceWizardUrlState | null>(null)
+  if (initialUrlStateRef.current === null && typeof window !== 'undefined') {
+    initialUrlStateRef.current = readPlaceWizardUrlState(window.location.search)
+  }
+  const initialUrlState = initialUrlStateRef.current
+
+  const [step, setStep] = useState<1 | 2 | 3>(() => {
+    const s = initialUrlState?.step ?? 1
+    return s === 'result' ? 3 : s
+  })
   const [showResult, setShowResult] = useState(false)
-  const [meal, setMeal] = useState<MealTime | null>(null)
-  const [area, setArea] = useState('')
-  const [categoryIds, setCategoryIds] = useState<string[]>([])
+  const [meal, setMeal] = useState<MealTime | null>(() => initialUrlState?.meal ?? null)
+  const [area, setArea] = useState(() => initialUrlState?.area ?? '')
+  const [categoryIds, setCategoryIds] = useState<string[]>(() => initialUrlState?.categoryIds ?? [])
   const [result, setResult] = useState<PlaceRecommendResponse | null>(null)
 
   const cats = usePlaceCategories()
   const recommend = useRecommendPlace()
 
+  // 브라우저/OS 뒤로가기(모바일 스와이프 포함) 시 URL → state 역동기화.
+  // result 데이터가 메모리에 없는 채로 step=result를 만나면(새로고침 등) 결과 화면 대신
+  // 마지막 입력 단계로 대체한다.
+  useEffect(() => {
+    function handlePopState() {
+      const next = readPlaceWizardUrlState(window.location.search)
+      setMeal(next.meal)
+      setArea(next.area)
+      setCategoryIds(next.categoryIds)
+
+      if (next.step === 'result') {
+        if (result) {
+          setShowResult(true)
+        } else {
+          setShowResult(false)
+          setStep(3)
+        }
+      } else {
+        setShowResult(false)
+        setStep(next.step)
+      }
+    }
+
+    window.addEventListener('popstate', handlePopState)
+    return () => window.removeEventListener('popstate', handlePopState)
+  }, [result])
+
   function run(overrideCategories?: string[]) {
     if (!meal) return
     const ids = overrideCategories ?? categoryIds
+    // run()은 step3→결과 진입과 결과 화면 내 재조회("다른 추천 보기") 모두에서 호출된다 —
+    // 히스토리 엔트리는 "결과 화면 진입" 그 자체에서만 한 번 쌓아야 하므로, 호출 시점에
+    // 아직 결과 화면이 아니었을 때만(=최초 진입) push 한다.
+    const enteringResult = !showResult
     recommend.mutate(
       {
         meal_time: meal,
@@ -75,6 +173,9 @@ export function PlaceRecommendWizard() {
         onSuccess: (data) => {
           setResult(data)
           setShowResult(true)
+          if (enteringResult) {
+            pushPlaceWizardState({ step: 'result', meal, area, categoryIds: ids })
+          }
         },
         onError: (e) =>
           toast.error(e instanceof Error ? e.message : '추천 중 오류가 발생했습니다.'),
@@ -89,10 +190,17 @@ export function PlaceRecommendWizard() {
     setMeal(null)
     setArea('')
     setCategoryIds([])
+    pushPlaceWizardState({ step: 1, meal: null, area: '', categoryIds: [] })
   }
 
   function toggleCat(id: string) {
-    setCategoryIds((prev) => (prev.includes(id) ? prev.filter((c) => c !== id) : [...prev, id]))
+    setCategoryIds((prev) => {
+      const next = prev.includes(id) ? prev.filter((c) => c !== id) : [...prev, id]
+      // 화면 전환 없이 같은 단계(step3)에 머무는 값 변경 — 새 엔트리를 쌓지 않고
+      // 현재 엔트리만 갱신해 뒤로가기/앞으로가기로 돌아왔을 때도 반영되게 한다.
+      replacePlaceWizardState({ step, meal, area, categoryIds: next })
+      return next
+    })
   }
 
   // ── 결과 화면 ──
@@ -233,6 +341,10 @@ export function PlaceRecommendWizard() {
                     onClick={() => {
                       setMeal(m.value)
                       setStep(2)
+                      // 방금 고른 값을 "떠나는" step1 엔트리에도 반영 — 뒤로가기로 이 단계에
+                      // 돌아왔을 때 방금 고른 값이 미선택 상태로 보이지 않도록.
+                      replacePlaceWizardState({ step: 1, meal: m.value, area, categoryIds })
+                      pushPlaceWizardState({ step: 2, meal: m.value, area, categoryIds })
                     }}
                     className={cn(
                       'flex flex-col items-center gap-1 rounded-xl border p-5 transition-all',
@@ -260,18 +372,34 @@ export function PlaceRecommendWizard() {
             </p>
             <Input
               value={area}
-              onChange={(e) => setArea(e.target.value)}
+              onChange={(e) => {
+                const next = e.target.value
+                setArea(next)
+                // 텍스트 입력은 화면 전환이 아니므로 push 대신 현재(step2) 엔트리만 갱신 —
+                // 키 입력마다 히스토리가 쌓이지 않으면서도 뒤로가기 시 입력값이 보존된다.
+                replacePlaceWizardState({ step: 2, meal, area: next, categoryIds })
+              }}
               placeholder="예: 마포, 강남, 성수동"
               autoFocus
             />
             <div className="space-y-2 pt-2">
               <Button
                 className={cn('h-10 w-full text-white hover:brightness-105', styles.detailPrimaryBtn)}
-                onClick={() => setStep(3)}
+                onClick={() => {
+                  setStep(3)
+                  pushPlaceWizardState({ step: 3, meal, area, categoryIds })
+                }}
               >
                 다음
               </Button>
-              <Button variant="outline" className="h-10 w-full" onClick={() => setStep(1)}>
+              <Button
+                variant="outline"
+                className="h-10 w-full"
+                onClick={() => {
+                  setStep(1)
+                  pushPlaceWizardState({ step: 1, meal, area, categoryIds })
+                }}
+              >
                 이전
               </Button>
             </div>
@@ -312,7 +440,14 @@ export function PlaceRecommendWizard() {
                 )}
                 {recommend.isPending ? '추천 받는 중...' : '추천 받기'}
               </Button>
-              <Button variant="outline" className="h-10 w-full" onClick={() => setStep(2)}>
+              <Button
+                variant="outline"
+                className="h-10 w-full"
+                onClick={() => {
+                  setStep(2)
+                  pushPlaceWizardState({ step: 2, meal, area, categoryIds })
+                }}
+              >
                 이전
               </Button>
             </div>

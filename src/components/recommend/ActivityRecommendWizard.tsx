@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { toast } from 'sonner'
 import {
@@ -42,6 +42,75 @@ const DURATIONS: { value: DurationBucket; icon: LucideIcon; label: string; sub: 
   { value: 'overnight', icon: Moon, label: '1박 이상', sub: '멀리 떠나기' },
 ]
 
+type ActivityWizardStep = 1 | 2 | 3 | 4 | 'result'
+
+interface ActivityWizardUrlState {
+  step: ActivityWizardStep
+  duration: DurationBucket | null
+  timeOfDay: TimeOfDay | null
+  locationType: LocationType | null
+  categoryIds: string[]
+}
+
+function parseDurationParam(v: string | null): DurationBucket | null {
+  return v === 'half' || v === 'full' || v === 'overnight' ? v : null
+}
+function parseTimeOfDayParam(v: string | null): TimeOfDay | null {
+  return v === 'day' || v === 'night' || v === 'any' ? v : null
+}
+function parseLocationTypeParam(v: string | null): LocationType | null {
+  return v === 'indoor' || v === 'outdoor' ? v : null
+}
+function parseCategoryIdsParam(v: string | null): string[] {
+  return v ? v.split(',').filter(Boolean) : []
+}
+
+function readActivityWizardUrlState(search: string): ActivityWizardUrlState {
+  const params = new URLSearchParams(search)
+  const stepParam = params.get('step')
+  const step: ActivityWizardStep =
+    stepParam === 'result'
+      ? 'result'
+      : stepParam === '2' || stepParam === '3' || stepParam === '4'
+        ? (Number(stepParam) as 2 | 3 | 4)
+        : 1
+  return {
+    step,
+    duration: parseDurationParam(params.get('duration')),
+    timeOfDay: parseTimeOfDayParam(params.get('time')),
+    locationType: parseLocationTypeParam(params.get('loc')),
+    categoryIds: parseCategoryIdsParam(params.get('cats')),
+  }
+}
+
+function buildActivityWizardQuery(s: ActivityWizardUrlState): string {
+  const params = new URLSearchParams()
+  params.set('step', String(s.step))
+  if (s.duration) params.set('duration', s.duration)
+  if (s.timeOfDay) params.set('time', s.timeOfDay)
+  if (s.locationType) params.set('loc', s.locationType)
+  if (s.categoryIds.length > 0) params.set('cats', s.categoryIds.join(','))
+  return params.toString()
+}
+
+// 단계 전환은 실제 화면 전환에 대응하므로 next/navigation 라우터(RSC 재요청 유발) 대신
+// 히스토리 API를 직접 사용해 엔트리를 쌓는다 — ListView의 필터 URL 동기화와 동일한 패턴.
+// 모든 전환(다음/이전/처음부터)이 항상 push만 사용 → 뒤로가기 한 번 = 직전에 보였던 화면으로 복귀.
+function pushActivityWizardState(s: ActivityWizardUrlState) {
+  const qs = buildActivityWizardQuery(s)
+  window.history.pushState(null, '', `${window.location.pathname}?${qs}`)
+}
+
+// 같은 단계에 머문 채 선택값만 바뀔 때(직전 단계 엔트리에 방금 고른 값을 반영할 때,
+// 카테고리 토글처럼 화면 전환 없이 값만 바뀔 때) 사용 — 새 엔트리를 쌓지 않고
+// "현재 엔트리"를 갱신한다. 이걸 거치지 않으면 어떤 단계를 처음 지나칠 때 저장된
+// (아직 선택 전) 엔트리가 그대로 남아, 뒤로가기로 그 단계에 돌아왔을 때 선택이
+// 안 된 것처럼 보인다.
+function replaceActivityWizardState(s: ActivityWizardUrlState) {
+  const qs = buildActivityWizardQuery(s)
+  window.history.replaceState(null, '', `${window.location.pathname}?${qs}`)
+}
+
 function StepDots({ step, steps }: { step: number; steps: number[] }) {
   return (
     <div className="mb-6 flex justify-center gap-1.5">
@@ -61,17 +130,64 @@ function StepDots({ step, steps }: { step: number; steps: number[] }) {
 }
 
 export function ActivityRecommendWizard() {
-  const [step, setStep] = useState<1 | 2 | 3 | 4>(1)
+  // 히스토리 back/forward로 이 화면에 처음 진입할 때(예: 새로고침)는 URL의 선택값을 그대로
+  // 초기 state로 복원한다. result 데이터는 URL에 담기지 않으므로 result 단계로는 복원하지 않는다.
+  const initialUrlStateRef = useRef<ActivityWizardUrlState | null>(null)
+  if (initialUrlStateRef.current === null && typeof window !== 'undefined') {
+    initialUrlStateRef.current = readActivityWizardUrlState(window.location.search)
+  }
+  const initialUrlState = initialUrlStateRef.current
+
+  const [step, setStep] = useState<1 | 2 | 3 | 4>(() => {
+    const s = initialUrlState?.step ?? 1
+    return s === 'result' ? 4 : s
+  })
   const [showResult, setShowResult] = useState(false)
-  const [duration, setDuration] = useState<DurationBucket | null>(null)
-  const [timeOfDay, setTimeOfDay] = useState<TimeOfDay | null>(null)
-  const [locationType, setLocationType] = useState<LocationType | null>(null)
-  const [categoryIds, setCategoryIds] = useState<string[]>([])
+  const [duration, setDuration] = useState<DurationBucket | null>(
+    () => initialUrlState?.duration ?? null
+  )
+  const [timeOfDay, setTimeOfDay] = useState<TimeOfDay | null>(
+    () => initialUrlState?.timeOfDay ?? null
+  )
+  const [locationType, setLocationType] = useState<LocationType | null>(
+    () => initialUrlState?.locationType ?? null
+  )
+  const [categoryIds, setCategoryIds] = useState<string[]>(
+    () => initialUrlState?.categoryIds ?? []
+  )
   const [includeShorter, setIncludeShorter] = useState(false)
   const [result, setResult] = useState<ActivityRecommendResponse | null>(null)
 
   const cats = useActivityCategories()
   const recommend = useRecommendActivity()
+
+  // 브라우저/OS 뒤로가기(모바일 스와이프 포함) 시 URL → state 역동기화.
+  // result 데이터가 메모리에 없는 채로 step=result를 만나면(새로고침 등) 결과 화면 대신
+  // 마지막 입력 단계로 대체한다.
+  useEffect(() => {
+    function handlePopState() {
+      const next = readActivityWizardUrlState(window.location.search)
+      setDuration(next.duration)
+      setTimeOfDay(next.timeOfDay)
+      setLocationType(next.locationType)
+      setCategoryIds(next.categoryIds)
+
+      if (next.step === 'result') {
+        if (result) {
+          setShowResult(true)
+        } else {
+          setShowResult(false)
+          setStep(4)
+        }
+      } else {
+        setShowResult(false)
+        setStep(next.step)
+      }
+    }
+
+    window.addEventListener('popstate', handlePopState)
+    return () => window.removeEventListener('popstate', handlePopState)
+  }, [result])
 
   // overnight(1박 이상)은 시간대 단계를 건너뛴다 → 표시 단계도 3개([1,3,4])
   const steps = duration === 'overnight' ? [1, 3, 4] : [1, 2, 3, 4]
@@ -80,6 +196,10 @@ export function ActivityRecommendWizard() {
     if (!duration) return
     const ids = overrideCategories ?? categoryIds
     const shorter = overrideShorter ?? includeShorter
+    // run()은 step4→결과 진입과 결과 화면 내 재조회(다른 추천 보기/더 짧은 일정) 모두에서
+    // 호출된다 — 히스토리 엔트리는 "결과 화면 진입" 그 자체에서만 한 번 쌓아야 하므로,
+    // 호출 시점에 아직 결과 화면이 아니었을 때만(=최초 진입) push 한다.
+    const enteringResult = !showResult
     recommend.mutate(
       {
         duration_bucket: duration,
@@ -94,6 +214,15 @@ export function ActivityRecommendWizard() {
           setShowResult(true)
           // 토글 상태는 요청 성공 후에 확정 — 로딩 중엔 직전 상태(라벨/색) 유지, 실패 시 불변
           setIncludeShorter(shorter)
+          if (enteringResult) {
+            pushActivityWizardState({
+              step: 'result',
+              duration,
+              timeOfDay,
+              locationType,
+              categoryIds: ids,
+            })
+          }
         },
         onError: (e) =>
           toast.error(e instanceof Error ? e.message : '추천 중 오류가 발생했습니다.'),
@@ -115,10 +244,23 @@ export function ActivityRecommendWizard() {
     setLocationType(null)
     setCategoryIds([])
     setIncludeShorter(false)
+    pushActivityWizardState({
+      step: 1,
+      duration: null,
+      timeOfDay: null,
+      locationType: null,
+      categoryIds: [],
+    })
   }
 
   function toggleCat(id: string) {
-    setCategoryIds((prev) => (prev.includes(id) ? prev.filter((c) => c !== id) : [...prev, id]))
+    setCategoryIds((prev) => {
+      const next = prev.includes(id) ? prev.filter((c) => c !== id) : [...prev, id]
+      // 화면 전환 없이 같은 단계(step4)에 머무는 값 변경 — 새 엔트리를 쌓지 않고
+      // 현재 엔트리만 갱신해 뒤로가기/앞으로가기로 돌아왔을 때도 반영되게 한다.
+      replaceActivityWizardState({ step, duration, timeOfDay, locationType, categoryIds: next })
+      return next
+    })
   }
 
   // ── 결과 화면 ──
@@ -321,14 +463,31 @@ export function ActivityRecommendWizard() {
                     key={d.value}
                     type="button"
                     onClick={() => {
+                      const isOvernight = d.value === 'overnight'
+                      const nextTimeOfDay = isOvernight ? null : timeOfDay
+                      const nextStep = isOvernight ? 3 : 2
                       setDuration(d.value)
-                      if (d.value === 'overnight') {
+                      if (isOvernight) {
                         // 1박 이상은 낮/밤 구분이 무의미 → 시간대 단계 건너뛰고 바로 실내/실외로
                         setTimeOfDay(null)
-                        setStep(3)
-                      } else {
-                        setStep(2)
                       }
+                      setStep(nextStep)
+                      // 방금 고른 값을 "떠나는" step1 엔트리에도 반영 — 그래야 이후 이
+                      // 단계로 되돌아왔을 때(뒤로가기 포함) 방금 고른 값이 그대로 활성 표시된다.
+                      replaceActivityWizardState({
+                        step: 1,
+                        duration: d.value,
+                        timeOfDay: nextTimeOfDay,
+                        locationType,
+                        categoryIds,
+                      })
+                      pushActivityWizardState({
+                        step: nextStep,
+                        duration: d.value,
+                        timeOfDay: nextTimeOfDay,
+                        locationType,
+                        categoryIds,
+                      })
                     }}
                     className={cn(
                       'flex w-full items-center gap-3 rounded-xl border p-4 text-left transition-all',
@@ -367,6 +526,22 @@ export function ActivityRecommendWizard() {
                     onClick={() => {
                       setTimeOfDay(t.value)
                       setStep(3)
+                      // 방금 고른 값을 "떠나는" step2 엔트리에도 반영 — 뒤로가기로 이 단계에
+                      // 돌아왔을 때 방금 고른 값이 미선택 상태로 보이지 않도록.
+                      replaceActivityWizardState({
+                        step: 2,
+                        duration,
+                        timeOfDay: t.value,
+                        locationType,
+                        categoryIds,
+                      })
+                      pushActivityWizardState({
+                        step: 3,
+                        duration,
+                        timeOfDay: t.value,
+                        locationType,
+                        categoryIds,
+                      })
                     }}
                     className={cn(
                       'flex flex-col items-center justify-center gap-1 rounded-xl border p-3 transition-all',
@@ -389,7 +564,16 @@ export function ActivityRecommendWizard() {
               <Button
                 variant="outline"
                 className="h-10 w-full"
-                onClick={() => setStep(1)}
+                onClick={() => {
+                  setStep(1)
+                  pushActivityWizardState({
+                    step: 1,
+                    duration,
+                    timeOfDay,
+                    locationType,
+                    categoryIds,
+                  })
+                }}
               >
                 이전
               </Button>
@@ -413,6 +597,22 @@ export function ActivityRecommendWizard() {
                     onClick={() => {
                       setLocationType(o.value)
                       setStep(4)
+                      // 방금 고른 값을 "떠나는" step3 엔트리에도 반영 — 뒤로가기로 이 단계에
+                      // 돌아왔을 때 방금 고른 값이 미선택 상태로 보이지 않도록.
+                      replaceActivityWizardState({
+                        step: 3,
+                        duration,
+                        timeOfDay,
+                        locationType: o.value,
+                        categoryIds,
+                      })
+                      pushActivityWizardState({
+                        step: 4,
+                        duration,
+                        timeOfDay,
+                        locationType: o.value,
+                        categoryIds,
+                      })
                     }}
                     className={cn(
                       'flex flex-col items-center justify-center gap-1 rounded-xl border p-3 transition-all',
@@ -440,6 +640,20 @@ export function ActivityRecommendWizard() {
                 onClick={() => {
                   setLocationType(null)
                   setStep(4)
+                  replaceActivityWizardState({
+                    step: 3,
+                    duration,
+                    timeOfDay,
+                    locationType: null,
+                    categoryIds,
+                  })
+                  pushActivityWizardState({
+                    step: 4,
+                    duration,
+                    timeOfDay,
+                    locationType: null,
+                    categoryIds,
+                  })
                 }}
               >
                 다음
@@ -447,7 +661,17 @@ export function ActivityRecommendWizard() {
               <Button
                 variant="outline"
                 className="h-10 w-full"
-                onClick={() => setStep(duration === 'overnight' ? 1 : 2)}
+                onClick={() => {
+                  const prevStep = duration === 'overnight' ? 1 : 2
+                  setStep(prevStep)
+                  pushActivityWizardState({
+                    step: prevStep,
+                    duration,
+                    timeOfDay,
+                    locationType,
+                    categoryIds,
+                  })
+                }}
               >
                 이전
               </Button>
@@ -492,7 +716,16 @@ export function ActivityRecommendWizard() {
               <Button
                 variant="outline"
                 className="h-10 w-full"
-                onClick={() => setStep(3)}
+                onClick={() => {
+                  setStep(3)
+                  pushActivityWizardState({
+                    step: 3,
+                    duration,
+                    timeOfDay,
+                    locationType,
+                    categoryIds,
+                  })
+                }}
               >
                 이전
               </Button>

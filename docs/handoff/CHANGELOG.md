@@ -2,7 +2,7 @@
 
 > **마지막 업데이트: 2026-07-29**
 
-> 260531~260728 핸드오프 전체를 날짜순으로 기록한 변경 이력입니다. 새 AI는 일반적으로 `PROJECT_CONTEXT.md`와 `CURRENT_STATE.md`만 먼저 읽고, 과거 판단 근거가 필요할 때 이 문서를 참고하세요.
+> 260531~260729 핸드오프 전체를 날짜순으로 기록한 변경 이력입니다. 새 AI는 일반적으로 `PROJECT_CONTEXT.md`와 `CURRENT_STATE.md`만 먼저 읽고, 과거 판단 근거가 필요할 때 이 문서를 참고하세요.
 
 ---
 
@@ -535,36 +535,11 @@
 
 ---
 
-## 2026-07-29 — 추천위저드 네비게이션 회귀 방지 테스트·CI 신규 도입
+## 2026-07-29 — 자동화 테스트·CI 도입 + P2 리팩터 배치(dark/hover/focus·추천위저드 히스토리·폼-API 검증)
 
-- 프로젝트 최초로 자동화 테스트·GitHub Actions 도입 (PR #91 squash `ce99df4`, 2커밋) — `test/recommend-navigation-regression`: 그 전까지는 `npm run build`/`npm run lint`와 세션 내 1회성 Playwright 클릭 검증(위 PR #88~90 기록)뿐, 저장소에 남는 테스트 코드나 CI 워크플로는 없었음. 후속 커밋에서 CURRENT_STATE.md의 아이폰 실기기 검증 상태 모순(사용자 실기기 검증 완료 vs 문서상 "미실행")도 함께 정정
-- 단위 테스트 도구로 Vitest(+jsdom) 채택 — 위저드 컴포넌트 내부에만 있던 URL 파싱/직렬화 순수 함수를 `src/lib/recommend/activityWizardUrl.ts`·`placeWizardUrl.ts`·`wizardUrl.ts`로 기계적으로 추출(로직 변경 없음, import 교체만), `resultCache.ts`·`listReturn.ts`는 이미 독립 모듈이라 그대로 테스트. 5개 파일 42개 테스트 — URL 파싱/직렬화 왕복, 잘못된 step·enum 기본값 처리, 결과 캐시 conditionsKey 일치/불일치·손상 JSON, returnTo 허용 목록·오픈 리다이렉트 차단
-- E2E는 Playwright — 인증(Supabase 조회 없이 `iron-session` `sealData`로 세션 쿠키 직접 발급)과 카테고리/추천 API(브라우저 레벨 `page.route` mocking)를 모두 DB 없이 우회해 CI에서 안정적으로 실행. 활동 위저드 1단계 선택→다음 단계→브라우저 뒤로가기 시 단계·선택값 유지 1건, 다이닝 위저드 결과 화면 returnTo 정확성 + 동일 URL 재진입 시 재조회 없이 세션 캐시 복원 1건. 실제 `/places/[id]` 상세 화면은 서버 컴포넌트가 Supabase를 직접 조회해 DB 없이는 자동화 불가로 판단 — 카드 returnTo href 검증 + 캐시 복원 검증으로 대체하고 실제 상세 화면 왕복은 기존 아이폰 실기기 수동 검증으로 유지
-- `package.json`에 `test`(vitest run)·`test:e2e`(playwright test)·`ci`(lint+test+build) 스크립트 신규 추가, 기존 `dev`/`build`/`start`/`lint` 무변경. `.github/workflows/ci.yml` 신규 — PR/main push에서 `npm ci`→lint→단위 테스트→build(verify job), 별도 e2e job에서 Playwright 실행
-- 회귀 탐지 실효성 확인: `getSafeListReturnTo`의 오픈 리다이렉트 가드와 `PlaceRecommendWizard`의 결과 캐시 저장 호출을 각각 한 번씩 임시로 무력화해 단위 테스트·E2E가 실제로 실패하는 것을 확인한 뒤 원복(diff 0)
-- 검증: `npm run lint` PASS, `npm run test`(42/42) PASS, `npm run build` PASS, `npm run test:e2e`(2/2) PASS. 기존 위저드 UI·문구·URL 파라미터명·History API 동작·sessionStorage 키·returnTo 정책 무변경(순수 함수 추출 외 로직 변경 없음)
-- 배경·설계 근거 → PROJECT_CONTEXT §13·§20 (테스트 인프라 관련 신규 절 필요 시 다음 세션에서 추가)
-
----
-
-## 2026-07-29 v2 — P2 리팩터 배치: dark/hover/focus 정합화·추천위저드 히스토리 공통화·폼-API 검증 정합화
-
-- **dark/hover/focus 상태 정합화 (PR #93 squash `4c58323`)** — `refactor/audit-dark-hover-focus`: 기술 백로그 그룹 1·2 착수
-  - `button.tsx`의 죽은 `dark:` Tailwind 클래스 3곳(`dark:aria-invalid:*`, ghost의 `dark:hover:bg-muted/50`, destructive의 `dark:focus-visible:ring-destructive/40`) 제거 — 앱이 `.dark` 클래스를 쓰지 않고 `prefers-color-scheme` 기반으로 동작해 절대 발동하지 않던 코드. `select.tsx`/`tabs.tsx`에도 동일 패턴이 있으나 앱 어디서도 import되지 않는 미사용 컴포넌트로 확인 후 범위 제외
-  - shadcn Button 전 variant(default·secondary·outline·ghost·link·destructive)의 focus-visible 링을 정적 `--ring`에서 화면 전체가 쓰는 다크 대응 토큰 `--s-focus-ring`으로 통일(그룹 2 종결) — Primary 버튼처럼 채움색이 보라 계열(`#7c3aed`)인 컨트롤이 다크에서 링과 겹쳐 안 보이던 문제 해소. `[data-slot='button']` 순수 속성 선택자는 CSS Module의 pure-selector 제약에 걸려 `screens.module.css`에 둘 수 없고, `globals.css`에 두면 이 프로젝트 Tailwind v3(`@layer` 미사용)의 유틸리티 방출 순서가 소스 위치와 무관하게 재배치돼 일반 명시도로 이기지 못함을 빌드 산출물로 직접 확인 — 코드베이스 유일한 `!important` 사용으로 고정(SKILL.md §5에 근거 문서화)
-  - `.detailDeleteBtn` 라이트 hover 불투명도(`/0.15`)를 공용 토큰(`--s-destructive-soft-bg`, `/0.10`)과 통일 — 라이트 시각이 옅어지는 변경이라 사용자 사인오프 받아 적용(다크는 이 표면 전용값 `/0.20`·`/0.26` 그대로 유지)
-  - Playwright로 라이트/다크(OS `prefers-color-scheme` 에뮬레이션) + 실제 키보드 Tab 포커스를 렌더링해 focus-visible box-shadow가 정확히 전환됨을 computed style로 검증. `npm run lint`/`test`(42/42)/`build` PASS, 기존 E2E 2/2 PASS
-- **추천위저드 History/URL 동기화 공통화 (PR #94 squash `b91b056`)** — `refactor/share-recommend-history`: `ActivityRecommendWizard`/`PlaceRecommendWizard`에 거의 동일하게 중복돼 있던 URL 상태 동기화·History API·popstate·결과 캐시 복원 흐름 정리
-  - `useWizardUrlSync` 훅(신규, `src/hooks/`) — 마운트 1회+popstate마다 URL을 읽어 `handler(next, source)`를 호출. `source`(`'mount'`/`'popstate'`)로 두 시점을 구분해, 컴포넌트당 마운트/popstate 두 벌씩 있던 "URL→state 반영+step=result 분기" 로직을 한 벌로 통합. handler는 ref로 항상 최신 클로저를 참조해 기존 `[result]` deps와 동일한 동작을 별도 배열 없이 재현
-  - `wizardUrl.ts`에 `pushWizardUrl`/`replaceWizardUrl`(History API 배선+전략 설명)과 `currentWizardUrl`(결과 카드 returnTo 계산) 추가, 각 위저드의 `pushXWizardState`/`replaceXWizardState`는 도메인 쿼리만 만들어 위임하는 1~2줄 래퍼로 축소
-  - URL 파라미터명·형식, sessionStorage 캐시 정책, 사용자 동작 무변경. 활동·다이닝 도메인 차이(필드 구성·overnight 스킵·카테고리 단계 번호 등)는 각 컴포넌트에 그대로 유지
-  - Vitest 45/45(기존 42+신규 3: `pushWizardUrl`/`replaceWizardUrl`/`currentWizardUrl` 회귀), 기존 E2E 2/2 PASS. 다단계 뒤로가기 연속 3회·결과 화면 재진입 후 앞으로가기 시 메모리 결과 재사용(재조회 없음)을 별도 스모크로 확인 후 커밋 미포함. `npm run lint`/`build` PASS
-- **폼-API 입력 검증 정합화 (PR #95 squash `f2055eb`)** — `refactor/unify-form-api-validation`: `ActivityForm`/`PlaceForm`과 `/api/activities`·`/api/places` 관련 라우트의 중복 입력 검증 정리, 잘못된 API 입력을 500 대신 400으로 통일
-  - `src/lib/schemas/apiFields.ts`(신규) — `title`(1~100자)·`category_id`(uuid, optional/nullable)·`location`(≤200자)·`memo`(≤1000자)·`reference_url`(URL 유효성+빈 문자열/null 허용)을 activities·places의 create·patch 스키마 4벌이 공유. patch 스키마에서 누락돼 있던 커스텀 에러 메시지(zod 기본 영문 메시지로 새던 불일치)도 함께 정정. `status`/`visited_at`/`rating`/`review_note`(patch 공통), `apiListQueryBase`(GET 목록 공통 status·category_id·q), `splitCommaIds`도 공유. 폼의 빈 문자열→null 정규화는 `emptyToNull`로 통일
-  - `src/lib/api/validation.ts`(신규) — `readJsonBody`(손상된 JSON 본문을 500 대신 400으로), `zodErrorResponse`(4개 라우트 공통 400 응답 포맷)
-  - GET 목록 라우트 2곳에 쿼리 파라미터 Zod 검증 추가(잘못된 `status`/`duration_bucket`/`meal_time` 등은 400), activities·places 도메인 고유 필드(`duration_bucket`/`time_of_day`/`location_type`/`visited_end_at` vs `area`/`meal_times`)는 억지 통합 없이 각 라우트에 유지
-  - `ActivityForm.tsx`/`PlaceForm.tsx`의 raw `fetch`+`res.json()`을 앱 전역에서 이미 쓰이던 `fetchJson`(`@/hooks/fetcher`)+try/catch로 교체 — 네트워크 실패·JSON 파싱 실패·비정상 응답(502 HTML 등)도 `err instanceof Error ? err.message : '저장 중 오류가 발생했습니다.'` 토스트로 안전 처리(`ActivityDetail`/`PlaceDetail`의 `onSaveInfo` 등 다른 화면과 동일 관용구로 통일)
-  - DB 스키마·마이그레이션 변경 없음, API 성공 응답 형식·UI 문구 변경 없음, 폼을 공통 컴포넌트로 합치지 않음
-  - Vitest 81/81(기존 45+신규 36: 공유 스키마 18건, 라우트 핸들러를 `NextRequest`로 직접 호출하는 GET 쿼리·POST/PATCH 400 검증 18건 — 실패 경로는 Supabase 호출 전에 끝나 DB 없이도 안정적), 기존 E2E 2/2 PASS. 폼 submit 성공/400 에러/비-JSON 502 응답 3가지 경로를 스모크로 확인 후 커밋 미포함. `npx tsc --noEmit`/`npm run lint`/`build` PASS
-- 세 PR 모두 GitHub Actions CI(lint→test→build, e2e job) success 확인 후 squash merge, 브랜치 정리·main 최신화 완료
-- SKILL.md는 PR #93에서만 갱신(디자인 정책 변경 있는 유일한 건) — `.detailDeleteBtn` 백로그 항목 해결 표시, shadcn Button `!important` 오버라이드 근거 §5에 신규 기록. PR #94·#95는 순수 로직/아키텍처 리팩터로 디자인 정책 변경 없어 SKILL.md 무변경
+- 자동화 테스트·GitHub Actions 도입 (PR #91 squash `ce99df4`) — 프로젝트 최초 Vitest 단위 테스트 42건 + Playwright E2E 2건, `.github/workflows/ci.yml` 신규(verify+e2e job). lint/test/build/test:e2e 전부 PASS
+- dark/hover/focus 상태 정합화 (PR #93 squash `4c58323`) — 기술 백로그 그룹 1·2 착수: 죽은 Tailwind `dark:` 클래스 제거, shadcn Button 전 variant의 focus-visible 링을 다크 대응 토큰으로 통일, `.detailDeleteBtn` 라이트 hover 정합(사용자 사인오프 확인). SKILL.md §5 갱신. lint/test(42)/build/E2E PASS
+- 추천위저드 History/URL 동기화 공통화 (PR #94 squash `b91b056`) — 활동·다이닝 위저드에 중복돼 있던 URL↔state 동기화·History API·결과 캐시 복원 로직을 공통 훅/유틸로 추출. URL 파라미터·캐시 정책·사용자 동작 무변경. test(45)/build/E2E PASS
+- 폼-API 입력 검증 정합화 (PR #95 squash `f2055eb`) — activities·places API 입력 검증 스키마를 공유 모듈로 통합, GET 쿼리 검증 추가, 잘못된 입력을 500 대신 400으로 통일. 폼 submit 에러 처리도 안전화. tsc/lint/test(81)/build/E2E PASS
+- 핸드오프 문서(CURRENT_STATE·CHANGELOG·PROJECT_CONTEXT) 오늘자 반영 (PR #96·#97, 문서 전용)
+- 현재 상태 → PROJECT_CONTEXT §2·§5

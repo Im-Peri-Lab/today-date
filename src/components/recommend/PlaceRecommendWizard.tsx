@@ -25,6 +25,12 @@ import {
   type PlaceRecommendResponse,
 } from '@/hooks/useRecommend'
 import { readPlaceResult, stashPlaceResult } from '@/lib/recommend/resultCache'
+import {
+  type PlaceWizardUrlState,
+  readPlaceWizardUrlState,
+  buildPlaceWizardQuery,
+  placeConditionsKey,
+} from '@/lib/recommend/placeWizardUrl'
 import { cn } from '@/lib/utils'
 import styles from '@/components/screens.module.css'
 import type { MealTime } from '@/types'
@@ -33,51 +39,6 @@ const MEALS: { value: MealTime; icon: LucideIcon; label: string; sub: string }[]
   { value: 'lunch', icon: Utensils, label: '점심', sub: '가볍게 한 끼' },
   { value: 'dinner', icon: Sunset, label: '저녁', sub: '분위기 있게' },
 ]
-
-type PlaceWizardStep = 1 | 2 | 3 | 'result'
-
-interface PlaceWizardUrlState {
-  step: PlaceWizardStep
-  meal: MealTime | null
-  area: string
-  categoryIds: string[]
-}
-
-function parseMealParam(v: string | null): MealTime | null {
-  return v === 'lunch' || v === 'dinner' ? v : null
-}
-function parseCategoryIdsParam(v: string | null): string[] {
-  return v ? v.split(',').filter(Boolean) : []
-}
-
-function readPlaceWizardUrlState(search: string): PlaceWizardUrlState {
-  const params = new URLSearchParams(search)
-  const stepParam = params.get('step')
-  const step: PlaceWizardStep =
-    stepParam === 'result' ? 'result' : stepParam === '2' || stepParam === '3' ? (Number(stepParam) as 2 | 3) : 1
-  return {
-    step,
-    meal: parseMealParam(params.get('meal')),
-    area: params.get('area') ?? '',
-    categoryIds: parseCategoryIdsParam(params.get('cats')),
-  }
-}
-
-function buildPlaceWizardQuery(s: PlaceWizardUrlState): string {
-  const params = new URLSearchParams()
-  params.set('step', String(s.step))
-  if (s.meal) params.set('meal', s.meal)
-  if (s.area) params.set('area', s.area)
-  if (s.categoryIds.length > 0) params.set('cats', s.categoryIds.join(','))
-  return params.toString()
-}
-
-// 결과 캐시(resultCache.ts) 무효화 키 — 선택 조건만으로 구성(step은 항상 고정값이라 무관).
-function placeConditionsKey(
-  s: Pick<PlaceWizardUrlState, 'meal' | 'area' | 'categoryIds'>
-): string {
-  return buildPlaceWizardQuery({ step: 'result', ...s })
-}
 
 // 단계 전환은 실제 화면 전환에 대응하므로 next/navigation 라우터(RSC 재요청 유발) 대신
 // 히스토리 API를 직접 사용해 엔트리를 쌓는다 — ListView의 필터 URL 동기화와 동일한 패턴.

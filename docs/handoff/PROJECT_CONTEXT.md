@@ -1,8 +1,8 @@
 # PROJECT_CONTEXT.md
 
-> **마지막 업데이트: 2026-07-28**
+> **마지막 업데이트: 2026-07-29**
 
-> 이 문서는 Today Date 프로젝트의 장기 컨텍스트입니다. 260531~260728 전체 핸드오프를 다시 읽고, 초기 컨텍스트에서 이후 작업으로 변경·확정된 내용을 반영한 최신본입니다. 새 AI에게는 이 파일과 `CURRENT_STATE.md`를 먼저 전달하고, 과거 의사결정 확인이 필요할 때만 `CHANGELOG.md`를 참고하게 하세요.
+> 이 문서는 Today Date 프로젝트의 장기 컨텍스트입니다. 260531~260729 전체 핸드오프를 다시 읽고, 초기 컨텍스트에서 이후 작업으로 변경·확정된 내용을 반영한 최신본입니다. 새 AI에게는 이 파일과 `CURRENT_STATE.md`를 먼저 전달하고, 과거 의사결정 확인이 필요할 때만 `CHANGELOG.md`를 참고하게 하세요.
 
 ---
 
@@ -38,6 +38,14 @@
 - lucide-react 아이콘
 - nextjs-toploader
 - 날짜 입력: **네이티브 `<input type="date">`** — 커스텀 date picker 재도입 금지
+- Zod — API 요청 검증. 생성/수정 스키마는 도메인(activities/places)별로 정의하되, 공통 필드
+  (title/category_id/location/memo/reference_url 등)는 `src/lib/schemas/apiFields.ts`
+  공유 스키마로 통일(260729)
+- Vitest(+jsdom) — 단위 테스트. `npm run test`
+- Playwright — E2E 테스트. 인증은 `iron-session` 쿠키 직접 발급, API는 브라우저 레벨
+  mocking으로 DB 미의존. `npm run test:e2e`
+- GitHub Actions(`.github/workflows/ci.yml`) — PR/main push마다 lint→단위 테스트→build
+  (verify job) + 별도 e2e job(260729)
 
 ### 주요 위치
 
@@ -204,7 +212,7 @@ Claude Code가 PR 생성 → squash 머지 → 원격·로컬 정리를 한 번�
 
 ## 5. 구현 완료 범위
 
-> 커버리지 기준: 2026-07-28
+> 커버리지 기준: 2026-07-29
 
 ### 인증 F-01
 
@@ -250,6 +258,7 @@ Claude Code가 PR 생성 → squash 머지 → 원격·로컬 정리를 한 번�
 - **최상위 타입 표시 라벨 rename (신규, 260724)**: 사용자 노출 텍스트 기준 활동→액티비티, 장소→다이닝으로 전면 변경(FAB·홈 검색·추천 위저드·리스트 탭/빈 상태·등록/수정 폼·상세 not-found·API 404 메시지 등). **DB 스키마·URL 라우트·변수/타입명·API 엔드포인트는 무변경** — `activities`/`places` 테이블과 라우트, 코드 내부 변수명은 계속 활동/장소를 쓰며, 이 문서를 포함한 기술 문서 전반의 "활동"/"장소" 표기도 내부 기술 용어로 유지한다(사용자가 실제로 보는 라벨과 문서·코드의 내부 용어가 의도적으로 분리됨). 카테고리 rename(액티비티→레저, PR #78)과의 이름 충돌을 피하려 그 이후로 순서를 맞춰 진행 → 배경 → CHANGELOG 2026-07-24 v2
 - **활동 실내/실외 필수 속성(location_type) (신규, 260725)**: `activities.location_type` 네이티브 pg enum(`'indoor'|'outdoor'`), 기존 47건 title 기준 실측 재분류(22실내/25실외) 후 NOT NULL 승격(마이그레이션 011, 재분류→검증→제약 순서, 원격 적용·검증 완료). places는 대상 아님(활동 전용). 폼 필드 순서 카테고리→실내/실외→소요시간→시간대, 상세는 항상 렌더+wide 단독 줄(소요시간+시간대가 다음 줄에서 짝지어지도록), `/list` 단일 선택 토글 필터(필드는 필수·필터는 계속 선택적), 카드 메타 줄 맨 앞 배지까지 end-to-end 반영 → 구체 스펙 SKILL §10-J·§10-K, 배경 → CHANGELOG 2026-07-25
 - **다이닝 카드 정보 줄 위치 폴백 (신규, 260725)**: `PlaceCard` 정보 줄이 메모만 표시하던 것을 `ActivityCard`와 동일한 규칙(메모 있으면 메모, 없으면 `location`, 아이콘도 StickyNote/MapPin 동일 전환)으로 대칭화 → 아래 "11. area/location 필드 구분"·"12. 카드 정보 줄 표시 규칙" 절 갱신 참조, 배경 → CHANGELOG 2026-07-25
+- **활동/다이닝 폼-API 입력 검증 공유 (신규, 260729)**: activities/places의 create/patch API 검증(title·category_id·location·memo·reference_url 등)이 `src/lib/schemas/apiFields.ts` 공유 Zod 스키마를 쓴다. GET 목록 API도 쿼리 파라미터를 Zod로 검증해 잘못된 값은 400(이전엔 무검증으로 조용히 빈 결과가 나갔음). POST/PATCH의 손상된 JSON 본문도 500이 아닌 400. 폼(`ActivityForm`/`PlaceForm`)의 submit은 `fetchJson`+try/catch로 네트워크 실패·JSON 파싱 실패·비정상 응답을 안전 처리(다른 화면과 동일 관용구) → 배경 → CHANGELOG 2026-07-29 v2
 
 ### 추천 F-05~F-06
 
@@ -266,6 +275,12 @@ Claude Code가 PR 생성 → squash 머지 → 원격·로컬 정리를 한 번�
   - API 응답에 `poolSize` 포함
 - **활동 추천 위저드 실내/실외 단계 (신규, 260727)**: 위저드 스텝 1(소요시간)→2(시간대)→3(실내/실외)→4(카테고리). 저장값(NOT NULL)과 무관하게 필터는 area와 동일하게 선택적 → 구체 스펙은 아래 "13. 추천 화면 규칙" 절, 배경 → CHANGELOG 2026-07-27
 - **추천위저드 뒤로가기 정합성 확보 (신규, 260728)**: 단계별 URL 히스토리 도입으로 브라우저/OS 뒤로가기 시 직전 단계·직전 결과 화면으로 정확히 복귀. `returnTo` 화이트리스트를 위저드 결과 경로까지 확장해 추천 결과→상세→복귀 시 목록이 아닌 원래 결과 화면으로 이동(라벨 "추천 결과로"). 결과 데이터는 셔플 알고리즘 특성상 재조회 대신 `resultCache`로 캐싱·복원. 위저드 1단계=목적지 이동형("홈으로")/2단계 이상=상태 리셋형("처음부터") 분기 → 구체 스펙 SKILL §13(네비게이션 버튼 라벨 규칙), 배경 → CHANGELOG 2026-07-28
+- **추천위저드 History/URL 동기화 공통 훅 (신규, 260729)**: 활동/다이닝 위저드의 마운트+popstate URL↔state 동기화가 `useWizardUrlSync` 훅(`src/hooks/`)으로 통일돼 있다. push/replace History API 배선은 `src/lib/recommend/wizardUrl.ts`의 `pushWizardUrl`/`replaceWizardUrl`/`currentWizardUrl` 공유. URL 파라미터·캐시 정책·사용자 동작은 이전과 동일, 활동·다이닝 도메인 고유 로직(필드 구성·overnight 스킵 등)은 각 컴포넌트에 그대로 유지 → 배경 → CHANGELOG 2026-07-29 v2
+
+### 품질 · 인프라
+
+- **자동화 테스트·CI (신규, 260729)**: Vitest 단위 테스트(위저드 URL 파싱/직렬화, 결과 캐시, `returnTo` 화이트리스트, 공유 API 스키마, API 라우트 400 검증 등) + Playwright E2E 2건(활동 위저드 뒤로가기, 다이닝 위저드 결과 캐시 복원). `.github/workflows/ci.yml`이 PR/main push마다 lint→단위 테스트→build(verify job)와 별도 e2e job을 실행 → 배경 → CHANGELOG 2026-07-29
+- **dark/hover/focus 상태 정합화 (신규, 260729)**: shadcn Button 전 variant(default·secondary·outline·ghost·link·destructive)의 focus-visible 링이 `--s-focus-ring` 토큰(다크 대응) 기반으로 앱 전역과 통일돼 있다(이전엔 정적 `--ring`이라 다크에서 Primary처럼 보라 계열 채움색 버튼은 링이 겹쳐 안 보이는 문제가 있었음). `.detailDeleteBtn` 라이트 hover는 공용 destructive 토큰과 일치. `.dark` 클래스를 쓰지 않는 이 앱에서 절대 발동하지 않는 죽은 Tailwind `dark:` 클래스는 실사용 컴포넌트에서 제거 완료(미사용 컴포넌트 `select.tsx`/`tabs.tsx`는 범위 밖으로 잔존) → 구체 메커니즘 SKILL §5, 배경 → CHANGELOG 2026-07-29 v2
 
 ### 시드 데이터
 

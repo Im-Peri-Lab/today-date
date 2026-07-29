@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
 import { toast } from 'sonner'
 import {
@@ -25,7 +25,9 @@ import {
   useRecommendActivity,
   type ActivityRecommendResponse,
 } from '@/hooks/useRecommend'
+import { useWizardUrlSync } from '@/hooks/useWizardUrlSync'
 import { readActivityResult, stashActivityResult } from '@/lib/recommend/resultCache'
+import { pushWizardUrl, replaceWizardUrl, currentWizardUrl } from '@/lib/recommend/wizardUrl'
 import {
   type ActivityWizardUrlState,
   readActivityWizardUrlState,
@@ -49,22 +51,13 @@ const DURATIONS: { value: DurationBucket; icon: LucideIcon; label: string; sub: 
   { value: 'overnight', icon: Moon, label: '1박 이상', sub: '멀리 떠나기' },
 ]
 
-// 단계 전환은 실제 화면 전환에 대응하므로 next/navigation 라우터(RSC 재요청 유발) 대신
-// 히스토리 API를 직접 사용해 엔트리를 쌓는다 — ListView의 필터 URL 동기화와 동일한 패턴.
-// 모든 전환(다음/이전/처음부터)이 항상 push만 사용 → 뒤로가기 한 번 = 직전에 보였던 화면으로 복귀.
+// push/replace의 의미 차이와 히스토리 전략은 wizardUrl.ts에 공통화 — 여기선 활동 전용
+// 쿼리 문자열만 결합한다.
 function pushActivityWizardState(s: ActivityWizardUrlState) {
-  const qs = buildActivityWizardQuery(s)
-  window.history.pushState(null, '', `${window.location.pathname}?${qs}`)
+  pushWizardUrl(buildActivityWizardQuery(s))
 }
-
-// 같은 단계에 머문 채 선택값만 바뀔 때(직전 단계 엔트리에 방금 고른 값을 반영할 때,
-// 카테고리 토글처럼 화면 전환 없이 값만 바뀔 때) 사용 — 새 엔트리를 쌓지 않고
-// "현재 엔트리"를 갱신한다. 이걸 거치지 않으면 어떤 단계를 처음 지나칠 때 저장된
-// (아직 선택 전) 엔트리가 그대로 남아, 뒤로가기로 그 단계에 돌아왔을 때 선택이
-// 안 된 것처럼 보인다.
 function replaceActivityWizardState(s: ActivityWizardUrlState) {
-  const qs = buildActivityWizardQuery(s)
-  window.history.replaceState(null, '', `${window.location.pathname}?${qs}`)
+  replaceWizardUrl(buildActivityWizardQuery(s))
 }
 
 function StepDots({ step, steps }: { step: number; steps: number[] }) {
@@ -123,22 +116,27 @@ export function ActivityRecommendWizard() {
     )
   }
 
-  // 마운트 시 URL → state 1회 동기화. `window.location`은 next/link의 클라이언트 사이드
-  // 전환(예: 상세 화면 "추천 결과로" 복귀) 중에는 렌더 시점에 아직 갱신되지 않은 경우가 있어
-  // useState 지연 초기화 대신 커밋 이후 실행되는 이펙트에서 읽어야 안전하다. URL이 이미
-  // step=result면(결과 카드 → 상세 → 복귀 등, 실제 페이지 이동이라 새로 마운트되는 경우)
-  // result 데이터 자체는 URL에 담기지 않으므로 먼저 sessionStorage 캐시에서 복원을
-  // 시도한다 — 재조회하면 pickTopWithShuffle이 매번 다른 카드를 뽑을 수 있어 "정확히 그
-  // 결과 화면으로 복귀"가 깨지기 때문. 캐시가 없을 때만(조건이 바뀌었거나 저장이 막힌 경우)
-  // 실제 재조회로 폴백한다.
-  useEffect(() => {
-    const next = readActivityWizardUrlState(window.location.search)
+  // URL → state 동기화(마운트 1회 + popstate마다). `window.location`은 next/link의 클라이언트
+  // 사이드 전환(예: 상세 화면 "추천 결과로" 복귀) 중에는 렌더 시점에 아직 갱신되지 않은 경우가
+  // 있어 useState 지연 초기화 대신 커밋 이후 실행되는 이펙트에서 읽어야 안전하다.
+  useWizardUrlSync(readActivityWizardUrlState, (next, source) => {
     setDuration(next.duration)
     setTimeOfDay(next.timeOfDay)
     setLocationType(next.locationType)
     setCategoryIds(next.categoryIds)
 
-    if (next.step === 'result') {
+    if (next.step !== 'result') {
+      setShowResult(false)
+      setStep(next.step)
+      return
+    }
+
+    if (source === 'mount') {
+      // URL이 이미 step=result로 새로 마운트되는 경우(결과 카드 → 상세 → 복귀 등, 실제 페이지
+      // 이동). result 데이터 자체는 URL에 담기지 않으므로 먼저 sessionStorage 캐시에서 복원을
+      // 시도한다 — 재조회하면 pickTopWithShuffle이 매번 다른 카드를 뽑을 수 있어 "정확히 그
+      // 결과 화면으로 복귀"가 깨지기 때문. 캐시가 없을 때만(조건이 바뀌었거나 저장이 막힌 경우)
+      // 실제 재조회로 폴백한다.
       setStep(4)
       const cached = readActivityResult(activityConditionsKey(next))
       if (cached) {
@@ -148,39 +146,16 @@ export function ActivityRecommendWizard() {
       } else {
         fetchResultForUrlState(next)
       }
+    } else if (result) {
+      // 이미 마운트된 채로 popstate만 발생 — 결과가 메모리에 남아있으면 그대로 재사용.
+      setShowResult(true)
     } else {
-      setStep(next.step)
+      // result 데이터가 메모리에 없는 채로 step=result를 만나면(새로고침 등) 결과 화면 대신
+      // 마지막 입력 단계로 대체한다.
+      setShowResult(false)
+      setStep(4)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  // 브라우저/OS 뒤로가기(모바일 스와이프 포함) 시 URL → state 역동기화.
-  // result 데이터가 메모리에 없는 채로 step=result를 만나면(새로고침 등) 결과 화면 대신
-  // 마지막 입력 단계로 대체한다.
-  useEffect(() => {
-    function handlePopState() {
-      const next = readActivityWizardUrlState(window.location.search)
-      setDuration(next.duration)
-      setTimeOfDay(next.timeOfDay)
-      setLocationType(next.locationType)
-      setCategoryIds(next.categoryIds)
-
-      if (next.step === 'result') {
-        if (result) {
-          setShowResult(true)
-        } else {
-          setShowResult(false)
-          setStep(4)
-        }
-      } else {
-        setShowResult(false)
-        setStep(next.step)
-      }
-    }
-
-    window.addEventListener('popstate', handlePopState)
-    return () => window.removeEventListener('popstate', handlePopState)
-  }, [result])
+  })
 
   // overnight(1박 이상)은 시간대 단계를 건너뛴다 → 표시 단계도 3개([1,3,4])
   const steps = duration === 'overnight' ? [1, 3, 4] : [1, 2, 3, 4]
@@ -269,11 +244,8 @@ export function ActivityRecommendWizard() {
   // ── 결과 화면 ──
   if (showResult && result) {
     // 결과 카드 → 상세 진입 후 "추천 결과로" 복귀 시 정확히 이 결과 화면(선택 조건 포함)으로
-    // 돌아오게 하는 returnTo. 위저드는 순수 History API로만 URL을 관리하므로(§ pushActivityWizardState)
-    // 현재 주소를 그대로 읽으면 된다 — 이 분기는 항상 클라이언트 상호작용 이후에만 렌더되므로
-    // window 접근이 안전하다(SSR에서는 도달하지 않음).
-    const resultReturnTo =
-      typeof window !== 'undefined' ? `${window.location.pathname}${window.location.search}` : undefined
+    // 돌아오게 하는 returnTo.
+    const resultReturnTo = currentWizardUrl()
     const hasResults = result.recommendations.length > 0
     // 결과가 있을 때만 상태 토글을 박스 밖에 노출. 반나절은 더 짧은 게 없어 제외.
     const showResultToggle = hasResults && duration !== 'half'

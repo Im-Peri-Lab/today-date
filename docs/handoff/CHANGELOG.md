@@ -1,6 +1,6 @@
 # CHANGELOG.md
 
-> **마지막 업데이트: 2026-07-28**
+> **마지막 업데이트: 2026-07-29**
 
 > 260531~260728 핸드오프 전체를 날짜순으로 기록한 변경 이력입니다. 새 AI는 일반적으로 `PROJECT_CONTEXT.md`와 `CURRENT_STATE.md`만 먼저 읽고, 과거 판단 근거가 필요할 때 이 문서를 참고하세요.
 
@@ -532,3 +532,15 @@
 - 위저드 1단계 상단 버튼 라벨 분기 (PR #90 squash `6024119`) — `fix/wizard-first-step-button-label`: 1단계="홈으로", 2단계 이상="처음부터"로 조건 분기. SKILL §13 반영(git show --stat 확인 완료), `npm run build`/`npm run lint` PASS
 - 기술 백로그 그룹 4(네비게이션 라벨 잔여: "이전"·"취소"·신규등록 조건부 라벨) 진단 후 종결 — 3건 모두 SKILL §13에 이미 부합해 코드 수정 없음
 - 배경·설계 근거·교훈 → PROJECT_CONTEXT §13·§20
+
+---
+
+## 2026-07-29 — 추천위저드 네비게이션 회귀 방지 테스트·CI 신규 도입
+
+- 프로젝트 최초로 자동화 테스트·GitHub Actions 도입 (`test/recommend-navigation-regression`, PR 생성 후 병합 대기) — 그 전까지는 `npm run build`/`npm run lint`와 세션 내 1회성 Playwright 클릭 검증(위 PR #88~90 기록)뿐, 저장소에 남는 테스트 코드나 CI 워크플로는 없었음
+- 단위 테스트 도구로 Vitest(+jsdom) 채택 — 위저드 컴포넌트 내부에만 있던 URL 파싱/직렬화 순수 함수를 `src/lib/recommend/activityWizardUrl.ts`·`placeWizardUrl.ts`·`wizardUrl.ts`로 기계적으로 추출(로직 변경 없음, import 교체만), `resultCache.ts`·`listReturn.ts`는 이미 독립 모듈이라 그대로 테스트. 5개 파일 42개 테스트 — URL 파싱/직렬화 왕복, 잘못된 step·enum 기본값 처리, 결과 캐시 conditionsKey 일치/불일치·손상 JSON, returnTo 허용 목록·오픈 리다이렉트 차단
+- E2E는 Playwright — 인증(Supabase 조회 없이 `iron-session` `sealData`로 세션 쿠키 직접 발급)과 카테고리/추천 API(브라우저 레벨 `page.route` mocking)를 모두 DB 없이 우회해 CI에서 안정적으로 실행. 활동 위저드 1단계 선택→다음 단계→브라우저 뒤로가기 시 단계·선택값 유지 1건, 다이닝 위저드 결과 화면 returnTo 정확성 + 동일 URL 재진입 시 재조회 없이 세션 캐시 복원 1건. 실제 `/places/[id]` 상세 화면은 서버 컴포넌트가 Supabase를 직접 조회해 DB 없이는 자동화 불가로 판단 — 카드 returnTo href 검증 + 캐시 복원 검증으로 대체하고 실제 상세 화면 왕복은 기존 아이폰 실기기 수동 검증으로 유지
+- `package.json`에 `test`(vitest run)·`test:e2e`(playwright test)·`ci`(lint+test+build) 스크립트 신규 추가, 기존 `dev`/`build`/`start`/`lint` 무변경. `.github/workflows/ci.yml` 신규 — PR/main push에서 `npm ci`→lint→단위 테스트→build(verify job), 별도 e2e job에서 Playwright 실행
+- 회귀 탐지 실효성 확인: `getSafeListReturnTo`의 오픈 리다이렉트 가드와 `PlaceRecommendWizard`의 결과 캐시 저장 호출을 각각 한 번씩 임시로 무력화해 단위 테스트·E2E가 실제로 실패하는 것을 확인한 뒤 원복(diff 0)
+- 검증: `npm run lint` PASS, `npm run test`(42/42) PASS, `npm run build` PASS, `npm run test:e2e`(2/2) PASS. 기존 위저드 UI·문구·URL 파라미터명·History API 동작·sessionStorage 키·returnTo 정책 무변경(순수 함수 추출 외 로직 변경 없음)
+- 배경·설계 근거 → PROJECT_CONTEXT §13·§20 (테스트 인프라 관련 신규 절 필요 시 다음 세션에서 추가)

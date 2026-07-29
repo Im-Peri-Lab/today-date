@@ -27,6 +27,12 @@ import {
 } from '@/hooks/useRecommend'
 import { readActivityResult, stashActivityResult } from '@/lib/recommend/resultCache'
 import {
+  type ActivityWizardUrlState,
+  readActivityWizardUrlState,
+  buildActivityWizardQuery,
+  activityConditionsKey,
+} from '@/lib/recommend/activityWizardUrl'
+import {
   TIME_OPTIONS,
   TIME_OF_DAY_ICONS,
   TIME_OF_DAY_LABELS,
@@ -42,65 +48,6 @@ const DURATIONS: { value: DurationBucket; icon: LucideIcon; label: string; sub: 
   { value: 'full', icon: Sun, label: '하루', sub: '하루를 꽉 채워서' },
   { value: 'overnight', icon: Moon, label: '1박 이상', sub: '멀리 떠나기' },
 ]
-
-type ActivityWizardStep = 1 | 2 | 3 | 4 | 'result'
-
-interface ActivityWizardUrlState {
-  step: ActivityWizardStep
-  duration: DurationBucket | null
-  timeOfDay: TimeOfDay | null
-  locationType: LocationType | null
-  categoryIds: string[]
-}
-
-function parseDurationParam(v: string | null): DurationBucket | null {
-  return v === 'half' || v === 'full' || v === 'overnight' ? v : null
-}
-function parseTimeOfDayParam(v: string | null): TimeOfDay | null {
-  return v === 'day' || v === 'night' || v === 'any' ? v : null
-}
-function parseLocationTypeParam(v: string | null): LocationType | null {
-  return v === 'indoor' || v === 'outdoor' ? v : null
-}
-function parseCategoryIdsParam(v: string | null): string[] {
-  return v ? v.split(',').filter(Boolean) : []
-}
-
-function readActivityWizardUrlState(search: string): ActivityWizardUrlState {
-  const params = new URLSearchParams(search)
-  const stepParam = params.get('step')
-  const step: ActivityWizardStep =
-    stepParam === 'result'
-      ? 'result'
-      : stepParam === '2' || stepParam === '3' || stepParam === '4'
-        ? (Number(stepParam) as 2 | 3 | 4)
-        : 1
-  return {
-    step,
-    duration: parseDurationParam(params.get('duration')),
-    timeOfDay: parseTimeOfDayParam(params.get('time')),
-    locationType: parseLocationTypeParam(params.get('loc')),
-    categoryIds: parseCategoryIdsParam(params.get('cats')),
-  }
-}
-
-function buildActivityWizardQuery(s: ActivityWizardUrlState): string {
-  const params = new URLSearchParams()
-  params.set('step', String(s.step))
-  if (s.duration) params.set('duration', s.duration)
-  if (s.timeOfDay) params.set('time', s.timeOfDay)
-  if (s.locationType) params.set('loc', s.locationType)
-  if (s.categoryIds.length > 0) params.set('cats', s.categoryIds.join(','))
-  return params.toString()
-}
-
-// 결과 캐시(resultCache.ts) 무효화 키 — 선택 조건만으로 구성(step은 항상 고정값이라 무관).
-// includeShorter는 조건이 아니라 같은 조건 안에서의 표시 옵션이라 키에 넣지 않는다(별도 저장).
-function activityConditionsKey(
-  s: Pick<ActivityWizardUrlState, 'duration' | 'timeOfDay' | 'locationType' | 'categoryIds'>
-): string {
-  return buildActivityWizardQuery({ step: 'result', ...s })
-}
 
 // 단계 전환은 실제 화면 전환에 대응하므로 next/navigation 라우터(RSC 재요청 유발) 대신
 // 히스토리 API를 직접 사용해 엔트리를 쌓는다 — ListView의 필터 URL 동기화와 동일한 패턴.

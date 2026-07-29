@@ -12,6 +12,9 @@ import { PlaceFields } from './PlaceFields'
 import { takePlacePrefill } from '@/lib/duplicatePrefill'
 import { buildDetailHref } from '@/lib/listReturn'
 import { placeFormSchema, type PlaceFormValues } from '@/lib/schemas/placeSchema'
+import { emptyToNull } from '@/lib/schemas/apiFields'
+import { fetchJson } from '@/hooks/fetcher'
+import type { Place } from '@/types'
 
 export function PlaceForm({ prefill, returnTo }: { prefill?: boolean; returnTo?: string }) {
   const router = useRouter()
@@ -47,21 +50,22 @@ export function PlaceForm({ prefill, returnTo }: { prefill?: boolean; returnTo?:
   async function onSubmit(values: PlaceFormValues, continueAdding: boolean) {
     const payload = {
       ...values,
-      category_id: values.category_id || null,
-      reference_url: values.reference_url || null,
-      location: values.location || null,
-      memo: values.memo || null,
+      category_id: emptyToNull(values.category_id),
+      reference_url: emptyToNull(values.reference_url),
+      location: emptyToNull(values.location),
+      memo: emptyToNull(values.memo),
     }
 
-    const res = await fetch('/api/places', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    })
-
-    const json = await res.json()
-    if (!res.ok) {
-      toast.error(json.error ?? '저장 중 오류가 발생했습니다.')
+    let created: Place
+    try {
+      const json = await fetchJson<{ data: Place }>('/api/places', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+      created = json.data
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : '저장 중 오류가 발생했습니다.')
       return
     }
 
@@ -81,7 +85,7 @@ export function PlaceForm({ prefill, returnTo }: { prefill?: boolean; returnTo?:
     router.push(
       hasContinuedRegistration
         ? returnTo ?? '/list?tab=place'
-        : buildDetailHref(`/places/${json.data.id}`, { returnTo })
+        : buildDetailHref(`/places/${created.id}`, { returnTo })
     )
   }
 

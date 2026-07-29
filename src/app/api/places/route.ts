@@ -1,19 +1,34 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { getSupabaseClient } from '@/lib/supabase/client'
-import { isValidReferenceUrl } from '@/lib/url'
+import { readJsonBody, zodErrorResponse } from '@/lib/api/validation'
+import {
+  apiTitleSchema,
+  apiCategoryIdSchema,
+  apiLocationSchema,
+  apiMemoSchema,
+  apiReferenceUrlSchema,
+  apiListQueryBase,
+  splitCommaIds,
+} from '@/lib/schemas/apiFields'
 
 const createSchema = z.object({
-  title: z.string().min(1, '제목을 입력해 주세요.').max(100, '제목은 100자 이하로 입력해 주세요.'),
-  category_id: z.string().uuid().optional().nullable(),
+  title: apiTitleSchema,
+  category_id: apiCategoryIdSchema,
   area: z.string().min(1, '지역을 입력해 주세요.'),
-  location: z.string().max(200, '위치는 200자 이하로 입력해 주세요.').optional().nullable(),
+  location: apiLocationSchema,
   meal_times: z
     .array(z.enum(['lunch', 'dinner']))
     .min(1, '식사 시간을 하나 이상 선택해 주세요.')
     .max(2),
-  memo: z.string().max(1000, '메모는 1000자 이하로 입력해 주세요.').optional().nullable(),
-  reference_url: z.string().refine(isValidReferenceUrl, '올바른 URL 형식이 아닙니다.').optional().nullable().or(z.literal('')),
+  memo: apiMemoSchema,
+  reference_url: apiReferenceUrlSchema,
+})
+
+const listQuerySchema = z.object({
+  ...apiListQueryBase,
+  area: z.string().optional(),
+  meal_time: z.enum(['lunch', 'dinner']).optional(),
 })
 
 async function getDefaultCategoryId(supabase: ReturnType<typeof getSupabaseClient>) {
@@ -27,12 +42,11 @@ async function getDefaultCategoryId(supabase: ReturnType<typeof getSupabaseClien
 
 export async function GET(req: NextRequest) {
   try {
-    const { searchParams } = req.nextUrl
-    const status = searchParams.get('status') ?? 'wishlist'
-    const category_id = searchParams.get('category_id')
-    const area = searchParams.get('area')
-    const meal_time = searchParams.get('meal_time')
-    const q = searchParams.get('q')
+    const parsedQuery = listQuerySchema.safeParse(
+      Object.fromEntries(req.nextUrl.searchParams)
+    )
+    if (!parsedQuery.success) return zodErrorResponse(parsedQuery.error)
+    const { status, category_id, area, meal_time, q } = parsedQuery.data
 
     const supabase = getSupabaseClient()
     let query = supabase
@@ -41,10 +55,9 @@ export async function GET(req: NextRequest) {
       .eq('status', status)
       .order('created_at', { ascending: false })
 
-    if (category_id) {
-      const ids = category_id.split(',').filter(Boolean)
-      query = ids.length > 1 ? query.in('category_id', ids) : query.eq('category_id', ids[0])
-    }
+    const ids = splitCommaIds(category_id)
+    if (ids.length > 1) query = query.in('category_id', ids)
+    else if (ids.length === 1) query = query.eq('category_id', ids[0])
     if (area) query = query.ilike('area', `%${area}%`)
     if (meal_time) query = query.contains('meal_times', [meal_time])
     if (q) {
@@ -64,12 +77,10 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json()
-    const result = createSchema.safeParse(body)
-    if (!result.success) {
-      const message = result.error.issues[0]?.message ?? '입력값이 올바르지 않습니다.'
-      return NextResponse.json({ error: message, details: result.error.issues }, { status: 400 })
-    }
+    const bodyResult = await readJsonBody(req)
+    if (!bodyResult.ok) return bodyResult.response
+    const result = createSchema.safeParse(bodyResult.body)
+    if (!result.success) return zodErrorResponse(result.error)
 
     const supabase = getSupabaseClient()
     const payload = { ...result.data }

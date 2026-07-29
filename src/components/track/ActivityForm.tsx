@@ -12,6 +12,9 @@ import { ActivityFields } from './ActivityFields'
 import { takeActivityPrefill } from '@/lib/duplicatePrefill'
 import { buildDetailHref } from '@/lib/listReturn'
 import { activityFormSchema, type ActivityFormValues } from '@/lib/schemas/activitySchema'
+import { emptyToNull } from '@/lib/schemas/apiFields'
+import { fetchJson } from '@/hooks/fetcher'
+import type { Activity } from '@/types'
 
 export function ActivityForm({ prefill, returnTo }: { prefill?: boolean; returnTo?: string }) {
   const router = useRouter()
@@ -47,22 +50,25 @@ export function ActivityForm({ prefill, returnTo }: { prefill?: boolean; returnT
   async function onSubmit(values: ActivityFormValues, continueAdding: boolean) {
     const payload = {
       ...values,
-      category_id: values.category_id || null,
-      reference_url: values.reference_url || null,
-      location: values.location || null,
-      memo: values.memo || null,
+      category_id: emptyToNull(values.category_id),
+      reference_url: emptyToNull(values.reference_url),
+      location: emptyToNull(values.location),
+      memo: emptyToNull(values.memo),
     }
 
-    const res = await fetch('/api/activities', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    })
-    const json = await res.json()
-    if (!res.ok) {
-      toast.error(json.error ?? '저장 중 오류가 발생했습니다.')
+    let created: Activity
+    try {
+      const json = await fetchJson<{ data: Activity }>('/api/activities', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+      created = json.data
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : '저장 중 오류가 발생했습니다.')
       return
     }
+
     // 리스트는 미마운트 상태(사용자가 상세로 이동)라도 즉시 백그라운드 재조회되도록
     // refetchType: 'all'. 복귀 시 새 항목이 누락되지 않고 바로 보인다.
     queryClient.invalidateQueries({ queryKey: ['activities'], refetchType: 'all' })
@@ -79,7 +85,7 @@ export function ActivityForm({ prefill, returnTo }: { prefill?: boolean; returnT
     router.push(
       hasContinuedRegistration
         ? returnTo ?? '/list?tab=activity'
-        : buildDetailHref(`/activities/${json.data.id}`, { returnTo })
+        : buildDetailHref(`/activities/${created.id}`, { returnTo })
     )
   }
 

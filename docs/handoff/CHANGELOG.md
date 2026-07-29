@@ -537,7 +537,7 @@
 
 ## 2026-07-29 — 추천위저드 네비게이션 회귀 방지 테스트·CI 신규 도입
 
-- 프로젝트 최초로 자동화 테스트·GitHub Actions 도입 (`test/recommend-navigation-regression`, PR 생성 후 병합 대기) — 그 전까지는 `npm run build`/`npm run lint`와 세션 내 1회성 Playwright 클릭 검증(위 PR #88~90 기록)뿐, 저장소에 남는 테스트 코드나 CI 워크플로는 없었음
+- 프로젝트 최초로 자동화 테스트·GitHub Actions 도입 (PR #91 squash `ce99df4`, 2커밋) — `test/recommend-navigation-regression`: 그 전까지는 `npm run build`/`npm run lint`와 세션 내 1회성 Playwright 클릭 검증(위 PR #88~90 기록)뿐, 저장소에 남는 테스트 코드나 CI 워크플로는 없었음. 후속 커밋에서 CURRENT_STATE.md의 아이폰 실기기 검증 상태 모순(사용자 실기기 검증 완료 vs 문서상 "미실행")도 함께 정정
 - 단위 테스트 도구로 Vitest(+jsdom) 채택 — 위저드 컴포넌트 내부에만 있던 URL 파싱/직렬화 순수 함수를 `src/lib/recommend/activityWizardUrl.ts`·`placeWizardUrl.ts`·`wizardUrl.ts`로 기계적으로 추출(로직 변경 없음, import 교체만), `resultCache.ts`·`listReturn.ts`는 이미 독립 모듈이라 그대로 테스트. 5개 파일 42개 테스트 — URL 파싱/직렬화 왕복, 잘못된 step·enum 기본값 처리, 결과 캐시 conditionsKey 일치/불일치·손상 JSON, returnTo 허용 목록·오픈 리다이렉트 차단
 - E2E는 Playwright — 인증(Supabase 조회 없이 `iron-session` `sealData`로 세션 쿠키 직접 발급)과 카테고리/추천 API(브라우저 레벨 `page.route` mocking)를 모두 DB 없이 우회해 CI에서 안정적으로 실행. 활동 위저드 1단계 선택→다음 단계→브라우저 뒤로가기 시 단계·선택값 유지 1건, 다이닝 위저드 결과 화면 returnTo 정확성 + 동일 URL 재진입 시 재조회 없이 세션 캐시 복원 1건. 실제 `/places/[id]` 상세 화면은 서버 컴포넌트가 Supabase를 직접 조회해 DB 없이는 자동화 불가로 판단 — 카드 returnTo href 검증 + 캐시 복원 검증으로 대체하고 실제 상세 화면 왕복은 기존 아이폰 실기기 수동 검증으로 유지
 - `package.json`에 `test`(vitest run)·`test:e2e`(playwright test)·`ci`(lint+test+build) 스크립트 신규 추가, 기존 `dev`/`build`/`start`/`lint` 무변경. `.github/workflows/ci.yml` 신규 — PR/main push에서 `npm ci`→lint→단위 테스트→build(verify job), 별도 e2e job에서 Playwright 실행

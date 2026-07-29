@@ -22,7 +22,7 @@
 | `SUPABASE_URL` | Supabase 프로젝트 URL (Settings → API → Project URL) |
 | `SUPABASE_SERVICE_ROLE_KEY` | Supabase service_role 시크릿 키 (서버 전용) |
 | `RESEND_API_KEY` | Resend API 키 (이메일 인증 발송용) |
-| `EMAIL_FROM` | 발신자 표기. 예: `Today Date <onboarding@resend.dev>` |
+| `RESEND_FROM_EMAIL` | 발신자 표기. 예: `Today Date <onboarding@resend.dev>` |
 | `SESSION_SECRET` | iron-session 암호화 키. `openssl rand -base64 32` 로 생성 |
 | `NEXT_PUBLIC_APP_URL` | 앱 base URL. 로컬은 `http://localhost:3000`, 운영은 배포 도메인 |
 
@@ -43,7 +43,7 @@
 
 ### 3. Resend API Key 발급
 - [resend.com](https://resend.com) → **API Keys → Create API Key**
-- 테스트 시에는 Resend 기본 도메인(`onboarding@resend.dev`)을 `EMAIL_FROM` 에 사용할 수 있습니다.
+- 테스트 시에는 Resend 기본 도메인(`onboarding@resend.dev`)을 `RESEND_FROM_EMAIL` 에 사용할 수 있습니다.
 
 ### 4. SESSION_SECRET 생성
 
@@ -78,6 +78,16 @@ npm run start
 
 ---
 
+## 테스트
+
+```bash
+npm run test       # 단위 테스트 (Vitest)
+npm run test:e2e   # E2E 테스트 (Playwright, DB 불필요 — API mocking)
+npm run ci          # lint + test + build (CI와 동일)
+```
+
+---
+
 ## 배포 (Vercel)
 
 1. GitHub 저장소를 [Vercel](https://vercel.com) 에 import
@@ -87,7 +97,7 @@ npm run start
 3. Framework Preset: **Next.js** (빌드/출력 설정 자동)
 4. Deploy
 
-**배포 URL:** _(배포 후 추가 예정)_
+**배포 URL:** [https://today-date-seven.vercel.app](https://today-date-seven.vercel.app)
 
 ---
 

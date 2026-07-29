@@ -82,8 +82,9 @@ npm run start
 
 ```bash
 npm run test       # 단위 테스트 (Vitest)
+npx playwright install --with-deps chromium  # E2E 최초 1회: Chromium 브라우저 설치
 npm run test:e2e   # E2E 테스트 (Playwright, DB 불필요 — API mocking)
-npm run ci          # lint + test + build (CI와 동일)
+npm run ci          # lint + test + build (CI의 verify job과 동일, e2e job은 별도)
 ```
 
 ---

@@ -6,31 +6,28 @@
 유지보수 / 점진적 UX 개선 단계.
 
 ## 현재 한 줄 요약
-프로젝트 최초로 자동화 테스트·CI 도입(`test/recommend-navigation-regression`, PR 병합 대기) —
-추천위저드(PR #88~90) 네비게이션 회귀 방지용 Vitest 단위 테스트 42건 + Playwright E2E 2건,
-`.github/workflows/ci.yml` 신규. 상세 → CHANGELOG 2026-07-29.
+프로젝트 최초로 자동화 테스트·CI 도입 완료(PR #91 병합) — 추천위저드(PR #88~90) 네비게이션
+회귀 방지용 Vitest 단위 테스트 42건 + Playwright E2E 2건, `.github/workflows/ci.yml` 신규.
+상세 → CHANGELOG 2026-07-29.
 
 ## 브랜치 상태
-- 작업 브랜치: `test/recommend-navigation-regression` (main에서 분기, PR 생성 후 병합 대기)
-- main 기준 build PASS
+- 현재 작업 브랜치 없음, main 기준 build PASS
 
 ## 구현 완료 (누적, 기존 유지)
 (기존 항목 전체 유지)
 - **(신규) 추천위저드 뒤로가기 정합성 확보** — 단계별 URL 히스토리 + 선택값 유지(PR #88),
   returnTo 확장·상세 복귀 라벨 분기·상단 버튼 리셋 통일·결과 캐시 복원(PR #89), 위저드
   1단계 버튼 "홈으로"/2단계 이상 "처음부터" 분기(PR #90) → 상세 CHANGELOG 2026-07-28
-- **(신규) 자동화 테스트·CI 도입** — Vitest 단위 테스트(위저드 URL 파싱/직렬화, 결과 캐시,
-  returnTo 화이트리스트) + Playwright E2E(활동 위저드 뒤로가기, 다이닝 위저드 결과 캐시
+- **(신규) 자동화 테스트·CI 도입(PR #91)** — Vitest 단위 테스트(위저드 URL 파싱/직렬화, 결과
+  캐시, returnTo 화이트리스트) + Playwright E2E(활동 위저드 뒤로가기, 다이닝 위저드 결과 캐시
   복원), `.github/workflows/ci.yml`(lint/test/build + e2e job) → 상세 CHANGELOG 2026-07-29
 
 ## 배포 상태
 - 플랫폼: Vercel
 - URL: `https://today-date-seven.vercel.app`
-- 현재 브랜치: `main` (PR #90 기준 `6024119`)
+- 현재 브랜치: `main` (PR #91 기준 `ce99df4`)
 
 ## 진행 중 / 남은 작업
-- **`test/recommend-navigation-regression` PR 병합** — Draft PR 생성, Vercel Preview 확인 후
-  병합 대기(자동 병합 금지 정책에 따라 병합은 별도 승인 필요)
 - **다이닝 위저드 "상세 화면 → 추천 결과로 복귀" 실제 왕복 E2E** — `/places/[id]` 상세는
   서버 컴포넌트가 Supabase를 직접 조회해 DB 없이는 자동화 불가로 판단, 카드 returnTo
   href 검증 + 결과 캐시 복원 검증으로 대체. 실제 상세 화면 왕복은 수동 QA로 유지(기존

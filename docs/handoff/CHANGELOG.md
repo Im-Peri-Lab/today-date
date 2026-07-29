@@ -538,7 +538,7 @@
 ## 2026-07-29 — 자동화 테스트·CI 도입 + P2 리팩터 배치(dark/hover/focus·추천위저드 히스토리·폼-API 검증)
 
 - 자동화 테스트·GitHub Actions 도입 (PR #91 squash `ce99df4`) — 프로젝트 최초 Vitest 단위 테스트 42건 + Playwright E2E 2건, `.github/workflows/ci.yml` 신규(verify+e2e job). lint/test/build/test:e2e 전부 PASS
-- dark/hover/focus 상태 정합화 (PR #93 squash `4c58323`) — 기술 백로그 그룹 1·2 착수: 죽은 Tailwind `dark:` 클래스 제거, shadcn Button 전 variant의 focus-visible 링을 다크 대응 토큰으로 통일, `.detailDeleteBtn` 라이트 hover 정합(사용자 사인오프 확인). SKILL.md §5 갱신. lint/test(45)/build/E2E PASS
+- dark/hover/focus 상태 정합화 (PR #93 squash `4c58323`) — 기술 백로그 그룹 1·2 착수: 죽은 Tailwind `dark:` 클래스 제거, shadcn Button 전 variant의 focus-visible 링을 다크 대응 토큰으로 통일, `.detailDeleteBtn` 라이트 hover 정합(사용자 사인오프 확인). SKILL.md §5 갱신. lint/test(42)/build/E2E PASS
 - 추천위저드 History/URL 동기화 공통화 (PR #94 squash `b91b056`) — 활동·다이닝 위저드에 중복돼 있던 URL↔state 동기화·History API·결과 캐시 복원 로직을 공통 훅/유틸로 추출. URL 파라미터·캐시 정책·사용자 동작 무변경. test(45)/build/E2E PASS
 - 폼-API 입력 검증 정합화 (PR #95 squash `f2055eb`) — activities·places API 입력 검증 스키마를 공유 모듈로 통합, GET 쿼리 검증 추가, 잘못된 입력을 500 대신 400으로 통일. 폼 submit 에러 처리도 안전화. tsc/lint/test(81)/build/E2E PASS
 - 핸드오프 문서(CURRENT_STATE·CHANGELOG·PROJECT_CONTEXT) 오늘자 반영 (PR #96·#97, 문서 전용)

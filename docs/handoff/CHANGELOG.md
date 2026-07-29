@@ -1,8 +1,8 @@
 # CHANGELOG.md
 
-> **마지막 업데이트: 2026-07-27 (v2)**
+> **마지막 업데이트: 2026-07-28**
 
-> 260531~260727 핸드오프 전체를 날짜순으로 기록한 변경 이력입니다. 새 AI는 일반적으로 `PROJECT_CONTEXT.md`와 `CURRENT_STATE.md`만 먼저 읽고, 과거 판단 근거가 필요할 때 이 문서를 참고하세요.
+> 260531~260728 핸드오프 전체를 날짜순으로 기록한 변경 이력입니다. 새 AI는 일반적으로 `PROJECT_CONTEXT.md`와 `CURRENT_STATE.md`만 먼저 읽고, 과거 판단 근거가 필요할 때 이 문서를 참고하세요.
 
 ---
 
@@ -522,3 +522,13 @@
 - Android 홈 화면 실행 시 뜨는 manifest 기반 자동 스플래시에 패스코드 화면과 동일한 브랜드 하트 반영, `manifest.json`이 참조하던 `icon-192.png`/`icon-512.png` 실물 파일 누락 이슈도 함께 해소 (PR #87 squash `e382af2`) — `fix/android-splash-icon-heart`. 정적 이미지, 배경색·앱 이름 표시 로직 변경 없음. iOS는 manifest 기반 자동 스플래시 미지원으로 범위 제외
 - `npm run build` PASS, 생성 PNG 사용자 직접 확인(스크린샷). 실기기 Android 홈 화면 스플래시 확인은 세션 환경 제약으로 미실행(다음 세션 권장)
 - 진단 근거·교훈 → PROJECT_CONTEXT §20
+
+---
+
+## 2026-07-28 — 추천위저드 뒤로가기 정합성 확보(PR #88~90) + 기술 백로그 그룹 4 종결
+
+- 위저드 단계별 URL 히스토리 도입 (PR #88 squash `e60ec50`, 2커밋) — `feature/recommend-wizard-step-history`: pushState/popstate 기반 단계 전환으로 브라우저 뒤로가기 시 직전 단계로 정확히 복귀, 후속 커밋(`86dc7d2`)에서 이전 버튼·뒤로가기 선택값 표시 불일치 해소. `npm run build`/`npm run lint` PASS, Playwright 30개 어서션 PASS
+- returnTo 확장 + 네비게이션 라벨 통일 (PR #89 squash `8a30198`, 2커밋) — `feature/recommend-returnto-and-label-unify`: returnTo 화이트리스트에 위저드 결과 경로 추가해 상세 복귀 라벨 "목록으로"/"추천 결과로" 분기, 위저드 상단 버튼 "처음부터" 통일, 다이얼로그 sr-only "닫기" 통일. 후속 커밋(`920fbee`)에서 결과 재조회를 `resultCache` 기반 복원으로 교체. SKILL §13 신규(git show --stat 확인), `npm run build`/`npm run lint` PASS, Playwright 70개 어서션 PASS
+- 위저드 1단계 상단 버튼 라벨 분기 (PR #90 squash `6024119`) — `fix/wizard-first-step-button-label`: 1단계="홈으로", 2단계 이상="처음부터"로 조건 분기. SKILL §13 반영(git show --stat 확인 완료), `npm run build`/`npm run lint` PASS
+- 기술 백로그 그룹 4(네비게이션 라벨 잔여: "이전"·"취소"·신규등록 조건부 라벨) 진단 후 종결 — 3건 모두 SKILL §13에 이미 부합해 코드 수정 없음
+- 배경·설계 근거·교훈 → PROJECT_CONTEXT §13·§20

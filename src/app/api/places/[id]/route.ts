@@ -2,20 +2,31 @@ import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { getPlaceById } from '@/lib/data/places'
 import { getSupabaseClient } from '@/lib/supabase/client'
-import { isValidReferenceUrl } from '@/lib/url'
+import { readJsonBody, zodErrorResponse } from '@/lib/api/validation'
+import {
+  apiTitleSchema,
+  apiCategoryIdSchema,
+  apiLocationSchema,
+  apiMemoSchema,
+  apiReferenceUrlSchema,
+  apiStatusSchema,
+  apiVisitedAtSchema,
+  apiRatingSchema,
+  apiReviewNoteSchema,
+} from '@/lib/schemas/apiFields'
 
 const patchSchema = z.object({
-  title: z.string().min(1, '제목을 입력해 주세요.').max(100).optional(),
-  category_id: z.string().uuid().optional().nullable(),
+  title: apiTitleSchema.optional(),
+  category_id: apiCategoryIdSchema,
   area: z.string().min(1).optional(),
-  location: z.string().max(200).optional().nullable(),
+  location: apiLocationSchema,
   meal_times: z.array(z.enum(['lunch', 'dinner'])).min(1).max(2).optional(),
-  memo: z.string().max(1000).optional().nullable(),
-  reference_url: z.string().refine(isValidReferenceUrl, '올바른 URL 형식이 아닙니다.').optional().nullable().or(z.literal('')),
-  status: z.enum(['wishlist', 'visited', 'archived']).optional(),
-  visited_at: z.string().optional().nullable(),
-  rating: z.number().int().min(1).max(5).optional().nullable(),
-  review_note: z.string().optional().nullable(),
+  memo: apiMemoSchema,
+  reference_url: apiReferenceUrlSchema,
+  status: apiStatusSchema,
+  visited_at: apiVisitedAtSchema,
+  rating: apiRatingSchema,
+  review_note: apiReviewNoteSchema,
 })
 
 type RouteContext = { params: Promise<{ id: string }> }
@@ -35,12 +46,10 @@ export async function GET(_req: NextRequest, { params }: RouteContext) {
 export async function PATCH(req: NextRequest, { params }: RouteContext) {
   const { id } = await params
   try {
-    const body = await req.json()
-    const result = patchSchema.safeParse(body)
-    if (!result.success) {
-      const message = result.error.issues[0]?.message ?? '입력값이 올바르지 않습니다.'
-      return NextResponse.json({ error: message, details: result.error.issues }, { status: 400 })
-    }
+    const bodyResult = await readJsonBody(req)
+    if (!bodyResult.ok) return bodyResult.response
+    const result = patchSchema.safeParse(bodyResult.body)
+    if (!result.success) return zodErrorResponse(result.error)
 
     const payload = { ...result.data }
     if (payload.reference_url === '') payload.reference_url = null

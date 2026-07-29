@@ -414,6 +414,7 @@ description: >
 - 카드 내부 `<a>` 요소는 `outline: none` (`:has(a:focus-visible)` 규칙이 카드 전체에 글로우).
 - **portal scope**: `.dialogPopup`(body portal)은 `.page` `--s-*` 상속 불가 → `.dialogPopup` 다크 블록에 `--s-focus-ring` / `--s-focus-ring-card` 재선언(이미 적용). 새 portal 루트 추가 시 동일하게.
 - 브라우저 기본 outline 방치 금지. 표시가 없으면 위 tier에서 해당하는 것을 적용한다.
+- **shadcn Button 계열은 `globals.css`의 `[data-slot='button']:focus-visible { box-shadow: var(--s-focus-ring) !important; }` 한 규칙이 전 variant(destructive 포함) 공통으로 담당한다** (dark/hover/focus 정합화 패스 신규). `button.tsx` 안의 `focus-visible:ring-ring/50` Tailwind 클래스는 그대로 있지만 이 규칙에 덮어써진다 — 실사용 색은 항상 `--s-focus-ring`. `!important`가 필요한 이유: `[data-slot='button']`은 순수 속성 선택자라 CSS Module의 "pure selector" 제약(로컬 클래스 필수)에 걸려 `screens.module.css` 등에 둘 수 없고, `globals.css`에 두면 이 프로젝트 Tailwind v3(`@layer` 미사용)의 유틸리티 방출 순서가 소스 위치와 무관하게 재배치돼 일반 명시도로는 이기지 못하는 경우가 실측으로 확인됨 — 이 한 규칙만 예외적으로 `!important` 사용.
 
 ### 새 인터랙티브 컴포넌트 추가 시 절차
 
@@ -1196,7 +1197,7 @@ requestAnimationFrame(() => router.push(listHref))
 
 ## 백로그 (별도 작업 필요 — 미해결)
 
-- **`.detailDeleteBtn` 라이트 hover 불투명도 불일치**: 라이트 hover가 `/0.15`로, 공통 토큰 base(`--s-destructive-soft-bg` 라이트 `/0.1`)와 다르다. 본래 있던 불일치이며, 통일하면 라이트 hover가 `0.15→0.1`로 묽어지는 **라이트 시각 변경**이라 별도 사인오프 필요. (다크는 §5-B대로 이미 이 표면 전용값 `/0.20`·`/0.26`으로 분리 적용됨.)
+- **`.detailDeleteBtn` 라이트 hover 불투명도 불일치** → **해결 (dark/hover/focus 정합화 패스)**: 라이트 hover를 공통 토큰(`var(--s-destructive-soft-bg)`, `/0.1`)으로 교체해 `/0.15`와의 불일치를 해소. 라이트 시각이 `0.15→0.1`로 옅어지는 변경이라 사용자 사인오프 받아 적용. (다크는 §5-B대로 이 표면 전용값 `/0.20`·`/0.26` 그대로 유지.)
 
 ---
 

@@ -234,6 +234,21 @@ description: >
 
 ---
 
+### 3-B. 카드 그리드 레이아웃 — `/list` vs 추천 결과 (의도된 예외, 확정 260730)
+
+왜: 두 화면 모두 카드를 그리드로 배치하지만 화면 성격이 다르다. `/list`는 필터링된 전체 목록(카드 수 많음·가변)을 보여주는 화면이라 컨테이너 트랙을 끝까지 채우는 게 자연스럽고, 추천 결과는 셔플 알고리즘이 골라준 소수(1~3장)를 큐레이션해 보여주는 갤러리 성격이라 카드 크기를 고정하고 가운데 정렬하는 게 자연스럽다. **구현 방식이 다른 건 리팩터 부채가 아니라 의도된 분리다** — 통합하지 않는다(PROJECT_CONTEXT §19 그룹3 실측·사용자 확정, 260730).
+
+| 화면 | 구현 | 카드 폭 |
+|---|---|---|
+| `/list` (`ListView.tsx` `GRID`) | CSS Grid: `grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3` | 트랙을 채움 — 뷰포트에 따라 가변(예: 900px 뷰포트에서 418px) |
+| `/recommend/activity`, `/recommend/place` 결과 (`ActivityRecommendWizard.tsx`/`PlaceRecommendWizard.tsx`) | flex-wrap: `flex flex-wrap justify-center gap-3 sm:gap-4` + 카드 `w-full sm:w-[calc(50%-0.5rem)] sm:max-w-[280px] lg:w-[calc(33.333%-0.667rem)]` | `sm:max-w-[280px]` 고정 캡 + `justify-center`로 가운데 정렬 |
+
+**실측(Playwright 렌더 측정)**: PC(`lg`, ≥1024px)에서는 두 구현 모두 카드 폭 265px로 완전 동일. 640~900px(2열 구간)에서는 `/list`가 트랙을 채우며 최대 418px까지 넓어지는 반면 추천 결과는 280px에서 고정된다 — 이 차이는 버그가 아니라 위 이유로 의도된 것.
+
+**통합하지 않는 이유**: 트랙을 채우는 구현으로 통일하면 카드 1~2장만 있는 추천 결과에서 카드가 과하게 커지고 빈 트랙이 어색해진다. 반대로 고정폭+가운데 정렬로 통일하면 `/list`는 항목이 많을 때 카드 사이 여백만 늘어나 화면 활용도가 떨어진다. **`sm:max-w-[280px]` 캡은 변경 금지.**
+
+---
+
 ## 4. 토글 · 검색 · 필터 컨트롤 스타일
 
 왜: 입력/컨트롤 줄(토글·검색바·필터)은 **바깥 박스 40px로 통일**해 한 줄로 정렬되게 한다. 라이트는 흰 면 + 옅은 보더(`--s-card-border-strong`), 활성만 보라로 구분. 포커스 시 보더는 1px 자리를 항상 차지해 레이아웃 점프가 없다.
@@ -1200,6 +1215,7 @@ requestAnimationFrame(() => router.push(listHref))
 
 - **`.detailDeleteBtn` 라이트 hover 불투명도 불일치** → **해결 (dark/hover/focus 정합화 패스)**: 라이트 hover를 공통 토큰(`var(--s-destructive-soft-bg)`, `/0.1`)으로 교체해 `/0.15`와의 불일치를 해소. 라이트 시각이 `0.15→0.1`로 옅어지는 변경이라 사용자 사인오프 받아 적용. (다크는 §5-B대로 이 표면 전용값 `/0.20`·`/0.26` 그대로 유지.)
 - **다크 hover "2계열 분리" 의심 (PROJECT_CONTEXT §19 그룹 1)** → **기각/종결 (260730, PR #101)**: 전수 재진단 결과 실제로 통일이 필요한 항목은 없었음. `.iconBtn`/`.headerNavBtn`/`.dialogCloseBtn`/`.editGhostBtn`/`.mapActionBtn`의 다크 hover가 라이트와 다른 토큰(중성→accent)을 쓰는 건 §5-A가 이미 확정한 "콘텐츠 vs 유틸리티" 의도된 구분이었고, `.detailDeleteBtn` hover/active 텍스트색이 다크에서도 고정인 것도 §5-B가 이미 명시한 설계(전경색은 솔리드 단일 출처, 소프트 배경과 안 섞음)였다. 실측(Playwright 실제 렌더 픽셀 샘플링)으로 `.detailDeleteBtn` hover 텍스트 대비도 확인: 라이트 CR≈3.18 / 다크 CR≈4.37 — 다크가 오히려 더 또렷해 "다크만 무대응이라 깨진다"는 가설도 기각. 유일한 실제 조치는 코드베이스에 남아있던 마지막 dead Tailwind `dark:` 클래스(미사용 컴포넌트 `select.tsx`/`tabs.tsx`) 삭제.
+- **카드 그리드 구현 방식 통합 검토 (PROJECT_CONTEXT §19 그룹 3)** → **기각/종결 (260730)**: `/list`(CSS Grid)와 추천 결과(flex-wrap)의 렌더 폭을 Playwright로 실측한 결과 PC(≥1024px)는 완전 동일(265px)했지만 640~900px 2열 구간에서 최대 140px 차이가 있었다. 사용자 확인 결과 이 차이는 버그가 아니라 "`/list`=전체 목록이라 트랙을 채우는 게 자연스럽고, 추천 결과=소수 큐레이션 갤러리라 고정폭+가운데 정렬이 자연스럽다"는 의도된 디자인 판단으로 확정됨 — 코드 변경 없이 §3-B에 의도된 예외로 문서화. `sm:max-w-[280px]` 캡은 변경 금지.
 
 ---
 

@@ -11,6 +11,7 @@ description: >
 
 이 문서는 **추측 금지**. 모든 값은 실제 코드에서 추출했다.
 
+- 용어 매핑: 코드 식별자 `place`(테이블/라우트/타입 등)는 사용자 노출 라벨 "다이닝", `activity`는 "액티비티"(PR #80). 식별자를 리네임하지 않은 이유는 DB 스키마/URL 브레이킹 리스크 때문이며, 필요 시 향후 멀티테넌시 재설계와 함께 검토한다.
 - 디자인 토큰 원본: `src/components/screens.module.css` (`.page` 컨테이너 안에서 `--s-*` 변수 정의)
 - 전역 배경/세이프영역: `src/app/globals.css`
 - shadcn HSL 토큰: `src/app/globals.css` `:root` / `.dark` + `tailwind.config.ts`

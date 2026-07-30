@@ -1,6 +1,6 @@
 # CHANGELOG.md
 
-> **마지막 업데이트: 2026-07-29**
+> **마지막 업데이트: 2026-07-30**
 
 > 260531~260729 핸드오프 전체를 날짜순으로 기록한 변경 이력입니다. 새 AI는 일반적으로 `PROJECT_CONTEXT.md`와 `CURRENT_STATE.md`만 먼저 읽고, 과거 판단 근거가 필요할 때 이 문서를 참고하세요.
 
@@ -543,3 +543,15 @@
 - 폼-API 입력 검증 정합화 (PR #95 squash `f2055eb`) — activities·places API 입력 검증 스키마를 공유 모듈로 통합, GET 쿼리 검증 추가, 잘못된 입력을 500 대신 400으로 통일. 폼 submit 에러 처리도 안전화. tsc/lint/test(81)/build/E2E PASS
 - 핸드오프 문서(CURRENT_STATE·CHANGELOG·PROJECT_CONTEXT) 오늘자 반영 (PR #96·#97, 문서 전용)
 - 현재 상태 → PROJECT_CONTEXT §2·§5
+
+---
+
+## 2026-07-30 — 다크 hover 상태 진단 + 기술 백로그 그룹 1 종결 (`fix/dark-hover-token-unification`, PR 병합 전)
+
+- 다크 hover/색 시스템 전수 진단(읽기 전용) — Tailwind `dark:` 클래스는 미사용 컴포넌트(`select.tsx`/`tabs.tsx`) 2곳에만 잔존(PR #93이 대부분 정리 완료)함을 확인. `--s-*` 토큰 시스템 내 "토큰 값 자동전환(A)" vs "다크용 규칙 별도 재선언(B)" 두 방식이 요소군별로 혼용돼 있는 것도 확인
+- 진단 이후 실제 구현에서 A/B 통일을 시도하기 전 SKILL.md §5-A를 재확인한 결과, 발견된 B 방식 사례(`.iconBtn`/`.headerNavBtn`/`.dialogCloseBtn`/`.editGhostBtn`/`.mapActionBtn`의 다크 hover가 라이트와 다른 토큰을 씀)는 전부 "유틸리티 아이콘 버튼은 다크에서 accent 소프트로 의도적으로 강조, accent로 바꾸지 않는다"는 기존 확정 규칙에 해당 — **코드 동작 변경 없이 각 규칙에 SKILL.md §5-A 참조 주석만 보강**해 다음 감사에서 같은 항목이 "미해결 불일치"로 재발견되지 않게 함
+- `.detailDeleteBtn:hover`/`:active`의 텍스트색(`hsl(var(--destructive))`)이 배경(`--s-destructive-soft-bg` 계열, 다크 대응)과 달리 다크에서도 라이트와 같은 고정값이라 "대비가 깨질 위험"으로 의심됐던 항목은, 정적 테스트 하네스(실제 `globals.css`/`screens.module.css` 로드 + Playwright 실제 hover 렌더 후 픽셀 샘플링)로 실측 — 라이트 hover 텍스트 대비 CR≈3.18, 다크 CR≈4.37로 **다크가 오히려 더 또렷함**을 확인, "다크만 무대응이라 깨진다"는 가설 기각. 코드 변경 없음(실측 근거를 코드 주석으로 남김)
+- 미사용 컴포넌트 `src/components/ui/select.tsx`/`tabs.tsx` 삭제 — 프로젝트 전역 grep으로 어디서도 import되지 않음을 재확인 후 진행(둘 다 shadcn 스캐폴드로 다크 `.dark` 클래스 기반 hover 클래스 잔존, 사용처 없어 렌더 영향 없음)
+- 기술 백로그 그룹 1("다크 hover 2계열 분리 검토") 진단 결과 실제 코드 수정 필요 항목은 죽은 파일 제거뿐이었음을 확인하고 종결 — PROJECT_CONTEXT §19에서 항목·그룹 1 헤딩 제거
+- `tsc --noEmit`/lint/test(81)/build PASS. 라이트 렌더는 `screens.module.css` diff가 주석 전용(선언 변경 0줄)이라 픽셀 불변 보장. SKILL.md는 디자인 값 변경이 없어 갱신 대상 없음
+- 배경·진단 근거 → PROJECT_CONTEXT §19·§20

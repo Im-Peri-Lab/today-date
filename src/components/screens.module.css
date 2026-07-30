@@ -463,7 +463,9 @@
 }
 @media (prefers-color-scheme: dark) {
   .iconBtn:hover:not(:disabled) {
-    /* 다크 현행 유지 */
+    /* 다크 현행 유지. 라이트 규칙과 별도 재선언 + 다른 토큰(중성→accent) 사용은 토큰 값이
+       못 바뀌어서가 아니라 SKILL.md §5-A가 명시한 "유틸리티 아이콘 hover는 다크에서만
+       accent 소프트로 강조" 의도적 구분 — 단일 토큰 자동전환으로 통일 대상 아님. */
     background: var(--s-accent-soft-bg, #f5f0ff);
     color: var(--s-accent, #7c3aed);
   }
@@ -512,6 +514,7 @@
   }
 }
 @media (prefers-color-scheme: dark) and (hover: hover) {
+  /* .iconBtn과 동일 이유(SKILL.md §5-A) — 중성→accent 전환은 의도적 구분, 통일 대상 아님. */
   .headerNavBtn:hover:not(:disabled) {
     background: var(--s-accent-soft-bg, #f5f0ff);
     color: var(--s-accent, #7c3aed);
@@ -1011,6 +1014,7 @@
   background: var(--s-card-border-strong, #eceaf3);
 }
 @media (prefers-color-scheme: dark) {
+  /* .iconBtn과 동일 이유(SKILL.md §5-A) — 중성→accent 전환은 의도적 구분, 통일 대상 아님. */
   .dialogCloseBtn:hover {
     background: var(--s-accent-soft-bg, #573f7f);
   }
@@ -1243,6 +1247,7 @@
   }
 }
 @media (prefers-color-scheme: dark) and (hover: hover) {
+  /* .iconBtn과 동일 이유(SKILL.md §5-A) — 중성→accent 전환은 의도적 구분, 통일 대상 아님. */
   .editGhostBtn:hover {
     background: var(--s-accent-soft-bg, #2d2540);
     color: var(--s-accent, #c084fc);
@@ -1290,6 +1295,7 @@
   }
 }
 @media (prefers-color-scheme: dark) and (hover: hover) {
+  /* .iconBtn과 동일 이유(SKILL.md §5-A) — 중성→accent 전환은 의도적 구분, 통일 대상 아님. */
   .mapActionBtn:hover {
     background: var(--s-accent-soft-bg, #2d2540);
     color: var(--s-accent, #c084fc);
@@ -1371,6 +1377,13 @@
   .detailDeleteBtn:active {
     background: hsl(var(--destructive) / 0.26);
   }
+  /*
+   * color: hsl(var(--destructive)) (위 hover/active) 는 다크에서도 그대로 — 라이트/다크가
+   * 같은 고정 빨강을 쓰는 게 의도. 실측(hover 텍스트 vs 합성 배경): 라이트 CR≈3.18, 다크
+   * CR≈4.37 — 다크가 오히려 더 또렷해 "다크만 무대응이라 대비가 깨진다"는 가설은 기각.
+   * 두 모드 다 절대치가 낮은 건 --destructive 색상 자체의 특성(다른 destructive 사용처 공통)이라
+   * 이 규칙만 손대면 라이트와 임의로 갈라질 뿐 — 별도 스코프(백로그).
+   */
 }
 
 /* ── 정의형 시트 행 (상세 화면 본문) ─────────────────

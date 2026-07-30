@@ -623,14 +623,15 @@ description: >
 **`.mealBadge` 의도된 예외** (`/places/[id]` `PlaceDetail.tsx` 전용):
 - `font-size: var(--type-caption)` (12px 토큰 참조, `.captionText` 유틸 통째 적용 금지 — color는 기존 `--s-sub` 유지)
 - `font-weight: 400` — `DetailRow`의 `.bodyText`에서 상속하며 별도 굵기를 덮어쓰지 않음
-- `padding: 0.25rem 0.625rem` (4px 상하 / 10px 좌우) — spacing 전용 토큰 없어 직접 지정
+- `padding: var(--s-badge-padding-y-info, 0.25rem) var(--s-badge-padding-x-info, 0.625rem)` (4px 상하 / 10px 좌우, 260730 토큰화 — 값 변경 없음)
 - `line-height: 1.4` 명시, `border-radius: 9999px` pill 유지, `height` 고정 없음
 - `background: var(--s-card-border-strong)`, `color: var(--s-sub)`, border 없음
 - **카테고리 칩(`.chip`, height 36px / 컨트롤)과 달리 정보 표시 전용 뱃지**라 height 고정 패턴 미적용
 
-**spacing 토큰 표준화 백로그 신호** (현행 유지, 미작업):
-- 이 프로젝트는 `--s-space-*` 계열 spacing 전용 토큰이 없으며 padding/gap을 inline 수치 또는 Tailwind 클래스로 직접 지정한다.
-- `.mealBadge` 같은 "정보 뱃지 크기" 케이스가 2~3개 이상 누적되면 타이포 스케일(`§2-B`)처럼 spacing 토큰 수렴을 검토할 것. 지금은 단일 사례라 전면 토큰화 없이 직접 지정 + 신호 기록으로 둔다.
+**spacing 토큰 표준화 — 정보 뱃지 padding 부분 완료 (260730)**:
+- 이 프로젝트는 여전히 `--s-space-*` 같은 범용 spacing 토큰 체계가 없다. Tailwind 유틸리티 클래스(`p-*`/`gap-*` 등)는 Tailwind 자체 스케일이 이미 일관된 값 체계라 이번 토큰화 대상이 아니다.
+- 신호 기준이던 "정보 뱃지 크기 케이스 2~3개 누적"이 실측 결과 충족되어(`.mealBadge`/`.visitedTag`/`.filterCount`), `.mealBadge`·`.visitedTag`의 padding만 이름 있는 토큰(`--s-badge-padding-y-info`/`-x-info`, `--s-badge-padding-y-status`/`-x-status`, `.page` 블록 정의)으로 승격했다. 두 값은 PR #71에서 "복수 정보값 나열(mealBadge) vs 단일 상태 강조(visitedTag)"로 역할이 이미 갈려 있어 **합치지 않고 각자 고유 토큰 유지** — 병합 재검토 없음.
+- `.filterCount`(카운터 성격, 정보 나열이 아님)는 이번 범위 제외. 값 자체는 변경하지 않아 라이트/다크 렌더 무변화.
 
 복붙:
 ```tsx
@@ -897,7 +898,7 @@ export const STATUS_LABELS: Record<Status, string> = {
 | `.mealBadge` | 정보값 badge — 장소 상세 등록정보의 "식사 시간" 행에서 복수 노출 가능 | 12px / 400 (`DetailRow` `.bodyText` 상속) | 4px 10px | `--s-card-border-strong` 배경, `--s-sub` 텍스트, pill, border 없음 |
 | `.visitedTag` + `.visitedTagVisited` | 상태 tag — 활동·장소 상세 카드 헤더에서 단독 노출 | 12px / 500 | 2px 8px | `--s-card-border-strong` 배경, `--s-sub` 텍스트, pill, border 없음 |
 
-공통 토큰은 두 요소가 같은 중립 배지 계열임을 나타내고, 서로 다른 density와 weight는 각 정보 역할을 나타내는 의도된 변형이다. `.mealBadge`의 상세값은 §8, 상태별 `.visitedTag*` 색 조합은 위 표를 따른다.
+공통 토큰은 두 요소가 같은 중립 배지 계열임을 나타내고, 서로 다른 density와 weight는 각 정보 역할을 나타내는 의도된 변형이다. `.mealBadge`의 상세값은 §8, 상태별 `.visitedTag*` 색 조합은 위 표를 따른다. padding은 각각 `--s-badge-padding-*-info`/`--s-badge-padding-*-status` 토큰(260730, `.page` 블록 정의)으로 이름이 붙었을 뿐 값은 그대로다 — 두 토큰을 병합하지 않는다.
 
 ---
 
@@ -1216,6 +1217,7 @@ requestAnimationFrame(() => router.push(listHref))
 - **`.detailDeleteBtn` 라이트 hover 불투명도 불일치** → **해결 (dark/hover/focus 정합화 패스)**: 라이트 hover를 공통 토큰(`var(--s-destructive-soft-bg)`, `/0.1`)으로 교체해 `/0.15`와의 불일치를 해소. 라이트 시각이 `0.15→0.1`로 옅어지는 변경이라 사용자 사인오프 받아 적용. (다크는 §5-B대로 이 표면 전용값 `/0.20`·`/0.26` 그대로 유지.)
 - **다크 hover "2계열 분리" 의심 (PROJECT_CONTEXT §19 그룹 1)** → **기각/종결 (260730, PR #101)**: 전수 재진단 결과 실제로 통일이 필요한 항목은 없었음. `.iconBtn`/`.headerNavBtn`/`.dialogCloseBtn`/`.editGhostBtn`/`.mapActionBtn`의 다크 hover가 라이트와 다른 토큰(중성→accent)을 쓰는 건 §5-A가 이미 확정한 "콘텐츠 vs 유틸리티" 의도된 구분이었고, `.detailDeleteBtn` hover/active 텍스트색이 다크에서도 고정인 것도 §5-B가 이미 명시한 설계(전경색은 솔리드 단일 출처, 소프트 배경과 안 섞음)였다. 실측(Playwright 실제 렌더 픽셀 샘플링)으로 `.detailDeleteBtn` hover 텍스트 대비도 확인: 라이트 CR≈3.18 / 다크 CR≈4.37 — 다크가 오히려 더 또렷해 "다크만 무대응이라 깨진다"는 가설도 기각. 유일한 실제 조치는 코드베이스에 남아있던 마지막 dead Tailwind `dark:` 클래스(미사용 컴포넌트 `select.tsx`/`tabs.tsx`) 삭제.
 - **카드 그리드 구현 방식 통합 검토 (PROJECT_CONTEXT §19 그룹 3)** → **기각/종결 (260730)**: `/list`(CSS Grid)와 추천 결과(flex-wrap)의 렌더 폭을 Playwright로 실측한 결과 PC(≥1024px)는 완전 동일(265px)했지만 640~900px 2열 구간에서 최대 140px 차이가 있었다. 사용자 확인 결과 이 차이는 버그가 아니라 "`/list`=전체 목록이라 트랙을 채우는 게 자연스럽고, 추천 결과=소수 큐레이션 갤러리라 고정폭+가운데 정렬이 자연스럽다"는 의도된 디자인 판단으로 확정됨 — 코드 변경 없이 §3-B에 의도된 예외로 문서화. `sm:max-w-[280px]` 캡은 변경 금지.
+- **spacing 토큰 표준화 (PROJECT_CONTEXT §19 그룹 3)** → **부분 완료 (260730)**: §8의 수렴 트리거("정보 뱃지 케이스 2~3개 누적")가 `.mealBadge`/`.visitedTag`/`.filterCount`로 충족되어, `.mealBadge`·`.visitedTag`의 padding만 `--s-badge-padding-*-info`/`--s-badge-padding-*-status` 토큰으로 승격(값 변경 없음, PR #71 역할 분리에 따라 병합하지 않음). `--s-space-*` 범용 체계 도입은 계속 보류 — Tailwind 유틸리티 spacing은 이미 일관된 스케일이라 대상이 아니었고, `.filterCount`(카운터 성격)는 이번 범위 제외.
 
 ---
 

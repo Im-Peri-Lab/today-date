@@ -1,3 +1,10 @@
+/**
+ * 네이밍 용어 매핑 (코드 식별자 ↔ 사용자 노출 라벨)
+ * - `place`/`Place` 관련 식별자(테이블 `places`, 라우트 `/places/*`, `/api/places/*`, 타입 `Place`/`PlaceCategory` 등)는
+ *   사용자에게는 "다이닝"으로 노출됨(PR #80).
+ * - `activity`/`Activity` 관련 식별자는 사용자에게는 "액티비티"로 노출됨(PR #80).
+ * - 리네임하지 않은 이유: DB 스키마/URL 브레이킹 리스크. 필요 시 향후 멀티테넌시 재설계와 함께 검토.
+ */
 export type DurationBucket = 'half' | 'full' | 'overnight'
 export type TimeOfDay = 'day' | 'night' | 'any'
 export type MealTime = 'lunch' | 'dinner'

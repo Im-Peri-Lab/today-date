@@ -11,13 +11,12 @@
 SKILL.md 반영(PR #100) + 기술 백로그 그룹 1("다크 hover 2계열 분리 검토") 진단 후 종결(PR #101)
 모두 병합 완료, main 기준 build PASS. 이어서 기술 백로그 그룹 3(위저드 h1·카드 그리드·spacing
 토큰·`/list` prefetch) 4건을 실측·분류 — 카드 그리드 의도된 예외 문서화(SKILL §3-B) + 뱃지
-spacing 토큰화(`--s-badge-padding-*-info`/`-status`)를 `chore/card-grid-decision-and-badge-spacing-token`
-브랜치에 push 완료, **PR 생성·머지는 아직 전**. 상세 → CHANGELOG 2026-07-30.
+spacing 토큰화(`--s-badge-padding-*-info`/`-status`) PR #103 squash 머지 완료. 상세 → CHANGELOG
+2026-07-30.
 
 ## 브랜치 상태
-- `chore/card-grid-decision-and-badge-spacing-token` — 커밋 2개(`d150775` 문서 전용, `4c85b25`
-  코드+문서), origin push 완료, PR 미생성. lint/test(81)/build 모두 PASS 확인됨
-- main은 이 브랜치와 무관하게 그대로 build PASS 상태 유지
+- 현재 작업 브랜치 없음, main 기준 build PASS
+- PR #103(`chore/card-grid-decision-and-badge-spacing-token`) squash 머지 완료(`a89817e`), 로컬·원격 브랜치 정리 완료
 
 ## 최근 구현 완료
 - 자동화 테스트·CI, dark/hover/focus 정합화, 추천위저드 History/URL 동기화 공통 훅, 폼-API
@@ -26,18 +25,15 @@ spacing 토큰화(`--s-badge-padding-*-info`/`-status`)를 `chore/card-grid-deci
   용어 매핑을 SKILL.md에도 pointer로 추가(PR #100), 기술 백로그 그룹 1 진단·종결 — dead
   `dark:` 클래스 완전 제거·SKILL.md 정정(PR #101) → 상세 CHANGELOG 2026-07-30
 - 기술 백로그 그룹 3 실측 4건(위저드 h1=stale 종결, `/list` prefetch=SKILL §12 확정 규칙과 충돌해
-  보류) + 카드 그리드·spacing 토큰 2건은 브랜치에 반영 완료(머지 전, 위 브랜치 상태 참고) →
+  보류) + 카드 그리드 의도된 예외 문서화·spacing 토큰화 2건 PR #103 squash 머지(`a89817e`) →
   상세 CHANGELOG 2026-07-30
 
 ## 배포 상태
 - 플랫폼: Vercel
 - URL: `https://today-date-seven.vercel.app`
-- 현재 브랜치: `main` (PR #101 기준 `b197944`)
+- 현재 브랜치: `main` (PR #103 기준 `a89817e`)
 
 ## 진행 중 / 남은 작업
-- `chore/card-grid-decision-and-badge-spacing-token` 브랜치 PR 생성·squash 머지 — 코드 변경은
-  끝났고 검증(lint/test/build + light·dark computed style 픽셀 불변 확인)도 통과했으나 표준
-  머지 플로우(PR → squash → 로컬 정리)가 아직 실행 안 됨
 - 다이닝 위저드 "상세 화면 → 추천 결과로 복귀" 실제 왕복 E2E — `/places/[id]` 상세는 서버
   컴포넌트가 Supabase를 직접 조회해 DB 없이는 자동화 불가, 카드 returnTo·결과 캐시 복원
   검증으로 대체(실제 왕복은 기존 아이폰 실기기 수동 검증으로 확인됨)

@@ -69,6 +69,15 @@
   /* ── StatRow 섹션 구분선 (라이트) — 나머지는 globals.css 전역 토큰 참조 ── */
   --s-row-divider: #f2f0f7; /* 카드 내부 행 구분선 — --s-divider(#ece7f5)보다 연해 위계 구분 */
 
+  /* ── 정보 뱃지 padding 토큰 (§8, 260730) ──────────────────────────
+   * mealBadge(복수 정보값 나열)와 visitedTag(단일 상태 강조)는 역할이 달라(PR #71) 값을 합치지
+   * 않고 각자 이름만 부여했다. 치수값이라 라이트/다크 공통(테마 분기 없음), 기존 값 그대로라
+   * 렌더 무변화. filterCount(카운터 성격)는 이번 토큰화 범위 밖. */
+  --s-badge-padding-y-info: 0.25rem; /* mealBadge 상하 — 4px */
+  --s-badge-padding-x-info: 0.625rem; /* mealBadge 좌우 — 10px */
+  --s-badge-padding-y-status: 0.125rem; /* visitedTag 상하 — 2px */
+  --s-badge-padding-x-status: 0.5rem; /* visitedTag 좌우 — 8px */
+
   /* ── 타이포 스케일 역할 토큰 (§0 — 정의만, 컴포넌트 미적용) ─────────────────────────
    * font-size / font-weight / color 3속성을 역할별로 토큰화.
    * color는 기존 --s-* 참조 → .page 다크 블록에서 자동 해석, 별도 다크 재선언 불필요.
@@ -416,7 +425,7 @@
 .mealBadge {
   white-space: nowrap;
   border-radius: 9999px;
-  padding: 0.25rem 0.625rem;
+  padding: var(--s-badge-padding-y-info, 0.25rem) var(--s-badge-padding-x-info, 0.625rem);
   font-size: var(--type-caption, 0.75rem);
   line-height: 1.4;
   /* 라이트: #eceaf3(불변) / 다크: #3a2f4e(카드면 #241a36보다 밝아 또렷).
@@ -1188,7 +1197,7 @@
 /* 상세: 상태 태그 공용 레이아웃 — 색은 modifier 클래스(.visitedTagVisited / .visitedTagWishlist)로 분리 */
 .visitedTag {
   border-radius: 9999px;
-  padding: 0.125rem 0.5rem;
+  padding: var(--s-badge-padding-y-status, 0.125rem) var(--s-badge-padding-x-status, 0.5rem);
   font-size: 0.75rem;
   font-weight: 500;
 }

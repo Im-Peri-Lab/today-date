@@ -543,7 +543,7 @@ description: >
 
 | 상태 | 라이트 | 다크(이 표면 전용) |
 |---|---|---|
-| hover | `/0.15` (불변) | `/0.20` (CR≈1.23 — 드롭다운 기준과 동급) |
+| hover | `var(--s-destructive-soft-bg)` = `/0.1` (공용 토큰 재사용, 舊 `/0.15`에서 정정·PR #93) | `/0.20` (CR≈1.23 — 드롭다운 기준과 동급) |
 | active | `/0.2` (불변) | `/0.26` (CR≈1.36) |
 
 → **원칙: 빨강 틴트의 불투명도는 "표면색"에 종속된다.** 새 destructive 면을 추가할 때 표면이 `#241a36`면 공통 토큰을, 더 어둡거나 밝은 표면이면 그 표면에서 기준 대비(hover CR≈1.23)를 맞춘 값을 별도로 정한다.
@@ -1199,6 +1199,7 @@ requestAnimationFrame(() => router.push(listHref))
 ## 백로그 (별도 작업 필요 — 미해결)
 
 - **`.detailDeleteBtn` 라이트 hover 불투명도 불일치** → **해결 (dark/hover/focus 정합화 패스)**: 라이트 hover를 공통 토큰(`var(--s-destructive-soft-bg)`, `/0.1`)으로 교체해 `/0.15`와의 불일치를 해소. 라이트 시각이 `0.15→0.1`로 옅어지는 변경이라 사용자 사인오프 받아 적용. (다크는 §5-B대로 이 표면 전용값 `/0.20`·`/0.26` 그대로 유지.)
+- **다크 hover "2계열 분리" 의심 (PROJECT_CONTEXT §19 그룹 1)** → **기각/종결 (260730, PR #101)**: 전수 재진단 결과 실제로 통일이 필요한 항목은 없었음. `.iconBtn`/`.headerNavBtn`/`.dialogCloseBtn`/`.editGhostBtn`/`.mapActionBtn`의 다크 hover가 라이트와 다른 토큰(중성→accent)을 쓰는 건 §5-A가 이미 확정한 "콘텐츠 vs 유틸리티" 의도된 구분이었고, `.detailDeleteBtn` hover/active 텍스트색이 다크에서도 고정인 것도 §5-B가 이미 명시한 설계(전경색은 솔리드 단일 출처, 소프트 배경과 안 섞음)였다. 실측(Playwright 실제 렌더 픽셀 샘플링)으로 `.detailDeleteBtn` hover 텍스트 대비도 확인: 라이트 CR≈3.18 / 다크 CR≈4.37 — 다크가 오히려 더 또렷해 "다크만 무대응이라 깨진다"는 가설도 기각. 유일한 실제 조치는 코드베이스에 남아있던 마지막 dead Tailwind `dark:` 클래스(미사용 컴포넌트 `select.tsx`/`tabs.tsx`) 삭제.
 
 ---
 

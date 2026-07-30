@@ -1,8 +1,8 @@
 # PROJECT_CONTEXT.md
 
-> **마지막 업데이트: 2026-07-29**
+> **마지막 업데이트: 2026-07-30**
 
-> 이 문서는 Today Date 프로젝트의 장기 컨텍스트입니다. 260531~260729 전체 핸드오프를 다시 읽고, 초기 컨텍스트에서 이후 작업으로 변경·확정된 내용을 반영한 최신본입니다. 새 AI에게는 이 파일과 `CURRENT_STATE.md`를 먼저 전달하고, 과거 의사결정 확인이 필요할 때만 `CHANGELOG.md`를 참고하게 하세요.
+> 이 문서는 Today Date 프로젝트의 장기 컨텍스트입니다. 260531~260730 전체 핸드오프를 다시 읽고, 초기 컨텍스트에서 이후 작업으로 변경·확정된 내용을 반영한 최신본입니다. 새 AI에게는 이 파일과 `CURRENT_STATE.md`를 먼저 전달하고, 과거 의사결정 확인이 필요할 때만 `CHANGELOG.md`를 참고하게 하세요.
 
 ---
 
@@ -212,7 +212,7 @@ Claude Code가 PR 생성 → squash 머지 → 원격·로컬 정리를 한 번�
 
 ## 5. 구현 완료 범위
 
-> 커버리지 기준: 2026-07-29
+> 커버리지 기준: 2026-07-30
 
 ### 인증 F-01
 
@@ -255,10 +255,11 @@ Claude Code가 PR 생성 → squash 머지 → 원격·로컬 정리를 한 번�
 - **연속 등록 (신규, 260721)**: 신규 등록 폼에 "저장하고 계속 등록하기" 보조 버튼 추가, 최종 등록 시 사용 여부에 따라 상세/리스트로 분기 이동 → 구체 스펙 SKILL §4-A·§5-A·§12-A, 배경 → CHANGELOG 2026-07-21
 - **리스트 검색·필터 URL 동기화 + 신규 등록 returnTo 연계 (신규, 260722)**: `/list` 검색어·세부 필터가 URL에 실시간 반영되고, 리스트↔상세 왕복뿐 아니라 신규 등록(FAB·빈 목록 CTA·저장 후 이동)에도 원래 목록 조건이 `returnTo`로 연결됨 → 구체 설계 규칙은 아래 "12. 리스트/카드 규칙 > 리스트 상태 유지" 절, 배경 → CHANGELOG 2026-07-22
 - **카테고리 체계 개편 (신규, 260724)**: 활동 카테고리를 레저(舊 액티비티 rename)·체험(신규)·문화·축제·자연·여행·미분류 7종으로(마이그레이션 009), 장소 카테고리를 한식·고기(신규)·일식·중식·양식·카페·디저트·바·미분류 9종으로(마이그레이션 010) 재편. 이원화돼 있던 카테고리 아이콘 맵을 `src/lib/categoryIcons.ts` 단일 출처로 통합. 마이그레이션 직후 카테고리 API가 stale 응답을 계속 반환하는 캐시 버그를 2단계로 발견·수정(라우트 `dynamic='force-dynamic'`만으론 부족 → `src/lib/supabase/client.ts`에서 모든 Supabase 요청에 `cache:'no-store'`를 강제하는 fetch 오버라이드로 근본 해결). 둘 다 원격 적용·재분류 건수 검증 완료 → 배경·검증 → CHANGELOG 2026-07-24 v2
-- **최상위 타입 표시 라벨 rename (신규, 260724)**: 사용자 노출 텍스트 기준 활동→액티비티, 장소→다이닝으로 전면 변경(FAB·홈 검색·추천 위저드·리스트 탭/빈 상태·등록/수정 폼·상세 not-found·API 404 메시지 등). **DB 스키마·URL 라우트·변수/타입명·API 엔드포인트는 무변경** — `activities`/`places` 테이블과 라우트, 코드 내부 변수명은 계속 활동/장소를 쓰며, 이 문서를 포함한 기술 문서 전반의 "활동"/"장소" 표기도 내부 기술 용어로 유지한다(사용자가 실제로 보는 라벨과 문서·코드의 내부 용어가 의도적으로 분리됨). 카테고리 rename(액티비티→레저, PR #78)과의 이름 충돌을 피하려 그 이후로 순서를 맞춰 진행 → 배경 → CHANGELOG 2026-07-24 v2
+- **최상위 타입 표시 라벨 rename (신규, 260724)**: 사용자 노출 텍스트 기준 활동→액티비티, 장소→다이닝으로 전면 변경(FAB·홈 검색·추천 위저드·리스트 탭/빈 상태·등록/수정 폼·상세 not-found·API 404 메시지 등). **DB 스키마·URL 라우트·변수/타입명·API 엔드포인트는 무변경** — `activities`/`places` 테이블과 라우트, 코드 내부 변수명은 계속 활동/장소를 쓰며, 이 문서를 포함한 기술 문서 전반의 "활동"/"장소" 표기도 내부 기술 용어로 유지한다(사용자가 실제로 보는 라벨과 문서·코드의 내부 용어가 의도적으로 분리됨). 카테고리 rename(액티비티→레저, PR #78)과의 이름 충돌을 피하려 그 이후로 순서를 맞춰 진행. 이 용어 매핑(코드 식별자 `place`/`activity` ↔ 노출 라벨 "다이닝"/"액티비티")은 SKILL.md 상단에도 짧은 pointer 주석으로 추가(260730, PR #100) → 배경 → CHANGELOG 2026-07-24 v2
 - **활동 실내/실외 필수 속성(location_type) (신규, 260725)**: `activities.location_type` 네이티브 pg enum(`'indoor'|'outdoor'`), 기존 47건 title 기준 실측 재분류(22실내/25실외) 후 NOT NULL 승격(마이그레이션 011, 재분류→검증→제약 순서, 원격 적용·검증 완료). places는 대상 아님(활동 전용). 폼 필드 순서 카테고리→실내/실외→소요시간→시간대, 상세는 항상 렌더+wide 단독 줄(소요시간+시간대가 다음 줄에서 짝지어지도록), `/list` 단일 선택 토글 필터(필드는 필수·필터는 계속 선택적), 카드 메타 줄 맨 앞 배지까지 end-to-end 반영 → 구체 스펙 SKILL §10-J·§10-K, 배경 → CHANGELOG 2026-07-25
 - **다이닝 카드 정보 줄 위치 폴백 (신규, 260725)**: `PlaceCard` 정보 줄이 메모만 표시하던 것을 `ActivityCard`와 동일한 규칙(메모 있으면 메모, 없으면 `location`, 아이콘도 StickyNote/MapPin 동일 전환)으로 대칭화 → 아래 "11. area/location 필드 구분"·"12. 카드 정보 줄 표시 규칙" 절 갱신 참조, 배경 → CHANGELOG 2026-07-25
 - **활동/다이닝 폼-API 입력 검증 공유 (신규, 260729)**: activities/places의 create/patch API 검증(title·category_id·location·memo·reference_url 등)이 `src/lib/schemas/apiFields.ts` 공유 Zod 스키마를 쓴다. GET 목록 API도 쿼리 파라미터를 Zod로 검증해 잘못된 값은 400(이전엔 무검증으로 조용히 빈 결과가 나갔음). POST/PATCH의 손상된 JSON 본문도 500이 아닌 400. 폼(`ActivityForm`/`PlaceForm`)의 submit은 `fetchJson`+try/catch로 네트워크 실패·JSON 파싱 실패·비정상 응답을 안전 처리(다른 화면과 동일 관용구) → 배경 → CHANGELOG 2026-07-29 v2
+- **`/list` 다녀온 곳 정렬 보정 (신규, 260729)**: `status=visited` 목록은 방문일(`visited_at`) 최신순, 방문일이 같으면 마지막 수정(`updated_at`) 최신순으로 정렬. 위시리스트(`status=wishlist`)는 기존대로 등록(`created_at`) 최신순 유지 → 구체 스펙 아래 "12. 리스트/카드 규칙" 절, 배경 → CHANGELOG 2026-07-30
 
 ### 추천 F-05~F-06
 
@@ -280,7 +281,7 @@ Claude Code가 PR 생성 → squash 머지 → 원격·로컬 정리를 한 번�
 ### 품질 · 인프라
 
 - **자동화 테스트·CI (신규, 260729)**: Vitest 단위 테스트(위저드 URL 파싱/직렬화, 결과 캐시, `returnTo` 화이트리스트, 공유 API 스키마, API 라우트 400 검증 등) + Playwright E2E 2건(활동 위저드 뒤로가기, 다이닝 위저드 결과 캐시 복원). `.github/workflows/ci.yml`이 PR/main push마다 lint→단위 테스트→build(verify job)와 별도 e2e job을 실행 → 배경 → CHANGELOG 2026-07-29
-- **dark/hover/focus 상태 정합화 (신규, 260729)**: shadcn Button 전 variant(default·secondary·outline·ghost·link·destructive)의 focus-visible 링이 `--s-focus-ring` 토큰(다크 대응) 기반으로 앱 전역과 통일돼 있다(이전엔 정적 `--ring`이라 다크에서 Primary처럼 보라 계열 채움색 버튼은 링이 겹쳐 안 보이는 문제가 있었음). `.detailDeleteBtn` 라이트 hover는 공용 destructive 토큰과 일치. `.dark` 클래스를 쓰지 않는 이 앱에서 절대 발동하지 않는 죽은 Tailwind `dark:` 클래스는 실사용 컴포넌트에서 제거 완료(미사용 컴포넌트 `select.tsx`/`tabs.tsx`는 범위 밖으로 잔존) → 구체 메커니즘 SKILL §5, 배경 → CHANGELOG 2026-07-29 v2
+- **dark/hover/focus 상태 정합화 (신규, 260729 착수 → 260730 종결, PR #93·#101)**: shadcn Button 전 variant(default·secondary·outline·ghost·link·destructive)의 focus-visible 링이 `--s-focus-ring` 토큰(다크 대응) 기반으로 앱 전역과 통일돼 있다(이전엔 정적 `--ring`이라 다크에서 Primary처럼 보라 계열 채움색 버튼은 링이 겹쳐 안 보이는 문제가 있었음). `.detailDeleteBtn` 라이트 hover는 공용 destructive 토큰과 일치. 죽은 Tailwind `dark:` 클래스는 실사용 컴포넌트에서 제거된 데 이어, 마지막으로 남아있던 미사용 컴포넌트(`select.tsx`/`tabs.tsx`)까지 삭제해 코드베이스 전역에서 완전히 제거됐다(260730). 이어서 진행한 기술 백로그 그룹 1("다크 hover 2계열 분리 검토") 전수 재진단은 실제 통일 대상이 없었음으로 종결 — `--s-*` 토큰의 "자동전환 vs 재선언" 혼용처럼 보였던 것도, `.detailDeleteBtn` 텍스트색이 다크에서 안 바뀌는 것도 SKILL §5-A·§5-B가 이미 확정한 의도된 설계였고, 실측(대비 라이트 CR≈3.18/다크 CR≈4.37)으로 접근성 문제도 아님을 확인했다 → 구체 메커니즘 SKILL §5, 배경 → CHANGELOG 2026-07-30
 
 ### 시드 데이터
 
@@ -463,6 +464,12 @@ Claude Code가 PR 생성 → squash 머지 → 원격·로컬 정리를 한 번�
 
 ActivityCard·PlaceCard 모두 동일한 정보 줄 우선순위(memo→location fallback)·아이콘 매핑(location=MapPin/memo=StickyNote)·고정 높이(min-h-5) 원칙을 쓴다. 최초엔 PlaceCard가 memo 고정 표시였으나(260707 v2), 260725에 ActivityCard와 동일한 fallback으로 대칭화(PR #82) — 메모 없는 다이닝 카드가 정보 줄이 항상 비어있던 문제를 해소. 구체 스펙은 SKILL.md가 단일 출처.
 → **SKILL §8-A**
+
+### 목록 정렬 규칙 (신규, 260729, PR #99)
+
+- 위시리스트(`status=wishlist`): 등록(`created_at`) 최신순 — 기존 동작 유지.
+- 다녀온 곳(`status=visited`): 방문일(`visited_at`) 최신순 우선, 방문일이 같으면 마지막 수정(`updated_at`) 최신순. 방문일이 없는 레코드는 뒤로(`nullsFirst: false`).
+- 두 정렬 모두 `/api/activities`, `/api/places` GET에서 `status` 파라미터로 분기해 서버가 결정한다(클라이언트 재정렬 없음).
 
 ### 홈 검색 진입점 (신규)
 

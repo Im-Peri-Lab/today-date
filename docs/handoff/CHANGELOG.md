@@ -546,10 +546,11 @@
 
 ---
 
-## 2026-07-30 — 다녀온 곳 정렬 보정 + 네이밍 용어 매핑 + 다크 hover 진단·기술 백로그 그룹 1 종결
+## 2026-07-30 — 다녀온 곳 정렬 보정 + 네이밍 용어 매핑 + 다크 hover 진단·기술 백로그 그룹 1 종결 + 기술 백로그 그룹 3 실측·처리
 
 - `/list` 다녀온 곳 정렬 보정 (PR #99 squash `1718710`) — `status=visited` 목록을 방문일(`visited_at`) 최신순, 동일하면 마지막 수정(`updated_at`) 최신순으로 정렬. 위시리스트는 기존대로 등록(`created_at`) 최신순 유지. PROJECT_CONTEXT §12 갱신
 - 네이밍 용어 매핑 pointer 추가 (PR #100 squash `256ed7f`) — 코드 식별자(`place`/`activity`) ↔ 노출 라벨("다이닝"/"액티비티") 매핑(PR #80에서 이미 확정)을 SKILL.md 상단과 `src/types/index.ts`에도 짧은 주석으로 추가해 어느 문서를 먼저 봐도 찾을 수 있게 함
 - 다크 hover 진단 + 기술 백로그 그룹 1 종결 (PR #101 squash `b197944`) — 전수 진단 결과 "다크 hover 2계열 분리 검토" 항목은 실제 통일 대상이 없었음을 확인: `.iconBtn`/`.headerNavBtn`/`.dialogCloseBtn`/`.editGhostBtn`/`.mapActionBtn`의 다크 hover가 라이트와 다른 토큰(중성→accent)을 쓰는 건 SKILL §5-A가 이미 확정한 의도된 구분, `.detailDeleteBtn` 텍스트색이 다크에서도 고정인 것도 §5-B가 이미 명시한 설계. Playwright 실제 렌더 픽셀 샘플링으로 실측한 결과(라이트 CR≈3.18/다크 CR≈4.37)도 다크 쪽 접근성 문제를 뒷받침하지 않음. 코드 동작 변경 없이 각 규칙에 SKILL §5-A 참조 주석만 보강. 유일한 실제 조치는 코드베이스에 마지막까지 남아있던 dead Tailwind `dark:` 클래스 — 미사용 컴포넌트 `select.tsx`/`tabs.tsx`를 삭제해 완전히 제거. SKILL §5-B의 stale 수치(`.detailDeleteBtn` 라이트 hover 표 `/0.15`로 남아있던 것 — PR #93에서 실제로는 `/0.1`로 바뀐 뒤 표 갱신 누락)도 함께 정정. lint/tsc/test(81)/build PASS
+- 기술 백로그 그룹 3 실측·처리 (`chore/card-grid-decision-and-badge-spacing-token` 브랜치, 커밋 `d150775`·`4c85b25`, PR 생성·머지 전) — PROJECT_CONTEXT §19 그룹 3의 위저드 h1 수렴·카드 그리드 통합·spacing 토큰 표준화·`/list` 서버 prefetch 4건을 Playwright 렌더 측정으로 실측·분류. 위저드 h1은 stale로 종결, `/list` prefetch는 SKILL §12 확정 규칙과 충돌해 보류. 카드 그리드는 사용자 확인 후 의도된 예외로 SKILL §3-B 신규 문서화(코드 변경 없음), spacing 토큰은 `.mealBadge`/`.visitedTag`의 padding만 `--s-badge-padding-*-info`/`-status` 토큰으로 승격(값 무변경, light/dark computed style로 픽셀 불변 확인, PR #71 역할 분리 유지·병합 없음). lint/test(81)/build PASS
 - 핸드오프 문서(PROJECT_CONTEXT·CURRENT_STATE·CHANGELOG) + SKILL.md 오늘자 반영
 - 배경·진단 근거 → PROJECT_CONTEXT §5·§12·§19·§20

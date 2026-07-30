@@ -7,22 +7,24 @@
 
 ## 현재 한 줄 요약
 자동화 테스트·CI 도입(PR #91) + P2 리팩터 배치(PR #93~95: dark/hover/focus 정합화, 추천위저드
-히스토리 공통화, 폼-API 검증 정합화) 병합 완료 + 기술 백로그 그룹 1 잔여 항목("다크 hover 2계열
-분리 검토") 진단 후 종결. 상세 → CHANGELOG 2026-07-30.
+히스토리 공통화, 폼-API 검증 정합화) + `/list` 다녀온 곳 정렬 보정(PR #99) + 네이밍 용어 매핑
+SKILL.md 반영(PR #100) + 기술 백로그 그룹 1("다크 hover 2계열 분리 검토") 진단 후 종결(PR #101)
+모두 병합 완료. 상세 → CHANGELOG 2026-07-30.
 
 ## 브랜치 상태
-- `fix/dark-hover-token-unification` — 기술 백로그 그룹 1 종결(미사용 컴포넌트 제거 + 주석 보강,
-  동작/렌더 변경 없음)
+- 현재 작업 브랜치 없음, main 기준 build PASS
 
 ## 최근 구현 완료
 - 자동화 테스트·CI, dark/hover/focus 정합화, 추천위저드 History/URL 동기화 공통 훅, 폼-API
   입력 검증 공유 → 상세 CHANGELOG 2026-07-29. 전체 누적 기능 목록은 PROJECT_CONTEXT §5 참조
-- 기술 백로그 그룹 1 종결 → 상세 CHANGELOG 2026-07-30
+- `/list` 다녀온 곳 정렬을 방문일·최종수정일 기준으로 보정(PR #99), 코드 식별자/노출 라벨 네이밍
+  용어 매핑을 SKILL.md에도 pointer로 추가(PR #100), 기술 백로그 그룹 1 진단·종결 — dead
+  `dark:` 클래스 완전 제거·SKILL.md 정정(PR #101) → 상세 CHANGELOG 2026-07-30
 
 ## 배포 상태
 - 플랫폼: Vercel
 - URL: `https://today-date-seven.vercel.app`
-- 현재 브랜치: `main` (PR #97 기준 `00c0b01`)
+- 현재 브랜치: `main` (PR #101 기준 `b197944`)
 
 ## 진행 중 / 남은 작업
 - 다이닝 위저드 "상세 화면 → 추천 결과로 복귀" 실제 왕복 E2E — `/places/[id]` 상세는 서버

@@ -1,6 +1,6 @@
 # CURRENT_STATE.md
 
-> **마지막 업데이트: 2026-07-30**
+> **마지막 업데이트: 2026-07-31**
 
 ## 현재 단계
 유지보수 / 점진적 UX 개선 단계.
@@ -8,15 +8,15 @@
 ## 현재 한 줄 요약
 자동화 테스트·CI 도입(PR #91) + P2 리팩터 배치(PR #93~95: dark/hover/focus 정합화, 추천위저드
 히스토리 공통화, 폼-API 검증 정합화) + `/list` 다녀온 곳 정렬 보정(PR #99) + 네이밍 용어 매핑
-SKILL.md 반영(PR #100) + 기술 백로그 그룹 1("다크 hover 2계열 분리 검토") 진단 후 종결(PR #101)
-모두 병합 완료, main 기준 build PASS. 이어서 기술 백로그 그룹 3(위저드 h1·카드 그리드·spacing
-토큰·`/list` prefetch) 4건을 실측·분류 — 카드 그리드 의도된 예외 문서화(SKILL §3-B) + 뱃지
-spacing 토큰화(`--s-badge-padding-*-info`/`-status`) PR #103 squash 머지 완료. 상세 → CHANGELOG
-2026-07-30.
+SKILL.md 반영(PR #100) + 기술 백로그 그룹 1·3 진단·처리(PR #101·#103: dark hover 진단 종결,
+카드 그리드 의도된 예외 문서화, 정보 뱃지 spacing 토큰화) 모두 병합 완료. 이어서 `.mealBadge`
+텍스트 색 대비 보정(PR #105) + Primary·그 외 액션 버튼 전수조사 2회로 액션 버튼 높이를 Tier
+A(40px)/Tier B(36px) 두 단계로 통일(PR #106) 병합 완료, main 기준 build PASS. 상세 → CHANGELOG
+2026-07-31.
 
 ## 브랜치 상태
 - 현재 작업 브랜치 없음, main 기준 build PASS
-- PR #103(`chore/card-grid-decision-and-badge-spacing-token`) squash 머지 완료(`a89817e`), 로컬·원격 브랜치 정리 완료
+- PR #106(`design/button-tier-consolidation`) squash 머지 완료(`3a05c31`), 로컬·원격 브랜치 정리 완료. PR #105(`design/meal-badge-color-ink`)도 squash 머지 완료(`ace0e3c`)
 
 ## 최근 구현 완료
 - 자동화 테스트·CI, dark/hover/focus 정합화, 추천위저드 History/URL 동기화 공통 훅, 폼-API
@@ -27,13 +27,22 @@ spacing 토큰화(`--s-badge-padding-*-info`/`-status`) PR #103 squash 머지 �
 - 기술 백로그 그룹 3 실측 4건(위저드 h1=stale 종결, `/list` prefetch=SKILL §12 확정 규칙과 충돌해
   보류) + 카드 그리드 의도된 예외 문서화·spacing 토큰화 2건 PR #103 squash 머지(`a89817e`) →
   상세 CHANGELOG 2026-07-30
+- `.mealBadge` 텍스트 색을 `--s-sub`→`--s-ink`로 승격해 같은 화면 `DetailRow` 값과 대비 위계를
+  맞춤(PR #105), Primary(보라) 버튼 15곳 + 그 외 액션 버튼 전수조사 2회를 근거로 액션 버튼 높이를
+  Tier A(40px, 화면/다이얼로그 풀폭 핵심 액션)/Tier B(36px, 인라인·컨텍스트 보조 액션) 두 단계로
+  통일, 48px였던 4개 지점 정렬 + SKILL §4-A 전면 재작성(PR #106) → 상세 CHANGELOG 2026-07-31
 
 ## 배포 상태
 - 플랫폼: Vercel
 - URL: `https://today-date-seven.vercel.app`
-- 현재 브랜치: `main` (PR #103 기준 `a89817e`)
+- 현재 브랜치: `main` (PR #106 기준 `3a05c31`)
 
 ## 진행 중 / 남은 작업
+- PR #106(액션 버튼 Tier 통일) Vercel 프리뷰 실기기 확인 — `/activities/new`(활동·다이닝), 홈
+  검색 다이얼로그, 방문기록 저장 다이얼로그, 되돌리기 다이얼로그 4곳. 세션 환경 제약으로 미실행
+- 아이콘 버튼 5종(headerNavBtn/iconBtn 44px, editGhostBtn 36px, mapActionBtn 28px, FAB 56px,
+  다이얼로그 닫기 24px) 크기 통일 여부, 위저드 "처음부터"/"홈으로" 구현 방식 불일치(ghost 버튼
+  vs 텍스트 링크) — 둘 다 PR #106 범위 밖으로 분리, PROJECT_CONTEXT §19 그룹 5 백로그 참고
 - 다이닝 위저드 "상세 화면 → 추천 결과로 복귀" 실제 왕복 E2E — `/places/[id]` 상세는 서버
   컴포넌트가 Supabase를 직접 조회해 DB 없이는 자동화 불가, 카드 returnTo·결과 캐시 복원
   검증으로 대체(실제 왕복은 기존 아이폰 실기기 수동 검증으로 확인됨)

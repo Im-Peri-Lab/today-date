@@ -410,10 +410,10 @@ export function ActivityDetail({ id, initialData, initialEdit, returnTo }: Props
                 </DialogDescription>
               </DialogHeader>
               <DialogFooter>
-                <DialogClose render={<Button variant="outline" disabled={update.isPending} />}>
+                <DialogClose render={<Button variant="outline" className="h-9" disabled={update.isPending} />}>
                   취소
                 </DialogClose>
-                <Button onClick={handleRevert} disabled={update.isPending}>
+                <Button className="h-9" onClick={handleRevert} disabled={update.isPending}>
                   {update.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
                   {update.isPending ? '처리 중...' : '되돌리기'}
                 </Button>

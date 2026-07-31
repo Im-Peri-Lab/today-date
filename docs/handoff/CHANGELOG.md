@@ -1,8 +1,8 @@
 # CHANGELOG.md
 
-> **마지막 업데이트: 2026-07-30**
+> **마지막 업데이트: 2026-07-31**
 
-> 260531~260729 핸드오프 전체를 날짜순으로 기록한 변경 이력입니다. 새 AI는 일반적으로 `PROJECT_CONTEXT.md`와 `CURRENT_STATE.md`만 먼저 읽고, 과거 판단 근거가 필요할 때 이 문서를 참고하세요.
+> 260531~260731 핸드오프 전체를 날짜순으로 기록한 변경 이력입니다. 새 AI는 일반적으로 `PROJECT_CONTEXT.md`와 `CURRENT_STATE.md`만 먼저 읽고, 과거 판단 근거가 필요할 때 이 문서를 참고하세요.
 
 ---
 
@@ -554,3 +554,11 @@
 - 기술 백로그 그룹 3 실측·처리 (PR #103 squash `a89817e`) — `chore/card-grid-decision-and-badge-spacing-token`: PROJECT_CONTEXT §19 그룹 3의 위저드 h1 수렴·카드 그리드 통합·spacing 토큰 표준화·`/list` 서버 prefetch 4건을 Playwright 렌더 측정으로 실측·분류. 위저드 h1은 stale로 종결, `/list` prefetch는 SKILL §12 확정 규칙과 충돌해 보류. 카드 그리드는 사용자 확인 후 의도된 예외로 SKILL §3-B 신규 문서화(코드 변경 없음), spacing 토큰은 `.mealBadge`/`.visitedTag`의 padding만 `--s-badge-padding-*-info`/`-status` 토큰으로 승격(값 무변경, light/dark computed style로 픽셀 불변 확인, PR #71 역할 분리 유지·병합 없음). lint/test(81)/build PASS
 - 핸드오프 문서(PROJECT_CONTEXT·CURRENT_STATE·CHANGELOG) + SKILL.md 오늘자 반영
 - 배경·진단 근거 → PROJECT_CONTEXT §5·§12·§19·§20
+
+---
+
+## 2026-07-31 — `.mealBadge` 텍스트 색 대비 보정 + 액션 버튼 Tier A/B 통일
+
+- `.mealBadge` 텍스트 색 승격 (PR #105 squash `ace0e3c`) — `design/meal-badge-color-ink`: 같은 화면 `DetailRow`(지역·위치, `PlaceDetail.tsx`)가 `--s-ink`인데 `.mealBadge`만 `--s-sub`라 상대적으로 흐려 보이던 것을 `--s-ink`로 승격(`font-size` 12px·`font-weight` 400 상속은 무변경). SKILL §8(`.mealBadge` 의도된 예외)·§10-E(역할별 배지 변형 표에 텍스트 색 컬럼 분리) 갱신. `npm run lint`/`build` PASS, Playwright `getComputedStyle`로 라이트/다크 `--s-ink` 값 실측 일치 확인
+- Primary(보라) 버튼·그 외 액션 버튼 전수조사 2회 + Tier A/B 통일 (PR #106 squash `3a05c31`) — `design/button-tier-consolidation`: 보라 버튼 15곳, 그 외 outline/ghost/destructive/아이콘/인증 버튼 전부를 두 차례 전수조사해 텍스트·풀폭 액션 버튼의 높이 위계를 **Tier A(화면/다이얼로그 풀폭 핵심 액션, 40px)/Tier B(인라인·컨텍스트 보조 액션, 36px)** 두 단계로 확정. 기존 48px였던 4개 지점(`FormLayout.tsx` 등록 버튼, `HomeSearchButton.tsx` 검색, `VisitedDialog.tsx` 저장하기)과, 높이 미지정으로 기본 32px 렌더 중이던 `ActivityDetail.tsx` 되돌리기 다이얼로그의 취소/확정 페어를 Tier A/B 값으로 정렬. 색(단색 채움/outline/ghost)은 위계 표현용일 뿐 높이와 독립임을 확정. 아이콘 버튼 5종(44/36/28/56/24px)과 위저드 "처음부터"/"홈으로" 구현 방식 불일치는 범위 밖으로 분리해 PROJECT_CONTEXT §19 백로그에 신규 등록. SKILL §4-A 전면 재작성(Tier A/B 표 + 판단 기준, 입력 컨트롤 표 분리). `npm run build` PASS. Vercel 프리뷰 4개 화면 실기기 확인은 세션 환경 제약으로 미실행
+- 배경·진단 근거 → PROJECT_CONTEXT §19·§20

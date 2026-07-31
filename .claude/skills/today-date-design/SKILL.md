@@ -621,11 +621,11 @@ description: >
 - 식사시간 등 보조 pill이 꼭 필요할 때만 `styles.mealBadge`(`--s-card-border-strong` 배경, radius full).
 
 **`.mealBadge` 의도된 예외** (`/places/[id]` `PlaceDetail.tsx` 전용):
-- `font-size: var(--type-caption)` (12px 토큰 참조, `.captionText` 유틸 통째 적용 금지 — color는 기존 `--s-sub` 유지)
+- `font-size: var(--type-caption)` (12px 토큰 참조, `.captionText` 유틸 통째 적용 금지)
 - `font-weight: 400` — `DetailRow`의 `.bodyText`에서 상속하며 별도 굵기를 덮어쓰지 않음
 - `padding: var(--s-badge-padding-y-info, 0.25rem) var(--s-badge-padding-x-info, 0.625rem)` (4px 상하 / 10px 좌우, 260730 토큰화 — 값 변경 없음)
 - `line-height: 1.4` 명시, `border-radius: 9999px` pill 유지, `height` 고정 없음
-- `background: var(--s-card-border-strong)`, `color: var(--s-sub)`, border 없음
+- `background: var(--s-card-border-strong)`, `color: var(--s-ink)`(260731 — `--s-sub`에서 승격. 같은 화면 `DetailRow` 값(지역·위치, `--s-ink`)보다 흐리게 보인다는 진단 결과 대비 위계를 맞춤), border 없음
 - **카테고리 칩(`.chip`, height 36px / 컨트롤)과 달리 정보 표시 전용 뱃지**라 height 고정 패턴 미적용
 
 **spacing 토큰 표준화 — 정보 뱃지 padding 부분 완료 (260730)**:
@@ -891,14 +891,14 @@ export const STATUS_LABELS: Record<Status, string> = {
 
 #### 역할별 배지 변형 (`.mealBadge` vs `.visitedTagVisited`)
 
-두 요소는 중립 색상과 pill 형태를 공유하지만, **복수 정보값과 단일 상태 강조라는 역할 차이에 따라 padding·font-weight를 의도적으로 분리**한다. 크기를 서로 맞추지 않는다.
+두 요소는 배경(`--s-card-border-strong`)과 pill 형태를 공유하지만, **복수 정보값과 단일 상태 강조라는 역할 차이에 따라 텍스트 색·padding·font-weight를 의도적으로 분리**한다. 크기를 서로 맞추지 않는다.
 
-| 요소 | 역할·노출 위치 | font-size / weight | padding | 공통 시각 속성 |
-|---|---|---|---|---|
-| `.mealBadge` | 정보값 badge — 장소 상세 등록정보의 "식사 시간" 행에서 복수 노출 가능 | 12px / 400 (`DetailRow` `.bodyText` 상속) | 4px 10px | `--s-card-border-strong` 배경, `--s-sub` 텍스트, pill, border 없음 |
-| `.visitedTag` + `.visitedTagVisited` | 상태 tag — 활동·장소 상세 카드 헤더에서 단독 노출 | 12px / 500 | 2px 8px | `--s-card-border-strong` 배경, `--s-sub` 텍스트, pill, border 없음 |
+| 요소 | 역할·노출 위치 | font-size / weight | padding | 텍스트 색 | 공통 시각 속성 |
+|---|---|---|---|---|---|
+| `.mealBadge` | 정보값 badge — 장소 상세 등록정보의 "식사 시간" 행에서 복수 노출 가능 | 12px / 400 (`DetailRow` `.bodyText` 상속) | 4px 10px | `--s-ink`(260731 승격 — 같은 화면 `DetailRow` 값(지역·위치)과 대비 위계 맞춤) | `--s-card-border-strong` 배경, pill, border 없음 |
+| `.visitedTag` + `.visitedTagVisited` | 상태 tag — 활동·장소 상세 카드 헤더에서 단독 노출 | 12px / 500 | 2px 8px | `--s-sub` | `--s-card-border-strong` 배경, pill, border 없음 |
 
-공통 토큰은 두 요소가 같은 중립 배지 계열임을 나타내고, 서로 다른 density와 weight는 각 정보 역할을 나타내는 의도된 변형이다. `.mealBadge`의 상세값은 §8, 상태별 `.visitedTag*` 색 조합은 위 표를 따른다. padding은 각각 `--s-badge-padding-*-info`/`--s-badge-padding-*-status` 토큰(260730, `.page` 블록 정의)으로 이름이 붙었을 뿐 값은 그대로다 — 두 토큰을 병합하지 않는다.
+배경 토큰은 두 요소가 같은 중립 배지 계열임을 나타내고, 서로 다른 density·weight·텍스트 색은 각 정보 역할을 나타내는 의도된 변형이다. `.mealBadge`의 상세값은 §8, 상태별 `.visitedTag*` 색 조합은 위 표를 따른다. padding은 각각 `--s-badge-padding-*-info`/`--s-badge-padding-*-status` 토큰(260730, `.page` 블록 정의)으로 이름이 붙었을 뿐 값은 그대로다 — 두 토큰을 병합하지 않는다.
 
 ---
 

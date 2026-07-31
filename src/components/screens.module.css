@@ -431,7 +431,9 @@
   /* 라이트: #eceaf3(불변) / 다크: #3a2f4e(카드면 #241a36보다 밝아 또렷).
      .visitedTagVisited 와 동일 토큰 — 면색 일관. */
   background: var(--s-card-border-strong, #eceaf3);
-  color: var(--s-sub, #6b7280);
+  /* 260731: --s-sub → --s-ink. 같은 화면 DetailRow 값(지역·위치)이 --s-ink라 뱃지 텍스트만
+     흐려 보이던 진단 결과 승격. font-size(12px)·font-weight(400 상속)는 무변경. */
+  color: var(--s-ink, #1a1033);
 }
 
 /* ── 통계 숫자 ─────────────────────────────────── */

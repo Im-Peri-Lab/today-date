@@ -36,7 +36,7 @@ export function FormLayout({
         <Button
           type="submit"
           disabled={isSubmitting}
-          className={cn(styles.detailPrimaryBtn, 'h-12 w-full text-white hover:brightness-105')}
+          className={cn(styles.detailPrimaryBtn, 'h-10 w-full text-white hover:brightness-105')}
         >
           {isSubmitting && submittingAction === 'submit' && (
             <Loader2 className="h-4 w-4 animate-spin" />

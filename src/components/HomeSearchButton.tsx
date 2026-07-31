@@ -116,7 +116,7 @@ export function HomeSearchButton() {
                 type="button"
                 onClick={() => void doSearch()}
                 disabled={submitting}
-                className={cn(styles.detailPrimaryBtn, 'h-12 w-full text-white hover:brightness-105')}
+                className={cn(styles.detailPrimaryBtn, 'h-10 w-full text-white hover:brightness-105')}
               >
                 {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
                 {submitting ? '검색 중...' : '검색'}

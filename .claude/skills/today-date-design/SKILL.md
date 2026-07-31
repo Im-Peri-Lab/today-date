@@ -278,52 +278,62 @@ description: >
 
 ---
 
-## 4-A. 폼 입력/선택 컨트롤 표준 (추가/수정 화면 + 상세 인라인 편집 공통)
+## 4-A. 폼 입력/선택 컨트롤 + 액션 버튼 높이 표준 (추가/수정 화면 + 상세 인라인 편집 + 다이얼로그 공통)
 
-왜: `/activities/new`·`/places/new`·상세 인라인 편집은 같은 프리미티브를 쓴다. 컨트롤 높이·radius·라벨 색을 아래 표준으로 고정해 한 화면 안에서 정렬되게 한다. (이 값들은 실제 코드에 반영됨 — 임의 변경 금지)
+왜: `/activities/new`·`/places/new`·상세 인라인 편집·주요 다이얼로그는 같은 프리미티브를 쓴다. 컨트롤·버튼 높이·radius를 아래 표준으로 고정해 한 화면 안에서 정렬되게 한다. (이 값들은 실제 코드에 반영됨 — 임의 변경 금지. Primary/보라 버튼 전수조사·그 외 액션 버튼 전수조사 결과를 반영해 260731 재작성)
 
-**높이 표준** (한 화면 안에서 정렬):
+**입력/선택 컨트롤 높이** (액션 버튼이 아닌 컨트롤류):
 | 컨트롤 | 높이 | radius | 출처 |
 |---|---|---|---|
 | 텍스트 입력바 (`Input`) | **40px** (`h-10`) | 10px (`rounded-lg`=`var(--radius)`) | `src/components/ui/input.tsx` |
 | textarea (`Textarea`) | min **64px** (`min-h-16`) | 10px | `src/components/ui/textarea.tsx` |
 | 세그먼트 (`styles.option`) | **40px** (`height:2.5rem`) | 10px (`0.625rem`) | `screens.module.css .option` |
 | 카테고리 칩 (`styles.chip`) | **36px** (`height:2.25rem`) | pill (`9999px`) | `screens.module.css .chip` |
-| 추가 화면 하단 Primary (제출) | **48px** (`h-12`) | 10px | `FormLayout.tsx` |
-| 추가 화면 하단 연속 등록 Secondary | **40px** (`h-10`) | 10px | `FormLayout.tsx` outline 버튼 |
-| 상세 하단 Primary(정방향 "다녀왔어요" / 역방향 "가보고 싶은 곳으로")·삭제 | **36px** (`h-9`) | 10px | `ActivityDetail`/`PlaceDetail` |
-| 인라인 편집 Save·Cancel (`DetailBlock`) | **36px** (`h-9`) | 10px | `DetailBlock.tsx` |
+| 리스트 필터 토글 (`styles.filterToggle`) | **40px** (`height:2.5rem`) | 12px | `ListView.tsx` — **액션 버튼이 아닌 토글 컨트롤**(펼침/접힘 상태 표시), 이 절의 Tier A/B 범위 밖 |
 
-→ **액션·컨트롤 사이즈 위계** (한 화면 안에서 정렬):
-- **48px** — 신규 생성 마무리 CTA(추가 화면 Primary `h-12` **전용**). 인라인엔 쓰지 않는다.
-- **40px** — 일반 입력/선택 컨트롤(`Input`·`Textarea`·세그먼트·카테고리 외 컨트롤·날짜 박스 `dateTrigger`)·컨트롤 줄(토글·검색바·필터, §4) + 신규 생성 Primary와 짝을 이루는 연속 등록 outline 보조 액션.
-- **36px** — 카테고리 칩 + **인라인 액션(저장·취소·삭제·전환)**.
-- **인라인 액션 = 36px (`h-9`, 확정)**: 상세 하단 Primary/삭제·인라인 Save/Cancel 모두 `h-9` 명시(예전 32px `h-8`에서 상향). 글자만인 Save/Cancel은 정사각 옹색함을 피하려 `px-4`로 통통하게, 아이콘+글자인 삭제/전환은 Button 기본 `px-2.5` 유지(이미 폭 있음). 한 화면(인라인 편집)에서 Save/Cancel·하단 Primary/삭제가 같은 36px로 정렬.
-- 인라인 액션(36px)은 카드 안 일반 컨트롤(40px)보다 **한 단계 작은 "보조 액션"** 결. Save 채움은 단색 액센트(`styles.detailPrimaryBtn`) 유지.
+**액션 버튼 위계 = Tier A(40px) / Tier B(36px) 두 단계.** 색(Primary 단색 채움/outline/ghost/destructive)은 중요도·성격을 구분하는 용도일 뿐 높이에는 관여하지 않는다 — 같은 Tier면 색과 무관하게 같은 높이를 쓴다.
+
+**이 표는 텍스트/풀폭 액션 버튼 전용이다.** 아이콘 버튼(`headerNavBtn`·`iconBtn`·`editGhostBtn`·`mapActionBtn`은 §7, FAB는 §9, 다이얼로그 우상단 닫기 X는 §11)은 이 표 범위 밖이며 별도 재검토 대상(백로그)이다. 인증 화면(`/lock`·`/forgot`·`/reset`·`/setup`) 버튼(46px, `src/components/auth/auth.module.css`의 `.btnPrimary`/`.btnSecondary`)도 처음부터 별도 시스템이라 이 표 범위 밖 — 변경 없음.
+
+### Tier A — 화면/다이얼로그 풀폭 핵심 액션: **40px** (`h-10`) · `w-full` · radius 10px
+
+| 버튼 | 화면 | 출처 |
+|---|---|---|
+| "액티비티 등록하기"/"다이닝 등록하기"(폼 최종 제출, 단색 채움) | `/activities/new`·`/places/new` | `FormLayout.tsx` |
+| "저장하고 계속 등록하기"(연속 등록 보조 제출, outline) | `/activities/new`·`/places/new` | `FormLayout.tsx` |
+| "검색"(단색 채움) | 홈 검색 다이얼로그 | `HomeSearchButton.tsx` |
+| "저장하기"(방문기록, 단색 채움) | "다녀왔어요" 방문기록 다이얼로그 | `VisitedDialog.tsx` |
+| "다음"(단색 채움) | 추천 위저드 스텝 진행 | `ActivityRecommendWizard.tsx`/`PlaceRecommendWizard.tsx` |
+| "이전"(outline) | 추천 위저드 스텝 진행 | 〃 |
+| "추천 받기"(위저드 마지막 스텝 실행, 단색 채움) | 추천 위저드 | 〃 |
+| "다른 추천 보기"(결과 재조회, 단색 채움/outline 상태에 따라) | 추천 결과 화면 | 〃 |
+| "더 짧은 일정도 볼까요?"(조건 넓히기) | 추천 결과 0건/재조회 상단 | `ActivityRecommendWizard.tsx` |
+| "액티비티 추가하기"/"다이닝 추가하기"(빈 결과, outline) | 추천 결과 0건 | 〃 |
+| "처음부터"(결과 화면 하단, ghost) | 추천 결과 화면 | `ActivityRecommendWizard.tsx` |
+
+### Tier B — 인라인/컨텍스트 내 보조 액션: **36px** (`h-9`) · `w-auto` · radius 10px
+
+| 버튼 | 화면 | 출처 |
+|---|---|---|
+| "다녀왔어요"/"가보고 싶은 곳으로"(상태 전환, 단색 채움) | 상세 하단 | `ActivityDetail.tsx`/`PlaceDetail.tsx` |
+| "삭제"(ghost + destructive 톤) | 상세 하단 | 〃 |
+| "저장"/"취소"(인라인 편집) | 상세 인라인 편집 | `DetailBlock.tsx` |
+| "삭제"/"취소"(삭제 확인 다이얼로그) | 삭제 확인 다이얼로그 | `DeleteConfirmDialog.tsx` |
+| "되돌리기"/"취소"(되돌리기 확인 다이얼로그) | "가보고 싶은 곳으로 되돌릴까요?" 다이얼로그 | `ActivityDetail.tsx` |
+| "초기화"(`styles.resetBtn`) | 리스트 필터 | `ListView.tsx` |
+
+**다이얼로그 취소+확정 페어는 항상 같은 높이를 쓴다** — 삭제 확인(`DeleteConfirmDialog`)·되돌리기 확인 두 다이얼로그 모두 취소/확정 버튼이 `h-9`로 통일돼 있다.
 
 **페이지 높이/하단 여백**: 상세 페이지는 `cn(styles.page, styles.pageStatic)`를 써서 `.page`의 `min-height:100svh`는 유지하고, `.pageStatic`으로 하단 safe-area padding만 제거한다. 짧은 콘텐츠에서도 페이지 자체와 고정 배경(`.page::before`)이 뷰포트를 채우므로 별도 spacer를 두지 않는다.
 
-### 액션 버튼 패턴 (거버넌스)
+### 액션 버튼 배치 판단 기준 (거버넌스)
 
-이 앱의 액션 버튼은 아래 **두 기본 패턴 + 신규 생성 폼의 짝 보조 액션 예외**만 사용한다. 새 화면을 추가할 때도 이 범위 밖의 **새 사이즈 도입 금지**.
+이 앱의 텍스트/풀폭 액션 버튼은 **Tier A(40px) / Tier B(36px) 두 단계**만 쓴다. 새 화면을 추가할 때도 이 범위 밖의 **새 사이즈 도입 금지**.
 
-**1) 풀폭 Primary CTA** — **48px / `w-full` / radius 10px / 단색 채움(`--s-active-fill` via `styles.detailPrimaryBtn`)**
-- 용도: "새 항목 생성 완료" — 데이터 추가가 발생하는 마무리 액션.
-- 적용처: `/activities/new` "활동 등록하기" · `/places/new` "장소 등록하기" · (향후) 추천 위저드 결과 저장, CSV 가져오기 완료 등.
-
-**2) 콘텐츠폭 액션** — **36px / 자연폭(`w-auto`, `h-9`) / radius 10px**
-- 용도: "기존 항목에 작용" — 수정·전환·삭제 등 데이터 가공 액션.
-- 적용처: 인라인 편집 Save/Cancel(`DetailBlock` 내부) · 상세 하단 전환 액션("다녀왔어요"/"가보고 싶은 곳으로" — 역방향만 `STATUS_MENU_LABELS.wishlist` 공유) · 상세 하단 삭제(ghost variant + destructive 톤) · 카드 메뉴 액션 · (향후) 다중 선택 액션 등.
-
-**신규 생성 폼의 짝 보조 액션 예외** — **40px / `w-full` / radius 10px / outline**
-- 용도: 새 항목은 만들지만 현재 폼 흐름을 끝내지 않는 보조 제출. `/activities/new`·`/places/new`의 "저장하고 계속 등록하기"가 기준 구현이다.
-- 배치: 풀폭 Primary 바로 아래, 같은 액션 묶음 안에서 `space-y-2`(8px). **Primary를 먼저**, outline Secondary를 나중에 둔다.
-- 위계: 두 버튼이 모두 생성 액션이어도 단색 채움은 현재 흐름을 끝내는 Primary 하나만 사용한다. 연속 등록 버튼에 `detailPrimaryBtn`·그라데이션을 적용하지 않는다.
-
-**판단 기준 — "이 액션이 현재 흐름을 끝내는 최종 주행동인가?"**
-- YES → 풀폭 Primary (48px). 신규 생성 완료·다음 화면 이동 등 현재 흐름을 마무리한다.
-- NO, 신규 생성 후 같은 폼에서 계속 작업 → 풀폭 outline Secondary (40px, 위 예외).
-- NO, 기존 항목에 작용(수정·전환·삭제·취소) → 콘텐츠폭 액션 (36px).
+- **화면 또는 다이얼로그의 "지금 눌러야 하는 핵심 진행/제출 액션"인가?** → **Tier A(40px, `w-full`)**. 신규 생성 완료·연속 등록 보조 제출·위저드 스텝 진행·다이얼로그 안의 유일한 주행동(검색·저장 등) 모두 여기에 속한다. 단색 채움 여부와 무관하게(outline·ghost 포함) 화면/다이얼로그 수준 핵심 액션이면 Tier A.
+- **이미 존재하는 항목에 대한 부수 액션(수정·전환·삭제·취소)이거나, 다이얼로그 안에서 Tier A 액션과 짝을 이루는 취소/확정 버튼인가?** → **Tier B(36px, `w-auto`)**.
+- 단색 채움(`styles.detailPrimaryBtn`)은 "지금 누를 단 하나의 CTA"에만 쓰고, 같은 Tier 안에 여러 버튼이 있어도 흐름을 끝내는 액션 하나만 단색으로 남긴다(§5-A). 색 위계와 높이 위계는 서로 독립적이다.
+- **인라인 액션(Tier B) 안의 세부 규칙**: 글자만인 Save/Cancel·취소/확정은 정사각 옹색함을 피하려 `px-4`로 통통하게, 아이콘+글자인 삭제/전환은 Button 기본 `px-2.5` 유지(이미 폭 있음).
 
 #### 연속 등록 제출 동작 (`FormLayout` 기준)
 
@@ -333,9 +343,6 @@ description: >
 - 한 번 이상 연속 등록한 뒤 최종 Primary 제출은 유효한 `returnTo`가 있으면 그 목록 URL로 바로 이동하고, 없으면 해당 목록 탭(`/list?tab=activity` 또는 `/list?tab=place`)으로 이동한다.
 - 두 버튼은 `isSubmitting || navigating`을 함께 참조해 동시에 잠근다. 실제로 누른 버튼만 `Loader2` + "저장 중..."을 표시하고, 함께 잠긴 다른 버튼은 원래 라벨을 유지한다(§12-A).
 - 복사하기 prefill은 마운트 시 one-shot `reset(values)`이고, 연속 등록의 `reset()`은 이후 사용자 제출 성공 시 실행되므로 서로 충돌하지 않는다.
-
-일반 컨트롤(입력바·세그먼트 등 **40px**)·카테고리 칩(**36px**)은 위 액션 버튼과 별개의 표준으로 유지한다(위 §4-A 높이 표 참조).
-
 
 **폰트:**
 - 입력 본문(`Input`/`Textarea`): **16px** (`text-base`, `md:text-sm` 쓰지 않음 → iOS 포커스 자동 줌인 방지).

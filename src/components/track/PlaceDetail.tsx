@@ -21,7 +21,7 @@ import { RevertConfirmDialog } from './RevertConfirmDialog'
 import { VisitedDialog } from '@/components/VisitedDialog'
 import { usePlace, useDeletePlace, useUpdatePlace } from '@/hooks/usePlaces'
 import { placeFormSchema, type PlaceFormValues } from '@/lib/schemas/placeSchema'
-import { PLACE_REVERT_PATCH } from '@/lib/revertPatch'
+import { REVERT_TO_WISHLIST_PATCH } from '@/lib/revertPatch'
 import type { Place } from '@/types'
 import { MEAL_LABELS, STATUS_LABELS, STATUS_MENU_LABELS } from '@/lib/labels'
 import { buildDetailHref, DEFAULT_LIST_RETURN_TO, isRecommendReturnTo } from '@/lib/listReturn'
@@ -110,7 +110,7 @@ export function PlaceDetail({ id, initialData, initialEdit, returnTo }: Props) {
 
   function handleRevert() {
     update.mutate(
-      { id, patch: PLACE_REVERT_PATCH },
+      { id, patch: REVERT_TO_WISHLIST_PATCH },
       {
         onSuccess: () => {
           setRevertOpen(false)

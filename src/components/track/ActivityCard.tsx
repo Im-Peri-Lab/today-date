@@ -24,7 +24,7 @@ import {
 import { buildDetailHref } from '@/lib/listReturn'
 import { stashActivityDuplicate } from '@/lib/duplicatePrefill'
 import { formatDotDateCompact, formatDotDateRangeCompact } from '@/lib/date'
-import { ACTIVITY_REVERT_PATCH } from '@/lib/revertPatch'
+import { REVERT_TO_WISHLIST_PATCH } from '@/lib/revertPatch'
 import { cn } from '@/lib/utils'
 import type { Activity } from '@/types'
 import styles from '@/components/screens.module.css'
@@ -54,7 +54,7 @@ export function ActivityCard({ activity, hideMenu, actionSlot, returnTo }: Activ
 
   function handleRevert() {
     update.mutate(
-      { id: activity.id, patch: ACTIVITY_REVERT_PATCH },
+      { id: activity.id, patch: REVERT_TO_WISHLIST_PATCH },
       {
         onSuccess: () => {
           setRevertOpen(false)

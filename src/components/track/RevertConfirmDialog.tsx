@@ -31,7 +31,7 @@ export function RevertConfirmDialog({
         <DialogHeader>
           <DialogTitle>가보고 싶은 곳으로 되돌릴까요?</DialogTitle>
           <DialogDescription>
-            별점, 감상, 방문일이 모두 삭제됩니다. 되돌릴 수 없어요.
+            별점, 감상, 방문일이 모두 삭제됩니다.
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>

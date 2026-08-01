@@ -28,7 +28,7 @@ import { RevertConfirmDialog } from './RevertConfirmDialog'
 import { VisitedDialog } from '@/components/VisitedDialog'
 import { useActivity, useDeleteActivity, useUpdateActivity } from '@/hooks/useActivities'
 import { activityFormSchema, type ActivityFormValues } from '@/lib/schemas/activitySchema'
-import { ACTIVITY_REVERT_PATCH } from '@/lib/revertPatch'
+import { REVERT_TO_WISHLIST_PATCH } from '@/lib/revertPatch'
 import type { Activity } from '@/types'
 import {
   DURATION_LABELS,
@@ -128,7 +128,7 @@ export function ActivityDetail({ id, initialData, initialEdit, returnTo }: Props
 
   function handleRevert() {
     update.mutate(
-      { id, patch: ACTIVITY_REVERT_PATCH },
+      { id, patch: REVERT_TO_WISHLIST_PATCH },
       {
         onSuccess: () => {
           setRevertOpen(false)

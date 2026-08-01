@@ -17,7 +17,7 @@ import { MEAL_LABELS, STATUS_LABELS } from '@/lib/labels'
 import { buildDetailHref } from '@/lib/listReturn'
 import { stashPlaceDuplicate } from '@/lib/duplicatePrefill'
 import { formatDotDateCompact } from '@/lib/date'
-import { PLACE_REVERT_PATCH } from '@/lib/revertPatch'
+import { REVERT_TO_WISHLIST_PATCH } from '@/lib/revertPatch'
 import { cn } from '@/lib/utils'
 import type { Place } from '@/types'
 import styles from '@/components/screens.module.css'
@@ -47,7 +47,7 @@ export function PlaceCard({ place, hideMenu, actionSlot, returnTo }: PlaceCardPr
 
   function handleRevert() {
     update.mutate(
-      { id: place.id, patch: PLACE_REVERT_PATCH },
+      { id: place.id, patch: REVERT_TO_WISHLIST_PATCH },
       {
         onSuccess: () => {
           setRevertOpen(false)

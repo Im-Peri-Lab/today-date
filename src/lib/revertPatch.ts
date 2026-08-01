@@ -1,17 +1,5 @@
-import type { Activity, Place } from '@/types'
+import type { Status } from '@/types'
 
-/** 되돌리기: 방문 기록(별점·감상·방문일)을 모두 지우고 위시리스트로 되돌린다. */
-export const ACTIVITY_REVERT_PATCH: Partial<Activity> = {
-  status: 'wishlist',
-  visited_at: null,
-  visited_end_at: null,
-  rating: null,
-  review_note: null,
-}
-
-export const PLACE_REVERT_PATCH: Partial<Place> = {
-  status: 'wishlist',
-  visited_at: null,
-  rating: null,
-  review_note: null,
-}
+/** 되돌리기: status만 wishlist로 바꾸고 별점·감상·방문일은 남겨둔다.
+ *  다시 '다녀온 곳'으로 바꾸면 VisitedDialog가 이 값들로 프리필된다. */
+export const REVERT_TO_WISHLIST_PATCH: { status: Status } = { status: 'wishlist' }

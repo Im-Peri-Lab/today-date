@@ -1,8 +1,8 @@
 # PROJECT_CONTEXT.md
 
-> **마지막 업데이트: 2026-07-31**
+> **마지막 업데이트: 2026-08-01**
 
-> 이 문서는 Today Date 프로젝트의 장기 컨텍스트입니다. 260531~260731 전체 핸드오프를 다시 읽고, 초기 컨텍스트에서 이후 작업으로 변경·확정된 내용을 반영한 최신본입니다. 새 AI에게는 이 파일과 `CURRENT_STATE.md`를 먼저 전달하고, 과거 의사결정 확인이 필요할 때만 `CHANGELOG.md`를 참고하게 하세요.
+> 이 문서는 Today Date 프로젝트의 장기 컨텍스트입니다. 260531~260801 전체 핸드오프를 다시 읽고, 초기 컨텍스트에서 이후 작업으로 변경·확정된 내용을 반영한 최신본입니다. 새 AI에게는 이 파일과 `CURRENT_STATE.md`를 먼저 전달하고, 과거 의사결정 확인이 필요할 때만 `CHANGELOG.md`를 참고하게 하세요.
 
 ---
 
@@ -212,7 +212,7 @@ Claude Code가 PR 생성 → squash 머지 → 원격·로컬 정리를 한 번�
 
 ## 5. 구현 완료 범위
 
-> 커버리지 기준: 2026-07-30
+> 커버리지 기준: 2026-08-01
 
 ### 인증 F-01
 
@@ -260,6 +260,7 @@ Claude Code가 PR 생성 → squash 머지 → 원격·로컬 정리를 한 번�
 - **다이닝 카드 정보 줄 위치 폴백 (신규, 260725)**: `PlaceCard` 정보 줄이 메모만 표시하던 것을 `ActivityCard`와 동일한 규칙(메모 있으면 메모, 없으면 `location`, 아이콘도 StickyNote/MapPin 동일 전환)으로 대칭화 → 아래 "11. area/location 필드 구분"·"12. 카드 정보 줄 표시 규칙" 절 갱신 참조, 배경 → CHANGELOG 2026-07-25
 - **활동/다이닝 폼-API 입력 검증 공유 (신규, 260729)**: activities/places의 create/patch API 검증(title·category_id·location·memo·reference_url 등)이 `src/lib/schemas/apiFields.ts` 공유 Zod 스키마를 쓴다. GET 목록 API도 쿼리 파라미터를 Zod로 검증해 잘못된 값은 400(이전엔 무검증으로 조용히 빈 결과가 나갔음). POST/PATCH의 손상된 JSON 본문도 500이 아닌 400. 폼(`ActivityForm`/`PlaceForm`)의 submit은 `fetchJson`+try/catch로 네트워크 실패·JSON 파싱 실패·비정상 응답을 안전 처리(다른 화면과 동일 관용구) → 배경 → CHANGELOG 2026-07-29 v2
 - **`/list` 다녀온 곳 정렬 보정 (신규, 260729)**: `status=visited` 목록은 방문일(`visited_at`) 최신순, 방문일이 같으면 마지막 수정(`updated_at`) 최신순으로 정렬. 위시리스트(`status=wishlist`)는 기존대로 등록(`created_at`) 최신순 유지 → 구체 스펙 아래 "12. 리스트/카드 규칙" 절, 배경 → CHANGELOG 2026-07-30
+- **되돌리기 확인 다이얼로그 4곳 통일 (신규, 260801, PR #108)**: "가보고 싶은 곳으로 되돌리기"가 `ActivityDetail`에만 확인 다이얼로그를 갖고 `ActivityCard`/`PlaceDetail`/`PlaceCard` ⋮ 메뉴 3곳은 즉시 실행되던 불일치를 사용자 관찰로 진단·수정. `RevertConfirmDialog` 공유 컴포넌트로 4곳 모두 다이얼로그를 거치게 통일했고, patch는 4곳 모두 `{ status: 'wishlist' }`만 전송해 별점/후기/방문일을 보존한다(다시 "다녀온 곳"으로 전환하면 `VisitedDialog`가 기존 값으로 프리필) → 구체 스펙 SKILL §4-A·§4-B·§10-H·§12-A, 배경 → CHANGELOG 2026-08-01
 
 ### 추천 F-05~F-06
 

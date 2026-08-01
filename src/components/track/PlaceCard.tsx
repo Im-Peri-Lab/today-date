@@ -10,12 +10,14 @@ import { CategoryBadge } from './CategoryBadge'
 import { ItemMenu } from './ItemMenu'
 import { RatingStars } from './RatingStars'
 import { DeleteConfirmDialog } from './DeleteConfirmDialog'
+import { RevertConfirmDialog } from './RevertConfirmDialog'
 import { VisitedDialog } from '@/components/VisitedDialog'
 import { useDeletePlace, useUpdatePlace } from '@/hooks/usePlaces'
 import { MEAL_LABELS, STATUS_LABELS } from '@/lib/labels'
 import { buildDetailHref } from '@/lib/listReturn'
 import { stashPlaceDuplicate } from '@/lib/duplicatePrefill'
 import { formatDotDateCompact } from '@/lib/date'
+import { PLACE_REVERT_PATCH } from '@/lib/revertPatch'
 import { cn } from '@/lib/utils'
 import type { Place } from '@/types'
 import styles from '@/components/screens.module.css'
@@ -32,6 +34,7 @@ export function PlaceCard({ place, hideMenu, actionSlot, returnTo }: PlaceCardPr
   const topLoader = useTopLoader()
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [visitedOpen, setVisitedOpen] = useState(false)
+  const [revertOpen, setRevertOpen] = useState(false)
   const del = useDeletePlace()
   const update = useUpdatePlace()
 
@@ -44,9 +47,12 @@ export function PlaceCard({ place, hideMenu, actionSlot, returnTo }: PlaceCardPr
 
   function handleRevert() {
     update.mutate(
-      { id: place.id, patch: { status: 'wishlist' } },
+      { id: place.id, patch: PLACE_REVERT_PATCH },
       {
-        onSuccess: () => toast.success(`${STATUS_LABELS.wishlist}으로 옮겼어요`),
+        onSuccess: () => {
+          setRevertOpen(false)
+          toast.success(`${STATUS_LABELS.wishlist}으로 옮겼어요`)
+        },
         onError: () => toast.error('변경 중 오류가 발생했습니다.'),
       }
     )
@@ -80,7 +86,7 @@ export function PlaceCard({ place, hideMenu, actionSlot, returnTo }: PlaceCardPr
             onDuplicate={() => navigate(stashPlaceDuplicate(place))}
             onDelete={() => setDeleteOpen(true)}
             onMarkVisited={() => setVisitedOpen(true)}
-            onRevert={handleRevert}
+            onRevert={() => setRevertOpen(true)}
           />
         </div>
       )}
@@ -148,6 +154,12 @@ export function PlaceCard({ place, hideMenu, actionSlot, returnTo }: PlaceCardPr
           rating: place.rating,
           review_note: place.review_note,
         }}
+      />
+      <RevertConfirmDialog
+        open={revertOpen}
+        onOpenChange={setRevertOpen}
+        loading={update.isPending}
+        onConfirm={handleRevert}
       />
     </div>
   )

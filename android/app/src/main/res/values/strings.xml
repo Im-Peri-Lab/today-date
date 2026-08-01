@@ -2,6 +2,6 @@
 <resources>
     <string name="app_name">Today Date</string>
     <string name="title_activity_main">Today Date</string>
-    <string name="package_name">com.imperilab.todaydate</string>
-    <string name="custom_url_scheme">com.imperilab.todaydate</string>
+    <string name="package_name">com.perilab.todaydate</string>
+    <string name="custom_url_scheme">com.perilab.todaydate</string>
 </resources>

@@ -1,4 +1,4 @@
-package com.imperilab.todaydate;
+package com.perilab.todaydate;
 
 import com.getcapacitor.BridgeActivity;
 

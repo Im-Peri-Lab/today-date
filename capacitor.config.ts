@@ -1,7 +1,7 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.imperilab.todaydate',
+  appId: 'com.perilab.todaydate',
   appName: 'Today Date',
   webDir: 'public',
   server: {

@@ -319,7 +319,7 @@ description: >
 | "삭제"(ghost + destructive 톤) | 상세 하단 | 〃 |
 | "저장"/"취소"(인라인 편집) | 상세 인라인 편집 | `DetailBlock.tsx` |
 | "삭제"/"취소"(삭제 확인 다이얼로그) | 삭제 확인 다이얼로그 | `DeleteConfirmDialog.tsx` |
-| "되돌리기"/"취소"(되돌리기 확인 다이얼로그) | "가보고 싶은 곳으로 되돌릴까요?" 다이얼로그 | `ActivityDetail.tsx` |
+| "되돌리기"/"취소"(되돌리기 확인 다이얼로그) | "가보고 싶은 곳으로 되돌릴까요?" 다이얼로그 (4곳 공유) | `RevertConfirmDialog.tsx` |
 | "초기화"(`styles.resetBtn`) | 리스트 필터 | `ListView.tsx` |
 
 **다이얼로그 취소+확정 페어는 항상 같은 높이를 쓴다** — 삭제 확인(`DeleteConfirmDialog`)·되돌리기 확인 두 다이얼로그 모두 취소/확정 버튼이 `h-9`로 통일돼 있다.
@@ -397,7 +397,7 @@ description: >
 - **상세 화면**(`VisitRecordBlock`): `formatDotDateRange(start, end)` — 요일 포함 풀 포맷. end 없거나 start와 같으면 단일 날짜(`formatDotDate`), 다르면 `"YYYY.MM.DD (요일) ~ YYYY.MM.DD (요일)"`.
 - **리스트 카드**: 단일·기간 **모두 요일 생략·연도 2자리로 통일**(`ActivityCard` 단일 = `formatDotDateCompact`, 기간 = `formatDotDateRangeCompact` → `"26.06.25 ~ 26.06.28"`). 연도는 생략하지 않고 2자리로 표기한다(수년 뒤 올해/작년 구분). 억지로 한 줄에 맞추지 않으며 두 줄로 감기는 것은 허용. **상세 규칙과 실측 근거는 §8-A 참조**(단일 출처).
 - place는 상세는 end=null로 항상 단일 날짜, 카드는 `formatDotDateCompact`(§8-A).
-- **리셋:** "가보고 싶은 곳으로 되돌리기"(wishlist 전환) 시 `visited_at`과 함께 `visited_end_at`도 `null`로 리셋한다.
+- **보존(리셋 아님):** "가보고 싶은 곳으로 되돌리기"(wishlist 전환) 시 `status`만 바뀌고 `visited_at`/`visited_end_at`/`rating`/`review_note`는 지우지 않는다 — 다시 "다녀온 곳"으로 전환하면 `VisitedDialog`가 이 값들로 프리필된다(공유 patch `REVERT_TO_WISHLIST_PATCH`, `src/lib/revertPatch.ts`). 되돌리기 확인 다이얼로그 문구는 §10-H 참고.
 
 ---
 
@@ -973,7 +973,8 @@ export const STATUS_LABELS: Record<Status, string> = {
 일반 신규 등록:    성공 토스트 없음 (상세 화면 전환이 성공 신호)
 활동 연속 등록:    "활동이 등록됐어요! 계속 등록해보세요 🎉"
 장소 연속 등록:    "장소가 등록됐어요! 계속 등록해보세요 🎉"
-활동 되돌리기 확인 다이얼로그 제목: "가보고 싶은 곳으로 되돌릴까요?"
+되돌리기 확인 다이얼로그(4곳 공유, `RevertConfirmDialog.tsx`) 제목: "가보고 싶은 곳으로 되돌릴까요?"
+되돌리기 확인 다이얼로그 설명:      "방문기록(방문일, 별점, 후기)이 모두 삭제됩니다."
 ```
 
 ---
@@ -1153,29 +1154,28 @@ requestAnimationFrame(() => router.push(listHref))
 | 화면 **그대로**, 액션 하나만 처리, 나머지 화면은 계속 유효 | **버튼 자체 상태** (`disabled` + 텍스트 "처리 중..." + **텍스트 앞 `Loader2` 스피너 병기**) |
 | 화면 그대로, **콘텐츠 영역 전체가 재생성** | **오버레이 스피너** (추천 위저드의 `Loader2` 오버레이 등) |
 
-**스피너 병기(모든 로딩 버튼 공통 규칙):** 로딩(`disabled`) 상태가 되는 **모든 버튼**은 예외 없이 텍스트 **왼쪽에 작은 스피너를 병기**한다 — `lucide-react`의 `Loader2` + `animate-spin`(`h-4 w-4`, 앱 공용 스피너, 신규 도입 금지·재사용). 되돌릴 수 없음/소요시간 길이와 **무관하게** 인라인 저장·로그아웃 등 제자리 액션도 동일하게 병기한다(옛 "제자리 액션은 텍스트만/아이콘 숨김" 예외는 **폐지**). 리딩 아이콘이 이미 있는 버튼(`Undo2` 되돌리기, `LogOut` 로그아웃, `Mail` 메일, `Sparkles` 추천 받기)은 그 아이콘 슬롯을 동일 size의 `Loader2`로 **스왑**하고, 리딩 아이콘이 없는 버튼(폼 제출·인라인 저장·방문기록 저장·홈 검색·삭제 확인 등)은 텍스트 앞에 **프리펜드**한다. 마크업은 `DeleteConfirmDialog`(`{loading && <Loader2 className="h-4 w-4 animate-spin" />}{loading ? '…중...' : '…'}`)를 복제하고 새 스타일을 발명하지 않는다.
+**스피너 병기(모든 로딩 버튼 공통 규칙):** 로딩(`disabled`) 상태가 되는 **모든 버튼**은 예외 없이 텍스트 **왼쪽에 작은 스피너를 병기**한다 — `lucide-react`의 `Loader2` + `animate-spin`(`h-4 w-4`, 앱 공용 스피너, 신규 도입 금지·재사용). 되돌릴 수 없음/소요시간 길이와 **무관하게** 인라인 저장·로그아웃 등 제자리 액션도 동일하게 병기한다(옛 "제자리 액션은 텍스트만/아이콘 숨김" 예외는 **폐지**). 리딩 아이콘이 이미 있는 버튼(`LogOut` 로그아웃, `Mail` 메일, `Sparkles` 추천 받기)은 그 아이콘 슬롯을 동일 size의 `Loader2`로 **스왑**하고, 리딩 아이콘이 없는 버튼(폼 제출·인라인 저장·방문기록 저장·홈 검색·삭제 확인·되돌리기 확인 등)은 텍스트 앞에 **프리펜드**한다. 마크업은 `DeleteConfirmDialog`(`{loading && <Loader2 className="h-4 w-4 animate-spin" />}{loading ? '…중...' : '…'}`)를 복제하고 새 스타일을 발명하지 않는다.
 
 **복수 제출 버튼의 공통 잠금 vs 개별 로딩 표시:** 같은 요청의 중복 실행을 막으려고 여러 버튼이 함께 `disabled`되어도, 스피너·"처리 중..." 라벨은 **실제로 요청을 시작한 버튼 하나에만** 표시한다. `FormLayout`처럼 제출 의도(`submit`/`continue`)를 로컬 상태로 기록하고, `isSubmitting || navigating`은 두 버튼의 잠금에 공통 적용한다. 함께 잠겼지만 요청을 시작하지 않은 버튼은 원래 라벨을 유지한다.
 
 ### 사례
 
-**되돌리기 (activity/place 상세 — "가보고 싶은 곳으로"):** 처리 중엔 리딩 `Undo2` 아이콘 슬롯을 `Loader2`로 스왑한다.
+**되돌리기 (activity/place, 상세+카드 4곳 — "가보고 싶은 곳으로"):** 트리거 버튼(`Undo2` 아이콘, 상세 하단/카드 ⋮ 메뉴)은 클릭 시 `RevertConfirmDialog`(§11)를 열기만 할 뿐 자체 로딩 상태를 갖지 않는다 — `update.isPending`의 스피너는 다이얼로그의 "되돌리기" 확정 버튼에 **프리펜드**한다(`DeleteConfirmDialog`와 동일 마크업).
 
 ```tsx
-{update.isPending ? (
-  <><Loader2 className="h-4 w-4 animate-spin" />처리 중...</>
-) : (
-  <><Undo2 className="h-4 w-4" />{STATUS_MENU_LABELS.wishlist}</>
-)}
+<Button className="h-9" onClick={onConfirm} disabled={loading}>
+  {loading && <Loader2 className="h-4 w-4 animate-spin" />}
+  {loading ? '처리 중...' : '되돌리기'}
+</Button>
 ```
 
-**삭제 확인 / setup·forgot 메일 발송:** 삭제 확인 다이얼로그는 텍스트 앞에 스피너를 얹고(`{loading && <Loader2 className="h-4 w-4 animate-spin" />}{loading ? '삭제 중...' : '삭제'}`), 메일 발송 버튼은 선두 `Mail` 아이콘을 **동일 size의 `Loader2`로 스왑**해 레이아웃 시프트를 없앤다. (같은 병기 규칙의 프리펜드/스왑 두 배치.)
+**삭제 확인 / 되돌리기 확인 / setup·forgot 메일 발송:** 삭제·되돌리기 확인 다이얼로그는 둘 다 텍스트 앞에 스피너를 얹고(`{loading && <Loader2 className="h-4 w-4 animate-spin" />}{loading ? '…중...' : '…'}`), 메일 발송 버튼은 선두 `Mail` 아이콘을 **동일 size의 `Loader2`로 스왑**해 레이아웃 시프트를 없앤다. (같은 병기 규칙의 프리펜드/스왑 두 배치.)
 
 > ⚠️ **카드 삭제(ActivityCard/PlaceCard 경유)는 스피너가 보이지 않는다 — 버그가 아니다.** 카드 삭제는 낙관적 캐시 제거(`onMutate`에서 `setQueriesData`로 항목 즉시 제거)로 카드가 언마운트되고, 호출부도 `mutate` 직전 `setDeleteOpen(false)`로 다이얼로그를 먼저 닫는다. `del.isPending=true`와 다이얼로그 언마운트가 **같은 커밋에 반영**되어 스피너가 그려질 프레임이 존재하지 않는다(**dead state**). 낙관적 UX상 의도된 결과다. 반면 **상세 화면 삭제**(ActivityDetail/PlaceDetail)는 다이얼로그를 닫지 않고 `navigating`으로 전환 완료까지 열어두므로 스피너가 정상 노출된다.
 
 ### 프리펜드 vs 스왑 — 같은 규칙의 두 배치
 
-모든 로딩 버튼은 스피너를 병기하되 배치만 두 가지다: 리딩 아이콘이 **없는** 버튼은 텍스트 앞에 **프리펜드**(폼 제출·인라인 저장·방문기록 저장·홈 검색·삭제 확인), 리딩 아이콘이 **있는** 버튼은 그 아이콘 슬롯을 `Loader2`로 **스왑**(되돌리기 `Undo2`·로그아웃 `LogOut`·메일 `Mail`·추천 `Sparkles`). 스왑은 추가 폭이 없고, 프리펜드는 폭 미고정 버튼에서 폭이 약간 늘 수 있으나 허용한다(별도 폭 고정 불필요). 크기는 항상 `h-4 w-4`.
+모든 로딩 버튼은 스피너를 병기하되 배치만 두 가지다: 리딩 아이콘이 **없는** 버튼은 텍스트 앞에 **프리펜드**(폼 제출·인라인 저장·방문기록 저장·홈 검색·삭제 확인·되돌리기 확인), 리딩 아이콘이 **있는** 버튼은 그 아이콘 슬롯을 `Loader2`로 **스왑**(로그아웃 `LogOut`·메일 `Mail`·추천 `Sparkles`). 스왑은 추가 폭이 없고, 프리펜드는 폭 미고정 버튼에서 폭이 약간 늘 수 있으나 허용한다(별도 폭 고정 불필요). 크기는 항상 `h-4 w-4`.
 
 ---
 

@@ -10,6 +10,7 @@ import { CategoryBadge } from './CategoryBadge'
 import { ItemMenu } from './ItemMenu'
 import { RatingStars } from './RatingStars'
 import { DeleteConfirmDialog } from './DeleteConfirmDialog'
+import { RevertConfirmDialog } from './RevertConfirmDialog'
 import { VisitedDialog } from '@/components/VisitedDialog'
 import { useDeleteActivity, useUpdateActivity } from '@/hooks/useActivities'
 import {
@@ -23,6 +24,7 @@ import {
 import { buildDetailHref } from '@/lib/listReturn'
 import { stashActivityDuplicate } from '@/lib/duplicatePrefill'
 import { formatDotDateCompact, formatDotDateRangeCompact } from '@/lib/date'
+import { REVERT_TO_WISHLIST_PATCH } from '@/lib/revertPatch'
 import { cn } from '@/lib/utils'
 import type { Activity } from '@/types'
 import styles from '@/components/screens.module.css'
@@ -39,6 +41,7 @@ export function ActivityCard({ activity, hideMenu, actionSlot, returnTo }: Activ
   const topLoader = useTopLoader()
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [visitedOpen, setVisitedOpen] = useState(false)
+  const [revertOpen, setRevertOpen] = useState(false)
   const del = useDeleteActivity()
   const update = useUpdateActivity()
 
@@ -51,9 +54,12 @@ export function ActivityCard({ activity, hideMenu, actionSlot, returnTo }: Activ
 
   function handleRevert() {
     update.mutate(
-      { id: activity.id, patch: { status: 'wishlist' } },
+      { id: activity.id, patch: REVERT_TO_WISHLIST_PATCH },
       {
-        onSuccess: () => toast.success(`${STATUS_LABELS.wishlist}으로 옮겼어요`),
+        onSuccess: () => {
+          setRevertOpen(false)
+          toast.success(`${STATUS_LABELS.wishlist}으로 옮겼어요`)
+        },
         onError: () => toast.error('변경 중 오류가 발생했습니다.'),
       }
     )
@@ -89,7 +95,7 @@ export function ActivityCard({ activity, hideMenu, actionSlot, returnTo }: Activ
             onDuplicate={() => navigate(stashActivityDuplicate(activity))}
             onDelete={() => setDeleteOpen(true)}
             onMarkVisited={() => setVisitedOpen(true)}
-            onRevert={handleRevert}
+            onRevert={() => setRevertOpen(true)}
           />
         </div>
       )}
@@ -168,6 +174,12 @@ export function ActivityCard({ activity, hideMenu, actionSlot, returnTo }: Activ
           rating: activity.rating,
           review_note: activity.review_note,
         }}
+      />
+      <RevertConfirmDialog
+        open={revertOpen}
+        onOpenChange={setRevertOpen}
+        loading={update.isPending}
+        onConfirm={handleRevert}
       />
     </div>
   )

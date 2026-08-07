@@ -278,52 +278,62 @@ description: >
 
 ---
 
-## 4-A. 폼 입력/선택 컨트롤 표준 (추가/수정 화면 + 상세 인라인 편집 공통)
+## 4-A. 폼 입력/선택 컨트롤 + 액션 버튼 높이 표준 (추가/수정 화면 + 상세 인라인 편집 + 다이얼로그 공통)
 
-왜: `/activities/new`·`/places/new`·상세 인라인 편집은 같은 프리미티브를 쓴다. 컨트롤 높이·radius·라벨 색을 아래 표준으로 고정해 한 화면 안에서 정렬되게 한다. (이 값들은 실제 코드에 반영됨 — 임의 변경 금지)
+왜: `/activities/new`·`/places/new`·상세 인라인 편집·주요 다이얼로그는 같은 프리미티브를 쓴다. 컨트롤·버튼 높이·radius를 아래 표준으로 고정해 한 화면 안에서 정렬되게 한다. (이 값들은 실제 코드에 반영됨 — 임의 변경 금지. Primary/보라 버튼 전수조사·그 외 액션 버튼 전수조사 결과를 반영해 260731 재작성)
 
-**높이 표준** (한 화면 안에서 정렬):
+**입력/선택 컨트롤 높이** (액션 버튼이 아닌 컨트롤류):
 | 컨트롤 | 높이 | radius | 출처 |
 |---|---|---|---|
 | 텍스트 입력바 (`Input`) | **40px** (`h-10`) | 10px (`rounded-lg`=`var(--radius)`) | `src/components/ui/input.tsx` |
 | textarea (`Textarea`) | min **64px** (`min-h-16`) | 10px | `src/components/ui/textarea.tsx` |
 | 세그먼트 (`styles.option`) | **40px** (`height:2.5rem`) | 10px (`0.625rem`) | `screens.module.css .option` |
 | 카테고리 칩 (`styles.chip`) | **36px** (`height:2.25rem`) | pill (`9999px`) | `screens.module.css .chip` |
-| 추가 화면 하단 Primary (제출) | **48px** (`h-12`) | 10px | `FormLayout.tsx` |
-| 추가 화면 하단 연속 등록 Secondary | **40px** (`h-10`) | 10px | `FormLayout.tsx` outline 버튼 |
-| 상세 하단 Primary(정방향 "다녀왔어요" / 역방향 "가보고 싶은 곳으로")·삭제 | **36px** (`h-9`) | 10px | `ActivityDetail`/`PlaceDetail` |
-| 인라인 편집 Save·Cancel (`DetailBlock`) | **36px** (`h-9`) | 10px | `DetailBlock.tsx` |
+| 리스트 필터 토글 (`styles.filterToggle`) | **40px** (`height:2.5rem`) | 12px | `ListView.tsx` — **액션 버튼이 아닌 토글 컨트롤**(펼침/접힘 상태 표시), 이 절의 Tier A/B 범위 밖 |
 
-→ **액션·컨트롤 사이즈 위계** (한 화면 안에서 정렬):
-- **48px** — 신규 생성 마무리 CTA(추가 화면 Primary `h-12` **전용**). 인라인엔 쓰지 않는다.
-- **40px** — 일반 입력/선택 컨트롤(`Input`·`Textarea`·세그먼트·카테고리 외 컨트롤·날짜 박스 `dateTrigger`)·컨트롤 줄(토글·검색바·필터, §4) + 신규 생성 Primary와 짝을 이루는 연속 등록 outline 보조 액션.
-- **36px** — 카테고리 칩 + **인라인 액션(저장·취소·삭제·전환)**.
-- **인라인 액션 = 36px (`h-9`, 확정)**: 상세 하단 Primary/삭제·인라인 Save/Cancel 모두 `h-9` 명시(예전 32px `h-8`에서 상향). 글자만인 Save/Cancel은 정사각 옹색함을 피하려 `px-4`로 통통하게, 아이콘+글자인 삭제/전환은 Button 기본 `px-2.5` 유지(이미 폭 있음). 한 화면(인라인 편집)에서 Save/Cancel·하단 Primary/삭제가 같은 36px로 정렬.
-- 인라인 액션(36px)은 카드 안 일반 컨트롤(40px)보다 **한 단계 작은 "보조 액션"** 결. Save 채움은 단색 액센트(`styles.detailPrimaryBtn`) 유지.
+**액션 버튼 위계 = Tier A(40px) / Tier B(36px) 두 단계.** 색(Primary 단색 채움/outline/ghost/destructive)은 중요도·성격을 구분하는 용도일 뿐 높이에는 관여하지 않는다 — 같은 Tier면 색과 무관하게 같은 높이를 쓴다.
+
+**이 표는 텍스트/풀폭 액션 버튼 전용이다.** 아이콘 버튼(`headerNavBtn`·`iconBtn`·`editGhostBtn`·`mapActionBtn`은 §7, FAB는 §9, 다이얼로그 우상단 닫기 X는 §11)은 이 표 범위 밖이며 별도 재검토 대상(백로그)이다. 인증 화면(`/lock`·`/forgot`·`/reset`·`/setup`) 버튼(46px, `src/components/auth/auth.module.css`의 `.btnPrimary`/`.btnSecondary`)도 처음부터 별도 시스템이라 이 표 범위 밖 — 변경 없음.
+
+### Tier A — 화면/다이얼로그 풀폭 핵심 액션: **40px** (`h-10`) · `w-full` · radius 10px
+
+| 버튼 | 화면 | 출처 |
+|---|---|---|
+| "액티비티 등록하기"/"다이닝 등록하기"(폼 최종 제출, 단색 채움) | `/activities/new`·`/places/new` | `FormLayout.tsx` |
+| "저장하고 계속 등록하기"(연속 등록 보조 제출, outline) | `/activities/new`·`/places/new` | `FormLayout.tsx` |
+| "검색"(단색 채움) | 홈 검색 다이얼로그 | `HomeSearchButton.tsx` |
+| "저장하기"(방문기록, 단색 채움) | "다녀왔어요" 방문기록 다이얼로그 | `VisitedDialog.tsx` |
+| "다음"(단색 채움) | 추천 위저드 스텝 진행 | `ActivityRecommendWizard.tsx`/`PlaceRecommendWizard.tsx` |
+| "이전"(outline) | 추천 위저드 스텝 진행 | 〃 |
+| "추천 받기"(위저드 마지막 스텝 실행, 단색 채움) | 추천 위저드 | 〃 |
+| "다른 추천 보기"(결과 재조회, 단색 채움/outline 상태에 따라) | 추천 결과 화면 | 〃 |
+| "더 짧은 일정도 볼까요?"(조건 넓히기) | 추천 결과 0건/재조회 상단 | `ActivityRecommendWizard.tsx` |
+| "액티비티 추가하기"/"다이닝 추가하기"(빈 결과, outline) | 추천 결과 0건 | 〃 |
+| "처음부터"(결과 화면 하단, ghost) | 추천 결과 화면 | `ActivityRecommendWizard.tsx` |
+
+### Tier B — 인라인/컨텍스트 내 보조 액션: **36px** (`h-9`) · `w-auto` · radius 10px
+
+| 버튼 | 화면 | 출처 |
+|---|---|---|
+| "다녀왔어요"/"가보고 싶은 곳으로"(상태 전환, 단색 채움) | 상세 하단 | `ActivityDetail.tsx`/`PlaceDetail.tsx` |
+| "삭제"(ghost + destructive 톤) | 상세 하단 | 〃 |
+| "저장"/"취소"(인라인 편집) | 상세 인라인 편집 | `DetailBlock.tsx` |
+| "삭제"/"취소"(삭제 확인 다이얼로그) | 삭제 확인 다이얼로그 | `DeleteConfirmDialog.tsx` |
+| "되돌리기"/"취소"(되돌리기 확인 다이얼로그) | "가보고 싶은 곳으로 되돌릴까요?" 다이얼로그 (4곳 공유) | `RevertConfirmDialog.tsx` |
+| "초기화"(`styles.resetBtn`) | 리스트 필터 | `ListView.tsx` |
+
+**다이얼로그 취소+확정 페어는 항상 같은 높이를 쓴다** — 삭제 확인(`DeleteConfirmDialog`)·되돌리기 확인 두 다이얼로그 모두 취소/확정 버튼이 `h-9`로 통일돼 있다.
 
 **페이지 높이/하단 여백**: 상세 페이지는 `cn(styles.page, styles.pageStatic)`를 써서 `.page`의 `min-height:100svh`는 유지하고, `.pageStatic`으로 하단 safe-area padding만 제거한다. 짧은 콘텐츠에서도 페이지 자체와 고정 배경(`.page::before`)이 뷰포트를 채우므로 별도 spacer를 두지 않는다.
 
-### 액션 버튼 패턴 (거버넌스)
+### 액션 버튼 배치 판단 기준 (거버넌스)
 
-이 앱의 액션 버튼은 아래 **두 기본 패턴 + 신규 생성 폼의 짝 보조 액션 예외**만 사용한다. 새 화면을 추가할 때도 이 범위 밖의 **새 사이즈 도입 금지**.
+이 앱의 텍스트/풀폭 액션 버튼은 **Tier A(40px) / Tier B(36px) 두 단계**만 쓴다. 새 화면을 추가할 때도 이 범위 밖의 **새 사이즈 도입 금지**.
 
-**1) 풀폭 Primary CTA** — **48px / `w-full` / radius 10px / 단색 채움(`--s-active-fill` via `styles.detailPrimaryBtn`)**
-- 용도: "새 항목 생성 완료" — 데이터 추가가 발생하는 마무리 액션.
-- 적용처: `/activities/new` "활동 등록하기" · `/places/new` "장소 등록하기" · (향후) 추천 위저드 결과 저장, CSV 가져오기 완료 등.
-
-**2) 콘텐츠폭 액션** — **36px / 자연폭(`w-auto`, `h-9`) / radius 10px**
-- 용도: "기존 항목에 작용" — 수정·전환·삭제 등 데이터 가공 액션.
-- 적용처: 인라인 편집 Save/Cancel(`DetailBlock` 내부) · 상세 하단 전환 액션("다녀왔어요"/"가보고 싶은 곳으로" — 역방향만 `STATUS_MENU_LABELS.wishlist` 공유) · 상세 하단 삭제(ghost variant + destructive 톤) · 카드 메뉴 액션 · (향후) 다중 선택 액션 등.
-
-**신규 생성 폼의 짝 보조 액션 예외** — **40px / `w-full` / radius 10px / outline**
-- 용도: 새 항목은 만들지만 현재 폼 흐름을 끝내지 않는 보조 제출. `/activities/new`·`/places/new`의 "저장하고 계속 등록하기"가 기준 구현이다.
-- 배치: 풀폭 Primary 바로 아래, 같은 액션 묶음 안에서 `space-y-2`(8px). **Primary를 먼저**, outline Secondary를 나중에 둔다.
-- 위계: 두 버튼이 모두 생성 액션이어도 단색 채움은 현재 흐름을 끝내는 Primary 하나만 사용한다. 연속 등록 버튼에 `detailPrimaryBtn`·그라데이션을 적용하지 않는다.
-
-**판단 기준 — "이 액션이 현재 흐름을 끝내는 최종 주행동인가?"**
-- YES → 풀폭 Primary (48px). 신규 생성 완료·다음 화면 이동 등 현재 흐름을 마무리한다.
-- NO, 신규 생성 후 같은 폼에서 계속 작업 → 풀폭 outline Secondary (40px, 위 예외).
-- NO, 기존 항목에 작용(수정·전환·삭제·취소) → 콘텐츠폭 액션 (36px).
+- **화면 또는 다이얼로그의 "지금 눌러야 하는 핵심 진행/제출 액션"인가?** → **Tier A(40px, `w-full`)**. 신규 생성 완료·연속 등록 보조 제출·위저드 스텝 진행·다이얼로그 안의 유일한 주행동(검색·저장 등) 모두 여기에 속한다. 단색 채움 여부와 무관하게(outline·ghost 포함) 화면/다이얼로그 수준 핵심 액션이면 Tier A.
+- **이미 존재하는 항목에 대한 부수 액션(수정·전환·삭제·취소)이거나, 다이얼로그 안에서 Tier A 액션과 짝을 이루는 취소/확정 버튼인가?** → **Tier B(36px, `w-auto`)**.
+- 단색 채움(`styles.detailPrimaryBtn`)은 "지금 누를 단 하나의 CTA"에만 쓰고, 같은 Tier 안에 여러 버튼이 있어도 흐름을 끝내는 액션 하나만 단색으로 남긴다(§5-A). 색 위계와 높이 위계는 서로 독립적이다.
+- **인라인 액션(Tier B) 안의 세부 규칙**: 글자만인 Save/Cancel·취소/확정은 정사각 옹색함을 피하려 `px-4`로 통통하게, 아이콘+글자인 삭제/전환은 Button 기본 `px-2.5` 유지(이미 폭 있음).
 
 #### 연속 등록 제출 동작 (`FormLayout` 기준)
 
@@ -333,9 +343,6 @@ description: >
 - 한 번 이상 연속 등록한 뒤 최종 Primary 제출은 유효한 `returnTo`가 있으면 그 목록 URL로 바로 이동하고, 없으면 해당 목록 탭(`/list?tab=activity` 또는 `/list?tab=place`)으로 이동한다.
 - 두 버튼은 `isSubmitting || navigating`을 함께 참조해 동시에 잠근다. 실제로 누른 버튼만 `Loader2` + "저장 중..."을 표시하고, 함께 잠긴 다른 버튼은 원래 라벨을 유지한다(§12-A).
 - 복사하기 prefill은 마운트 시 one-shot `reset(values)`이고, 연속 등록의 `reset()`은 이후 사용자 제출 성공 시 실행되므로 서로 충돌하지 않는다.
-
-일반 컨트롤(입력바·세그먼트 등 **40px**)·카테고리 칩(**36px**)은 위 액션 버튼과 별개의 표준으로 유지한다(위 §4-A 높이 표 참조).
-
 
 **폰트:**
 - 입력 본문(`Input`/`Textarea`): **16px** (`text-base`, `md:text-sm` 쓰지 않음 → iOS 포커스 자동 줌인 방지).
@@ -390,7 +397,7 @@ description: >
 - **상세 화면**(`VisitRecordBlock`): `formatDotDateRange(start, end)` — 요일 포함 풀 포맷. end 없거나 start와 같으면 단일 날짜(`formatDotDate`), 다르면 `"YYYY.MM.DD (요일) ~ YYYY.MM.DD (요일)"`.
 - **리스트 카드**: 단일·기간 **모두 요일 생략·연도 2자리로 통일**(`ActivityCard` 단일 = `formatDotDateCompact`, 기간 = `formatDotDateRangeCompact` → `"26.06.25 ~ 26.06.28"`). 연도는 생략하지 않고 2자리로 표기한다(수년 뒤 올해/작년 구분). 억지로 한 줄에 맞추지 않으며 두 줄로 감기는 것은 허용. **상세 규칙과 실측 근거는 §8-A 참조**(단일 출처).
 - place는 상세는 end=null로 항상 단일 날짜, 카드는 `formatDotDateCompact`(§8-A).
-- **리셋:** "가보고 싶은 곳으로 되돌리기"(wishlist 전환) 시 `visited_at`과 함께 `visited_end_at`도 `null`로 리셋한다.
+- **보존(리셋 아님):** "가보고 싶은 곳으로 되돌리기"(wishlist 전환) 시 `status`만 바뀌고 `visited_at`/`visited_end_at`/`rating`/`review_note`는 지우지 않는다 — 다시 "다녀온 곳"으로 전환하면 `VisitedDialog`가 이 값들로 프리필된다(공유 patch `REVERT_TO_WISHLIST_PATCH`, `src/lib/revertPatch.ts`). 되돌리기 확인 다이얼로그 문구는 §10-H 참고.
 
 ---
 
@@ -966,7 +973,8 @@ export const STATUS_LABELS: Record<Status, string> = {
 일반 신규 등록:    성공 토스트 없음 (상세 화면 전환이 성공 신호)
 활동 연속 등록:    "활동이 등록됐어요! 계속 등록해보세요 🎉"
 장소 연속 등록:    "장소가 등록됐어요! 계속 등록해보세요 🎉"
-활동 되돌리기 확인 다이얼로그 제목: "가보고 싶은 곳으로 되돌릴까요?"
+되돌리기 확인 다이얼로그(4곳 공유, `RevertConfirmDialog.tsx`) 제목: "가보고 싶은 곳으로 되돌릴까요?"
+되돌리기 확인 다이얼로그 설명:      "방문기록(방문일, 별점, 후기)이 모두 삭제됩니다."
 ```
 
 ---
@@ -1146,29 +1154,28 @@ requestAnimationFrame(() => router.push(listHref))
 | 화면 **그대로**, 액션 하나만 처리, 나머지 화면은 계속 유효 | **버튼 자체 상태** (`disabled` + 텍스트 "처리 중..." + **텍스트 앞 `Loader2` 스피너 병기**) |
 | 화면 그대로, **콘텐츠 영역 전체가 재생성** | **오버레이 스피너** (추천 위저드의 `Loader2` 오버레이 등) |
 
-**스피너 병기(모든 로딩 버튼 공통 규칙):** 로딩(`disabled`) 상태가 되는 **모든 버튼**은 예외 없이 텍스트 **왼쪽에 작은 스피너를 병기**한다 — `lucide-react`의 `Loader2` + `animate-spin`(`h-4 w-4`, 앱 공용 스피너, 신규 도입 금지·재사용). 되돌릴 수 없음/소요시간 길이와 **무관하게** 인라인 저장·로그아웃 등 제자리 액션도 동일하게 병기한다(옛 "제자리 액션은 텍스트만/아이콘 숨김" 예외는 **폐지**). 리딩 아이콘이 이미 있는 버튼(`Undo2` 되돌리기, `LogOut` 로그아웃, `Mail` 메일, `Sparkles` 추천 받기)은 그 아이콘 슬롯을 동일 size의 `Loader2`로 **스왑**하고, 리딩 아이콘이 없는 버튼(폼 제출·인라인 저장·방문기록 저장·홈 검색·삭제 확인 등)은 텍스트 앞에 **프리펜드**한다. 마크업은 `DeleteConfirmDialog`(`{loading && <Loader2 className="h-4 w-4 animate-spin" />}{loading ? '…중...' : '…'}`)를 복제하고 새 스타일을 발명하지 않는다.
+**스피너 병기(모든 로딩 버튼 공통 규칙):** 로딩(`disabled`) 상태가 되는 **모든 버튼**은 예외 없이 텍스트 **왼쪽에 작은 스피너를 병기**한다 — `lucide-react`의 `Loader2` + `animate-spin`(`h-4 w-4`, 앱 공용 스피너, 신규 도입 금지·재사용). 되돌릴 수 없음/소요시간 길이와 **무관하게** 인라인 저장·로그아웃 등 제자리 액션도 동일하게 병기한다(옛 "제자리 액션은 텍스트만/아이콘 숨김" 예외는 **폐지**). 리딩 아이콘이 이미 있는 버튼(`LogOut` 로그아웃, `Mail` 메일, `Sparkles` 추천 받기)은 그 아이콘 슬롯을 동일 size의 `Loader2`로 **스왑**하고, 리딩 아이콘이 없는 버튼(폼 제출·인라인 저장·방문기록 저장·홈 검색·삭제 확인·되돌리기 확인 등)은 텍스트 앞에 **프리펜드**한다. 마크업은 `DeleteConfirmDialog`(`{loading && <Loader2 className="h-4 w-4 animate-spin" />}{loading ? '…중...' : '…'}`)를 복제하고 새 스타일을 발명하지 않는다.
 
 **복수 제출 버튼의 공통 잠금 vs 개별 로딩 표시:** 같은 요청의 중복 실행을 막으려고 여러 버튼이 함께 `disabled`되어도, 스피너·"처리 중..." 라벨은 **실제로 요청을 시작한 버튼 하나에만** 표시한다. `FormLayout`처럼 제출 의도(`submit`/`continue`)를 로컬 상태로 기록하고, `isSubmitting || navigating`은 두 버튼의 잠금에 공통 적용한다. 함께 잠겼지만 요청을 시작하지 않은 버튼은 원래 라벨을 유지한다.
 
 ### 사례
 
-**되돌리기 (activity/place 상세 — "가보고 싶은 곳으로"):** 처리 중엔 리딩 `Undo2` 아이콘 슬롯을 `Loader2`로 스왑한다.
+**되돌리기 (activity/place, 상세+카드 4곳 — "가보고 싶은 곳으로"):** 트리거 버튼(`Undo2` 아이콘, 상세 하단/카드 ⋮ 메뉴)은 클릭 시 `RevertConfirmDialog`(§11)를 열기만 할 뿐 자체 로딩 상태를 갖지 않는다 — `update.isPending`의 스피너는 다이얼로그의 "되돌리기" 확정 버튼에 **프리펜드**한다(`DeleteConfirmDialog`와 동일 마크업).
 
 ```tsx
-{update.isPending ? (
-  <><Loader2 className="h-4 w-4 animate-spin" />처리 중...</>
-) : (
-  <><Undo2 className="h-4 w-4" />{STATUS_MENU_LABELS.wishlist}</>
-)}
+<Button className="h-9" onClick={onConfirm} disabled={loading}>
+  {loading && <Loader2 className="h-4 w-4 animate-spin" />}
+  {loading ? '처리 중...' : '되돌리기'}
+</Button>
 ```
 
-**삭제 확인 / setup·forgot 메일 발송:** 삭제 확인 다이얼로그는 텍스트 앞에 스피너를 얹고(`{loading && <Loader2 className="h-4 w-4 animate-spin" />}{loading ? '삭제 중...' : '삭제'}`), 메일 발송 버튼은 선두 `Mail` 아이콘을 **동일 size의 `Loader2`로 스왑**해 레이아웃 시프트를 없앤다. (같은 병기 규칙의 프리펜드/스왑 두 배치.)
+**삭제 확인 / 되돌리기 확인 / setup·forgot 메일 발송:** 삭제·되돌리기 확인 다이얼로그는 둘 다 텍스트 앞에 스피너를 얹고(`{loading && <Loader2 className="h-4 w-4 animate-spin" />}{loading ? '…중...' : '…'}`), 메일 발송 버튼은 선두 `Mail` 아이콘을 **동일 size의 `Loader2`로 스왑**해 레이아웃 시프트를 없앤다. (같은 병기 규칙의 프리펜드/스왑 두 배치.)
 
 > ⚠️ **카드 삭제(ActivityCard/PlaceCard 경유)는 스피너가 보이지 않는다 — 버그가 아니다.** 카드 삭제는 낙관적 캐시 제거(`onMutate`에서 `setQueriesData`로 항목 즉시 제거)로 카드가 언마운트되고, 호출부도 `mutate` 직전 `setDeleteOpen(false)`로 다이얼로그를 먼저 닫는다. `del.isPending=true`와 다이얼로그 언마운트가 **같은 커밋에 반영**되어 스피너가 그려질 프레임이 존재하지 않는다(**dead state**). 낙관적 UX상 의도된 결과다. 반면 **상세 화면 삭제**(ActivityDetail/PlaceDetail)는 다이얼로그를 닫지 않고 `navigating`으로 전환 완료까지 열어두므로 스피너가 정상 노출된다.
 
 ### 프리펜드 vs 스왑 — 같은 규칙의 두 배치
 
-모든 로딩 버튼은 스피너를 병기하되 배치만 두 가지다: 리딩 아이콘이 **없는** 버튼은 텍스트 앞에 **프리펜드**(폼 제출·인라인 저장·방문기록 저장·홈 검색·삭제 확인), 리딩 아이콘이 **있는** 버튼은 그 아이콘 슬롯을 `Loader2`로 **스왑**(되돌리기 `Undo2`·로그아웃 `LogOut`·메일 `Mail`·추천 `Sparkles`). 스왑은 추가 폭이 없고, 프리펜드는 폭 미고정 버튼에서 폭이 약간 늘 수 있으나 허용한다(별도 폭 고정 불필요). 크기는 항상 `h-4 w-4`.
+모든 로딩 버튼은 스피너를 병기하되 배치만 두 가지다: 리딩 아이콘이 **없는** 버튼은 텍스트 앞에 **프리펜드**(폼 제출·인라인 저장·방문기록 저장·홈 검색·삭제 확인·되돌리기 확인), 리딩 아이콘이 **있는** 버튼은 그 아이콘 슬롯을 `Loader2`로 **스왑**(로그아웃 `LogOut`·메일 `Mail`·추천 `Sparkles`). 스왑은 추가 폭이 없고, 프리펜드는 폭 미고정 버튼에서 폭이 약간 늘 수 있으나 허용한다(별도 폭 고정 불필요). 크기는 항상 `h-4 w-4`.
 
 ---
 

@@ -14,19 +14,9 @@ import {
   ExternalLink,
   Undo2,
   Clock,
-  Loader2,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
 import { CategoryBadge } from './CategoryBadge'
 import { ActivityFields } from './ActivityFields'
 import { DuplicateMenu } from './DuplicateMenu'
@@ -34,9 +24,11 @@ import { DetailBlock } from './DetailBlock'
 import { DetailRow } from './DetailRow'
 import { VisitRecordBlock } from './VisitRecordBlock'
 import { DeleteConfirmDialog } from './DeleteConfirmDialog'
+import { RevertConfirmDialog } from './RevertConfirmDialog'
 import { VisitedDialog } from '@/components/VisitedDialog'
 import { useActivity, useDeleteActivity, useUpdateActivity } from '@/hooks/useActivities'
 import { activityFormSchema, type ActivityFormValues } from '@/lib/schemas/activitySchema'
+import { REVERT_TO_WISHLIST_PATCH } from '@/lib/revertPatch'
 import type { Activity } from '@/types'
 import {
   DURATION_LABELS,
@@ -136,7 +128,7 @@ export function ActivityDetail({ id, initialData, initialEdit, returnTo }: Props
 
   function handleRevert() {
     update.mutate(
-      { id, patch: { status: 'wishlist', visited_at: null, visited_end_at: null, rating: null, review_note: null } },
+      { id, patch: REVERT_TO_WISHLIST_PATCH },
       {
         onSuccess: () => {
           setRevertOpen(false)
@@ -401,25 +393,12 @@ export function ActivityDetail({ id, initialData, initialEdit, returnTo }: Props
               review_note: activity.review_note,
             }}
           />
-          <Dialog open={revertOpen} onOpenChange={setRevertOpen}>
-            <DialogContent className="max-w-xs">
-              <DialogHeader>
-                <DialogTitle>가보고 싶은 곳으로 되돌릴까요?</DialogTitle>
-                <DialogDescription>
-                  별점, 감상, 방문일이 모두 삭제됩니다. 되돌릴 수 없어요.
-                </DialogDescription>
-              </DialogHeader>
-              <DialogFooter>
-                <DialogClose render={<Button variant="outline" disabled={update.isPending} />}>
-                  취소
-                </DialogClose>
-                <Button onClick={handleRevert} disabled={update.isPending}>
-                  {update.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
-                  {update.isPending ? '처리 중...' : '되돌리기'}
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+          <RevertConfirmDialog
+            open={revertOpen}
+            onOpenChange={setRevertOpen}
+            loading={update.isPending}
+            onConfirm={handleRevert}
+          />
         </>
       )}
     </div>

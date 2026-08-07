@@ -7,7 +7,7 @@ import { useState, useRef, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
-import { ArrowLeft, Trash2, CheckCircle2, Undo2, MapPin, ExternalLink, Utensils, Loader2 } from 'lucide-react'
+import { ArrowLeft, Trash2, CheckCircle2, Undo2, MapPin, ExternalLink, Utensils } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { CategoryBadge } from './CategoryBadge'
@@ -17,9 +17,11 @@ import { DetailBlock } from './DetailBlock'
 import { DetailRow } from './DetailRow'
 import { VisitRecordBlock } from './VisitRecordBlock'
 import { DeleteConfirmDialog } from './DeleteConfirmDialog'
+import { RevertConfirmDialog } from './RevertConfirmDialog'
 import { VisitedDialog } from '@/components/VisitedDialog'
 import { usePlace, useDeletePlace, useUpdatePlace } from '@/hooks/usePlaces'
 import { placeFormSchema, type PlaceFormValues } from '@/lib/schemas/placeSchema'
+import { REVERT_TO_WISHLIST_PATCH } from '@/lib/revertPatch'
 import type { Place } from '@/types'
 import { MEAL_LABELS, STATUS_LABELS, STATUS_MENU_LABELS } from '@/lib/labels'
 import { buildDetailHref, DEFAULT_LIST_RETURN_TO, isRecommendReturnTo } from '@/lib/listReturn'
@@ -52,6 +54,7 @@ export function PlaceDetail({ id, initialData, initialEdit, returnTo }: Props) {
   // "삭제 중..." 비활성 상태로 유지한다. 상세 언마운트 시 자연 정리되므로 해제 불필요.
   const [navigating, setNavigating] = useState(false)
   const [visitedOpen, setVisitedOpen] = useState(false)
+  const [revertOpen, setRevertOpen] = useState(false)
   const listHref = returnTo ?? DEFAULT_LIST_RETURN_TO
   const listLabel = isRecommendReturnTo(returnTo) ? '추천 결과로' : '목록으로'
 
@@ -107,9 +110,12 @@ export function PlaceDetail({ id, initialData, initialEdit, returnTo }: Props) {
 
   function handleRevert() {
     update.mutate(
-      { id, patch: { status: 'wishlist' } },
+      { id, patch: REVERT_TO_WISHLIST_PATCH },
       {
-        onSuccess: () => toast.success('가보고 싶은 곳으로 옮겼어요'),
+        onSuccess: () => {
+          setRevertOpen(false)
+          toast.success('가보고 싶은 곳으로 옮겼어요')
+        },
         onError: () => toast.error('변경 중 오류가 발생했습니다.'),
       }
     )
@@ -322,20 +328,10 @@ export function PlaceDetail({ id, initialData, initialEdit, returnTo }: Props) {
               {place.status === 'visited' ? (
                 <Button
                   className={cn(styles.detailPrimaryBtn, 'h-9 gap-1.5 text-white hover:brightness-105')}
-                  onClick={handleRevert}
-                  disabled={update.isPending}
+                  onClick={() => setRevertOpen(true)}
                 >
-                  {update.isPending ? (
-                    <>
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      처리 중...
-                    </>
-                  ) : (
-                    <>
-                      <Undo2 className="h-4 w-4" />
-                      {STATUS_MENU_LABELS.wishlist}
-                    </>
-                  )}
+                  <Undo2 className="h-4 w-4" />
+                  {STATUS_MENU_LABELS.wishlist}
                 </Button>
               ) : (
                 <Button
@@ -367,6 +363,12 @@ export function PlaceDetail({ id, initialData, initialEdit, returnTo }: Props) {
               rating: place.rating,
               review_note: place.review_note,
             }}
+          />
+          <RevertConfirmDialog
+            open={revertOpen}
+            onOpenChange={setRevertOpen}
+            loading={update.isPending}
+            onConfirm={handleRevert}
           />
         </>
       )}

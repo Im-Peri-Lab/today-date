@@ -2,7 +2,7 @@
 
 > **마지막 업데이트: 2026-08-05**
 
-> 이 문서는 Today Date 프로젝트의 장기 컨텍스트입니다. 260531~260805 전체 핸드오프를 다시 읽고, 초기 컨텍스트에서 이후 작업으로 변경·확정된 내용을 반영한 최신본입니다. 새 AI에게는 이 파일과 `CURRENT_STATE.md`를 먼저 전달하고, 과거 의사결정 확인이 필요할 때만 `CHANGELOG.md`를 참고하게 하세요.
+> 이 문서는 Today Date 프로젝트의 장기 컨텍스트입니다. 260531~260801 전체 핸드오프를 다시 읽고, 초기 컨텍스트에서 이후 작업으로 변경·확정된 내용을 반영한 최신본입니다. 새 AI에게는 이 파일과 `CURRENT_STATE.md`를 먼저 전달하고, 과거 의사결정 확인이 필요할 때만 `CHANGELOG.md`를 참고하게 하세요.
 
 ---
 
@@ -215,7 +215,7 @@ Claude Code가 PR 생성 → squash 머지 → 원격·로컬 정리를 한 번�
 
 ## 5. 구현 완료 범위
 
-> 커버리지 기준: 2026-07-30
+> 커버리지 기준: 2026-08-01
 
 ### 인증 F-01
 
@@ -263,6 +263,7 @@ Claude Code가 PR 생성 → squash 머지 → 원격·로컬 정리를 한 번�
 - **다이닝 카드 정보 줄 위치 폴백 (신규, 260725)**: `PlaceCard` 정보 줄이 메모만 표시하던 것을 `ActivityCard`와 동일한 규칙(메모 있으면 메모, 없으면 `location`, 아이콘도 StickyNote/MapPin 동일 전환)으로 대칭화 → 아래 "11. area/location 필드 구분"·"12. 카드 정보 줄 표시 규칙" 절 갱신 참조, 배경 → CHANGELOG 2026-07-25
 - **활동/다이닝 폼-API 입력 검증 공유 (신규, 260729)**: activities/places의 create/patch API 검증(title·category_id·location·memo·reference_url 등)이 `src/lib/schemas/apiFields.ts` 공유 Zod 스키마를 쓴다. GET 목록 API도 쿼리 파라미터를 Zod로 검증해 잘못된 값은 400(이전엔 무검증으로 조용히 빈 결과가 나갔음). POST/PATCH의 손상된 JSON 본문도 500이 아닌 400. 폼(`ActivityForm`/`PlaceForm`)의 submit은 `fetchJson`+try/catch로 네트워크 실패·JSON 파싱 실패·비정상 응답을 안전 처리(다른 화면과 동일 관용구) → 배경 → CHANGELOG 2026-07-29 v2
 - **`/list` 다녀온 곳 정렬 보정 (신규, 260729)**: `status=visited` 목록은 방문일(`visited_at`) 최신순, 방문일이 같으면 마지막 수정(`updated_at`) 최신순으로 정렬. 위시리스트(`status=wishlist`)는 기존대로 등록(`created_at`) 최신순 유지 → 구체 스펙 아래 "12. 리스트/카드 규칙" 절, 배경 → CHANGELOG 2026-07-30
+- **되돌리기 확인 다이얼로그 4곳 통일 (신규, 260801, PR #108)**: "가보고 싶은 곳으로 되돌리기"가 `ActivityDetail`에만 확인 다이얼로그를 갖고 `ActivityCard`/`PlaceDetail`/`PlaceCard` ⋮ 메뉴 3곳은 즉시 실행되던 불일치를 사용자 관찰로 진단·수정. `RevertConfirmDialog` 공유 컴포넌트로 4곳 모두 다이얼로그를 거치게 통일했고, patch는 4곳 모두 `{ status: 'wishlist' }`만 전송해 별점/후기/방문일을 보존한다(다시 "다녀온 곳"으로 전환하면 `VisitedDialog`가 기존 값으로 프리필) → 구체 스펙 SKILL §4-A·§4-B·§10-H·§12-A, 배경 → CHANGELOG 2026-08-01
 
 ### 추천 F-05~F-06
 
@@ -296,8 +297,8 @@ Claude Code가 PR 생성 → squash 머지 → 원격·로컬 정리를 한 번�
 
 - Capacitor 8.x iOS + Android 네이티브 셸, App ID `com.perilab.todaydate`
 - 브랜드 하트 아이콘(라벤더 `#f5f3ff` 배경)·스플래시 적용 완료
-- 소스 파일: `assets/_icon-only.svg`(하트 전경), `assets/_icon-background.svg`(라벤더 배경), `assets/_splash.svg`(스플래시)
-- 아이콘 하트 여백 비율: 좌우 ~24%, 상단 ~26.6%, 하단 ~25.8% (PWA `icon-512.png`와 일치)
+- 소스 파일: `assets/_icon-only.svg`(하트 전경), `assets/_icon-background.svg`(라벤더 배경), `assets/_splash.svg`
+- 아이콘 하트 여백: 좌우 ~24%, 상단 ~26.6%, 하단 ~25.8% (PWA `icon-512.png`와 일치)
 - iOS 재생성 명령: `npx capacitor-assets generate --ios --iconBackgroundColor '#f5f3ff'`(플래그 생략 시 배경 흰색 됨)
 - 실기기 확인 후 main 머지 예정 → 배경 CHANGELOG 2026-08-05, 설계 교훈 §20
 
@@ -665,6 +666,10 @@ ActivityCard·PlaceCard 모두 동일한 정보 줄 우선순위(memo→location
 - spacing 토큰 표준화 — 정보 뱃지(`.mealBadge`/`.visitedTag`) padding은 SKILL §8의 수렴 트리거("정보 뱃지 케이스 2~3개 누적")가 충족돼 `--s-badge-padding-*-info`/`-status` 토큰으로 승격 완료(260730, PR #103). `--s-space-*` 범용 체계는 여전히 부재 — 새 "정보 뱃지" 유사 케이스가 또 누적되면 그때 재검토
 - `/list` 서버 prefetch (현재 스켈레톤 유지) — 260730 재확인: SKILL §12·PROJECT_CONTEXT §18/§20이 `/list`=스켈레톤(카드 모양 고정, 개수만 가변)을 이미 확정 규칙으로 명시해 prefetch 전환은 이 규칙과 정면 충돌. 실사용 체감 지연 관찰 등 규칙을 뒤집을 근거 없이는 보류
 
+**그룹 5 — 액션 버튼 체계** (신규, 260731)
+- 아이콘 버튼 5종(`headerNavBtn`/`iconBtn` 44px, `editGhostBtn` 36px, `mapActionBtn` 28px, FAB 56px, 다이얼로그 닫기 24px) 크기 통일 여부 — Primary(보라) 버튼·그 외 액션 버튼 전수조사 2회(260731)로 텍스트/풀폭 액션 버튼은 Tier A(40px)/Tier B(36px)로 정리됐지만(PR #106), 아이콘 버튼은 성격이 다른 별도 계열로 분류돼 이번 범위에서 의도적으로 제외됨. 통일 여부는 미판단 — 착수 전 실측 필요
+- 위저드 "처음부터"/"홈으로" 리셋 액션의 구현 방식 불일치(결과 화면 ghost 버튼 40px vs 상단 텍스트 링크, 고정 height 없음) — 같은 260731 전수조사에서 발견, 이번 범위 밖으로 분리. 통일 여부 미판단
+
 ---
 
 ## 20. 알려진 교훈 / 금지 사항
@@ -759,7 +764,8 @@ ActivityCard·PlaceCard 모두 동일한 정보 줄 우선순위(memo→location
 - **네비게이션 라벨 규칙(§13)을 세운 뒤에는, 규칙 확정 이전부터 있던 유사 버튼들도 한 번은 대조해야 규칙의 완결성이 확인된다.** 다만 대조 결과가 전부 "이미 부합" 또는 "성격이 달라 범위 밖"으로 나오는 것도 정상적인 결과다 — 규칙에 없는 케이스를 찾지 못했다고 진단이 실패한 게 아니라, 오히려 규칙 설계 시점에 이미 예외 케이스를 잘 갈라놨다는 확인이다. 백로그 항목은 "코드를 고쳐야 완료"가 아니라 "실측/대조로 판정이 나면 완료"다(260728, 그룹4 종결 사례).
 - **레이아웃 폭 차이는 뷰포트를 하나만 확인하면 숨은 divergence를 놓친다.** 그룹3 카드 그리드 백로그가 "PC 렌더 폭 267px로 완전 동일"이라고만 적어뒀던 건 260710 진단이 데스크탑만 봤기 때문 — 260730 재실측(Playwright)에서 640~900px 2열 구간에 최대 140px 차이가 있음을 추가로 확인했다. 다만 이 차이 자체가 곧 버그는 아니다: `/list`(전체 목록, 트랙을 채움)와 추천 결과(소수 큐레이션 갤러리, 고정폭+가운데 정렬)는 화면 성격이 달라 폭 로직이 갈려도 되는 사례였고, 사용자 확인으로 의도된 예외 확정. "차이를 더 넓게 실측하는 것"과 "차이가 나면 무조건 통합한다"는 별개 판단이다(260730).
 - **백로그가 스스로 정해둔 수렴 트리거는 실측으로 재확인해야 발동 여부를 알 수 있다.** SKILL §8이 "정보 뱃지 케이스 2~3개 누적 시 검토"라고 못박아 놨어도, 그 사이 `.visitedTag`가 추가돼 트리거를 충족했는지는 문서만 봐서는 알 수 없었다 — 코드를 grep해 실제 후보 수(`mealBadge`/`visitedTag`/`filterCount`)를 세어야 판단 가능했다. 트리거가 충족돼도 무조건 전면 토큰화(`--s-space-*`)로 가지 않고, 트리거가 가리키는 좁은 범위(정보 뱃지 padding)만 토큰화하는 것으로 스코프를 지켰다(260730).
-- **`@capacitor/assets`는 플랫폼별로 아이콘 배경 처리 경로가 다르다.** iOS는 `icon-background.png`를 무시하고 `--iconBackgroundColor` CLI 플래그에서만 배경색을 받는 반면, Android는 `icon-background.png`를 `generateAdaptiveIconBackground()`로 직접 처리해 정상 반영된다. "소스 파일을 넣었으니 iOS도 당연히 반영되겠지"라는 가정이 맞지 않는다 — iOS 아이콘을 재생성할 때는 반드시 `--iconBackgroundColor '#f5f3ff'`를 플래그에 명시한다(260805, `chore/capacitor-init`).
+- **색 위계와 높이 위계는 서로 독립적인 축이다.** 액션 버튼을 "Primary(단색)만 특별하다"는 전제로 진단하면 outline·ghost 버튼의 높이 불일치를 놓친다. 색(중요도·성격 구분)과 높이(Tier A 40px/Tier B 36px, 화면 수준 핵심 액션 vs 인라인 보조 액션)를 별개 질문으로 분리해 전수조사해야, 같은 Tier인데 색만 다른 버튼들이 실제로는 이미 정렬돼 있다는 것도, 진짜 예외(48px 4곳)도 정확히 갈린다(260731, Primary·그 외 액션 버튼 전수조사 2회·PR #106).
+- **`@capacitor/assets`는 플랫폼별로 아이콘 배경 처리 경로가 다르다.** iOS는 `icon-background.png`를 무시하고 `--iconBackgroundColor` CLI 플래그에서만 배경색을 받는 반면, Android는 `icon-background.png`를 `generateAdaptiveIconBackground()`로 직접 처리해 정상 반영된다. iOS 아이콘을 재생성할 때는 반드시 `--iconBackgroundColor '#f5f3ff'`를 플래그에 명시한다(260805, `chore/capacitor-init`).
 - **네이티브 앱 아이콘의 여백 기준은 원본 에셋("하트가 자기 박스 안에서 채우는 비율")을 이식한다.** 원본이 없는 개념("박스가 화면에서 차지하는 비율")을 새로 만들지 않는다. PWA 아이콘(`public/icon-512.png`)의 픽셀 바운딩박스로 측정한 실제 여백 비율을 SVG viewBox에 역산 반영하면 시각 일관성을 유지할 수 있다(260805).
 
 ---

@@ -557,6 +557,23 @@
 
 ---
 
+## 2026-07-31 — `.mealBadge` 텍스트 색 대비 보정 + 액션 버튼 Tier A/B 통일
+
+- `.mealBadge` 텍스트 색 승격 (PR #105 squash `ace0e3c`) — `design/meal-badge-color-ink`: 같은 화면 `DetailRow`(지역·위치, `PlaceDetail.tsx`)가 `--s-ink`인데 `.mealBadge`만 `--s-sub`라 상대적으로 흐려 보이던 것을 `--s-ink`로 승격(`font-size` 12px·`font-weight` 400 상속은 무변경). SKILL §8(`.mealBadge` 의도된 예외)·§10-E(역할별 배지 변형 표에 텍스트 색 컬럼 분리) 갱신. `npm run lint`/`build` PASS, Playwright `getComputedStyle`로 라이트/다크 `--s-ink` 값 실측 일치 확인
+- Primary(보라) 버튼·그 외 액션 버튼 전수조사 2회 + Tier A/B 통일 (PR #106 squash `3a05c31`) — `design/button-tier-consolidation`: 보라 버튼 15곳, 그 외 outline/ghost/destructive/아이콘/인증 버튼 전부를 두 차례 전수조사해 텍스트·풀폭 액션 버튼의 높이 위계를 **Tier A(화면/다이얼로그 풀폭 핵심 액션, 40px)/Tier B(인라인·컨텍스트 보조 액션, 36px)** 두 단계로 확정. 기존 48px였던 4개 지점(`FormLayout.tsx` 등록 버튼, `HomeSearchButton.tsx` 검색, `VisitedDialog.tsx` 저장하기)과, 높이 미지정으로 기본 32px 렌더 중이던 `ActivityDetail.tsx` 되돌리기 다이얼로그의 취소/확정 페어를 Tier A/B 값으로 정렬. 색(단색 채움/outline/ghost)은 위계 표현용일 뿐 높이와 독립임을 확정. 아이콘 버튼 5종(44/36/28/56/24px)과 위저드 "처음부터"/"홈으로" 구현 방식 불일치는 범위 밖으로 분리해 PROJECT_CONTEXT §19 백로그에 신규 등록. SKILL §4-A 전면 재작성(Tier A/B 표 + 판단 기준, 입력 컨트롤 표 분리). `npm run build` PASS. Vercel 프리뷰 4개 화면 실기기 확인은 세션 환경 제약으로 미실행
+- 배경·진단 근거 → PROJECT_CONTEXT §19·§20
+
+---
+
+## 2026-08-01 — 되돌리기 확인 다이얼로그 4곳 통일
+
+- 되돌리기 확인 다이얼로그 통일 (PR #108 squash `70b7d09`) — `fix/revert-to-wishlist-consistency`: "가보고 싶은 곳으로 되돌리기"가 `ActivityDetail.tsx`에만 확인 다이얼로그를 갖고 `ActivityCard`/`PlaceDetail`/`PlaceCard` ⋮ 메뉴 3곳은 곧장 실행되던 불일치를 사용자 스크린샷 관찰로 진단(삭제 확인엔 있는 공유 컴포넌트가 되돌리기엔 없어 개별 구현마다 갈려 있었음). `RevertConfirmDialog` 공유 컴포넌트로 4곳 통일하고, patch도 4곳 모두 `{ status: 'wishlist' }`만 전송해 별점/후기/방문일을 보존(재전환 시 `VisitedDialog`가 프리필)하도록 정정. 다이얼로그 문구는 사용자 확인을 거쳐 "방문기록(방문일, 별점, 후기)이 모두 삭제됩니다."로 확정
+- SKILL.md §4-A(다이얼로그 출처)·§4-B(필드 보존 정정)·§10-H(문구)·§12-A(스피너 위치: 트리거 아닌 다이얼로그 확정 버튼) 갱신
+- `tsc`/`eslint`/`next build` PASS. 브라우저 실행 검증은 `.env.local`(Supabase) 부재로 세션 환경에서 미실행, 코드 리뷰로 대체 확인
+- 배경 → PROJECT_CONTEXT §5
+
+---
+
 ## 2026-08-05 — Capacitor 네이티브 앱 초기화 + 브랜드 아이콘/스플래시 반영
 
 브랜치: `chore/capacitor-init` (미머지, 실기기 확인 후 머지 예정)

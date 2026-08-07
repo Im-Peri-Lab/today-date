@@ -1,8 +1,8 @@
 # CHANGELOG.md
 
-> **마지막 업데이트: 2026-08-01**
+> **마지막 업데이트: 2026-08-05**
 
-> 260531~260801 핸드오프 전체를 날짜순으로 기록한 변경 이력입니다. 새 AI는 일반적으로 `PROJECT_CONTEXT.md`와 `CURRENT_STATE.md`만 먼저 읽고, 과거 판단 근거가 필요할 때 이 문서를 참고하세요.
+> 260531~260805 핸드오프 전체를 날짜순으로 기록한 변경 이력입니다. 새 AI는 일반적으로 `PROJECT_CONTEXT.md`와 `CURRENT_STATE.md`만 먼저 읽고, 과거 판단 근거가 필요할 때 이 문서를 참고하세요.
 
 ---
 
@@ -571,3 +571,15 @@
 - SKILL.md §4-A(다이얼로그 출처)·§4-B(필드 보존 정정)·§10-H(문구)·§12-A(스피너 위치: 트리거 아닌 다이얼로그 확정 버튼) 갱신
 - `tsc`/`eslint`/`next build` PASS. 브라우저 실행 검증은 `.env.local`(Supabase) 부재로 세션 환경에서 미실행, 코드 리뷰로 대체 확인
 - 배경 → PROJECT_CONTEXT §5
+
+---
+
+## 2026-08-05 — Capacitor 네이티브 앱 초기화 + 브랜드 아이콘/스플래시 반영
+
+브랜치: `chore/capacitor-init` (미머지, 실기기 확인 후 머지 예정)
+
+- Capacitor 8.x iOS + Android 네이티브 셸 초기화, App ID `com.perilab.todaydate` 확정 (`e159d31`)
+- `@capacitor/assets` v3.0.5 Custom Mode로 브랜드 하트(라벤더 `#f5f3ff` 배경) 아이콘·스플래시 일괄 생성 (`013e3db`); SVG viewBox `-7.23 -7.23 38.46 38.46`으로 조정해 PWA 아이콘 여백 비율 일치(좌우 ~24%) (`d63d564`)
+- iOS 아이콘 배경 흰색→라벤더 수정: `--iconBackgroundColor '#f5f3ff'` 플래그 명시 재생성 (`09f2183`); `cap sync` PASS, iOS/Android 아이콘 네 귀퉁이 픽셀 샘플링 검증 완료
+- `.gitignore` Xcode SPM 캐시 경로 추가 (`7e576be`)
+- 진단 근거·교훈 → PROJECT_CONTEXT §20

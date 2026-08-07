@@ -1,9 +1,9 @@
 # CURRENT_STATE.md
 
-> **마지막 업데이트: 2026-08-01**
+> **마지막 업데이트: 2026-08-05**
 
 ## 현재 단계
-유지보수 / 점진적 UX 개선 단계.
+유지보수 / 점진적 UX 개선 단계 + Capacitor 네이티브 앱 초기화 진행 중.
 
 ## 현재 한 줄 요약
 자동화 테스트·CI 도입(PR #91) + P2 리팩터 배치(PR #93~95: dark/hover/focus 정합화, 추천위저드
@@ -14,11 +14,13 @@ SKILL.md 반영(PR #100) + 기술 백로그 그룹 1·3 진단·처리(PR #101·
 A(40px)/Tier B(36px) 두 단계로 통일(PR #106) 병합 완료. 사용자 스크린샷 관찰로 "가보고 싶은
 곳으로 되돌리기" 확인 다이얼로그가 4곳 중 1곳(ActivityDetail)에만 있던 불일치를 발견·진단해
 `RevertConfirmDialog` 공유 컴포넌트로 통일(PR #108), 되돌리기 patch도 4곳 모두 필드 보존형으로
-정정 병합 완료, main 기준 build PASS. 상세 → CHANGELOG 2026-08-01.
+정정 병합 완료, main 기준 build PASS. 상세 → CHANGELOG 2026-08-01. 이어서 Capacitor 8.x
+iOS/Android 네이티브 앱 셸 초기화 + 브랜드 아이콘/스플래시 반영을 `chore/capacitor-init`
+브랜치에서 완료, 실기기 확인 후 머지 예정. 상세 → CHANGELOG 2026-08-05.
 
 ## 브랜치 상태
-- 현재 작업 브랜치 없음, main 기준 build PASS
-- PR #108(`fix/revert-to-wishlist-consistency`) squash 머지 완료(`70b7d09`), 원격 브랜치 정리 완료. PR #106(`design/button-tier-consolidation`)도 squash 머지 완료(`3a05c31`), PR #105(`design/meal-badge-color-ink`)도 squash 머지 완료(`ace0e3c`)
+- `chore/capacitor-init` — Capacitor 네이티브 셸 초기화·아이콘/스플래시 반영 완료, 실기기 확인 후 PR 예정
+- main 기준 build PASS (PR #108 `70b7d09` 기준)
 
 ## 최근 구현 완료
 - 자동화 테스트·CI, dark/hover/focus 정합화, 추천위저드 History/URL 동기화 공통 훅, 폼-API
@@ -38,6 +40,8 @@ A(40px)/Tier B(36px) 두 단계로 통일(PR #106) 병합 완료. 사용자 스�
   patch를 4곳 모두 `{ status: 'wishlist' }`만 전송하도록 정정(별점/후기/방문일 보존, 재전환 시
   `VisitedDialog` 프리필). 다이얼로그 문구 "방문기록(방문일, 별점, 후기)이 모두 삭제됩니다."로
   확정. SKILL.md §4-A·§4-B·§10-H·§12-A 동시 갱신 → 상세 CHANGELOG 2026-08-01
+- Capacitor 8.x iOS/Android 네이티브 앱 셸 초기화, 브랜드 하트 아이콘·스플래시 반영, iOS 아이콘
+  배경색 수정(`chore/capacitor-init`, 미머지) → 상세 CHANGELOG 2026-08-05
 
 ## 배포 상태
 - 플랫폼: Vercel
@@ -45,6 +49,8 @@ A(40px)/Tier B(36px) 두 단계로 통일(PR #106) 병합 완료. 사용자 스�
 - 현재 브랜치: `main` (PR #108 기준 `70b7d09`)
 
 ## 진행 중 / 남은 작업
+- **`chore/capacitor-init` 머지 전 실기기 확인**: iPhone 홈 화면 아이콘(라벤더 배경·하트)·스플래시
+  실사용 확인, Android 실기기 확인(Galaxy 미확보로 보류 중)
 - PR #108(되돌리기 확인 다이얼로그 통일) 브라우저 실행 검증 — 4개 지점 모두 다이얼로그 노출→확인
   →재전환 시 기존 별점/후기/방문일 프리필까지의 실사용 흐름. `.env.local`(Supabase) 부재로 세션
   환경에서 미실행, tsc/lint/build PASS + 코드 리뷰로 대체 확인함

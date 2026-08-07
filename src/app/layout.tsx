@@ -42,7 +42,12 @@ export default function RootLayout({
         {/* color = --s-active-line (#7c3aed). CSS 변수는 JS inline-style 주입 방식 특성상 직접 참조 불가 */}
         <NextTopLoader color="#7c3aed" height={2} showSpinner={false} />
         <Providers>{children}</Providers>
-        <Toaster position="top-center" richColors />
+        <Toaster
+          position="top-center"
+          richColors
+          offset={{ top: 'calc(env(safe-area-inset-top, 0px) + 16px)' }}
+          mobileOffset={{ top: 'calc(env(safe-area-inset-top, 0px) + 16px)' }}
+        />
       </body>
     </html>
   )

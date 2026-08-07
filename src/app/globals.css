@@ -223,3 +223,14 @@ html.dark body {
   }
 }
 
+/*
+ * nextjs-toploader 는 `#nprogress .bar { top: 0 }` 를 인라인 <style> 로 body 안(globals.css
+ * 링크보다 DOM 상 뒤)에 주입해서 동일 specificity 오버라이드가 소스 순서로 밀린다.
+ * !important 로 iOS 노치 안전영역만큼 내려 카메라/다이나믹 아일랜드에 가리지 않게 한다.
+ */
+#nprogress .bar {
+  top: env(safe-area-inset-top, 0px) !important;
+}
+#nprogress .spinner {
+  top: calc(env(safe-area-inset-top, 0px) + 15px) !important;
+}

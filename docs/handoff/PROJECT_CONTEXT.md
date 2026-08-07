@@ -1,8 +1,8 @@
 # PROJECT_CONTEXT.md
 
-> **마지막 업데이트: 2026-07-30**
+> **마지막 업데이트: 2026-08-05**
 
-> 이 문서는 Today Date 프로젝트의 장기 컨텍스트입니다. 260531~260730 전체 핸드오프를 다시 읽고, 초기 컨텍스트에서 이후 작업으로 변경·확정된 내용을 반영한 최신본입니다. 새 AI에게는 이 파일과 `CURRENT_STATE.md`를 먼저 전달하고, 과거 의사결정 확인이 필요할 때만 `CHANGELOG.md`를 참고하게 하세요.
+> 이 문서는 Today Date 프로젝트의 장기 컨텍스트입니다. 260531~260805 전체 핸드오프를 다시 읽고, 초기 컨텍스트에서 이후 작업으로 변경·확정된 내용을 반영한 최신본입니다. 새 AI에게는 이 파일과 `CURRENT_STATE.md`를 먼저 전달하고, 과거 의사결정 확인이 필요할 때만 `CHANGELOG.md`를 참고하게 하세요.
 
 ---
 
@@ -46,6 +46,9 @@
   mocking으로 DB 미의존. `npm run test:e2e`
 - GitHub Actions(`.github/workflows/ci.yml`) — PR/main push마다 lint→단위 테스트→build
   (verify job) + 별도 e2e job(260729)
+- **Capacitor 8.x** — iOS + Android 네이티브 앱 셸(`chore/capacitor-init` 브랜치, 미머지). App ID `com.perilab.todaydate`.
+  - `@capacitor/assets` v3.0.5 Custom Mode — `assets/` 소스 SVG(`_icon-only.svg`, `_icon-background.svg`, `_splash.svg`)로 아이콘·스플래시 일괄 생성
+  - iOS 아이콘 재생성 시 반드시 `--iconBackgroundColor '#f5f3ff'` 플래그 포함 필수(`icon-background.png`는 iOS에서 무시됨, Android는 정상 반영)
 
 ### 주요 위치
 
@@ -288,6 +291,15 @@ Claude Code가 PR 생성 → squash 머지 → 원격·로컬 정리를 한 번�
 - 활동 12개
 - 장소 14개
 - 일회성 삽입 후 seed 스크립트 삭제됨
+
+### 네이티브 앱 (Capacitor) — `chore/capacitor-init` 브랜치, 미머지
+
+- Capacitor 8.x iOS + Android 네이티브 셸, App ID `com.perilab.todaydate`
+- 브랜드 하트 아이콘(라벤더 `#f5f3ff` 배경)·스플래시 적용 완료
+- 소스 파일: `assets/_icon-only.svg`(하트 전경), `assets/_icon-background.svg`(라벤더 배경), `assets/_splash.svg`(스플래시)
+- 아이콘 하트 여백 비율: 좌우 ~24%, 상단 ~26.6%, 하단 ~25.8% (PWA `icon-512.png`와 일치)
+- iOS 재생성 명령: `npx capacitor-assets generate --ios --iconBackgroundColor '#f5f3ff'`(플래그 생략 시 배경 흰색 됨)
+- 실기기 확인 후 main 머지 예정 → 배경 CHANGELOG 2026-08-05, 설계 교훈 §20
 
 ---
 
@@ -637,7 +649,7 @@ ActivityCard·PlaceCard 모두 동일한 정보 줄 우선순위(memo→location
 - F-09 통계 대시보드
 - F-10 카테고리 관리
 - F-11 설정 페이지 (이메일/패스코드/커플 정보 변경)
-- F-12 PWA 설치
+- ~~F-12 PWA 설치~~ → **Capacitor 네이티브 앱으로 대체 진행 중** (`chore/capacitor-init`)
 - F-13 Gemini AI 추천
 - F-14 데이트 코스 번들
 - 다크모드 토글
@@ -747,6 +759,8 @@ ActivityCard·PlaceCard 모두 동일한 정보 줄 우선순위(memo→location
 - **네비게이션 라벨 규칙(§13)을 세운 뒤에는, 규칙 확정 이전부터 있던 유사 버튼들도 한 번은 대조해야 규칙의 완결성이 확인된다.** 다만 대조 결과가 전부 "이미 부합" 또는 "성격이 달라 범위 밖"으로 나오는 것도 정상적인 결과다 — 규칙에 없는 케이스를 찾지 못했다고 진단이 실패한 게 아니라, 오히려 규칙 설계 시점에 이미 예외 케이스를 잘 갈라놨다는 확인이다. 백로그 항목은 "코드를 고쳐야 완료"가 아니라 "실측/대조로 판정이 나면 완료"다(260728, 그룹4 종결 사례).
 - **레이아웃 폭 차이는 뷰포트를 하나만 확인하면 숨은 divergence를 놓친다.** 그룹3 카드 그리드 백로그가 "PC 렌더 폭 267px로 완전 동일"이라고만 적어뒀던 건 260710 진단이 데스크탑만 봤기 때문 — 260730 재실측(Playwright)에서 640~900px 2열 구간에 최대 140px 차이가 있음을 추가로 확인했다. 다만 이 차이 자체가 곧 버그는 아니다: `/list`(전체 목록, 트랙을 채움)와 추천 결과(소수 큐레이션 갤러리, 고정폭+가운데 정렬)는 화면 성격이 달라 폭 로직이 갈려도 되는 사례였고, 사용자 확인으로 의도된 예외 확정. "차이를 더 넓게 실측하는 것"과 "차이가 나면 무조건 통합한다"는 별개 판단이다(260730).
 - **백로그가 스스로 정해둔 수렴 트리거는 실측으로 재확인해야 발동 여부를 알 수 있다.** SKILL §8이 "정보 뱃지 케이스 2~3개 누적 시 검토"라고 못박아 놨어도, 그 사이 `.visitedTag`가 추가돼 트리거를 충족했는지는 문서만 봐서는 알 수 없었다 — 코드를 grep해 실제 후보 수(`mealBadge`/`visitedTag`/`filterCount`)를 세어야 판단 가능했다. 트리거가 충족돼도 무조건 전면 토큰화(`--s-space-*`)로 가지 않고, 트리거가 가리키는 좁은 범위(정보 뱃지 padding)만 토큰화하는 것으로 스코프를 지켰다(260730).
+- **`@capacitor/assets`는 플랫폼별로 아이콘 배경 처리 경로가 다르다.** iOS는 `icon-background.png`를 무시하고 `--iconBackgroundColor` CLI 플래그에서만 배경색을 받는 반면, Android는 `icon-background.png`를 `generateAdaptiveIconBackground()`로 직접 처리해 정상 반영된다. "소스 파일을 넣었으니 iOS도 당연히 반영되겠지"라는 가정이 맞지 않는다 — iOS 아이콘을 재생성할 때는 반드시 `--iconBackgroundColor '#f5f3ff'`를 플래그에 명시한다(260805, `chore/capacitor-init`).
+- **네이티브 앱 아이콘의 여백 기준은 원본 에셋("하트가 자기 박스 안에서 채우는 비율")을 이식한다.** 원본이 없는 개념("박스가 화면에서 차지하는 비율")을 새로 만들지 않는다. PWA 아이콘(`public/icon-512.png`)의 픽셀 바운딩박스로 측정한 실제 여백 비율을 SVG viewBox에 역산 반영하면 시각 일관성을 유지할 수 있다(260805).
 
 ---
 

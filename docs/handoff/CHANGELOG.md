@@ -1,8 +1,8 @@
 # CHANGELOG.md
 
-> **마지막 업데이트: 2026-07-30**
+> **마지막 업데이트: 2026-08-05**
 
-> 260531~260729 핸드오프 전체를 날짜순으로 기록한 변경 이력입니다. 새 AI는 일반적으로 `PROJECT_CONTEXT.md`와 `CURRENT_STATE.md`만 먼저 읽고, 과거 판단 근거가 필요할 때 이 문서를 참고하세요.
+> 260531~260805 핸드오프 전체를 날짜순으로 기록한 변경 이력입니다. 새 AI는 일반적으로 `PROJECT_CONTEXT.md`와 `CURRENT_STATE.md`만 먼저 읽고, 과거 판단 근거가 필요할 때 이 문서를 참고하세요.
 
 ---
 
@@ -554,3 +554,15 @@
 - 기술 백로그 그룹 3 실측·처리 (PR #103 squash `a89817e`) — `chore/card-grid-decision-and-badge-spacing-token`: PROJECT_CONTEXT §19 그룹 3의 위저드 h1 수렴·카드 그리드 통합·spacing 토큰 표준화·`/list` 서버 prefetch 4건을 Playwright 렌더 측정으로 실측·분류. 위저드 h1은 stale로 종결, `/list` prefetch는 SKILL §12 확정 규칙과 충돌해 보류. 카드 그리드는 사용자 확인 후 의도된 예외로 SKILL §3-B 신규 문서화(코드 변경 없음), spacing 토큰은 `.mealBadge`/`.visitedTag`의 padding만 `--s-badge-padding-*-info`/`-status` 토큰으로 승격(값 무변경, light/dark computed style로 픽셀 불변 확인, PR #71 역할 분리 유지·병합 없음). lint/test(81)/build PASS
 - 핸드오프 문서(PROJECT_CONTEXT·CURRENT_STATE·CHANGELOG) + SKILL.md 오늘자 반영
 - 배경·진단 근거 → PROJECT_CONTEXT §5·§12·§19·§20
+
+---
+
+## 2026-08-05 — Capacitor 네이티브 앱 초기화 + 브랜드 아이콘/스플래시 반영
+
+브랜치: `chore/capacitor-init` (미머지, 실기기 확인 후 머지 예정)
+
+- Capacitor 8.x iOS + Android 네이티브 셸 초기화, App ID `com.perilab.todaydate` 확정 (`e159d31`)
+- `@capacitor/assets` v3.0.5 Custom Mode로 브랜드 하트(라벤더 `#f5f3ff` 배경) 아이콘·스플래시 일괄 생성 (`013e3db`); SVG viewBox `-7.23 -7.23 38.46 38.46`으로 조정해 PWA 아이콘 여백 비율 일치(좌우 ~24%) (`d63d564`)
+- iOS 아이콘 배경 흰색→라벤더 수정: `--iconBackgroundColor '#f5f3ff'` 플래그 명시 재생성 (`09f2183`); `cap sync` PASS, iOS/Android 아이콘 네 귀퉁이 픽셀 샘플링 검증 완료
+- `.gitignore` Xcode SPM 캐시 경로 추가 (`7e576be`)
+- 진단 근거·교훈 → PROJECT_CONTEXT §20

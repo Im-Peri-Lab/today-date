@@ -37,3 +37,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Xcode SPM cache (local, not committed)
+ios/App/App.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/

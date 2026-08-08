@@ -17,14 +17,16 @@
 
 
     <!--
-      parent 은 Theme.SplashScreen 이 아니라 AppTheme.NoActionBar 다.
-      Theme.SplashScreen(androidx core-splashscreen)을 parent 로 두면 android:background 는
-      무시되고, Android 12+ 는 windowSplashScreenBackground/windowSplashScreenAnimatedIcon 이
-      없다는 이유로 앱 런처 아이콘을 원형 배지에 넣어 자체 렌더링해버린다(우리 splash.png 대신).
-      공식 문서대로 컴팻 라이브러리를 비활성화해 커스텀 splash.png(라벤더 배경 + 하트, 원 없음)가
-      그대로 쓰이게 한다.
+      parent=Theme.SplashScreen 인 이상 android:background(@drawable/splash)는 Android 12+
+      플랫폼 SplashScreen API 에서 애초에 읽히지 않는다 — installSplashScreen() 이
+      Activity.getSplashScreen() 을 직접 후킹해서, windowSplashScreenBackground /
+      windowSplashScreenAnimatedIcon 을 명시하지 않으면 런처 아이콘(adaptive icon)을
+      기본값으로 그려버린다(로그의 SplashScreenView Icon: ...ImmobileIconDrawable 로 확인).
+      parent 를 바꿔도(AppTheme.NoActionBar) 이 경로가 비활성화되지 않으므로,
+      아예 이 두 속성을 명시해서 우리 배경색/하트가 그려지게 한다.
     -->
-    <style name="AppTheme.NoActionBarLaunch" parent="AppTheme.NoActionBar">
-        <item name="android:background">@drawable/splash</item>
+    <style name="AppTheme.NoActionBarLaunch" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">#f5f3ff</item>
+        <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher_foreground</item>
     </style>
 </resources>

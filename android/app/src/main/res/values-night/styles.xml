@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!--
+      다크모드(night) 전용 스플래시 오버라이드.
+      windowSplashScreenBackground 는 format="color" 전용이라(Android SDK attrs.xml 확인)
+      그라디언트를 못 쓰므로 단색 #0a0712(NativeBootOverlay/앱 다크 배경의 최상단 색)로.
+      windowSplashScreenAnimatedIcon 은 같은 @drawable/splash_icon_with_title 참조를 유지 —
+      drawable-night/splash_icon_with_title.png 가 있으므로 다크에서 자동으로 그 파일이 선택된다.
+      (values-night 의 style item 은 values/styles.xml 과 병합되지 않으므로 두 item 모두 재선언 필요.)
+    -->
+    <style name="AppTheme.NoActionBarLaunch" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">#0a0712</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/splash_icon_with_title</item>
+    </style>
+</resources>

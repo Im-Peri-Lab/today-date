@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next'
 import localFont from 'next/font/local'
 import NextTopLoader from 'nextjs-toploader'
 import { Toaster } from '@/components/ui/sonner'
+import { NativeBootOverlay } from '@/components/boot/NativeBootOverlay'
 import { Providers } from './providers'
 import { cn } from '@/lib/utils'
 import './globals.css'
@@ -41,6 +42,7 @@ export default function RootLayout({
       <body className={`${geistMono.variable} antialiased`}>
         {/* color = --s-active-line (#7c3aed). CSS 변수는 JS inline-style 주입 방식 특성상 직접 참조 불가 */}
         <NextTopLoader color="#7c3aed" height={2} showSpinner={false} />
+        <NativeBootOverlay />
         <Providers>{children}</Providers>
         <Toaster position="top-center" richColors />
       </body>

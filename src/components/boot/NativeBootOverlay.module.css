@@ -19,3 +19,18 @@
     transition: none;
   }
 }
+
+/*
+ * BrandHeader의 하트 그라데이션(--heart-from/--heart-to)은 auth.module.css의 .page 안에서만
+ * 다크 오버라이드가 선언되어 있다(auth.module.css:448-449). 이 오버레이는 .page 조상 없이
+ * BrandHeader를 단독 렌더링하므로, 값을 여기서도 동일하게 상속용으로 재선언한다(auth.module.css
+ * 다크 블록과 같은 값). 타이틀 텍스트(#f5f3fa)는 auth.module.css의 .title 셀렉터가 .page 조상과
+ * 무관하게 직접 매치되어 이미 정상 적용되므로 여기서 재선언하지 않는다.
+ */
+@media (prefers-color-scheme: dark) {
+  .overlay {
+    background: linear-gradient(180deg, #0a0712 0%, #120c1e 100%);
+    --heart-from: #c084fc;
+    --heart-to: #f472b6;
+  }
+}

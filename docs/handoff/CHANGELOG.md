@@ -1,8 +1,8 @@
 # CHANGELOG.md
 
-> **마지막 업데이트: 2026-08-05**
+> **마지막 업데이트: 2026-08-11**
 
-> 260531~260805 핸드오프 전체를 날짜순으로 기록한 변경 이력입니다. 새 AI는 일반적으로 `PROJECT_CONTEXT.md`와 `CURRENT_STATE.md`만 먼저 읽고, 과거 판단 근거가 필요할 때 이 문서를 참고하세요.
+> 260531~260811 핸드오프 전체를 날짜순으로 기록한 변경 이력입니다. 새 AI는 일반적으로 `PROJECT_CONTEXT.md`와 `CURRENT_STATE.md`만 먼저 읽고, 과거 판단 근거가 필요할 때 이 문서를 참고하세요.
 
 ---
 
@@ -583,3 +583,45 @@
 - iOS 아이콘 배경 흰색→라벤더 수정: `--iconBackgroundColor '#f5f3ff'` 플래그 명시 재생성 (`09f2183`); `cap sync` PASS, iOS/Android 아이콘 네 귀퉁이 픽셀 샘플링 검증 완료
 - `.gitignore` Xcode SPM 캐시 경로 추가 (`7e576be`)
 - 진단 근거·교훈 → PROJECT_CONTEXT §20
+
+---
+
+## 2026-08-07 — iOS safe-area 토스트/로더 수정 + Android 릴리즈 서명 (PR #111, #112)
+
+- PR #111(`main`): `nextjs-toploader` 진행바 + `sonner` 토스트가 iOS 노치/다이나믹 아일랜드 카메라 하우징에 가려 안 보이던 문제 수정. `#nprogress .bar/.spinner`에 `env(safe-area-inset-top)` 오버라이드(라이브러리가 동일 specificity 인라인 스타일을 더 늦게 주입해 `!important` 필요), `<Toaster>` `offset`/`mobileOffset`에 `calc(env(safe-area-inset-top) + 16px)` 적용. `viewportFit:'cover'`가 이미 main에 있어 PWA(홈 화면 추가) 사용자도 동일 영향. 실기기(iPhone 17 Pro) 확인.
+- PR #112(`chore/capacitor-init`): Android 릴리즈 서명 설정 — `keystore.properties` 기반 `signingConfig`을 `build.gradle`에 추가, keystore 파일·properties는 git 제외. `assembleRelease` 서명 빌드·`apksigner verify`(v2 서명)·Pixel 10/API 36 에뮬레이터 설치·실행까지 확인.
+- PR #110(`docs/capacitor-handoff-260805`) 백필 문서가 `main`에 반영됨.
+
+---
+
+## 2026-08-09 — 네이티브 부팅 스플래시 오버레이 도입 (PR #113, #114)
+
+- `NativeBootOverlay`(기존 `BrandHeader` 재사용, `Capacitor.isNativePlatform()` 가드로 웹/PWA에는 렌더 안 함) 신규 — 네이티브 스플래시 화면과 첫 페인트 사이를 웹 오버레이로 이어주고, 마운트 완료 시 `@capacitor/splash-screen`의 `SplashScreen.hide()`로 네이티브 스플래시를 닫는다.
+- PR #114(`main`): 웹 전용 부분만 먼저 분리 병합 — `capacitor.config.ts`, Android/Ios 네이티브 스플래시 리소스는 의도적으로 제외(당시 `chore/capacitor-init` 쪽 네이티브 작업이 아직 미병합이었기 때문).
+- PR #113(`chore/capacitor-init`): `@capacitor/splash-screen` 네이티브 플러그인 등록, Android 12+ SplashScreen 테마가 원형 런처 아이콘 배지로 폴백되던 버그 수정, 하트+타이틀 전용 스플래시 아이콘(Android)·`Splash.imageset` 교체(iOS, `scaleAspectFill` 크롭 대응 사이즈)로 네이티브 스플래시와 웹 오버레이의 시각적 이음매를 맞춤. Android 에뮬레이터(Pixel 10)·iOS 시뮬레이터(iPhone 17 Pro) 콜드 스타트로 색·위치 점프 없음 확인.
+
+---
+
+## 2026-08-09 v2 — 스플래시 콘텐츠 비율 실측 보정 + 다크모드 지원 (PR #115)
+
+- iOS 스플래시 콘텐츠 폭을 처음엔 임의 목표치(13~15%)로 설정했다가, 실제 `/setup` 페이지(`NativeBootOverlay`와 동일 `BrandHeader`)의 타이틀 폭을 직접 재측정하니 35.28%였던 것을 발견 — 이 실측값을 `scaleAspectFill` 크롭 비율(46.1%)로 역산해 콘텐츠 폭 16.39%로 재보정(`8a660fe`). Android는 56.4%로 별도 보정.
+- `NativeBootOverlay`의 다크모드 하트 그라데이션 버그 수정(`d3f6be9`) — `--heart-from`/`--heart-to`가 `auth.module.css`의 `.page` 클래스 스코프에서만 정의돼 있어, `.page` 조상 없이 렌더되는 오버레이에는 상속되지 않던 문제.
+- Android `drawable-night` + `values-night` 스타일, iOS `Splash.imageset` dark appearance variant 추가(`e741d0d`) — 라이트 스플래시 PNG를 "그라데이션 위치 보존 픽셀 리컬러"로 다크 팔레트로 변환(재크롭 없음, 콘텐츠 비율 byte-identical).
+- PR #115 fast-forward 머지 (`chore/capacitor-init`).
+
+---
+
+## 2026-08-10 — 다크모드 CSS 프로덕션 미배포 발견·수정 (PR #117)
+
+- 실기기 다크모드 콜드 스타트에서 `NativeBootOverlay` fade-out 구간(~0.6초)에 라이트 톤이 짧게 노출되는 현상을 발견해 진단. 단계적으로 CSS 특이성 충돌·`z-index:-1` 페인팅 순서·WKWebView 네이티브 배경색 미설정을 후보로 조사했으나, 최종 원인은 훨씬 단순했다: 다크 CSS 수정(`d3f6be9`, PR #115)이 `chore/capacitor-init`에만 머지돼 있었고 **프로덕션(`main`, Vercel)에는 배포된 적이 없었음**. `capacitor.config.ts`의 `server.url`이 프로덕션 URL을 가리키므로, 실기기 테스트는 로컬 소스 수정과 무관하게 항상 구버전 CSS로 실행되고 있었다.
+- `d3f6be9` 한 커밋만 cherry-pick해 `main` 기준 새 브랜치(`feature/native-boot-overlay-dark-web`)로 분리(네이티브 전용 변경은 의도적으로 제외), PR #117 squash 머지 → Vercel 프로덕션 재배포(`success` 확인).
+- 재검증: 방어적으로 준비해뒀던 네이티브 WKWebView 배경색 수정(`BootBridgeViewController`, `UITraitCollection` 기반 다크/라이트 동적 배경)을 **적용하지 않은 상태**로 실기기 150프레임 고속 연속 캡처(~27.5초, 네이티브 스플래시→오버레이→fade-out→대시보드 전 구간) 결과 라이트 톤 미검출 — 배포 갭이 근본 원인이었고 네이티브 수정은 불필요하다는 결론. 관련 미커밋 변경사항(`BootBridgeViewController.swift`·`Main.storyboard`·`project.pbxproj` 수정분)은 최종 폐기(260811).
+
+---
+
+## 2026-08-11 — iOS AppIcon 다크모드 variant 병합 (PR #116)
+
+- `AppIcon.appiconset/Contents.json`에 dark luminosity appearance 항목 추가(`26681cd`) + `ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS` 빌드 세팅 추가(`9f8f443`) — 이 세팅이 없으면 `Contents.json`에 dark variant를 선언해도 Xcode가 컴파일된 `Assets.car`에서 제거해버림(`xcrun assetutil --info`로 dark rendition 존재 확인).
+- Home Screen 아이콘이 다크모드에서도 라이트로 보이는 잔여 증상은 앱 코드 문제가 아니라, iOS 18+ "홈 화면 아이콘 모양"이 시스템 다크모드와 **별개의 사용자 Settings 토글**이라는 것으로 확인 — 앱이 강제할 수 없는 영역.
+- 별개로 관찰된 앱 실행 아이콘-줌 전환(SpringBoard 런치 애니메이션) 중 "하트만 있고 타이틀 없는" 라이트 톤 짧은 노출은, `Splash.imageset`과는 다른 시스템 전환 단계에서 AppIcon 어피어런스 variant를 반영하지 못하는 iOS 플랫폼 제약으로 추정되나 코드 레벨로 확정·수정하지 못함 — 오픈 이슈로 남김.
+- PR #116 fast-forward 머지(`chore/capacitor-init`, `9f8f443`), `feature/dark-app-icon` 브랜치 정리.

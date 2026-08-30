@@ -1,56 +1,64 @@
 # CURRENT_STATE.md
 
-> **마지막 업데이트: 2026-08-05**
+> **마지막 업데이트: 2026-08-11**
 
 ## 현재 단계
-유지보수 / 점진적 UX 개선 단계 + Capacitor 네이티브 앱 초기화 진행 중.
+유지보수 / 점진적 UX 개선 단계 + Capacitor 네이티브 앱 다크모드 스플래시/아이콘 작업 마무리 단계.
 
 ## 현재 한 줄 요약
 자동화 테스트·CI 도입(PR #91) + P2 리팩터 배치(PR #93~95: dark/hover/focus 정합화, 추천위저드
 히스토리 공통화, 폼-API 검증 정합화) + `/list` 다녀온 곳 정렬 보정(PR #99) + 네이밍 용어 매핑
-SKILL.md 반영(PR #100) + 기술 백로그 그룹 1·3 진단·처리(PR #101·#103: dark hover 진단 종결,
-카드 그리드 의도된 예외 문서화, 정보 뱃지 spacing 토큰화) 모두 병합 완료. 이어서 `.mealBadge`
-텍스트 색 대비 보정(PR #105) + Primary·그 외 액션 버튼 전수조사 2회로 액션 버튼 높이를 Tier
-A(40px)/Tier B(36px) 두 단계로 통일(PR #106) 병합 완료. 사용자 스크린샷 관찰로 "가보고 싶은
-곳으로 되돌리기" 확인 다이얼로그가 4곳 중 1곳(ActivityDetail)에만 있던 불일치를 발견·진단해
-`RevertConfirmDialog` 공유 컴포넌트로 통일(PR #108), 되돌리기 patch도 4곳 모두 필드 보존형으로
-정정 병합 완료, main 기준 build PASS. 상세 → CHANGELOG 2026-08-01. 이어서 Capacitor 8.x
-iOS/Android 네이티브 앱 셸 초기화 + 브랜드 아이콘/스플래시 반영을 `chore/capacitor-init`
-브랜치에서 완료, 실기기 확인 후 머지 예정. 상세 → CHANGELOG 2026-08-05.
+SKILL.md 반영(PR #100) + 기술 백로그 그룹 1·3 진단·처리(PR #101·#103) + `.mealBadge` 대비 보정
+(PR #105) + 액션 버튼 Tier A/B 통일(PR #106) + 되돌리기 확인 다이얼로그 4곳 통일(PR #108) 모두
+병합 완료 (상세 → CHANGELOG 2026-07-29~2026-08-01). 이어서 `chore/capacitor-init` 브랜치에서
+Capacitor 8.x iOS/Android 네이티브 앱 셸 초기화(PR #111·#112) → 네이티브 부팅 스플래시 오버레이
+도입(PR #113·#114) → 스플래시 콘텐츠 비율 실측 보정 + 다크모드 지원(PR #115) → 다크 CSS가
+`chore/capacitor-init`에만 머지되고 프로덕션엔 배포된 적이 없었던 갭을 발견해 별도 cherry-pick
+PR #117로 프로덕션 재배포 → iOS AppIcon 다크모드 variant 병합(PR #116)까지 순차 완료. 상세 →
+CHANGELOG 2026-08-07~2026-08-11.
 
 ## 브랜치 상태
-- `chore/capacitor-init` — Capacitor 네이티브 셸 초기화·아이콘/스플래시 반영 완료, 실기기 확인 후 PR 예정
-- main 기준 build PASS (PR #108 `70b7d09` 기준)
+- `chore/capacitor-init` — PR #111~#116 모두 병합 완료(23 커밋 `main` 대비 앞섬). `main`으로의
+  최종 머지는 아직 진행 안 함 — 사용자 확인 후 진행 예정
+- main 기준 build PASS (PR #117 `main` 반영분 포함)
 
 ## 최근 구현 완료
 - 자동화 테스트·CI, dark/hover/focus 정합화, 추천위저드 History/URL 동기화 공통 훅, 폼-API
   입력 검증 공유 → 상세 CHANGELOG 2026-07-29. 전체 누적 기능 목록은 PROJECT_CONTEXT §5 참조
-- `/list` 다녀온 곳 정렬을 방문일·최종수정일 기준으로 보정(PR #99), 코드 식별자/노출 라벨 네이밍
-  용어 매핑을 SKILL.md에도 pointer로 추가(PR #100), 기술 백로그 그룹 1 진단·종결 — dead
-  `dark:` 클래스 완전 제거·SKILL.md 정정(PR #101) → 상세 CHANGELOG 2026-07-30
-- 기술 백로그 그룹 3 실측 4건(위저드 h1=stale 종결, `/list` prefetch=SKILL §12 확정 규칙과 충돌해
-  보류) + 카드 그리드 의도된 예외 문서화·spacing 토큰화 2건 PR #103 squash 머지(`a89817e`) →
+- `/list` 다녀온 곳 정렬 보정(PR #99), 네이밍 용어 매핑 SKILL.md 반영(PR #100), 기술 백로그
+  그룹 1 진단·종결(PR #101) → 상세 CHANGELOG 2026-07-30
+- 기술 백로그 그룹 3 실측 4건 + 카드 그리드 의도된 예외 문서화·spacing 토큰화(PR #103) →
   상세 CHANGELOG 2026-07-30
-- `.mealBadge` 텍스트 색을 `--s-sub`→`--s-ink`로 승격해 같은 화면 `DetailRow` 값과 대비 위계를
-  맞춤(PR #105), Primary(보라) 버튼 15곳 + 그 외 액션 버튼 전수조사 2회를 근거로 액션 버튼 높이를
-  Tier A(40px, 화면/다이얼로그 풀폭 핵심 액션)/Tier B(36px, 인라인·컨텍스트 보조 액션) 두 단계로
-  통일, 48px였던 4개 지점 정렬 + SKILL §4-A 전면 재작성(PR #106) → 상세 CHANGELOG 2026-07-31
-- 되돌리기 확인 다이얼로그 4곳 통일(PR #108) — ActivityDetail에만 있던 다이얼로그를
-  `RevertConfirmDialog` 공유 컴포넌트로 추출해 ActivityCard/PlaceDetail/PlaceCard ⋮ 메뉴까지 적용,
-  patch를 4곳 모두 `{ status: 'wishlist' }`만 전송하도록 정정(별점/후기/방문일 보존, 재전환 시
-  `VisitedDialog` 프리필). 다이얼로그 문구 "방문기록(방문일, 별점, 후기)이 모두 삭제됩니다."로
-  확정. SKILL.md §4-A·§4-B·§10-H·§12-A 동시 갱신 → 상세 CHANGELOG 2026-08-01
+- `.mealBadge` 텍스트 색 대비 보정(PR #105), 액션 버튼 높이 Tier A(40px)/Tier B(36px) 통일
+  (PR #106) → 상세 CHANGELOG 2026-07-31
+- 되돌리기 확인 다이얼로그 4곳 통일(PR #108) → 상세 CHANGELOG 2026-08-01
 - Capacitor 8.x iOS/Android 네이티브 앱 셸 초기화, 브랜드 하트 아이콘·스플래시 반영, iOS 아이콘
-  배경색 수정(`chore/capacitor-init`, 미머지) → 상세 CHANGELOG 2026-08-05
+  배경색 수정(`013e3db`~`09f2183`) → 상세 CHANGELOG 2026-08-05
+- iOS safe-area 토스트/로더 수정(PR #111), Android 릴리즈 서명 설정(PR #112) →
+  상세 CHANGELOG 2026-08-07
+- 네이티브 부팅 스플래시 오버레이(`NativeBootOverlay`) 도입, Android SplashScreen 테마 버그 수정,
+  하트+타이틀 전용 스플래시 아이콘(PR #113·#114) → 상세 CHANGELOG 2026-08-09
+- 스플래시 콘텐츠 폭 실측 재보정(iOS 16.39%/Android 56.4%), 오버레이·네이티브 스플래시 다크모드
+  지원(PR #115) → 상세 CHANGELOG 2026-08-09 v2
+- 다크 CSS 프로덕션 미배포 갭 발견·cherry-pick 재배포(PR #117), WKWebView 네이티브 배경 수정은
+  불필요 판정 → 상세 CHANGELOG 2026-08-10
+- iOS AppIcon 다크모드 variant 병합(PR #116) → 상세 CHANGELOG 2026-08-11
 
 ## 배포 상태
 - 플랫폼: Vercel
 - URL: `https://today-date-seven.vercel.app`
-- 현재 브랜치: `main` (PR #108 기준 `70b7d09`)
+- 현재 브랜치: `main` (PR #117 반영 기준)
 
 ## 진행 중 / 남은 작업
-- **`chore/capacitor-init` 머지 전 실기기 확인**: iPhone 홈 화면 아이콘(라벤더 배경·하트)·스플래시
-  실사용 확인, Android 실기기 확인(Galaxy 미확보로 보류 중)
+- **`chore/capacitor-init` → `main` 최종 머지**: PR #111~#116 모두 병합 완료 상태지만, 전체
+  Capacitor 네이티브 셸 자체를 `main`(프로덕션 배포 소스)에 반영할지는 아직 사용자 확인 전 —
+  머지 시점·방식(ff-only/squash)은 별도로 지시받아 진행할 것
+- **오픈 이슈(코드 레벨 미해결)**: 앱 실행 시 SpringBoard 아이콘-줌 전환 중 "하트만 있고 타이틀
+  없는" 라이트 톤이 짧게 노출되는 현상 — iOS 플랫폼이 그 전환 단계에서 AppIcon 다크 variant를
+  반영하지 못하는 것으로 추정되나 확정된 해결책 없음(CHANGELOG 2026-08-11)
+- **Home Screen 아이콘 다크모드 반영 여부는 사용자 Settings 토글에 의존**: iOS 18+ "홈 화면
+  아이콘 모양"이 시스템 다크모드와 별개 설정이라 앱이 강제할 수 없음 — 문의 들어오면 안내용으로
+  참고
 - PR #108(되돌리기 확인 다이얼로그 통일) 브라우저 실행 검증 — 4개 지점 모두 다이얼로그 노출→확인
   →재전환 시 기존 별점/후기/방문일 프리필까지의 실사용 흐름. `.env.local`(Supabase) 부재로 세션
   환경에서 미실행, tsc/lint/build PASS + 코드 리뷰로 대체 확인함
@@ -63,6 +71,6 @@ iOS/Android 네이티브 앱 셸 초기화 + 브랜드 아이콘/스플래시 �
 - 다이닝 위저드 "상세 화면 → 추천 결과로 복귀" 실제 왕복 E2E — `/places/[id]` 상세는 서버
   컴포넌트가 Supabase를 직접 조회해 DB 없이는 자동화 불가, 카드 returnTo·결과 캐시 복원
   검증으로 대체(실제 왕복은 기존 아이폰 실기기 수동 검증으로 확인됨)
-- Android 스플래시 하트 실기기 홈 화면 확인, Galaxy 실기기 QA — 하드웨어 미확보로 보류
+- Android 스플래시 실기기 홈 화면 확인(다크모드 포함), Galaxy 실기기 QA — 하드웨어 미확보로 보류
 - `ActivityDetail.tsx`/`PlaceDetail.tsx`의 `onSaveInfo` 정규화 정리(PR #95의 `emptyToNull`
   재사용 여지) — PR #95 범위(ActivityForm/PlaceForm) 밖이라 의도적으로 보류

@@ -6,8 +6,11 @@
 -- 모든 검사를 하나의 UNION ALL 쿼리로 묶어 한 화면에 나오게 했다.
 -- pass 컬럼이 전부 true 여야 한다.
 --
--- 주의: 이 파일은 의도적으로 이메일·패스코드 해시 등 민감 값을 조회하지 않는다.
---       존재 여부(boolean)와 건수만 확인한다.
+-- 주의: 이 파일은 이메일·패스코드 해시 등 민감 값을 절대 출력하지 않는다.
+--       민감 값이 걸린 검사(⑩ ⑫ ⑬)는 DB 안에서 비교만 수행하고 그 결과
+--       boolean 만 actual 컬럼에 내보낸다 — 원문은 결과 집합에 등장하지 않는다.
+--       actual 이 null 이면 검사가 실제로 돌았는지 눈으로 확인할 수 없으므로,
+--       모든 항목이 계산된 값을 actual 에 채운다.
 -- ============================================================
 
 select * from (
@@ -83,14 +86,14 @@ select * from (
   -- ⑥ app_config → couples 인증 상태 복제 일치 (해시 값 자체는 출력하지 않음)
   union all
   select 10,
-         'app_config → couples 인증 상태 일치',
-         null,
+         'passcode_hash 일치 — app_config ↔ couples',
+         -- 해시 원문은 절대 출력하지 않는다. 비교 결과 boolean 만 text 로 내보낸다.
+         -- is not distinct from: 양쪽이 모두 NULL 인 경우도 "일치"로 본다.
+         (select (a.passcode_hash is not distinct from c.passcode_hash)::text
+            from app_config a cross join couples c where a.id = 1),
          'true',
          (select a.passcode_hash is not distinct from c.passcode_hash
-             and a.failed_attempts = c.failed_attempts
-             and a.session_version = c.session_version
-             and a.locked_until is not distinct from c.locked_until
-          from app_config a cross join couples c where a.id = 1)
+            from app_config a cross join couples c where a.id = 1)
 
   -- ⑦ app_config 무손상 (순수 additive 확인)
   union all
@@ -101,16 +104,22 @@ select * from (
          (select count(*) from app_config) = 1
   union all
   select 12,
-         'app_config passcode_hash 보존 (값 미출력)',
-         null,
+         'recovery_email 일치 — app_config ↔ users.email',
+         -- 이메일 원문은 절대 출력하지 않는다. 비교 결과 boolean 만 text 로 내보낸다.
+         (select (a.recovery_email is not distinct from u.email)::text
+            from app_config a cross join users u where a.id = 1),
          'true',
-         (select passcode_hash is not null from app_config where id = 1)
+         (select a.recovery_email is not distinct from u.email
+            from app_config a cross join users u where a.id = 1)
   union all
   select 13,
-         'app_config recovery_email 보존 (값 미출력)',
-         null,
+         'app_config 민감값 보존 — passcode_hash·recovery_email NOT NULL',
+         -- 값이 아니라 "비어있지 않다"는 사실만 boolean 으로 출력한다.
+         (select (passcode_hash is not null and recovery_email is not null)::text
+            from app_config where id = 1),
          'true',
-         (select recovery_email is not null from app_config where id = 1)
+         (select passcode_hash is not null and recovery_email is not null
+            from app_config where id = 1)
 
   -- ⑧ email_token_purpose enum 에 invite_partner 존재
   union all
@@ -163,5 +172,49 @@ select * from (
          '0',
          (select count(*) from pg_policies
            where schemaname = 'public' and tablename in ('couples', 'users')) = 0
+
+  -- ⑪ 비민감 인증 필드 복제 일치 — 이 값들은 민감하지 않으므로 실측값을 그대로 보여준다.
+  --    (원래 ⑩ 에 묶여 있던 검사를 분리했다. ⑩ 은 해시 일치 전용)
+  union all
+  select 18,
+         'failed_attempts 일치 — app_config ↔ couples',
+         (select a.failed_attempts || ' == ' || c.failed_attempts
+            from app_config a cross join couples c where a.id = 1),
+         '일치',
+         (select a.failed_attempts = c.failed_attempts
+            from app_config a cross join couples c where a.id = 1)
+  union all
+  select 19,
+         'session_version 일치 — app_config ↔ couples',
+         (select a.session_version || ' == ' || c.session_version
+            from app_config a cross join couples c where a.id = 1),
+         '일치',
+         (select a.session_version = c.session_version
+            from app_config a cross join couples c where a.id = 1)
+  union all
+  select 20,
+         'locked_until 일치 — app_config ↔ couples',
+         (select coalesce(a.locked_until::text, 'NULL') || ' == '
+              || coalesce(c.locked_until::text, 'NULL')
+            from app_config a cross join couples c where a.id = 1),
+         '일치',
+         (select a.locked_until is not distinct from c.locked_until
+            from app_config a cross join couples c where a.id = 1)
+  union all
+  select 21,
+         'created_at 승계 — app_config → couples',
+         (select (a.created_at = c.created_at)::text
+            from app_config a cross join couples c where a.id = 1),
+         'true',
+         (select a.created_at = c.created_at
+            from app_config a cross join couples c where a.id = 1)
+  union all
+  select 22,
+         'email_verified 승계 — app_config → users',
+         (select a.email_verified || ' == ' || u.email_verified
+            from app_config a cross join users u where a.id = 1),
+         '일치',
+         (select a.email_verified = u.email_verified
+            from app_config a cross join users u where a.id = 1)
 ) checks
 order by seq;

@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
 import { verifyToken, markTokenUsed } from '@/lib/auth/tokens'
-import { getSupabaseClient } from '@/lib/supabase/client'
+import { markUserEmailVerified } from '@/lib/auth/couple'
 
 interface Props {
   searchParams: Promise<{ token?: string }>
@@ -19,11 +19,11 @@ export default async function SetupVerifyPage({ searchParams }: Props) {
     redirect('/setup?error=invalid-token')
   }
 
-  const supabase = getSupabaseClient()
-  await supabase
-    .from('app_config')
-    .update({ email_verified: true })
-    .eq('id', 1)
+  const verified = await markUserEmailVerified(tokenRow.target_email)
+
+  if (!verified) {
+    redirect('/setup?error=invalid-token')
+  }
 
   await markTokenUsed(tokenRow.id)
 

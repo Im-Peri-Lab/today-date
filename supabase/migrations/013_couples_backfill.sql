@@ -128,16 +128,28 @@ begin
       v_a_null, v_p_null, v_r_null;
   end if;
 
-  -- 모든 domain 행이 그 1개 커플을 가리키는지 (엉뚱한 uuid 가 섞이지 않았는지)
-  select count(*) into v_orphan
-  from (
-    select couple_id from activities
-    union all select couple_id from places
-    union all select couple_id from recommendations_log
-  ) d
-  where d.couple_id not in (select id from couples);
+  -- 모든 domain 행이 실제 존재하는 couples 를 가리키는지 (엉뚱한 uuid 가 섞이지 않았는지).
+  -- 테이블별 개별 검사로 작성한다 — 012 에서 VALUES/서브쿼리 조합 구문이
+  -- Supabase SQL Editor 에서 실패한 이력이 있어 위험 패턴을 쓰지 않는다.
+  select count(*) into v_orphan from activities a
+  where a.couple_id is not null
+    and not exists (select 1 from couples c where c.id = a.couple_id);
   if v_orphan > 0 then
-    raise exception '검증 실패: couples 에 없는 couple_id 를 가진 행이 %건입니다.', v_orphan;
+    raise exception '검증 실패: activities 에 couples 에 없는 couple_id 가 %건입니다.', v_orphan;
+  end if;
+
+  select count(*) into v_orphan from places p
+  where p.couple_id is not null
+    and not exists (select 1 from couples c where c.id = p.couple_id);
+  if v_orphan > 0 then
+    raise exception '검증 실패: places 에 couples 에 없는 couple_id 가 %건입니다.', v_orphan;
+  end if;
+
+  select count(*) into v_orphan from recommendations_log r
+  where r.couple_id is not null
+    and not exists (select 1 from couples c where c.id = r.couple_id);
+  if v_orphan > 0 then
+    raise exception '검증 실패: recommendations_log 에 couples 에 없는 couple_id 가 %건입니다.', v_orphan;
   end if;
 
   -- users 가 그 커플에 연결됐는지

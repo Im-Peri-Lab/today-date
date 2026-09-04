@@ -118,10 +118,17 @@ alter table public.users   enable row level security;
 
 -- ──────────────────────────────────────────────
 -- 6. 스키마 적용 검증 — 하나라도 어긋나면 중단(롤백)한다.
+--
+--    검사는 전부 변수 없는 `if not exists (...) then raise exception` 형태로만
+--    작성한다. 초기 버전은 `select string_agg(t, ', ') into missing
+--    from (values (...)) as v(t) where not exists (...)` 로 누락 목록을 모아
+--    한 번에 보고했는데, Supabase SQL Editor 에서 이 구문이
+--    `ERROR: 42P01: relation "missing" does not exist` 로 실패했다.
+--    (009~011 이 쓰는 `select count(*) into cnt from <테이블>` 패턴은 이 DB 에서
+--     이미 정상 적용된 이력이 있으므로 INTO 자체가 아니라 VALUES 리스트 조합이 원인)
+--    개별 검사는 어떤 객체가 빠졌는지도 더 정확히 알려준다.
 -- ──────────────────────────────────────────────
 do $$
-declare
-  missing text;
 begin
   -- 신규 테이블 2종
   if not exists (select 1 from information_schema.tables
@@ -143,14 +150,20 @@ begin
   end if;
 
   -- domain couple_id 컬럼 3종
-  select string_agg(t, ', ') into missing
-  from (values ('activities'), ('places'), ('recommendations_log')) as v(t)
-  where not exists (
-    select 1 from information_schema.columns
-    where table_schema = 'public' and table_name::text = v.t and column_name = 'couple_id'
-  );
-  if missing is not null then
-    raise exception 'couple_id 컬럼이 누락된 테이블: %', missing;
+  if not exists (select 1 from information_schema.columns
+                 where table_schema = 'public' and table_name = 'activities'
+                   and column_name = 'couple_id') then
+    raise exception 'activities.couple_id 컬럼이 생성되지 않았습니다.';
+  end if;
+  if not exists (select 1 from information_schema.columns
+                 where table_schema = 'public' and table_name = 'places'
+                   and column_name = 'couple_id') then
+    raise exception 'places.couple_id 컬럼이 생성되지 않았습니다.';
+  end if;
+  if not exists (select 1 from information_schema.columns
+                 where table_schema = 'public' and table_name = 'recommendations_log'
+                   and column_name = 'couple_id') then
+    raise exception 'recommendations_log.couple_id 컬럼이 생성되지 않았습니다.';
   end if;
 
   -- app_config 무손상 확인 — 이번 작업은 순수 additive 여야 한다.
@@ -158,15 +171,20 @@ begin
     raise exception 'app_config 단일 row 가 사라졌습니다. 이 마이그레이션은 app_config 를 건드리지 않아야 합니다.';
   end if;
 
-  select string_agg(c, ', ') into missing
-  from (values ('passcode_hash'), ('recovery_email'), ('email_verified'),
-               ('failed_attempts'), ('locked_until'), ('session_version')) as v(c)
-  where not exists (
-    select 1 from information_schema.columns
-    where table_schema = 'public' and table_name = 'app_config' and column_name::text = v.c
-  );
-  if missing is not null then
-    raise exception 'app_config 에서 컬럼이 사라졌습니다: %', missing;
+  if not exists (select 1 from information_schema.columns
+                 where table_schema = 'public' and table_name = 'app_config'
+                   and column_name = 'passcode_hash') then
+    raise exception 'app_config.passcode_hash 컬럼이 사라졌습니다.';
+  end if;
+  if not exists (select 1 from information_schema.columns
+                 where table_schema = 'public' and table_name = 'app_config'
+                   and column_name = 'recovery_email') then
+    raise exception 'app_config.recovery_email 컬럼이 사라졌습니다.';
+  end if;
+  if not exists (select 1 from information_schema.columns
+                 where table_schema = 'public' and table_name = 'app_config'
+                   and column_name = 'session_version') then
+    raise exception 'app_config.session_version 컬럼이 사라졌습니다.';
   end if;
 
   raise notice '012 스키마 검증 통과: couples/users 생성, invite_partner 추가, couple_id 3개 테이블, app_config 무손상.';

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { getSupabaseClient } from '@/lib/supabase/client'
+import { requireCoupleScope } from '@/lib/auth/coupleScope'
 import { readJsonBody, zodErrorResponse } from '@/lib/api/validation'
 import {
   apiTitleSchema,
@@ -52,10 +53,14 @@ export async function GET(req: NextRequest) {
     const { status, category_id, duration_bucket, time_of_day, location_type, q } =
       parsedQuery.data
 
+    const scope = await requireCoupleScope()
+    if (!scope.ok) return scope.response
+
     const supabase = getSupabaseClient()
     let query = supabase
       .from('activities')
       .select('*, category:activity_categories(id,name,icon,color)')
+      .eq('couple_id', scope.coupleId)
       .eq('status', status)
 
     // 다녀온 곳: 다녀온 날짜 최신순, 같으면 다녀온 곳으로 바꾼(마지막 수정) 날짜 최신순.
@@ -95,8 +100,14 @@ export async function POST(req: NextRequest) {
     const result = createSchema.safeParse(bodyResult.body)
     if (!result.success) return zodErrorResponse(result.error)
 
+    const scope = await requireCoupleScope()
+    if (!scope.ok) return scope.response
+
     const supabase = getSupabaseClient()
-    const payload = { ...result.data }
+    // couple_id 는 세션값으로만 정한다. createSchema 에 couple_id 가 없어 Zod 가
+    // 클라이언트가 보낸 값을 이미 떨어내지만, 소유자를 세션에서 채운다는 사실이
+    // 스키마 동작에 의존해 보이지 않게 여기서 한 번 더 명시한다.
+    const payload = { ...result.data, couple_id: scope.coupleId }
 
     if (!payload.category_id) {
       payload.category_id = await getDefaultCategoryId(supabase)

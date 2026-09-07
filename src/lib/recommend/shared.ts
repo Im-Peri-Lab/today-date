@@ -6,15 +6,20 @@ const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000
  * 추천 로그에서 두 종류의 id 집합을 구한다.
  * - recentIds: 최근 30일 이내 추천된 항목 (다양성 패널티용)
  * - everIds: 한 번이라도 추천된 항목 (새 항목 보너스용)
+ *
+ * coupleId 로 로그를 좁힌다 — 다른 커플의 추천 이력이 섞이면 점수가 오염되고,
+ * 그 커플이 무엇을 추천받았는지가 우리 쪽 추천 순서로 간접 관측된다.
  */
 export async function recommendedIdSets(
   supabase: SupabaseClient,
-  track: 'activity' | 'place'
+  track: 'activity' | 'place',
+  coupleId: string
 ): Promise<{ recentIds: Set<string>; everIds: Set<string> }> {
   const since = new Date(Date.now() - THIRTY_DAYS_MS).toISOString()
   const { data } = await supabase
     .from('recommendations_log')
     .select('recommended_ids, created_at')
+    .eq('couple_id', coupleId)
     .eq('track', track)
 
   const recentIds = new Set<string>()

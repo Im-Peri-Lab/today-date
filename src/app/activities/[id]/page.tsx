@@ -14,11 +14,11 @@ export default async function ActivityDetailPage({
   searchParams: Promise<{ edit?: string; returnTo?: string }>
 }) {
   const session = await getSession()
-  if (!session.authenticated) redirect('/lock')
+  if (!session.authenticated || !session.couple_id) redirect('/lock')
   const { id } = await params
   const { edit, returnTo } = await searchParams
 
-  const activity = await getActivityById(id)
+  const activity = await getActivityById(id, session.couple_id)
   if (!activity) notFound()
 
   return (

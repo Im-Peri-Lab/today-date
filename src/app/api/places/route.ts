@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { getSupabaseClient } from '@/lib/supabase/client'
+import { requireCoupleScope } from '@/lib/auth/coupleScope'
 import { readJsonBody, zodErrorResponse } from '@/lib/api/validation'
 import {
   apiTitleSchema,
@@ -48,10 +49,14 @@ export async function GET(req: NextRequest) {
     if (!parsedQuery.success) return zodErrorResponse(parsedQuery.error)
     const { status, category_id, area, meal_time, q } = parsedQuery.data
 
+    const scope = await requireCoupleScope()
+    if (!scope.ok) return scope.response
+
     const supabase = getSupabaseClient()
     let query = supabase
       .from('places')
       .select('*, category:place_categories(id,name,icon,color)')
+      .eq('couple_id', scope.coupleId)
       .eq('status', status)
 
     // 다녀온 곳: 다녀온 날짜 최신순, 같으면 다녀온 곳으로 바꾼(마지막 수정) 날짜 최신순.
@@ -90,8 +95,12 @@ export async function POST(req: NextRequest) {
     const result = createSchema.safeParse(bodyResult.body)
     if (!result.success) return zodErrorResponse(result.error)
 
+    const scope = await requireCoupleScope()
+    if (!scope.ok) return scope.response
+
     const supabase = getSupabaseClient()
-    const payload = { ...result.data }
+    // 소유자는 세션값으로만 정한다 — 사유는 POST /api/activities 주석 참고.
+    const payload = { ...result.data, couple_id: scope.coupleId }
 
     if (!payload.category_id) {
       payload.category_id = await getDefaultCategoryId(supabase)

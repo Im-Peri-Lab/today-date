@@ -20,9 +20,11 @@ export interface ActivityRecommendResult {
   poolSize: number
 }
 
+/** coupleId 필수 — 후보 풀과 추천 이력 모두 세션 커플의 데이터로만 구성한다. */
 export async function recommendActivities(
   supabase: SupabaseClient,
-  input: ActivityRecommendInput
+  input: ActivityRecommendInput,
+  coupleId: string
 ): Promise<ActivityRecommendResult> {
   const statuses = input.include_visited ? ['wishlist', 'visited'] : ['wishlist']
   const tod: TimeOfDay = input.time_of_day ?? 'any'
@@ -31,6 +33,7 @@ export async function recommendActivities(
   const { data, error } = await supabase
     .from('activities')
     .select('*, category:activity_categories(id,name,icon,color)')
+    .eq('couple_id', coupleId)
     .in('status', statuses)
   if (error) throw error
 
@@ -60,7 +63,7 @@ export async function recommendActivities(
     return DURATION_RANK[a.duration_bucket] < targetRank
   })
 
-  const { recentIds, everIds } = await recommendedIdSets(supabase, 'activity')
+  const { recentIds, everIds } = await recommendedIdSets(supabase, 'activity', coupleId)
 
   const scored = pool.map((a) => {
     let score = 0

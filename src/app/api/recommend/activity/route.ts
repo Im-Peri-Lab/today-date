@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { getSupabaseClient } from '@/lib/supabase/client'
+import { requireCoupleScope } from '@/lib/auth/coupleScope'
 import { recommendActivities } from '@/lib/recommend/activity'
 
 export const dynamic = 'force-dynamic'
@@ -25,12 +26,20 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: message }, { status: 400 })
     }
 
+    const scope = await requireCoupleScope()
+    if (!scope.ok) return scope.response
+
     const supabase = getSupabaseClient()
-    const { recommendations, reason, poolSize } = await recommendActivities(supabase, result.data)
+    const { recommendations, reason, poolSize } = await recommendActivities(
+      supabase,
+      result.data,
+      scope.coupleId
+    )
 
     const { data: log } = await supabase
       .from('recommendations_log')
       .insert({
+        couple_id: scope.coupleId,
         track: 'activity',
         recommend_type: 'quick',
         input_filters: result.data,

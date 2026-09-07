@@ -1,7 +1,8 @@
 import { getSupabaseClient } from '@/lib/supabase/client'
 import type { DashboardStats } from '@/hooks/useDashboardStats'
 
-export async function getDashboardStats(): Promise<DashboardStats> {
+/** 홈 대시보드 집계 — 세션 커플의 행만 센다(다른 커플의 개수/제목이 섞이면 그 자체로 유출이다). */
+export async function getDashboardStats(coupleId: string): Promise<DashboardStats> {
   const supabase = getSupabaseClient()
   const countOpts = { count: 'exact' as const, head: true }
   const titleOpts = { ascending: false }
@@ -10,14 +11,14 @@ export async function getDashboardStats(): Promise<DashboardStats> {
     wishAct, wishPlc, visitedAct, visitedPlc,
     wishActTitles, wishPlcTitles, visitedActTitles, visitedPlcTitles,
   ] = await Promise.all([
-    supabase.from('activities').select('*', countOpts).eq('status', 'wishlist'),
-    supabase.from('places').select('*', countOpts).eq('status', 'wishlist'),
-    supabase.from('activities').select('*', countOpts).eq('status', 'visited'),
-    supabase.from('places').select('*', countOpts).eq('status', 'visited'),
-    supabase.from('activities').select('title').eq('status', 'wishlist').order('created_at', titleOpts).limit(2),
-    supabase.from('places').select('title').eq('status', 'wishlist').order('created_at', titleOpts).limit(2),
-    supabase.from('activities').select('title').eq('status', 'visited').order('created_at', titleOpts).limit(2),
-    supabase.from('places').select('title').eq('status', 'visited').order('created_at', titleOpts).limit(2),
+    supabase.from('activities').select('*', countOpts).eq('status', 'wishlist').eq('couple_id', coupleId),
+    supabase.from('places').select('*', countOpts).eq('status', 'wishlist').eq('couple_id', coupleId),
+    supabase.from('activities').select('*', countOpts).eq('status', 'visited').eq('couple_id', coupleId),
+    supabase.from('places').select('*', countOpts).eq('status', 'visited').eq('couple_id', coupleId),
+    supabase.from('activities').select('title').eq('status', 'wishlist').eq('couple_id', coupleId).order('created_at', titleOpts).limit(2),
+    supabase.from('places').select('title').eq('status', 'wishlist').eq('couple_id', coupleId).order('created_at', titleOpts).limit(2),
+    supabase.from('activities').select('title').eq('status', 'visited').eq('couple_id', coupleId).order('created_at', titleOpts).limit(2),
+    supabase.from('places').select('title').eq('status', 'visited').eq('couple_id', coupleId).order('created_at', titleOpts).limit(2),
   ])
 
   return {

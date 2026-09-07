@@ -28,7 +28,7 @@ jobs:
           NEXT_PUBLIC_APP_URL: http://127.0.0.1:3100
 
   e2e:
-    name: E2E (Playwright, API mocked — DB 불필요)
+    name: E2E (Playwright — 브라우저 mocking + PostgREST 스텁, 실 DB 불필요)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -38,4 +38,10 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npx playwright install --with-deps chromium
+      # 두 프로젝트를 모두 돌린다:
+      #   chromium     — /api/* 를 브라우저에서 mocking 하는 위저드 스펙
+      #   chromium-db  — PostgREST 스텁(e2e/stub/server.mjs)을 세워 실제 라우트를
+      #                  타는 커플 격리·인증 스펙. 실 Supabase 접속이 없으므로
+      #                  시크릿 없이 상시 실행된다(환경변수는 playwright.config.ts 의
+      #                  webServer.env 가 전부 명시한다).
       - run: npm run test:e2e

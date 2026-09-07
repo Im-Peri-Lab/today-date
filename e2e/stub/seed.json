@@ -1,0 +1,231 @@
+{
+  "_comment": [
+    "e2e 스텁 DB의 시드 데이터 — 스텁 서버(server.mjs)와 스펙(*.spec.ts)이 함께 읽는 단일 출처다.",
+    "JSON 으로 둔 이유: 스텁은 node 가 직접 실행하는 .mjs 이고 스펙은 Playwright 가 트랜스파일하는 .ts 라",
+    "두 언어에서 같은 파일을 읽을 수 있는 형식이 필요했다(tsconfig 의 resolveJsonModule 활성).",
+    "id 는 실제 스키마와 같은 uuid 형태로 고정한다 — 라우트 스키마가 uuid 를 요구하는 값들이 있다."
+  ],
+
+  "refs": {
+    "coupleA": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1",
+    "coupleB": "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbb1",
+    "userA": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2",
+    "userB": "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbb2",
+    "actCategory": "cccccccc-cccc-4ccc-8ccc-ccccccccccc1",
+    "plcCategory": "cccccccc-cccc-4ccc-8ccc-ccccccccccc2",
+
+    "actA1": "a1111111-1111-4111-8111-111111111111",
+    "actA2": "a1111111-1111-4111-8111-111111111112",
+    "actB1": "b1111111-1111-4111-8111-111111111111",
+    "plcA1": "a2222222-2222-4222-8222-222222222221",
+    "plcB1": "b2222222-2222-4222-8222-222222222221",
+
+    "titleActA1": "A커플 한강 자전거",
+    "titleActA2": "A커플 미술관 데이트",
+    "titleActB1": "B커플 비밀 캠핑",
+    "titlePlcA1": "A커플 연남동 파스타",
+    "titlePlcB1": "B커플 청담동 스시",
+
+    "signupEmail": "newcouple@example.com"
+  },
+
+  "scenarios": {
+    "twoCouples": {
+      "couples": [
+        {
+          "id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1",
+          "passcode_hash": "$2a$10$e2eStubPlaceholderHashNeverComparedAAAAAAAAAAAAAAAAAAAAAA",
+          "failed_attempts": 0,
+          "locked_until": null,
+          "session_version": 1,
+          "created_at": "2026-01-01T00:00:00.000Z",
+          "updated_at": "2026-01-01T00:00:00.000Z"
+        },
+        {
+          "id": "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbb1",
+          "passcode_hash": "$2a$10$e2eStubPlaceholderHashNeverComparedBBBBBBBBBBBBBBBBBBBBBB",
+          "failed_attempts": 0,
+          "locked_until": null,
+          "session_version": 1,
+          "created_at": "2026-01-02T00:00:00.000Z",
+          "updated_at": "2026-01-02T00:00:00.000Z"
+        }
+      ],
+      "users": [
+        {
+          "id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2",
+          "couple_id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1",
+          "email": "couple-a@example.com",
+          "email_verified": true,
+          "created_at": "2026-01-01T00:00:00.000Z"
+        },
+        {
+          "id": "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbb2",
+          "couple_id": "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbb1",
+          "email": "couple-b@example.com",
+          "email_verified": true,
+          "created_at": "2026-01-02T00:00:00.000Z"
+        }
+      ],
+      "activity_categories": [
+        {
+          "id": "cccccccc-cccc-4ccc-8ccc-ccccccccccc1",
+          "name": "미분류",
+          "icon": "Sparkles",
+          "color": "#a78bfa",
+          "sort_order": 0,
+          "is_default": true,
+          "is_hidden": false,
+          "created_at": "2026-01-01T00:00:00.000Z"
+        }
+      ],
+      "place_categories": [
+        {
+          "id": "cccccccc-cccc-4ccc-8ccc-ccccccccccc2",
+          "name": "미분류",
+          "icon": "Utensils",
+          "color": "#f472b6",
+          "sort_order": 0,
+          "is_default": true,
+          "is_hidden": false,
+          "created_at": "2026-01-01T00:00:00.000Z"
+        }
+      ],
+      "activities": [
+        {
+          "id": "a1111111-1111-4111-8111-111111111111",
+          "couple_id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1",
+          "title": "A커플 한강 자전거",
+          "category_id": "cccccccc-cccc-4ccc-8ccc-ccccccccccc1",
+          "duration_bucket": "half",
+          "time_of_day": "day",
+          "location_type": "outdoor",
+          "location": null,
+          "memo": null,
+          "reference_url": null,
+          "image_urls": [],
+          "status": "wishlist",
+          "visited_at": null,
+          "visited_end_at": null,
+          "rating": null,
+          "review_note": null,
+          "created_at": "2026-02-01T00:00:00.000Z",
+          "updated_at": "2026-02-01T00:00:00.000Z"
+        },
+        {
+          "id": "a1111111-1111-4111-8111-111111111112",
+          "couple_id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1",
+          "title": "A커플 미술관 데이트",
+          "category_id": "cccccccc-cccc-4ccc-8ccc-ccccccccccc1",
+          "duration_bucket": "half",
+          "time_of_day": "any",
+          "location_type": "indoor",
+          "location": null,
+          "memo": null,
+          "reference_url": null,
+          "image_urls": [],
+          "status": "wishlist",
+          "visited_at": null,
+          "visited_end_at": null,
+          "rating": null,
+          "review_note": null,
+          "created_at": "2026-02-02T00:00:00.000Z",
+          "updated_at": "2026-02-02T00:00:00.000Z"
+        },
+        {
+          "id": "b1111111-1111-4111-8111-111111111111",
+          "couple_id": "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbb1",
+          "title": "B커플 비밀 캠핑",
+          "category_id": "cccccccc-cccc-4ccc-8ccc-ccccccccccc1",
+          "duration_bucket": "overnight",
+          "time_of_day": "any",
+          "location_type": "outdoor",
+          "location": null,
+          "memo": "B커플만 아는 메모",
+          "reference_url": null,
+          "image_urls": [],
+          "status": "wishlist",
+          "visited_at": null,
+          "visited_end_at": null,
+          "rating": null,
+          "review_note": null,
+          "created_at": "2026-02-03T00:00:00.000Z",
+          "updated_at": "2026-02-03T00:00:00.000Z"
+        }
+      ],
+      "places": [
+        {
+          "id": "a2222222-2222-4222-8222-222222222221",
+          "couple_id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1",
+          "title": "A커플 연남동 파스타",
+          "category_id": "cccccccc-cccc-4ccc-8ccc-ccccccccccc2",
+          "area": "연남동",
+          "location": null,
+          "meal_times": ["lunch", "dinner"],
+          "memo": null,
+          "reference_url": null,
+          "image_urls": [],
+          "status": "wishlist",
+          "visited_at": null,
+          "rating": null,
+          "review_note": null,
+          "created_at": "2026-02-01T00:00:00.000Z",
+          "updated_at": "2026-02-01T00:00:00.000Z"
+        },
+        {
+          "id": "b2222222-2222-4222-8222-222222222221",
+          "couple_id": "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbb1",
+          "title": "B커플 청담동 스시",
+          "category_id": "cccccccc-cccc-4ccc-8ccc-ccccccccccc2",
+          "area": "청담동",
+          "location": null,
+          "meal_times": ["dinner"],
+          "memo": "B커플만 아는 메모",
+          "reference_url": null,
+          "image_urls": [],
+          "status": "wishlist",
+          "visited_at": null,
+          "rating": null,
+          "review_note": null,
+          "created_at": "2026-02-02T00:00:00.000Z",
+          "updated_at": "2026-02-02T00:00:00.000Z"
+        }
+      ],
+      "recommendations_log": [],
+      "email_tokens": []
+    },
+
+    "empty": {
+      "couples": [],
+      "users": [],
+      "activity_categories": [
+        {
+          "id": "cccccccc-cccc-4ccc-8ccc-ccccccccccc1",
+          "name": "미분류",
+          "icon": "Sparkles",
+          "color": "#a78bfa",
+          "sort_order": 0,
+          "is_default": true,
+          "is_hidden": false,
+          "created_at": "2026-01-01T00:00:00.000Z"
+        }
+      ],
+      "place_categories": [
+        {
+          "id": "cccccccc-cccc-4ccc-8ccc-ccccccccccc2",
+          "name": "미분류",
+          "icon": "Utensils",
+          "color": "#f472b6",
+          "sort_order": 0,
+          "is_default": true,
+          "is_hidden": false,
+          "created_at": "2026-01-01T00:00:00.000Z"
+        }
+      ],
+      "activities": [],
+      "places": [],
+      "recommendations_log": [],
+      "email_tokens": []
+    }
+  }
+}

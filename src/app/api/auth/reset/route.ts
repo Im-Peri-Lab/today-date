@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { getSupabaseClient } from '@/lib/supabase/client'
+import { getCoupleById, getUserByEmail } from '@/lib/auth/couple'
 import { hashPasscode } from '@/lib/auth/passcode'
 import { verifyToken, markTokenUsed } from '@/lib/auth/tokens'
 import { getSession } from '@/lib/auth/session'
@@ -32,27 +33,34 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: '유효하지 않거나 만료된 링크입니다.' }, { status: 400 })
     }
 
+    // 토큰의 이메일 → 사용자 → 그 사용자가 속한 커플. 재설정 대상이 커플 단위로 확정된다.
+    const user = await getUserByEmail(tokenRow.target_email)
+    const couple = user ? await getCoupleById(user.couple_id) : null
+
+    if (!couple) {
+      return NextResponse.json({ error: '유효하지 않거나 만료된 링크입니다.' }, { status: 400 })
+    }
+
     const hash = await hashPasscode(passcode)
     const supabase = getSupabaseClient()
 
-    // 현재 session_version 조회 후 +1
-    const { data: config } = await supabase
-      .from('app_config')
-      .select('session_version')
-      .eq('id', 1)
-      .single()
+    // session_version +1 → 이 커플의 기존 기기 세션이 모두 무효화된다.
+    const newVersion = couple.session_version + 1
 
-    const newVersion = (config?.session_version ?? 1) + 1
-
-    await supabase
-      .from('app_config')
+    const { error: updateError } = await supabase
+      .from('couples')
       .update({
         passcode_hash: hash,
         failed_attempts: 0,
         locked_until: null,
         session_version: newVersion,
       })
-      .eq('id', 1)
+      .eq('id', couple.id)
+
+    if (updateError) {
+      console.error('[reset] couple 갱신 실패:', updateError)
+      return NextResponse.json({ error: '서버 오류가 발생했습니다.' }, { status: 500 })
+    }
 
     await markTokenUsed(tokenRow.id)
 

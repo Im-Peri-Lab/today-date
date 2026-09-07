@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
-import { getSupabaseClient } from '@/lib/supabase/client'
+import { getUserByEmail } from '@/lib/auth/couple'
 import { createToken } from '@/lib/auth/tokens'
 import { sendEmail } from '@/lib/email/resend'
 import { getResetPasscodeTemplate } from '@/lib/email/templates'
@@ -19,16 +19,12 @@ export async function POST(req: NextRequest) {
     }
 
     const { email } = result.data
-    const supabase = getSupabaseClient()
 
-    const { data: config } = await supabase
-      .from('app_config')
-      .select('recovery_email, email_verified')
-      .eq('id', 1)
-      .single()
+    // 이메일로 사용자를 특정한다 — 커플이 여러 개가 되어도 그대로 동작한다.
+    const user = await getUserByEmail(email)
 
-    // 이메일 불일치여도 동일한 응답 (사용자 열거 방지)
-    if (config?.email_verified && config?.recovery_email === email) {
+    // 등록되지 않은 이메일이어도 동일한 응답 (사용자 열거 방지)
+    if (user?.email_verified) {
       const rawToken = await createToken('reset_passcode', email, 30)
       const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL}/reset?token=${rawToken}`
       await sendEmail({

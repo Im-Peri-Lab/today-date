@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
-import { getSupabaseClient } from '@/lib/supabase/client'
+import { markUserEmailVerified } from '@/lib/auth/couple'
 import { verifyToken, markTokenUsed } from '@/lib/auth/tokens'
 
 const schema = z.object({
@@ -22,11 +22,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: '유효하지 않거나 만료된 링크입니다.' }, { status: 400 })
     }
 
-    const supabase = getSupabaseClient()
-    await supabase
-      .from('app_config')
-      .update({ email_verified: true })
-      .eq('id', 1)
+    // 토큰이 가리키는 이메일의 users 행을 인증 완료로 표시한다.
+    const verified = await markUserEmailVerified(tokenRow.target_email)
+    if (!verified) {
+      return NextResponse.json({ error: '유효하지 않거나 만료된 링크입니다.' }, { status: 400 })
+    }
 
     await markTokenUsed(tokenRow.id)
 

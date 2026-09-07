@@ -18,9 +18,11 @@ export interface PlaceRecommendResult {
   poolSize: number
 }
 
+/** coupleId 필수 — 사유는 recommendActivities() 주석 참고. */
 export async function recommendPlaces(
   supabase: SupabaseClient,
-  input: PlaceRecommendInput
+  input: PlaceRecommendInput,
+  coupleId: string
 ): Promise<PlaceRecommendResult> {
   const statuses = input.include_visited ? ['wishlist', 'visited'] : ['wishlist']
   const categoryIds = input.category_ids ?? []
@@ -30,6 +32,7 @@ export async function recommendPlaces(
   const { data, error } = await supabase
     .from('places')
     .select('*, category:place_categories(id,name,icon,color)')
+    .eq('couple_id', coupleId)
     .in('status', statuses)
   if (error) throw error
 
@@ -50,7 +53,7 @@ export async function recommendPlaces(
     pool = pool.filter((p) => p.area && p.area.toLowerCase().includes(areaLower))
   }
 
-  const { recentIds, everIds } = await recommendedIdSets(supabase, 'place')
+  const { recentIds, everIds } = await recommendedIdSets(supabase, 'place', coupleId)
 
   const qLower = q.toLowerCase()
 

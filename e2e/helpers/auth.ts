@@ -1,4 +1,5 @@
-import { sealData } from 'iron-session'
+import { sealData, unsealData } from 'iron-session'
+import type { Page } from '@playwright/test'
 import { E2E_BASE_URL, E2E_SESSION_SECRET } from './env'
 
 /**
@@ -95,4 +96,28 @@ export async function legacySessionCookies() {
   })
 
   return [cookie('today-date-session', sealed), cookie('app-ready', '1', false)]
+}
+
+/**
+ * 서버가 실제로 발급한 세션 쿠키를 열어 본다.
+ *
+ * "패스코드 로그인 뒤 세션이 누구로 발급됐는가"는 화면으로는 확인할 수 없다 — 커플
+ * 데이터는 두 파트너가 똑같이 보이므로 화면이 같다. 초대 수락 직후의 첫 잠금해제가
+ * 먼저 만들어진 사용자가 아니라 방금 합류한 사용자로 발급되는지는 쿠키의 user_id 를
+ * 직접 봐야 판별된다. 서버와 같은 시크릿으로 unseal 하므로 서버가 읽는 것과 동일한 값이다.
+ *
+ * 쿠키가 없으면 null(로그아웃 상태), 복호화가 실패하면 예외를 그대로 낸다 —
+ * 조용히 null 이 되면 "세션이 없다"와 구분할 수 없다.
+ */
+export async function readSessionCookie(page: Page): Promise<{
+  authenticated?: boolean
+  user_id?: string
+  couple_id?: string
+  sessionVersion?: number
+} | null> {
+  const cookies = await page.context().cookies()
+  const raw = cookies.find((c) => c.name === 'today-date-session')?.value
+  if (!raw) return null
+
+  return unsealData(raw, { password: E2E_SESSION_SECRET })
 }

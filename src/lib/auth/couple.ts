@@ -61,8 +61,11 @@ export async function getCoupleById(coupleId: string): Promise<CoupleRow | null>
  * 이메일이 없어 커플을 특정할 단서가 없다. 0개거나 2개 이상이면 null 을 반환해
  * 호출부가 403 으로 닫히게 한다 — 커플을 임의로 골라 인증을 통과시키는 일은 없다.
  *
- * TODO(초대 기능 청크): 커플이 여러 개가 되는 시점에는 잠금 화면이 이메일을 함께
- * 받아 getUserByEmail() 로 커플을 특정해야 한다. 그때까지 이 함수가 유일한 경로다.
+ * 예외 경로: 초대를 수락한 직후의 첫 잠금해제는 커플을 특정할 단서가 있다 —
+ * /invite 가 발급한 pending-user 쿠키가 couple_id 를 담는다(src/lib/auth/pendingUser.ts).
+ * /api/auth/unlock 은 그 쿠키가 있으면 getCoupleById() 로 커플을 확정하고, 없을 때만
+ * 이 함수로 내려온다. 커플이 상시 여러 개가 되면(멀티 워크스페이스) 잠금 화면 자체가
+ * 이메일을 받아야 하지만, 그건 이 함수의 문제가 아니라 잠금 화면의 문제다.
  */
 export async function getSoleCouple(): Promise<CoupleRow | null> {
   const supabase = getSupabaseClient()
@@ -110,11 +113,46 @@ export async function getCoupleUsers(coupleId: string): Promise<CoupleUserRow[]>
  * 패스코드는 커플 단위로 하나이므로 잠금해제 요청만으로는 두 파트너 중 누가
  * 들어왔는지 알 수 없다. SOLO 에서는 후보가 1명이라 모호함이 없다.
  *
- * TODO(초대 기능 청크): PAIRED 에서 파트너를 구분하려면 잠금 화면이 이메일을
- * 받거나 파트너별 자격증명이 필요하다. 지금은 커플 단위 인증으로만 동작한다.
+ * PAIRED 에서는 후보가 2명이라 이 함수만으로는 모호하다. 초대 수락 직후의 첫
+ * 잠금해제는 pending-user 쿠키가 user_id 를 지정하므로 /api/auth/unlock 이 이 함수를
+ * 건너뛴다(src/lib/auth/pendingUser.ts). 그 뒤의 재로그인은 여전히 모호해 먼저 만들어진
+ * 사용자로 수렴한다 — 패스코드가 커플 단위 하나라는 설계의 결과이며, 데이터는 커플
+ * 단위로 공유되므로 기능상 차이는 없다. 파트너별 구분이 필요해지면 잠금 화면이
+ * 이메일을 받거나 파트너별 자격증명을 도입해야 한다.
  */
 export function pickSessionUser(users: CoupleUserRow[]): CoupleUserRow | null {
   return users.find((u) => u.email_verified) ?? null
+}
+
+/**
+ * 커플에 사용자 행을 추가한다(파트너 초대 수락).
+ *
+ * emailVerified=true 로 넣는 경로가 초대 수락이다 — 초대 링크를 열었다는 사실 자체가
+ * 그 메일함의 소유를 증명하므로 별도 인증 메일을 한 번 더 보내지 않는다.
+ *
+ * users.email 은 전역 unique 이므로, 초대 발송 시점의 중복 검사를 통과했더라도 그 사이
+ * 같은 이메일이 다른 커플에 등록됐다면 여기서 23505 로 실패한다. 그 경쟁 상황을
+ * null 로 알려 호출부가 "이미 가입된 이메일" 안내로 닫게 한다 — 사용자 행을 잘못된
+ * 커플에 붙이는 것보다 초대를 실패시키는 쪽이 안전하다.
+ */
+export async function addCoupleUser(
+  coupleId: string,
+  email: string,
+  emailVerified: boolean
+): Promise<CoupleUserRow | null> {
+  const supabase = getSupabaseClient()
+  const { data, error } = await supabase
+    .from('users')
+    .insert({ couple_id: coupleId, email, email_verified: emailVerified })
+    .select(USER_COLUMNS)
+    .single()
+
+  if (error) {
+    console.error('[addCoupleUser] users 삽입 실패:', error)
+    return null
+  }
+
+  return (data as CoupleUserRow | null) ?? null
 }
 
 /**

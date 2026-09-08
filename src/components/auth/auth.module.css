@@ -440,6 +440,53 @@
   opacity: 0.85;
 }
 
+/*
+ * 초대 링크로 들어온 사람에게 보여주는 안내 배너(§ src/app/lock/page.tsx).
+ *
+ * 잠금 배너(.lockNotice)와 같은 박스 형태를 공유하되 색만 다르다 — 안내/성공은 accent
+ * 계열, 실패는 잠금과 같은 경고 계열을 그대로 재사용한다(같은 자리에 뜨는 배너가
+ * 두 종류의 시각 언어를 새로 만들지 않도록).
+ * 값은 인증 화면 전용 팔레트다 — 이 파일의 다른 색들과 같은 계열로 직접 적는다
+ * (인증 화면은 screens.module.css 의 --s-* 스코프 밖이다, § 디자인 기준 §9-A).
+ */
+.inviteNotice {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  max-width: 18rem;
+  padding: 0.75rem 1.25rem;
+  border-radius: 0.875rem;
+  background: #f6f1ff;
+  border: 1px solid #ddd0fb;
+}
+
+.inviteNoticeError {
+  background: #fef2f2;
+  border-color: #fecdd3;
+}
+
+.inviteTitle {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  text-align: center;
+  color: #6d28d9;
+}
+
+.inviteDesc {
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  text-align: center;
+  color: #7c3aed;
+  opacity: 0.85;
+}
+
+.inviteNoticeError .inviteTitle,
+.inviteNoticeError .inviteDesc {
+  color: #be123c;
+}
+
 /* ── 다크 모드 (OS 설정, 인증 화면 한정) ───── */
 @media (prefers-color-scheme: dark) {
   .page {
@@ -581,5 +628,31 @@
   .heart,
   .heartPulse {
     animation: none;
+  }
+}
+
+/* 초대 안내 배너 다크 — 카드면(#221a38)보다 한 단계 밝은 보라/경고 틴트 */
+@media (prefers-color-scheme: dark) {
+  .inviteNotice {
+    background: #2c2440;
+    border-color: #4a3f63;
+  }
+
+  .inviteNoticeError {
+    background: #3a2029;
+    border-color: #5c2b39;
+  }
+
+  .inviteTitle {
+    color: #d8b4fe;
+  }
+
+  .inviteDesc {
+    color: #c084fc;
+  }
+
+  .inviteNoticeError .inviteTitle,
+  .inviteNoticeError .inviteDesc {
+    color: #fb7185;
   }
 }

@@ -28,6 +28,12 @@ function SetupFlow() {
   const [step, setStep] = useState<Step>(1)
   const [sentEmail, setSentEmail] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  /**
+   * 이 이메일로 대기 중인 파트너 초대가 있어서, 새 커플을 만들지 않고 초대를 다시 보낸
+   * 경우다(§ src/app/api/auth/setup/send-verify — `invite: true`). 2단계 안내가
+   * "이메일 인증"이 아니라 "초대 수락"을 가리켜야 하므로 문구를 갈라 쓴다.
+   */
+  const [isInviteResent, setIsInviteResent] = useState(false)
 
   // 패스코드 단계 상태 (step 3)
   const [passcodeSubStep, setPasscodeSubStep] = useState<PasscodeSubStep>('set')
@@ -62,6 +68,7 @@ function SetupFlow() {
         return
       }
       setSentEmail(data.email)
+      setIsInviteResent(json.invite === true)
       setStep(2)
     } finally {
       setIsLoading(false)
@@ -169,13 +176,22 @@ function SetupFlow() {
             </span>
             <p className={styles.cardTitle}>메일을 확인해 주세요</p>
             <p className={styles.cardDesc}>
-              <strong>{sentEmail}</strong>으로<br />인증 링크를 보냈습니다.
+              <strong>{sentEmail}</strong>으로<br />
+              {isInviteResent ? '초대 링크를 보냈습니다.' : '인증 링크를 보냈습니다.'}
             </p>
           </div>
-          <p className={styles.hint}>
-            메일함에서 <strong>이메일 인증하기</strong> 버튼을 눌러주세요.<br />
-            링크는 1시간 후 만료됩니다.
-          </p>
+          {isInviteResent ? (
+            <p className={styles.hint}>
+              파트너가 이미 초대를 보냈어요. 메일함에서 <strong>초대 수락하기</strong>{' '}
+              버튼을 누르면 파트너와 같은 공간에 합류합니다.<br />
+              링크는 24시간 후 만료됩니다.
+            </p>
+          ) : (
+            <p className={styles.hint}>
+              메일함에서 <strong>이메일 인증하기</strong> 버튼을 눌러주세요.<br />
+              링크는 1시간 후 만료됩니다.
+            </p>
+          )}
           <button
             type="button"
             className={styles.btnSecondary}

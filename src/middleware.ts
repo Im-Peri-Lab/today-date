@@ -10,10 +10,10 @@ const SETUP_PREFIXES = ['/setup', '/api/auth/setup']
 
 // 잠금 화면 관련 경로: 설정 완료 후에도 세션 없이 접근 가능
 //
-// TODO(초대 기능 청크): 초대 토큰이 붙은 URL(/invite?token=... 등)도 세션 없이 열려야 하므로
-//   여기에 경로를 추가하고, 토큰을 검증해 파트너 가입 플로우로 보내는 처리가 필요하다.
-//   이번 청크 범위 밖이라 아직 그런 경로가 없다.
-const OPEN_PREFIXES = ['/lock', '/forgot', '/reset', '/api/auth/']
+// /invite 는 파트너 초대 링크(/invite?token=...)다. 초대받은 사람은 아직 users 행도
+// 세션도 없으므로 반드시 인증 전에 열려야 한다. 토큰 검증과 수락 처리는 그 라우트
+// 핸들러가 직접 한다(src/app/invite/route.ts) — 미들웨어는 통과만 시킨다.
+const OPEN_PREFIXES = ['/lock', '/forgot', '/reset', '/invite', '/api/auth/']
 
 /** 세션을 신뢰할 수 없을 때: API 는 401, 화면은 /lock 으로 보내고 쿠키를 지운다. */
 function expireSession(req: NextRequest, pathname: string, message: string) {
@@ -85,9 +85,10 @@ export async function middleware(req: NextRequest) {
 
   // 보호 경로: 세션 검증
   //
-  // TODO(초대 기능 청크): PAIRED 전용 처리(파트너 구분, 초대 수락 화면으로의 유도)는
-  //   아래 세션 검증 뒤에 session.user_id 로 분기해 붙인다. 이번 청크에서는 상태 판별만
-  //   만들어 두고 SOLO 와 PAIRED 를 완전히 동일하게 취급한다.
+  // SOLO 와 PAIRED 를 여기서 구분하지 않는다 — 인증 상태(패스코드·잠금·session_version)는
+  // 커플 단위이고 데이터도 커플 단위로 공유되므로, 세션이 유효하면 두 파트너는 완전히
+  // 동등하다. 파트너를 구분해야 하는 유일한 지점은 초대 수락 직후의 첫 세션 발급이며,
+  // 그건 미들웨어가 아니라 /api/auth/unlock 이 pending-user 쿠키로 처리한다.
   const rawCookie = req.cookies.get('today-date-session')?.value
 
   if (!rawCookie) {

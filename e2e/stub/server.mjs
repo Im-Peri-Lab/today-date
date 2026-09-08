@@ -50,7 +50,10 @@ const COLUMN_DEFAULTS = {
   recommendations_log: { recommended_ids: [], selected_id: null },
   couples: { failed_attempts: 0, session_version: 1, passcode_hash: null, locked_until: null },
   users: { email_verified: false },
-  email_tokens: { used_at: null },
+  // 015 로 email_tokens 에 couple_id 가 추가됐다(invite_partner 전용 스코프, nullable).
+  // 기본값을 재현하지 않으면 초대 이외 목적으로 만든 토큰 행에 couple_id 키가 아예 없어
+  // `couple_id=is.null` 필터가 빗나간다(undefined ≠ null).
+  email_tokens: { used_at: null, couple_id: null },
 }
 
 /**
@@ -372,7 +375,14 @@ async function handleControl(req, res, url) {
   if (path === '/rows' && req.method === 'POST') {
     const body = await readBody(req)
     if (!body?.table || !body?.row) return sendError(res, 400, 'STUB', 'table 과 row 가 필요합니다.')
-    rowsOf(body.table).push({ id: randomUUID(), created_at: new Date().toISOString(), ...body.row })
+    // 컬럼 DEFAULT 를 REST INSERT 와 동일하게 적용한다 — 심는 행이 명시하지 않은 컬럼이
+    // 아예 없는 키로 남으면 `col=is.null` 필터가 빗나간다(undefined ≠ null).
+    rowsOf(body.table).push({
+      id: randomUUID(),
+      created_at: new Date().toISOString(),
+      ...COLUMN_DEFAULTS[body.table],
+      ...body.row,
+    })
     return sendJson(res, 200, { ok: true })
   }
 

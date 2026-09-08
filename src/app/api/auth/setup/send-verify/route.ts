@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { getSupabaseClient } from '@/lib/supabase/client'
 import { getWorkspaceStatus } from '@/lib/auth/couple'
-import { createToken } from '@/lib/auth/tokens'
+import { sendPartnerInvite } from '@/lib/auth/invite'
+import { createToken, findPendingInvite } from '@/lib/auth/tokens'
 import { sendEmail } from '@/lib/email/resend'
 import { getVerifyEmailTemplate } from '@/lib/email/templates'
 
@@ -20,6 +21,48 @@ export async function POST(req: NextRequest) {
 
     const { email } = result.data
     const supabase = getSupabaseClient()
+
+    /**
+     * 대기 중인 파트너 초대가 있으면 새 커플을 만들지 않는다.
+     *
+     * 파트너가 초대 메일을 못 찾고 직접 가입을 시도하는 흐름이다. 여기서 그대로
+     * 진행하면 커플이 하나 더 생기고, 나중에 초대 링크를 눌러도 users.email 이
+     * 전역 unique 라 합류가 영구히 막힌다 — 되돌리려면 DB 를 손봐야 한다.
+     *
+     * 그래서 커플 생성 전에 이 검사를 먼저 한다(설정 완료 여부보다도 앞이다 —
+     * 초대는 이미 설정이 끝난 커플만 보낼 수 있으므로 아래 409 에 먼저 걸린다).
+     * 초대를 다시 발송해 초대 수락 플로우(/invite)로 이어준다: 원문 토큰은 메일함에만
+     * 있어 재전송이 불가능하므로 같은 커플·같은 이메일로 새 초대를 발급한다
+     * (sendPartnerInvite 가 기존 대기 초대를 폐기하므로 유효한 초대는 여전히 한 장).
+     *
+     * 응답에 invite: true 를 실어 화면이 "인증 메일" 대신 "초대 메일" 안내를 띄우게 한다.
+     *
+     * 트레이드오프: 이 분기는 "이 이메일로 대기 중인 초대가 있다"를 응답으로 드러낸다 —
+     * 이 라우트의 다른 경로가 지키는 사용자 열거 방지에서 벗어난다. 그 대가로 초대받은
+     * 사람이 왜 새 커플이 안 만들어지는지 알 수 있고, 실제로 합류할 수 있게 된다.
+     * 드러나는 사실은 "초대 대기 여부"뿐이고(가입 여부·패스코드·커플 정보는 아니다)
+     * 질의자가 그 이메일 주소를 이미 알고 있어야 하므로 열거 가치가 낮다고 판단했다.
+     */
+    const pendingInvite = await findPendingInvite(email)
+    if (pendingInvite?.couple_id) {
+      const resent = await sendPartnerInvite({
+        coupleId: pendingInvite.couple_id,
+        targetEmail: email,
+      })
+
+      if (!resent.ok) {
+        // already_registered — 초대는 대기 중인데 그 사이 그 이메일이 가입됐다.
+        // already_paired    — 초대한 커플이 다른 사람으로 이미 짝을 채웠다.
+        // 어느 쪽이든 이 초대로는 합류할 수 없다.
+        console.error('[send-verify] 대기 초대 재발송 실패:', resent.reason)
+        return NextResponse.json(
+          { error: '이 이메일로는 설정을 진행할 수 없습니다.' },
+          { status: 409 }
+        )
+      }
+
+      return NextResponse.json({ success: true, invite: true })
+    }
 
     const status = await getWorkspaceStatus()
 

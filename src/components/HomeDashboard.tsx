@@ -1,10 +1,11 @@
 'use client'
 
 import Link from 'next/link'
-import { Sparkles, MapPin, Check, ChevronRight } from 'lucide-react'
+import { Sparkles, MapPin, Check, ChevronRight, UserPlus } from 'lucide-react'
 import { HomeFab } from '@/components/HomeFab'
 import { PageHeader } from '@/components/PageHeader'
 import { useDashboardStats, type DashboardStats } from '@/hooks/useDashboardStats'
+import type { WorkspaceState } from '@/lib/auth/couple'
 import { STATUS_LABELS } from '@/lib/labels'
 import { cn } from '@/lib/utils'
 import styles from '@/components/screens.module.css'
@@ -119,8 +120,47 @@ function CtaCard({
   )
 }
 
+// ── 파트너 초대 진입 행 ──────────────────────────
+/**
+ * SOLO(멤버 1명) 상태에서만 보이는 초대 진입점.
+ *
+ * PAIRED 에서는 초대할 자리가 없으므로 아예 렌더하지 않는다 — 서버가 POST /api/auth/invite
+ * 를 409 로 막지만(§ lib/auth/invite.ts), 누를 수 있는 버튼을 남겨두면 눌러야 알 수 있는
+ * 실패가 된다. 상태는 서버 컴포넌트가 세션의 커플로 판별해 내려준다(§ app/(home)/page.tsx).
+ */
+function PartnerInviteSection() {
+  return (
+    <div>
+      <p className={styles.statSectionHeader}>파트너</p>
+      <div className={styles.statSectionCard}>
+        <Link href="/partner" className={styles.statRow}>
+          <div className={styles.statChipWrap}>
+            <div className={cn(styles.statChip, styles.statChipAccent)}>
+              <UserPlus strokeWidth={1.75} />
+            </div>
+          </div>
+          <div className={styles.statRowContent}>
+            <span className={styles.statRowTitle}>파트너 초대</span>
+            <span className={styles.statRowPreview}>
+              둘이 함께 위시리스트를 쌓아보세요
+            </span>
+          </div>
+          <ChevronRight className={styles.statRowChevron} strokeWidth={1.75} aria-hidden="true" />
+        </Link>
+      </div>
+    </div>
+  )
+}
+
 // ── HomeDashboard ────────────────────────────────
-export function HomeDashboard({ initialStats }: { initialStats?: DashboardStats }) {
+export function HomeDashboard({
+  initialStats,
+  workspaceState,
+}: {
+  initialStats?: DashboardStats
+  /** 커플을 특정할 수 없으면 null — 그때는 초대 진입점을 감춘다(§ PartnerInviteSection). */
+  workspaceState?: WorkspaceState | null
+}) {
   const { data } = useDashboardStats(initialStats)
 
   return (
@@ -179,6 +219,8 @@ export function HomeDashboard({ initialStats }: { initialStats?: DashboardStats 
             previewTitles={data?.visitedPlaceTitles ?? []}
           />
         </StatSection>
+
+        {workspaceState === 'SOLO' && <PartnerInviteSection />}
       </div>
 
       <HomeFab />

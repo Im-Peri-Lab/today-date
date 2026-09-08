@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation'
+import { deriveWorkspaceState, getCoupleById, getCoupleUsers } from '@/lib/auth/couple'
 import { getSession } from '@/lib/auth/session'
 import { getDashboardStats } from '@/lib/data/dashboard'
 import { HomeDashboard } from '@/components/HomeDashboard'
@@ -14,11 +15,23 @@ export default async function HomePage() {
     redirect('/lock')
   }
 
-  const initialStats = await getDashboardStats(session.couple_id)
+  /**
+   * 워크스페이스 상태는 세션의 커플로 판별한다(getWorkspaceStatus 의 "커플이 1개일 때만"
+   * 경로를 쓰지 않는다) — 커플이 여러 개가 되어도 홈은 항상 자기 커플의 상태를 본다.
+   * SOLO 일 때만 파트너 초대 진입점을 그린다(§ HomeDashboard).
+   */
+  const [initialStats, couple, users] = await Promise.all([
+    getDashboardStats(session.couple_id),
+    getCoupleById(session.couple_id),
+    getCoupleUsers(session.couple_id),
+  ])
 
   return (
     <main className={cn(styles.page, styles.pageHome)}>
-      <HomeDashboard initialStats={initialStats} />
+      <HomeDashboard
+        initialStats={initialStats}
+        workspaceState={deriveWorkspaceState(couple, users)}
+      />
     </main>
   )
 }

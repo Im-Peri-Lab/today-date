@@ -120,7 +120,7 @@ function CtaCard({
   )
 }
 
-// ── 파트너 초대 진입 카드 ────────────────────────
+// ── 파트너 초대 안내 배너 ────────────────────────
 /**
  * SOLO(멤버 1명) 상태에서만 보이는 초대 진입점.
  *
@@ -128,32 +128,27 @@ function CtaCard({
  * 를 409 로 막지만(§ lib/auth/invite.ts), 누를 수 있는 버튼을 남겨두면 눌러야 알 수 있는
  * 실패가 된다. 상태는 서버 컴포넌트가 세션의 커플로 판별해 내려준다(§ app/(home)/page.tsx).
  *
- * 통계 리스트(StatSection) 안의 한 행이 아니라 추천 CTA 바로 아래의 독립 카드다.
- * 성격이 다른 항목이기 때문이다 — 통계 행은 "쌓아둔 콘텐츠 보기"로 반복해서 누르는
- * 자리이고, 이 카드는 계정을 한 번 세팅하는 온보딩 액션이라 목록에 섞이면 콘텐츠처럼
- * 읽힌다. 카드 위계도 통계 카드(조연, 그림자 최약)가 아닌 CTA 계열 표면
- * (`card` + `cardInteractive`, 그림자 표준 + `gradIcon`)을 쓴다(§ 디자인 3).
+ * 카드가 아니라 **안내 배너**(`styles.notice`)이고, 자리도 추천 CTA 위 —
+ * 제목/서브카피 바로 아래다. 이유는 계위다:
+ *   - 추천 CTA·통계 행은 "여러 번 쓰는 기능"이고 서로 대등한 선택지다.
+ *   - 이건 선택지가 아니라 **아직 갖춰지지 않은 상태의 통보**다("아직 둘이 아니에요").
+ * 흰 카드 표면·그림자·부상을 쓰면 기능 버튼 중 하나로 읽혀 그 신호가 사라지므로,
+ * accent 틴트 면 + 틴트 보더로 표면 자체를 분리한다(§ screens.module.css .notice).
+ * 페어링이 끝나면 사라지는 한시적 배너라는 점도 배너 계위가 맞는 근거다.
  */
-function PartnerInviteCard() {
+function PartnerInviteNotice() {
   return (
-    <Link
-      href="/partner"
-      className={cn(
-        styles.card,
-        styles.cardInteractive,
-        'mt-3 flex items-center gap-3 p-4 lg:mt-4',
-      )}
-    >
-      <span className={cn(styles.gradIcon, 'h-10 w-10 shrink-0')}>
-        <UserPlus className="h-5 w-5" strokeWidth={1.75} />
+    <Link href="/partner" className={cn(styles.notice, 'mt-5')}>
+      <span className={styles.noticeIcon}>
+        <UserPlus className="h-[22px] w-[22px]" strokeWidth={1.75} />
       </span>
       <span className="min-w-0 flex-1">
-        <span className={cn('block text-base font-semibold', styles.ink)}>파트너 초대</span>
-        <span className={cn('mt-0.5 block text-sm', styles.sub)}>
-          둘이 함께 위시리스트를 쌓아보세요
+        <span className={styles.noticeTitle}>아직 혼자 쓰고 있어요</span>
+        <span className={styles.noticeDesc}>
+          파트너를 초대해 함께 위시리스트를 쌓아보세요
         </span>
       </span>
-      <ChevronRight className={styles.statRowChevron} strokeWidth={1.75} aria-hidden="true" />
+      <ChevronRight className={styles.noticeChevron} strokeWidth={1.75} aria-hidden="true" />
     </Link>
   )
 }
@@ -164,7 +159,7 @@ export function HomeDashboard({
   workspaceState,
 }: {
   initialStats?: DashboardStats
-  /** 커플을 특정할 수 없으면 null — 그때는 초대 진입점을 감춘다(§ PartnerInviteCard). */
+  /** 커플을 특정할 수 없으면 null — 그때는 초대 진입점을 감춘다(§ PartnerInviteNotice). */
   workspaceState?: WorkspaceState | null
 }) {
   const { data } = useDashboardStats(initialStats)
@@ -177,6 +172,9 @@ export function HomeDashboard({
       )}
     >
       <PageHeader title="오늘, 우리 어떻게 보낼까?" subtitle="위시리스트에서 골라드릴게요 💜" />
+
+      {/* 페어링 전 상태 안내 — 기능 카드들보다 위(별도 계위) */}
+      {workspaceState === 'SOLO' && <PartnerInviteNotice />}
 
       {/* 메인 CTA — 정사각 통통 카드 2열 */}
       <div className="mt-5 grid grid-cols-2 gap-3 lg:mt-5 lg:gap-4">
@@ -193,9 +191,6 @@ export function HomeDashboard({
           subtitle="다이닝 추천 받기"
         />
       </div>
-
-      {/* 계정/온보딩 액션 — 콘텐츠 리스트보다 위, CTA 바로 아래 */}
-      {workspaceState === 'SOLO' && <PartnerInviteCard />}
 
       {/* 통계 — 행형 리스트 2섹션 */}
       <div className={styles.statSections}>

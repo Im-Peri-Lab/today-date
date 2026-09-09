@@ -151,7 +151,8 @@ export function getInvitePartnerTemplate(inviteUrl: string, inviterEmail: string
                 </tr>
               </table>
               <p style="margin:24px 0 0;color:#9ca3af;font-size:13px;text-align:center;">
-                수락 후에는 파트너와 함께 쓰는 <strong>기존 패스코드</strong>로 로그인합니다.<br>
+                수락 후에는 둘이 함께 쓰는 <strong>기존 패스코드</strong>로 로그인합니다.<br>
+                패스코드는 초대한 분에게 받아주세요.<br>
                 이 링크는 <strong>24시간</strong> 후 만료됩니다.<br>
                 본인이 요청하지 않았다면 이 메일을 무시하세요.
               </p>

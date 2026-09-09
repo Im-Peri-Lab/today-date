@@ -615,7 +615,8 @@ test.describe('파트너 초대 · 화면', () => {
     await loginAsSolo(page)
     await page.goto('/')
 
-    await page.getByRole('link', { name: /파트너 초대/ }).click()
+    // 홈의 진입점은 "아직 페어링 안 됨"을 알리는 안내 배너다(§ HomeDashboard PartnerInviteNotice).
+    await page.getByRole('link', { name: /파트너를 초대해/ }).click()
     await page.waitForURL(/\/partner$/, { timeout: 15_000 })
 
     await page.getByLabel('파트너 이메일').fill(refs.partnerEmail)
@@ -638,7 +639,8 @@ test.describe('파트너 초대 · 화면', () => {
 
     // 통계 섹션이 그려질 때까지 기다린 뒤 "없다"를 단정한다(로딩 중 스냅샷 방지).
     await expect(page.getByText('가보고 싶은 곳').first()).toBeVisible({ timeout: 15_000 })
-    await expect(page.getByRole('link', { name: /파트너 초대/ })).toHaveCount(0)
+    await expect(page.getByText('아직 혼자 쓰고 있어요')).toHaveCount(0)
+    await expect(page.getByRole('link', { name: /파트너를 초대해/ })).toHaveCount(0)
 
     await page.goto('/partner')
     await expect(page).toHaveURL(/\/$/)

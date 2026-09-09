@@ -61,6 +61,13 @@
   --s-ink: #1a1033; /* 제목/주요 텍스트 */
   --s-accent: #7c3aed; /* 보라 강조 */
   --s-accent-soft-bg: #f6f1ff; /* 활성 칩/소프트 강조 배경 */
+  /* 상태 안내 배너(.notice) 전용 — 인증 화면의 초대 안내 배너(auth.module.css .inviteNotice)와
+     같은 값이다. 카드(--s-card-bg + 그림자)와 달리 accent 틴트 면 + 한 단계 진한 틴트 보더를
+     쓴다: "누를 수 있는 콘텐츠"가 아니라 "지금 상태를 알려주는 안내"라는 표면 구분.
+     --s-accent-soft-bg 를 그대로 쓰지 않는 이유는 다크값이다 — 그 토큰의 다크(#573f7f)는
+     칩만 한 작은 면 기준이라 배너 크기로 깔면 과하게 뜬다. */
+  --s-notice-bg: #f6f1ff;
+  --s-notice-line: #ddd0fb;
   --s-grad: linear-gradient(135deg, #a855f7 0%, #ec4899 100%); /* 주요 액션/아이콘/FAB 그라데이션 */
   /* 폼 입력 placeholder(임시 안내 글자) 전용 — 기능 신호용 --s-faint(#9ca3af)와 의미 분리.
      값은 종전 placeholder 폴백 #b0aabe 그대로(렌더 무변화). 다크는 아래 @media 에서 --s-faint 와 동일 톤. */
@@ -260,6 +267,10 @@
     --s-accent-soft-bg: #573f7f; /* 활성 칩/소프트 배경 — 카드면(#241a36) 대비 선택이 한눈에. 명도만 한 톤 더(보라 톤·채도 유지) */
     --s-accent-soft-text: #d8b4fe;
 
+    /* 안내 배너 다크 — 카드면(#241a36)보다 한 단계 밝은 보라 틴트(인증 화면 배너와 동일 톤) */
+    --s-notice-bg: #2c2440;
+    --s-notice-line: #4a3f63;
+
     --s-card-bg: #241a36; /* 카드 표면 — 페이지 배경(#0a0712~#120c1e)보다 또렷이 밝게 분리 */
     --s-card-border: #2a1f3e; /* 보더로 분리감 확보 */
     --s-card-border-strong: #3a2f4e; /* 검색/필터/팝업용 또렷한 보더(배경보다 한 단계 밝게) */
@@ -408,6 +419,73 @@
 }
 .cardInteractive a:focus-visible {
   outline: none;
+}
+
+/* ── 상태 안내 배너 (.page 안, 카드가 아닌 계위) ─────────────────
+ * 첫 사용처: 홈의 페어링 전 "파트너 초대" 유도(§ HomeDashboard PartnerInviteNotice).
+ *
+ * 카드와 계위를 섞지 않기 위해 표면을 분리한다 — 그림자·부상(translateY) 없이 accent
+ * 틴트 면 + 틴트 보더. 추천 CTA(주연 카드)나 통계 행(콘텐츠 리스트)과 같은 흰 카드
+ * 표면을 쓰면 "또 하나의 콘텐츠 버튼"으로 읽혀, 아직 상태가 갖춰지지 않았다는 신호가
+ * 사라진다. 인증 화면의 초대 안내 배너(auth.module.css .inviteNotice)와 같은 시각 언어다.
+ *
+ * 그라데이션 배지(.gradIcon)를 쓰지 않는다 — 그건 CTA 전용 액센트다(§ 디자인 금지규칙 9).
+ */
+.notice {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.875rem 1rem;
+  border-radius: 0.875rem;
+  background: var(--s-notice-bg, #f6f1ff);
+  border: 1px solid var(--s-notice-line, #ddd0fb);
+}
+
+/* 유틸리티/콘텐츠 hover 와 구분되는 배너 hover — 면은 그대로, 보더만 한 단계 또렷하게.
+   (모바일 sticky hover 방지를 위해 @media (hover: hover) 안에 둔다, § 디자인 7) */
+@media (hover: hover) {
+  .notice:hover {
+    border-color: var(--s-active-line, #7c3aed);
+  }
+}
+
+.notice:focus-visible {
+  outline: none;
+  box-shadow: var(--s-focus-ring-card, 0 0 0 3px rgba(124, 58, 237, 0.5));
+}
+
+/* 배너 안의 아이콘·글씨는 모두 accent 계열 — 틴트 면 위 "외곽선형 활성" 톤(§ 디자인 5) */
+.noticeIcon {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--s-active-text, #7c3aed);
+}
+
+.noticeTitle {
+  display: block;
+  font-size: var(--type-card-title-sm, 0.9375rem);
+  font-weight: var(--type-card-title-sm-weight, 600);
+  letter-spacing: -0.01em;
+  color: var(--s-active-text, #7c3aed);
+}
+
+.noticeDesc {
+  display: block;
+  margin-top: 0.125rem;
+  font-size: var(--type-preview-meta, 0.75rem);
+  line-height: 1.5;
+  color: var(--s-active-text, #7c3aed);
+  opacity: 0.85;
+}
+
+.noticeChevron {
+  flex-shrink: 0;
+  width: 15px;
+  height: 15px;
+  color: var(--s-active-text, #7c3aed);
+  opacity: 0.7;
 }
 
 /* ── 그라데이션 아이콘 배지 (CTA/주요 액션 한정) ── */

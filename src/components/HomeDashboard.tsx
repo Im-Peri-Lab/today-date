@@ -120,35 +120,36 @@ function CtaCard({
   )
 }
 
-// ── 파트너 초대 진입 행 ──────────────────────────
+// ── 파트너 초대 안내 배너 ────────────────────────
 /**
  * SOLO(멤버 1명) 상태에서만 보이는 초대 진입점.
  *
  * PAIRED 에서는 초대할 자리가 없으므로 아예 렌더하지 않는다 — 서버가 POST /api/auth/invite
  * 를 409 로 막지만(§ lib/auth/invite.ts), 누를 수 있는 버튼을 남겨두면 눌러야 알 수 있는
  * 실패가 된다. 상태는 서버 컴포넌트가 세션의 커플로 판별해 내려준다(§ app/(home)/page.tsx).
+ *
+ * 카드가 아니라 **안내 배너**(`styles.notice`)이고, 자리도 추천 CTA 위 —
+ * 제목/서브카피 바로 아래다. 이유는 계위다:
+ *   - 추천 CTA·통계 행은 "여러 번 쓰는 기능"이고 서로 대등한 선택지다.
+ *   - 이건 선택지가 아니라 **아직 갖춰지지 않은 상태의 통보**다("아직 둘이 아니에요").
+ * 흰 카드 표면·그림자·부상을 쓰면 기능 버튼 중 하나로 읽혀 그 신호가 사라지므로,
+ * accent 틴트 면 + 틴트 보더로 표면 자체를 분리한다(§ screens.module.css .notice).
+ * 페어링이 끝나면 사라지는 한시적 배너라는 점도 배너 계위가 맞는 근거다.
  */
-function PartnerInviteSection() {
+function PartnerInviteNotice() {
   return (
-    <div>
-      <p className={styles.statSectionHeader}>파트너</p>
-      <div className={styles.statSectionCard}>
-        <Link href="/partner" className={styles.statRow}>
-          <div className={styles.statChipWrap}>
-            <div className={cn(styles.statChip, styles.statChipAccent)}>
-              <UserPlus strokeWidth={1.75} />
-            </div>
-          </div>
-          <div className={styles.statRowContent}>
-            <span className={styles.statRowTitle}>파트너 초대</span>
-            <span className={styles.statRowPreview}>
-              둘이 함께 위시리스트를 쌓아보세요
-            </span>
-          </div>
-          <ChevronRight className={styles.statRowChevron} strokeWidth={1.75} aria-hidden="true" />
-        </Link>
-      </div>
-    </div>
+    <Link href="/partner" className={cn(styles.notice, 'mt-5')}>
+      <span className={styles.noticeIcon}>
+        <UserPlus className="h-[22px] w-[22px]" strokeWidth={1.75} />
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className={styles.noticeTitle}>아직 혼자 쓰고 있어요</span>
+        <span className={styles.noticeDesc}>
+          파트너를 초대해 함께 위시리스트를 쌓아보세요
+        </span>
+      </span>
+      <ChevronRight className={styles.noticeChevron} strokeWidth={1.75} aria-hidden="true" />
+    </Link>
   )
 }
 
@@ -158,7 +159,7 @@ export function HomeDashboard({
   workspaceState,
 }: {
   initialStats?: DashboardStats
-  /** 커플을 특정할 수 없으면 null — 그때는 초대 진입점을 감춘다(§ PartnerInviteSection). */
+  /** 커플을 특정할 수 없으면 null — 그때는 초대 진입점을 감춘다(§ PartnerInviteNotice). */
   workspaceState?: WorkspaceState | null
 }) {
   const { data } = useDashboardStats(initialStats)
@@ -171,6 +172,9 @@ export function HomeDashboard({
       )}
     >
       <PageHeader title="오늘, 우리 어떻게 보낼까?" subtitle="위시리스트에서 골라드릴게요 💜" />
+
+      {/* 페어링 전 상태 안내 — 기능 카드들보다 위(별도 계위) */}
+      {workspaceState === 'SOLO' && <PartnerInviteNotice />}
 
       {/* 메인 CTA — 정사각 통통 카드 2열 */}
       <div className="mt-5 grid grid-cols-2 gap-3 lg:mt-5 lg:gap-4">
@@ -219,8 +223,6 @@ export function HomeDashboard({
             previewTitles={data?.visitedPlaceTitles ?? []}
           />
         </StatSection>
-
-        {workspaceState === 'SOLO' && <PartnerInviteSection />}
       </div>
 
       <HomeFab />

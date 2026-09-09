@@ -26,10 +26,12 @@ export interface CoupleUserRow {
   couple_id: string
   email: string
   email_verified: boolean
+  /** 가입 시각(users.created_at). 세션 사용자 선택 순서와 파트너 화면의 "가입일"이 함께 쓴다. */
+  created_at: string
 }
 
 const COUPLE_COLUMNS = 'id, passcode_hash, failed_attempts, locked_until, session_version'
-const USER_COLUMNS = 'id, couple_id, email, email_verified'
+const USER_COLUMNS = 'id, couple_id, email, email_verified, created_at'
 
 /**
  * 워크스페이스 상태.
@@ -122,6 +124,22 @@ export async function getCoupleUsers(coupleId: string): Promise<CoupleUserRow[]>
  */
 export function pickSessionUser(users: CoupleUserRow[]): CoupleUserRow | null {
   return users.find((u) => u.email_verified) ?? null
+}
+
+/**
+ * 커플의 "나 아닌 한 명" — 세션 user_id 를 제외하고 남는 사용자.
+ *
+ * 커플은 최대 2명이라는 스키마 전제(§ deriveWorkspaceState)에 기대지 않고, 후보가
+ * 정확히 1명일 때만 반환한다. 0명이면 SOLO 이고, 2명 이상이면 데이터가 어긋난
+ * 상태(한 커플에 3명) 또는 세션 user_id 가 이 커플의 멤버가 아닌 상태다 — 그때
+ * 아무나 골라 보여주면 남의 이메일을 노출하게 되므로 null 로 닫는다.
+ */
+export function pickPartnerUser(
+  users: CoupleUserRow[],
+  selfUserId: string
+): CoupleUserRow | null {
+  const others = users.filter((u) => u.id !== selfUserId)
+  return others.length === 1 ? others[0] : null
 }
 
 /**

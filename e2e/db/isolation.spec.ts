@@ -382,6 +382,25 @@ test.describe('인증 회귀', () => {
     await expect(page).toHaveURL(/\/lock$/)
   })
 
+  /**
+   * 삼선 메뉴의 로그아웃 — 항목이 여러 개가 된 뒤에도 같은 자리에서 같은 일을 하는가.
+   *
+   * 메뉴가 "로그아웃 하나"에서 "항목 목록"으로 바뀌면서(§ HomeMenu) 액션 항목이
+   * 링크 항목과 한 배열에서 렌더된다. 세션을 실제로 끊는 유일한 항목이므로 회귀를 본다.
+   */
+  test('메뉴에서 로그아웃하면 /lock 으로 나가고 세션 쿠키가 지워진다 (회귀)', async ({
+    page,
+  }) => {
+    await loginAsA(page)
+    await page.goto('/')
+
+    await page.getByRole('button', { name: '메뉴' }).click()
+    await page.getByRole('menuitem', { name: '로그아웃' }).click()
+
+    await page.waitForURL(/\/lock$/, { timeout: 15_000 })
+    expect(await readSessionCookie(page)).toBeNull()
+  })
+
   test('초대 링크 없이 신규 이메일로 가입하면 SOLO 상태로 정상 진입한다', async ({ page }) => {
     // 커플이 0개인 상태에서 시작 — 최초 설정 플로우.
     await resetStub('empty')
@@ -596,7 +615,8 @@ test.describe('파트너 초대 · 화면', () => {
     await loginAsSolo(page)
     await page.goto('/')
 
-    await page.getByRole('link', { name: /파트너 초대/ }).click()
+    // 홈의 진입점은 "아직 페어링 안 됨"을 알리는 안내 배너다(§ HomeDashboard PartnerInviteNotice).
+    await page.getByRole('link', { name: /파트너를 초대해/ }).click()
     await page.waitForURL(/\/partner$/, { timeout: 15_000 })
 
     await page.getByLabel('파트너 이메일').fill(refs.partnerEmail)
@@ -619,7 +639,8 @@ test.describe('파트너 초대 · 화면', () => {
 
     // 통계 섹션이 그려질 때까지 기다린 뒤 "없다"를 단정한다(로딩 중 스냅샷 방지).
     await expect(page.getByText('가보고 싶은 곳').first()).toBeVisible({ timeout: 15_000 })
-    await expect(page.getByRole('link', { name: /파트너 초대/ })).toHaveCount(0)
+    await expect(page.getByText('아직 혼자 쓰고 있어요')).toHaveCount(0)
+    await expect(page.getByRole('link', { name: /파트너를 초대해/ })).toHaveCount(0)
 
     await page.goto('/partner')
     await expect(page).toHaveURL(/\/$/)
@@ -869,6 +890,97 @@ test.describe('파트너 초대 · PAIRED 전환 후 격리', () => {
     }
 
     await contextPartner.close()
+  })
+})
+
+/**
+ * 파트너 정보 — "나 아닌 상대"를 각 세션이 정확히 받는가.
+ *
+ * 커플 격리(다른 커플의 행이 안 보이는가)와는 다른 축이다. 여기서는 **같은 커플
+ * 안에서** 세션 user_id 를 기준으로 두 사람이 갈라지는지를 본다. 커플 데이터는
+ * 공유되므로 두 세션 모두 users 두 행을 읽을 권한이 있고, "나를 지우고 남은 한 명"을
+ * 고르는 판정이 뒤집히면 자기 이메일을 파트너로 보게 된다 — 응답 코드로는 절대
+ * 드러나지 않는 종류의 버그다. 그래서 A→B / B→A 를 한 테스트에서 교차로 확인한다.
+ */
+test.describe('파트너 정보 · 나 아닌 상대', () => {
+  test('PAIRED 두 세션이 각자 상대의 이메일·가입일을 받는다 (교차 확인)', async ({
+    page,
+    browser,
+  }) => {
+    await resetStub('paired')
+
+    const contextPartner = await browser.newContext()
+    const pagePartner = await contextPartner.newPage()
+
+    await loginAsSolo(page)
+    await loginAsPartner(pagePartner)
+
+    // ── 화면: 각 세션의 /partner/info 에 상대만 보인다 ──
+    await page.goto('/partner/info')
+    await expect(page.getByText(refs.partnerEmail)).toBeVisible({ timeout: 15_000 })
+    await expect(page.getByText(refs.soloEmail)).toHaveCount(0)
+    // paired 시드의 가입일: solo-a 2026-03-01 / partner-b 2026-03-05.
+    await expect(page.getByText('2026년 3월 5일')).toBeVisible()
+
+    await pagePartner.goto('/partner/info')
+    await expect(pagePartner.getByText(refs.soloEmail)).toBeVisible({ timeout: 15_000 })
+    await expect(pagePartner.getByText(refs.partnerEmail)).toHaveCount(0)
+    await expect(pagePartner.getByText('2026년 3월 1일')).toBeVisible()
+
+    // ── API: 화면 문구가 아니라 서버가 고른 사용자 자체를 교차 확인 ──
+    const partnerOf = async (p: Page) => {
+      const res = await apiCall(p, 'GET', '/api/partner')
+      expect(res.status).toBe(200)
+      return res.json?.partner as { email: string; joinedAt: string } | null
+    }
+
+    expect(await partnerOf(page)).toMatchObject({ email: refs.partnerEmail })
+    expect(await partnerOf(pagePartner)).toMatchObject({ email: refs.soloEmail })
+
+    await contextPartner.close()
+  })
+
+  test('PAIRED 홈 메뉴의 "파트너" 항목으로 상대 정보 화면에 들어간다', async ({ page }) => {
+    await resetStub('paired')
+    await loginAsSolo(page)
+    await page.goto('/')
+
+    await page.getByRole('button', { name: '메뉴' }).click()
+    // 메뉴 항목은 `<a>` 로 렌더되지만 base-ui 가 role="menuitem" 을 씌운다(LinkItem).
+    await page.getByRole('menuitem', { name: '파트너' }).click()
+    await page.waitForURL(/\/partner\/info$/, { timeout: 15_000 })
+
+    await expect(page.getByText(refs.partnerEmail)).toBeVisible({ timeout: 15_000 })
+  })
+
+  test('SOLO 에는 메뉴 항목이 없고 /partner/info 는 홈으로 되돌린다', async ({ page }) => {
+    await resetStub('solo')
+    await loginAsSolo(page)
+    await page.goto('/')
+
+    // 메뉴를 실제로 열어 항목이 없음을 단정한다(닫힌 메뉴는 항목이 DOM 에 없다).
+    await page.getByRole('button', { name: '메뉴' }).click()
+    await expect(page.getByRole('menuitem', { name: '로그아웃' })).toBeVisible({
+      timeout: 15_000,
+    })
+    await expect(page.getByRole('menuitem', { name: '파트너' })).toHaveCount(0)
+    await page.keyboard.press('Escape')
+
+    await page.goto('/partner/info')
+    await expect(page).toHaveURL(/\/$/)
+
+    // API 도 같은 판정 — SOLO 는 오류가 아니라 "상대 없음"이다.
+    const res = await apiCall(page, 'GET', '/api/partner')
+    expect(res.status).toBe(200)
+    expect(res.json?.partner).toBeNull()
+  })
+
+  test('세션 없이 파트너 API 를 호출하면 401 이다', async ({ page }) => {
+    await resetStub('paired')
+    await page.goto('/lock')
+
+    const res = await apiCall(page, 'GET', '/api/partner')
+    expect(res.status).toBe(401)
   })
 })
 

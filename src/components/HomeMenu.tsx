@@ -51,7 +51,7 @@ type MenuItemDef =
       pendingLabel?: string
     }
 
-/** 홈/목록 우상단 미니멀 메뉴 — 햄버거 → (파트너) · 로그아웃 */
+/** 홈/목록 우상단 미니멀 메뉴 — 햄버거 → (파트너) · 로그아웃 · (계정 삭제) */
 export function HomeMenu() {
   const router = useRouter()
   const topLoader = useTopLoader()
@@ -106,13 +106,18 @@ export function HomeMenu() {
           },
         ]
       : []),
+    /*
+     * 로그아웃은 중성이다(destructive 아니다) — 되돌릴 수 있는 일이기 때문이다.
+     * 패스코드를 다시 넣으면 같은 자리로 돌아오고 잃는 것이 없다. 빨강은 "계정 삭제"
+     * 하나에만 남긴다: 한 메뉴 안에 빨강이 둘이면 둘 다 같은 무게로 읽혀, 진짜로
+     * 되돌릴 수 없는 항목의 경고가 묻힌다(§ 디자인 5-A 파괴적 액션 격리의 취지).
+     */
     {
       kind: 'action',
       key: 'logout',
       label: '로그아웃',
       icon: LogOut,
       onSelect: handleLogout,
-      variant: 'destructive',
       pending: isLoading,
       pendingLabel: '로그아웃 중...',
     },
@@ -136,11 +141,12 @@ export function HomeMenu() {
   ]
 
   /**
-   * 파괴적 항목 묶음 앞에 구분선을 하나만 둔다.
+   * 첫 파괴적 항목 앞에만 구분선을 둔다.
    *
-   * 항목마다 구분선을 붙이면 로그아웃·계정 삭제 사이에도 선이 생겨 둘이 별개 그룹처럼
-   * 읽힌다. 카드 ⋮ 메뉴가 "구분선은 삭제 앞 하나만"으로 정한 것과 같은 규칙이다
-   * (§ 디자인 5-A). 첫 항목이면 위에 가를 것이 없으므로 그리지 않는다.
+   * 구분선의 역할은 "되돌릴 수 없는 항목을 위의 평범한 항목들과 갈라 두는 것" 하나다.
+   * 카드 ⋮ 메뉴가 "구분선은 삭제 앞 하나만"으로 정한 것과 같은 규칙이다(§ 디자인 5-A).
+   * 그래서 파괴적 항목이 없는 조합(PAIRED — 파트너 · 로그아웃)에는 선이 없고, 파괴적
+   * 항목이 첫 항목이면 위에 가를 것이 없으므로 역시 그리지 않는다.
    */
   const firstDestructiveIndex = items.findIndex((item) => item.variant === 'destructive')
 
@@ -154,7 +160,7 @@ export function HomeMenu() {
       <DropdownMenuContent>
         {items.map((item, index) => {
           const Icon = item.icon
-          // 파괴적 항목 묶음은 위의 일반 항목들과 구분선으로 한 번만 갈라 둔다.
+          // 되돌릴 수 없는 항목만 위의 평범한 항목들과 갈라 둔다(첫 파괴적 항목 앞 한 번).
           const separator = index === firstDestructiveIndex && index > 0
 
           if (item.kind === 'link') {

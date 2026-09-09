@@ -62,3 +62,28 @@ export function formatDotDateRangeCompact(start?: string | null, end?: string | 
   if (!end || end === start) return formatDotDateCompact(start)
   return `${formatDotDateCompact(start)} ~ ${formatDotDateCompact(end)}`
 }
+
+/**
+ * 시각이 붙은 값(timestamptz)을 한글 날짜로 — "2026년 3월 5일". 가입일 표시 전용.
+ *
+ * `formatKoreanDate` 를 쓸 수 없는 이유: 그 함수는 'YYYY-MM-DD' 를 문자열로 분해하는데,
+ * created_at 은 '2026-03-05T00:00:00.000Z' 라 앞 10자만 자르면 UTC 기준 날짜가 나와
+ * 한국 시간으로는 하루 밀릴 수 있다(예: 03-05T15:30Z = KST 03-06 00:30).
+ *
+ * 타임존을 Asia/Seoul 로 못 박는 이유: 이 화면은 서버 컴포넌트가 렌더하므로 지정하지
+ * 않으면 서버(배포 환경 UTC)의 타임존이 그대로 쓰인다. 한국어 단일 로케일 앱이므로
+ * 실행 위치와 무관하게 같은 날짜를 보이도록 고정한다.
+ */
+const KOREAN_DATE_FORMAT = new Intl.DateTimeFormat('ko-KR', {
+  timeZone: 'Asia/Seoul',
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+})
+
+export function formatKoreanTimestamp(iso?: string | null): string {
+  if (!iso) return ''
+  const at = new Date(iso)
+  if (Number.isNaN(at.getTime())) return iso
+  return KOREAN_DATE_FORMAT.format(at)
+}

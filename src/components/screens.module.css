@@ -1524,16 +1524,6 @@
   }
 }
 
-/*
- * 도메인 성격이 없는 accent 칩 — 통계 행이 아닌 진입 행(파트너 초대 등)에서 쓴다.
- * .statChipActWish 와 같은 토큰 쌍이지만 이름이 "액티비티 위시리스트"라 재사용하면
- * 읽는 사람이 잘못된 도메인을 떠올린다. 새 색을 만들지 않고 이름만 분리한다.
- */
-.statChipAccent {
-  background: var(--s-accent-chip-tint, #f6f1ff);
-  color: var(--s-accent, #7c3aed);
-}
-
 /* 칩 type × status 색 */
 .statChipActWish {
   background: var(--s-accent-chip-tint, #f6f1ff);

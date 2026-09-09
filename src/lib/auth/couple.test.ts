@@ -4,12 +4,14 @@ import {
   CoupleUserRow,
   deriveWorkspaceState,
   isSetupComplete,
+  pickPartnerUser,
   pickSessionUser,
 } from './couple'
 
 /**
  * DB에 닿지 않는 순수 판별 로직만 다룬다 — 조회 함수(getSoleCouple 등)는 Supabase가 필요해
- * 여기서 다루지 않는다. 이 세 함수가 미들웨어의 라우팅과 세션 발급 대상을 결정한다.
+ * 여기서 다루지 않는다. 이 함수들이 미들웨어의 라우팅·세션 발급 대상·파트너 화면에
+ * 노출할 사용자를 결정한다.
  */
 
 const couple = (over: Partial<CoupleRow> = {}): CoupleRow => ({
@@ -26,6 +28,7 @@ const user = (over: Partial<CoupleUserRow> = {}): CoupleUserRow => ({
   couple_id: 'c1',
   email: 'a@example.com',
   email_verified: false,
+  created_at: '2026-01-01T00:00:00.000Z',
   ...over,
 })
 
@@ -83,5 +86,31 @@ describe('pickSessionUser', () => {
     const first = user({ id: 'u1', email_verified: true })
     const second = user({ id: 'u2', email: 'b@example.com', email_verified: true })
     expect(pickSessionUser([first, second])?.id).toBe('u1')
+  })
+})
+
+describe('pickPartnerUser', () => {
+  const me = user({ id: 'u1' })
+  const partner = user({ id: 'u2', email: 'b@example.com' })
+
+  it('SOLO(나 혼자)면 null — 보여줄 상대가 없다', () => {
+    expect(pickPartnerUser([me], 'u1')).toBeNull()
+  })
+
+  it('PAIRED 면 세션 사용자가 아닌 나머지 한 명을 고른다', () => {
+    expect(pickPartnerUser([me, partner], 'u1')?.id).toBe('u2')
+  })
+
+  it('반대쪽 세션에서는 반대쪽 사용자를 고른다 (교차)', () => {
+    expect(pickPartnerUser([me, partner], 'u2')?.id).toBe('u1')
+  })
+
+  it('세션 사용자가 그 커플의 멤버가 아니면 null — 남의 이메일을 고르지 않는다', () => {
+    expect(pickPartnerUser([me, partner], 'u-outsider')).toBeNull()
+  })
+
+  it('한 커플에 3명이면 null — 후보가 모호하면 아무도 보여주지 않는다', () => {
+    const third = user({ id: 'u3', email: 'c@example.com' })
+    expect(pickPartnerUser([me, partner, third], 'u1')).toBeNull()
   })
 })

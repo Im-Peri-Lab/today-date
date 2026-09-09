@@ -120,35 +120,41 @@ function CtaCard({
   )
 }
 
-// ── 파트너 초대 진입 행 ──────────────────────────
+// ── 파트너 초대 진입 카드 ────────────────────────
 /**
  * SOLO(멤버 1명) 상태에서만 보이는 초대 진입점.
  *
  * PAIRED 에서는 초대할 자리가 없으므로 아예 렌더하지 않는다 — 서버가 POST /api/auth/invite
  * 를 409 로 막지만(§ lib/auth/invite.ts), 누를 수 있는 버튼을 남겨두면 눌러야 알 수 있는
  * 실패가 된다. 상태는 서버 컴포넌트가 세션의 커플로 판별해 내려준다(§ app/(home)/page.tsx).
+ *
+ * 통계 리스트(StatSection) 안의 한 행이 아니라 추천 CTA 바로 아래의 독립 카드다.
+ * 성격이 다른 항목이기 때문이다 — 통계 행은 "쌓아둔 콘텐츠 보기"로 반복해서 누르는
+ * 자리이고, 이 카드는 계정을 한 번 세팅하는 온보딩 액션이라 목록에 섞이면 콘텐츠처럼
+ * 읽힌다. 카드 위계도 통계 카드(조연, 그림자 최약)가 아닌 CTA 계열 표면
+ * (`card` + `cardInteractive`, 그림자 표준 + `gradIcon`)을 쓴다(§ 디자인 3).
  */
-function PartnerInviteSection() {
+function PartnerInviteCard() {
   return (
-    <div>
-      <p className={styles.statSectionHeader}>파트너</p>
-      <div className={styles.statSectionCard}>
-        <Link href="/partner" className={styles.statRow}>
-          <div className={styles.statChipWrap}>
-            <div className={cn(styles.statChip, styles.statChipAccent)}>
-              <UserPlus strokeWidth={1.75} />
-            </div>
-          </div>
-          <div className={styles.statRowContent}>
-            <span className={styles.statRowTitle}>파트너 초대</span>
-            <span className={styles.statRowPreview}>
-              둘이 함께 위시리스트를 쌓아보세요
-            </span>
-          </div>
-          <ChevronRight className={styles.statRowChevron} strokeWidth={1.75} aria-hidden="true" />
-        </Link>
-      </div>
-    </div>
+    <Link
+      href="/partner"
+      className={cn(
+        styles.card,
+        styles.cardInteractive,
+        'mt-3 flex items-center gap-3 p-4 lg:mt-4',
+      )}
+    >
+      <span className={cn(styles.gradIcon, 'h-10 w-10 shrink-0')}>
+        <UserPlus className="h-5 w-5" strokeWidth={1.75} />
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className={cn('block text-base font-semibold', styles.ink)}>파트너 초대</span>
+        <span className={cn('mt-0.5 block text-sm', styles.sub)}>
+          둘이 함께 위시리스트를 쌓아보세요
+        </span>
+      </span>
+      <ChevronRight className={styles.statRowChevron} strokeWidth={1.75} aria-hidden="true" />
+    </Link>
   )
 }
 
@@ -158,7 +164,7 @@ export function HomeDashboard({
   workspaceState,
 }: {
   initialStats?: DashboardStats
-  /** 커플을 특정할 수 없으면 null — 그때는 초대 진입점을 감춘다(§ PartnerInviteSection). */
+  /** 커플을 특정할 수 없으면 null — 그때는 초대 진입점을 감춘다(§ PartnerInviteCard). */
   workspaceState?: WorkspaceState | null
 }) {
   const { data } = useDashboardStats(initialStats)
@@ -187,6 +193,9 @@ export function HomeDashboard({
           subtitle="다이닝 추천 받기"
         />
       </div>
+
+      {/* 계정/온보딩 액션 — 콘텐츠 리스트보다 위, CTA 바로 아래 */}
+      {workspaceState === 'SOLO' && <PartnerInviteCard />}
 
       {/* 통계 — 행형 리스트 2섹션 */}
       <div className={styles.statSections}>
@@ -219,8 +228,6 @@ export function HomeDashboard({
             previewTitles={data?.visitedPlaceTitles ?? []}
           />
         </StatSection>
-
-        {workspaceState === 'SOLO' && <PartnerInviteSection />}
       </div>
 
       <HomeFab />

@@ -4,7 +4,7 @@ import { Fragment, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useTopLoader } from 'nextjs-toploader'
-import { Menu, LogOut, Loader2, Users, type LucideIcon } from 'lucide-react'
+import { Menu, LogOut, Loader2, Trash2, Users, type LucideIcon } from 'lucide-react'
 import { toast } from 'sonner'
 import {
   DropdownMenu,
@@ -29,14 +29,22 @@ import styles from '@/components/screens.module.css'
  * 클래스가 자동으로 맞춘다.
  */
 type MenuItemDef =
-  | { kind: 'link'; key: string; label: string; icon: LucideIcon; href: string }
+  | {
+      kind: 'link'
+      key: string
+      label: string
+      icon: LucideIcon
+      href: string
+      /** destructive 는 빨강 글자(파괴적 액션 격리, § 디자인 5-A). */
+      variant?: 'default' | 'destructive'
+    }
   | {
       kind: 'action'
       key: string
       label: string
       icon: LucideIcon
       onSelect: () => void
-      /** destructive 는 빨강 글자 + 위쪽 구분선(파괴적 액션 격리, § 디자인 5-A). */
+      /** destructive 는 빨강 글자(파괴적 액션 격리, § 디자인 5-A). */
       variant?: 'default' | 'destructive'
       /** 진행 중 표시 — 아이콘이 스피너로 바뀌고 라벨이 pendingLabel 로 교체된다. */
       pending?: boolean
@@ -77,7 +85,15 @@ export function HomeMenu() {
    * 같은 판정으로 홈으로 되돌리지만(§ app/partner/info/page.tsx), 눌러야 알 수 있는
    * 빈 화면을 메뉴에 남겨두지 않는다. 조회 전(undefined)에도 그리지 않아 "있다"로
    * 잘못 깜빡이는 일이 없다.
+   *
+   * "계정 삭제"는 그 반대로 SOLO 에서만 그린다 — 파트너가 있는 계정의 삭제는 상대의
+   * 데이터까지 지우는 일이라 이 경로가 다루지 않는다(§ lib/auth/accountDeletion.ts).
+   * 판정 근거는 같은 응답 하나다: partner 가 null 이면 SOLO, 값이 있으면 PAIRED.
+   * 그래서 두 항목은 절대 동시에 나오지 않고, 조회 전(undefined)에는 둘 다 나오지 않는다
+   * — "혼자인지 둘인지" 모르는 동안 탈퇴 진입점을 보여주지 않는 것이 안전한 기본값이다.
    */
+  const isSolo = partnerData !== undefined && partnerData.partner === null
+
   const items: MenuItemDef[] = [
     ...(partnerData?.partner
       ? [
@@ -100,7 +116,33 @@ export function HomeMenu() {
       pending: isLoading,
       pendingLabel: '로그아웃 중...',
     },
+    /*
+     * 삭제는 메뉴에서 즉시 실행하지 않고 전용 화면으로 보낸다(link) — 되돌릴 수 없는
+     * 작업이라 확인 문구 입력과 재확인이 필요하고(§ AccountDeleteForm), 그건 드롭다운
+     * 항목 안에 들어갈 수 없다. 파괴적 액션은 맨 끝(§ 디자인 5-A ItemMenu 순서 근거).
+     */
+    ...(isSolo
+      ? [
+          {
+            kind: 'link' as const,
+            key: 'account-delete',
+            label: '계정 삭제',
+            icon: Trash2,
+            href: '/account/delete',
+            variant: 'destructive' as const,
+          },
+        ]
+      : []),
   ]
+
+  /**
+   * 파괴적 항목 묶음 앞에 구분선을 하나만 둔다.
+   *
+   * 항목마다 구분선을 붙이면 로그아웃·계정 삭제 사이에도 선이 생겨 둘이 별개 그룹처럼
+   * 읽힌다. 카드 ⋮ 메뉴가 "구분선은 삭제 앞 하나만"으로 정한 것과 같은 규칙이다
+   * (§ 디자인 5-A). 첫 항목이면 위에 가를 것이 없으므로 그리지 않는다.
+   */
+  const firstDestructiveIndex = items.findIndex((item) => item.variant === 'destructive')
 
   return (
     <DropdownMenu>
@@ -112,13 +154,21 @@ export function HomeMenu() {
       <DropdownMenuContent>
         {items.map((item, index) => {
           const Icon = item.icon
+          // 파괴적 항목 묶음은 위의 일반 항목들과 구분선으로 한 번만 갈라 둔다.
+          const separator = index === firstDestructiveIndex && index > 0
 
           if (item.kind === 'link') {
             return (
-              <DropdownMenuLinkItem key={item.key} render={<Link href={item.href} />}>
-                <Icon />
-                {item.label}
-              </DropdownMenuLinkItem>
+              <Fragment key={item.key}>
+                {separator && <DropdownMenuSeparator />}
+                <DropdownMenuLinkItem
+                  variant={item.variant}
+                  render={<Link href={item.href} />}
+                >
+                  <Icon />
+                  {item.label}
+                </DropdownMenuLinkItem>
+              </Fragment>
             )
           }
 
@@ -126,8 +176,7 @@ export function HomeMenu() {
 
           return (
             <Fragment key={item.key}>
-              {/* 파괴적 액션은 위의 일반 항목들과 구분선으로 갈라 둔다(첫 항목이면 불필요). */}
-              {item.variant === 'destructive' && index > 0 && <DropdownMenuSeparator />}
+              {separator && <DropdownMenuSeparator />}
               <DropdownMenuItem
                 variant={item.variant}
                 disabled={pending}

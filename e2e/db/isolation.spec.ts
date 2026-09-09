@@ -1,7 +1,14 @@
 import { test, expect, type Page } from '@playwright/test'
 import bcrypt from 'bcryptjs'
 import { coupleSessionCookies, legacySessionCookies, readSessionCookie } from '../helpers/auth'
-import { refs, resetStub, stubInsert, stubRowById, stubRows } from '../helpers/stub'
+import {
+  refs,
+  resetStub,
+  stubInsert,
+  stubRawDelete,
+  stubRowById,
+  stubRows,
+} from '../helpers/stub'
 
 /**
  * 커플 데이터 격리 + 인증 회귀 — 실제 브라우저, 실제 HTTP, 실제 라우트.
@@ -1047,5 +1054,371 @@ test.describe('파트너 초대 · 자가가입 시 대기 초대 확인', () =>
     expect(await stubRows('couples')).toHaveLength(1)
     expect(await stubRows('users')).toHaveLength(1)
     expect(await stubRows('email_tokens')).toHaveLength(0)
+  })
+})
+
+// ──────────────────────────────────────────────
+// 9. 계정 삭제 (SOLO 전용)
+//
+// 이 기능의 위험은 "안 지워지는 것"이 아니라 **너무 많이 지워지는 것**이다. 조건이 하나
+// 빠진 DELETE 는 전 커플의 행을 지우고 되돌릴 수 없다. 그래서 twoCouples 시나리오에서
+// 커플 A 를 지운 뒤 커플 B 의 행이 한 건도 줄지 않았는지를 매번 함께 단정한다.
+//
+// 프로덕션 상태(커플 1개)의 목적 검증은 solo 시나리오에서 본다: 전부 지워지고,
+// 같은 이메일로 처음부터 다시 가입할 수 있는가 — 이 기능이 존재하는 이유다.
+// ──────────────────────────────────────────────
+
+interface StubCoupleRow {
+  id: string
+}
+
+/** 커플 B 의 행이 전부 그대로인지 — 삭제 범위가 번지지 않았다는 단정. */
+async function expectCoupleBIntact() {
+  const couples = await stubRows<StubCoupleRow>('couples')
+  expect(couples.map((c) => c.id)).toEqual([refs.coupleB])
+
+  const users = await stubRows<StubUserRow>('users')
+  expect(users.map((u) => u.email)).toEqual([refs.emailB])
+
+  const activities = await stubRows<{ id: string }>('activities')
+  expect(activities.map((a) => a.id)).toEqual([refs.actB1])
+
+  const places = await stubRows<{ id: string }>('places')
+  expect(places.map((p) => p.id)).toEqual([refs.plcB1])
+}
+
+test.describe('계정 삭제 · 삭제 범위', () => {
+  test('커플 A 를 삭제해도 커플 B 의 데이터는 한 건도 줄지 않는다', async ({ page }) => {
+    // 두 커플이 각각 도메인 데이터와 email_tokens 두 갈래를 가진 상태를 만든다.
+    await stubInsert('email_tokens', {
+      token_hash: 'h-a-verify', purpose: 'verify_email',
+      target_email: refs.emailA, couple_id: null,
+      expires_at: new Date(Date.now() + 3_600_000).toISOString(),
+    })
+    await stubInsert('email_tokens', {
+      token_hash: 'h-a-invite', purpose: 'invite_partner',
+      target_email: refs.outsiderEmail, couple_id: refs.coupleA,
+      expires_at: new Date(Date.now() + 3_600_000).toISOString(),
+    })
+    await stubInsert('email_tokens', {
+      token_hash: 'h-b-verify', purpose: 'verify_email',
+      target_email: refs.emailB, couple_id: null,
+      expires_at: new Date(Date.now() + 3_600_000).toISOString(),
+    })
+    /*
+     * 커플 B 가 커플 A 의 이메일로 보낸 초대 — 이 행의 소유자는 B 다(target_email 은
+     * "초대받는 사람"일 뿐이다). 목적을 가리지 않고 target_email 로 지우면 우리가 남의
+     * 초대장을 대신 폐기하게 되므로, 삭제 후에도 남아 있어야 한다.
+     */
+    await stubInsert('email_tokens', {
+      token_hash: 'h-b-invite-to-a', purpose: 'invite_partner',
+      target_email: refs.emailA, couple_id: refs.coupleB,
+      expires_at: new Date(Date.now() + 3_600_000).toISOString(),
+    })
+
+    await loginAsA(page)
+    await page.goto('/')
+
+    const res = await apiCall(page, 'DELETE', '/api/account')
+    expect(res.status).toBe(200)
+
+    // 커플 A 의 흔적이 전부 사라졌다.
+    await expectCoupleBIntact()
+
+    // email_tokens 도 B 의 두 건만 남는다 — B 가 A 의 이메일로 보낸 초대 포함.
+    const tokens = await stubRows<StubTokenRow & { token_hash: string }>('email_tokens')
+    expect(tokens.map((t) => t.token_hash).sort()).toEqual(
+      ['h-b-invite-to-a', 'h-b-verify'].sort()
+    )
+  })
+
+  test('삭제 후 커플 B 세션은 자기 데이터를 그대로 쓸 수 있다 (회귀)', async ({
+    page,
+    browser,
+  }) => {
+    await loginAsA(page)
+    await page.goto('/')
+    expect((await apiCall(page, 'DELETE', '/api/account')).status).toBe(200)
+
+    // 남의 계정 삭제가 이웃 커플의 앱 사용을 깨뜨리지 않는지 — 새 컨텍스트로 확인한다.
+    const ctx = await browser.newContext()
+    const bPage = await ctx.newPage()
+    await bPage.context().addCookies(
+      await coupleSessionCookies({ coupleId: refs.coupleB, userId: refs.userB })
+    )
+    await bPage.goto('/list?tab=activity&status=wishlist')
+    await waitForList(bPage)
+
+    await expect(bPage.getByText(refs.titleActB1)).toBeVisible({ timeout: 15_000 })
+    const stats = await apiCall(bPage, 'GET', '/api/dashboard/stats')
+    expect(stats.status).toBe(200)
+    expect(stats.json).toMatchObject({ wishlistActivities: 1, wishlistPlaces: 1 })
+
+    await ctx.close()
+  })
+
+  test('클라이언트가 남의 couple_id 를 실어도 자기 커플만 지워진다', async ({ page }) => {
+    await loginAsA(page)
+    await page.goto('/')
+
+    // 라우트는 본문을 아예 읽지 않는다 — 읽는 순간 남의 계정을 지우는 경로가 생긴다.
+    const res = await apiCall(page, 'DELETE', '/api/account', {
+      couple_id: refs.coupleB,
+    })
+    expect(res.status).toBe(200)
+
+    await expectCoupleBIntact()
+  })
+})
+
+test.describe('계정 삭제 · 삭제 순서(외래키)', () => {
+  /**
+   * 하네스 자기 점검 — 스텁이 restrict 를 실제로 거부하는가.
+   *
+   * 이 단정이 없으면 위·아래 삭제 테스트가 "순서가 맞다"를 증명하지 못한다. 스텁이
+   * 순서를 따지지 않고 다 지워 주면 잘못된 순서로도 초록이 뜨고, 실제 DB 만
+   * 23503 으로 거부한다(로컬 Postgres 가 없어 제약을 직접 실행할 수는 없다).
+   */
+  test('스텁은 도메인 데이터가 남은 커플의 삭제를 23503 으로 거부한다', async () => {
+    await resetStub('solo')
+
+    const blocked = await stubRawDelete('couples', `id=eq.${refs.soloCouple}`)
+    expect(blocked.status).toBe(409)
+    expect(blocked.code).toBe('23503')
+
+    // 거부된 문장은 아무것도 지우지 않았다.
+    expect(await stubRows('couples')).toHaveLength(1)
+  })
+
+  test('앱은 도메인 데이터를 먼저 지워 커플 삭제까지 끝낸다', async ({ page }) => {
+    await resetStub('solo')
+    await loginAsSolo(page)
+    await page.goto('/')
+
+    // 순서가 뒤집혀 있으면 위 테스트가 보여준 23503 에 걸려 500 이 되고 커플이 남는다.
+    const res = await apiCall(page, 'DELETE', '/api/account')
+    expect(res.status).toBe(200)
+    expect(await stubRows('couples')).toHaveLength(0)
+  })
+})
+
+test.describe('계정 삭제 · SOLO 전체 삭제와 재가입', () => {
+  test('SOLO 계정을 삭제하면 모든 데이터와 세션이 사라진다', async ({ page }) => {
+    await resetStub('solo')
+    await stubInsert('email_tokens', {
+      token_hash: 'h-solo-verify', purpose: 'verify_email',
+      target_email: refs.soloEmail, couple_id: null,
+      expires_at: new Date(Date.now() + 3_600_000).toISOString(),
+    })
+
+    await loginAsSolo(page)
+    await page.goto('/')
+
+    const res = await apiCall(page, 'DELETE', '/api/account')
+    expect(res.status).toBe(200)
+
+    // 응답 코드만 보지 않는다 — 스텁 DB 의 최종 상태를 테이블별로 확인한다.
+    expect(await stubRows('couples')).toHaveLength(0)
+    expect(await stubRows('users')).toHaveLength(0)
+    expect(await stubRows('activities')).toHaveLength(0)
+    expect(await stubRows('places')).toHaveLength(0)
+    expect(await stubRows('recommendations_log')).toHaveLength(0)
+    expect(await stubRows('email_tokens')).toHaveLength(0)
+
+    // 카테고리는 전역 참조 데이터라 남아야 한다 — 커플 소유가 아니다(§ 012 주석).
+    expect(await stubRows('activity_categories')).toHaveLength(1)
+    expect(await stubRows('place_categories')).toHaveLength(1)
+
+    // 세션이 실제로 파기됐다(로그아웃 상태).
+    expect(await readSessionCookie(page)).toBeNull()
+  })
+
+  test('삭제 후 같은 이메일로 처음부터 다시 가입할 수 있다', async ({ page }) => {
+    await resetStub('solo')
+    await loginAsSolo(page)
+    await page.goto('/')
+
+    expect((await apiCall(page, 'DELETE', '/api/account')).status).toBe(200)
+
+    /*
+     * /setup 에 들어갈 수 있어야 한다 — app-ready 쿠키가 지워졌다는 뜻이다.
+     * 이 쿠키가 남으면 미들웨어가 DB 조회를 건너뛰고 "설정 완료"로 단정해 /setup 을
+     * 홈으로 되돌린다(§ src/middleware.ts). 그러면 재가입 자체가 불가능해진다.
+     */
+    await page.goto('/setup')
+    await expect(page).toHaveURL(/\/setup/)
+
+    // 삭제된 그 이메일로 다시 가입한다 — users.email 전역 unique 가 풀렸는지가 핵심이다.
+    await page.getByLabel('이메일 주소').fill(refs.soloEmail)
+    await page.getByRole('button', { name: '인증 메일 발송' }).click()
+    await expect(page.getByText('메일을 확인해 주세요')).toBeVisible({ timeout: 15_000 })
+
+    await expect
+      .poll(async () => (await stubRows('users')).length, { timeout: 15_000 })
+      .toBe(1)
+    const couples = await stubRows<StubCoupleRow>('couples')
+    expect(couples).toHaveLength(1)
+    // 지워진 커플이 되살아난 게 아니라 새 커플이다.
+    expect(couples[0].id).not.toBe(refs.soloCouple)
+
+    const users = await stubRows<StubUserRow>('users')
+    expect(users[0].email).toBe(refs.soloEmail)
+    expect(users[0].couple_id).toBe(couples[0].id)
+
+    // 이메일 인증 → 패스코드 설정까지 끝내 실제로 앱에 들어간다.
+    const rawToken = 'e2e-verify-token-after-account-deletion'
+    await stubInsert('email_tokens', {
+      token_hash: await bcrypt.hash(rawToken, 10),
+      purpose: 'verify_email',
+      target_email: refs.soloEmail,
+      expires_at: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+      used_at: null,
+    })
+
+    await page.goto(`/setup/verify?token=${rawToken}`)
+    await expect
+      .poll(
+        async () => (await stubRows<{ email_verified: boolean }>('users'))[0]?.email_verified,
+        { timeout: 15_000 }
+      )
+      .toBe(true)
+
+    await expect(page).toHaveURL(/\/setup\?verified=true/)
+    await expect(page.getByText('패스코드 설정')).toBeVisible()
+    await page.keyboard.type('864202')
+    await expect(page.getByText('패스코드 확인')).toBeVisible()
+    await page.keyboard.type('864202')
+
+    await page.waitForURL((url) => url.pathname === '/', { timeout: 15_000 })
+
+    // 새 계정은 데이터가 0건인 깨끗한 상태다 — 지워진 계정의 기록이 되살아나지 않는다.
+    const stats = await apiCall(page, 'GET', '/api/dashboard/stats')
+    expect(stats.status).toBe(200)
+    expect(stats.json).toMatchObject({ wishlistActivities: 0, wishlistPlaces: 0 })
+  })
+})
+
+test.describe('계정 삭제 · PAIRED 차단', () => {
+  test('PAIRED 세션의 삭제 요청은 409 이고 아무것도 지워지지 않는다', async ({ page }) => {
+    await resetStub('paired')
+    await loginAsSolo(page)
+    await page.goto('/')
+
+    const res = await apiCall(page, 'DELETE', '/api/account')
+    expect(res.status).toBe(409)
+
+    // 차단은 "한 건도 지우지 않았다"까지가 차단이다.
+    expect(await stubRows('couples')).toHaveLength(1)
+    expect(await stubRows('users')).toHaveLength(2)
+    expect(await stubRows('activities')).toHaveLength(2)
+    expect(await stubRows('places')).toHaveLength(1)
+
+    // 차단된 요청은 세션도 건드리지 않는다 — 로그아웃될 이유가 없다.
+    expect(await readSessionCookie(page)).not.toBeNull()
+  })
+
+  test('나중에 합류한 파트너의 삭제 요청도 같이 차단된다', async ({ page }) => {
+    await resetStub('paired')
+    await loginAsPartner(page)
+    await page.goto('/')
+
+    const res = await apiCall(page, 'DELETE', '/api/account')
+    expect(res.status).toBe(409)
+    expect(await stubRows('users')).toHaveLength(2)
+  })
+
+  test('세션 없이 삭제 API 를 호출하면 401 이다', async ({ page }) => {
+    await resetStub('solo')
+    await page.goto('/lock')
+
+    const res = await apiCall(page, 'DELETE', '/api/account')
+    expect(res.status).toBe(401)
+    expect(await stubRows('couples')).toHaveLength(1)
+    expect(await stubRows('users')).toHaveLength(1)
+  })
+})
+
+test.describe('계정 삭제 · 화면', () => {
+  test('SOLO 메뉴의 "계정 삭제" 항목으로 들어가 확인 문구를 넣고 삭제한다', async ({
+    page,
+  }) => {
+    await resetStub('solo')
+    await loginAsSolo(page)
+    await page.goto('/')
+
+    await page.getByRole('button', { name: '메뉴' }).click()
+    await page.getByRole('menuitem', { name: '계정 삭제' }).click()
+    await page.waitForURL(/\/account\/delete$/, { timeout: 15_000 })
+
+    // 지울 계정이 무엇인지 화면이 밝힌다.
+    await expect(page.getByText(refs.soloEmail)).toBeVisible({ timeout: 15_000 })
+
+    // 확인 문구가 비어 있으면 삭제 버튼이 잠겨 있다.
+    const deleteBtn = page.getByRole('button', { name: '계정 삭제', exact: true })
+    await expect(deleteBtn).toBeDisabled()
+
+    await page.getByLabel(/확인 문구/).fill('계정 삭제')
+    await expect(deleteBtn).toBeEnabled()
+    await deleteBtn.click()
+
+    // 재확인 다이얼로그 — 문구를 채운 뒤의 마지막 정지 지점.
+    await expect(page.getByText('계정을 삭제할까요?')).toBeVisible({ timeout: 15_000 })
+    await page.getByRole('button', { name: '삭제', exact: true }).click()
+
+    // 삭제 후에는 재가입 시작점(/setup)으로 나간다.
+    await page.waitForURL(/\/setup/, { timeout: 15_000 })
+
+    expect(await stubRows('couples')).toHaveLength(0)
+    expect(await stubRows('users')).toHaveLength(0)
+    expect(await stubRows('activities')).toHaveLength(0)
+    expect(await readSessionCookie(page)).toBeNull()
+  })
+
+  test('확인 문구가 틀리면 삭제 버튼이 잠긴 채로 남는다', async ({ page }) => {
+    await resetStub('solo')
+    await loginAsSolo(page)
+    await page.goto('/account/delete')
+
+    const deleteBtn = page.getByRole('button', { name: '계정 삭제', exact: true })
+    await page.getByLabel(/확인 문구/).fill('계정삭제')
+    await expect(deleteBtn).toBeDisabled()
+
+    // 데이터는 그대로다.
+    expect(await stubRows('couples')).toHaveLength(1)
+    expect(await stubRows('activities')).toHaveLength(2)
+  })
+
+  test('다이얼로그에서 취소하면 아무것도 지워지지 않는다', async ({ page }) => {
+    await resetStub('solo')
+    await loginAsSolo(page)
+    await page.goto('/account/delete')
+
+    await page.getByLabel(/확인 문구/).fill('계정 삭제')
+    await page.getByRole('button', { name: '계정 삭제', exact: true }).click()
+    await expect(page.getByText('계정을 삭제할까요?')).toBeVisible({ timeout: 15_000 })
+    await page.getByRole('button', { name: '취소' }).click()
+
+    await expect(page).toHaveURL(/\/account\/delete$/)
+    expect(await stubRows('couples')).toHaveLength(1)
+    expect(await stubRows('users')).toHaveLength(1)
+    expect(await stubRows('activities')).toHaveLength(2)
+  })
+
+  test('PAIRED 에는 메뉴 항목이 없고 /account/delete 는 홈으로 되돌린다', async ({ page }) => {
+    await resetStub('paired')
+    await loginAsSolo(page)
+    await page.goto('/')
+
+    await page.getByRole('button', { name: '메뉴' }).click()
+    // 메뉴가 열렸음을 먼저 확인한 뒤 "없음"을 단정한다(닫힌 메뉴는 항목이 DOM 에 없다).
+    await expect(page.getByRole('menuitem', { name: '로그아웃' })).toBeVisible({
+      timeout: 15_000,
+    })
+    await expect(page.getByRole('menuitem', { name: '계정 삭제' })).toHaveCount(0)
+    await page.keyboard.press('Escape')
+
+    // URL 을 직접 열어도 화면이 되돌린다(서버 판정).
+    await page.goto('/account/delete')
+    await expect(page).toHaveURL(/\/$/)
   })
 })

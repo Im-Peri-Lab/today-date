@@ -72,6 +72,32 @@ const NOT_NULL = {
   email_tokens: ['token_hash', 'purpose', 'target_email', 'expires_at'],
 }
 
+/**
+ * `on delete restrict` 외래키 대역 — 부모 행 삭제를 막는 참조 목록.
+ *
+ * 012 가 domain 3종의 couple_id 를 restrict 로 걸었다("커플 행 삭제가 실데이터 대량
+ * 삭제로 번지는 것을 막는다 — 커플 삭제 기능을 만들 때 명시적으로 데이터를 먼저
+ * 처리하도록 강제"). 스텁이 이 제약을 흉내내지 않으면 계정 삭제의 **순서가 틀려도**
+ * e2e 가 초록으로 통과한다 — 실제 DB 는 23503 으로 거부하므로 프로덕션에서만 깨진다.
+ * 스텁이 실제 스키마보다 관대하면 안 된다는 이 파일의 원칙(§ NOT_NULL)을 삭제 쪽에도 적용한다.
+ *
+ * 반대로 `on delete cascade`(users.couple_id, email_tokens.couple_id)는 **의도적으로
+ * 재현하지 않는다.** 재현하면 커플 행 하나만 지워도 자식 행이 따라 사라져, "앱이 그
+ * 행들을 스스로 지웠는가"를 e2e 가 더 이상 검증할 수 없다. 앱은 cascade 에 기대지 않고
+ * 명시적으로 지우므로(§ src/lib/auth/accountDeletion.ts) 이 선택이 검증을 더 엄격하게 만든다.
+ */
+const RESTRICT_REFS = {
+  couples: [
+    { table: 'activities', column: 'couple_id', constraint: 'activities_couple_id_fkey' },
+    { table: 'places', column: 'couple_id', constraint: 'places_couple_id_fkey' },
+    {
+      table: 'recommendations_log',
+      column: 'couple_id',
+      constraint: 'recommendations_log_couple_id_fkey',
+    },
+  ],
+}
+
 /** PostgREST 임베드(`category:activity_categories(...)`) 해석용 외래키 맵. */
 const EMBEDS = {
   activities: { activity_categories: { localKey: 'category_id', foreignKey: 'id' } },
@@ -347,6 +373,20 @@ function findNotNullViolation(table, row) {
   return null
 }
 
+/**
+ * restrict 외래키를 아직 참조하는 자식 행이 있으면 그 사실을 돌려준다(없으면 null).
+ * 삭제 대상 중 **하나라도** 참조되면 실제 Postgres 처럼 문장 전체가 실패해야 한다.
+ */
+function findRestrictViolation(table, targets) {
+  for (const ref of RESTRICT_REFS[table] ?? []) {
+    for (const target of targets) {
+      const child = rowsOf(ref.table).find((row) => row[ref.column] === target.id)
+      if (child) return { ...ref, parentId: target.id }
+    }
+  }
+  return null
+}
+
 // ──────────────────────────────────────────────
 // 라우팅
 // ──────────────────────────────────────────────
@@ -462,6 +502,18 @@ async function handleRest(req, res, url) {
 
   if (req.method === 'DELETE') {
     const targets = applyFilters(rowsOf(table), params)
+
+    // restrict 참조가 남아 있으면 아무것도 지우지 않고 실패한다 — PostgREST 는 외래키
+    // 위반(23503)을 409 로 돌려준다.
+    const fk = findRestrictViolation(table, targets)
+    if (fk) {
+      return sendError(
+        res, 409, '23503',
+        `update or delete on table "${table}" violates foreign key constraint "${fk.constraint}" on table "${fk.table}"`,
+        `Key (id)=(${fk.parentId}) is still referenced from table "${fk.table}".`
+      )
+    }
+
     tables[table] = rowsOf(table).filter((row) => !targets.includes(row))
     if (!wantsRepresentation(req)) {
       res.writeHead(204, {})

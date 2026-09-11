@@ -11,6 +11,8 @@
     "coupleB": "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbb1",
     "userA": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2",
     "userB": "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbb2",
+    "emailA": "couple-a@example.com",
+    "emailB": "couple-b@example.com",
     "actCategory": "cccccccc-cccc-4ccc-8ccc-ccccccccccc1",
     "plcCategory": "cccccccc-cccc-4ccc-8ccc-ccccccccccc2",
 

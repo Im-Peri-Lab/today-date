@@ -89,14 +89,29 @@ function DropdownMenuItem({
  *
  * data-slot 은 Item 과 같은 값을 유지한다 — globals.css 의 highlight 규칙이
  * 슬롯 이름으로 걸려 있어, 이름을 바꾸면 이동 항목만 hover 강조를 잃는다.
+ *
+ * variant 도 Item 과 같은 값을 받는다: 파괴적 결과로 이어지는 화면으로 보내는 항목
+ * (계정 삭제 진입 등)이 액션 항목과 같은 빨강 글자·hover 를 갖도록 한다. 두 항목
+ * 종류에서 같은 이름의 variant 가 같은 모습을 뜻해야, 메뉴가 "이동인지 실행인지"와
+ * 무관하게 위험도를 일관되게 표시한다.
  */
-function DropdownMenuLinkItem({ className, ...props }: MenuPrimitive.LinkItem.Props) {
+function DropdownMenuLinkItem({
+  className,
+  variant = "default",
+  ...props
+}: MenuPrimitive.LinkItem.Props & {
+  variant?: "default" | "destructive"
+}) {
   return (
     <MenuPrimitive.LinkItem
       data-slot="dropdown-menu-item"
-      data-variant="default"
+      data-variant={variant}
       closeOnClick
-      className={cn(menuItemClass, className)}
+      className={cn(
+        menuItemClass,
+        variant === "destructive" && "text-destructive",
+        className
+      )}
       {...props}
     />
   )

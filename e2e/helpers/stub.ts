@@ -45,6 +45,31 @@ export async function stubRowById<T = Record<string, unknown>>(
   return rows.find((r) => r.id === id)
 }
 
+/**
+ * PostgREST DELETE 를 스텁에 직접 날린다 — **하네스 자기 점검용**(앱 경로가 아니다).
+ *
+ * 계정 삭제 스펙은 "앱이 외래키 순서를 맞게 지운다"를 확인하는데, 그 확인이 의미를
+ * 가지려면 스텁이 실제로 잘못된 순서를 거부해야 한다. 스텁의 restrict 대역
+ * (§ e2e/stub/server.mjs RESTRICT_REFS)이 살아 있는지 여기로 직접 찔러 확인한다 —
+ * 대역이 조용히 없어지면 순서 검증이 통째로 무의미해지기 때문이다.
+ */
+export async function stubRawDelete(
+  table: string,
+  query: string
+): Promise<{ status: number; code: string | null }> {
+  const res = await fetch(`${E2E_STUB_URL}/rest/v1/${table}?${query}`, { method: 'DELETE' })
+
+  // 성공(204)은 본문이 없다 — 그때 code 는 null 이다.
+  let code: string | null = null
+  try {
+    code = ((await res.json()) as { code?: string })?.code ?? null
+  } catch {
+    code = null
+  }
+
+  return { status: res.status, code }
+}
+
 /** 앱이 만들 수 없는 행을 심는다(원문을 알고 있는 이메일 인증 토큰 등). */
 export async function stubInsert(table: string, row: Record<string, unknown>): Promise<void> {
   const res = await fetch(`${E2E_STUB_URL}/__control/rows`, {

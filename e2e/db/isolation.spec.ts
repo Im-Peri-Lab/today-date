@@ -986,6 +986,15 @@ test.describe('세션 주체 · 기기 기억', () => {
     expect(s1?.user_id).toBe(refs.partnerUser)
     expect(s1?.user_id).not.toBe(refs.soloUser)
 
+    /*
+     * 이 이메일 단계는 "둘 중 누구인지" 고르는 것뿐이다 — 가입도, 재초대도 아니다.
+     * 이미 그 커플의 멤버인 이메일이면 그 자리에서 바로 로그인되고, DB 는 그대로여야
+     * 한다: 사용자 행이 늘지 않고(=새로 가입시키지 않음), 초대·인증 토큰도 생기지
+     * 않는다(=메일을 보내지 않음). 잠금해제 라우트에는 insert·발송 호출이 아예 없다.
+     */
+    expect(await stubRows('users')).toHaveLength(2)
+    expect(await stubRows('email_tokens')).toHaveLength(0)
+
     // ── 기기 2: 초대자로 로그인 (같은 패스코드, 다른 이메일) ──
     const context2 = await browser.newContext()
     const page2 = await context2.newPage()

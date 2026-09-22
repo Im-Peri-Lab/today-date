@@ -4,6 +4,7 @@ import { Suspense, useCallback, useEffect, useRef, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { useTopLoader } from 'nextjs-toploader'
+import { ArrowLeft, Loader2, LogIn } from 'lucide-react'
 import { PasscodeInput } from '@/components/PasscodeInput'
 import { AuthLayout } from '@/components/auth/AuthLayout'
 import { cn } from '@/lib/utils'
@@ -83,6 +84,16 @@ export default function LockPage() {
   const [isLoading, setIsLoading] = useState(false)
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
+  /**
+   * "누구인지" 확인 단계.
+   *
+   * 함께 쓰는 계정(PAIRED)이면서 이 기기에 기억이 없을 때만 서버가 요구한다
+   * (§ api/auth/unlock 의 needsEmail). 맞은 패스코드는 여기 들고 있다가 이메일과
+   * 함께 다시 보낸다 — 사용자에게 6자리를 다시 입력하게 하지 않기 위함이다.
+   */
+  const [identityPasscode, setIdentityPasscode] = useState<string | null>(null)
+  const [email, setEmail] = useState('')
+
   useEffect(() => {
     if (!lockedUntil) return
     function tick() {
@@ -99,7 +110,7 @@ export default function LockPage() {
     return () => { if (timerRef.current) clearInterval(timerRef.current) }
   }, [lockedUntil])
 
-  const handleComplete = useCallback(async (code: string) => {
+  const submitUnlock = useCallback(async (passcode: string, identityEmail?: string) => {
     setIsLoading(true)
     setError('')
     topLoader.start()
@@ -107,13 +118,27 @@ export default function LockPage() {
       const res = await fetch('/api/auth/unlock', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ passcode: code }),
+        body: JSON.stringify(
+          identityEmail ? { passcode, email: identityEmail } : { passcode }
+        ),
       })
       const json = await res.json()
 
       if (res.status === 423 || json.locked) {
         setIsLocked(true)
         setLockedUntil(new Date(json.lockedUntil))
+        topLoader.done()
+        return
+      }
+
+      /*
+       * 패스코드는 맞았지만 두 파트너 중 누구인지 모른다 → 이메일 단계로 넘어간다.
+       * 이 응답은 패스코드를 통과한 요청에만 오므로, 화면이 이 분기를 타는 것 자체가
+       * "패스코드는 맞았다"는 뜻이다. 그래서 오류(빨강)가 아니라 안내로 보여준다.
+       */
+      if (json.needsEmail) {
+        setIdentityPasscode(passcode)
+        setError(identityEmail ? (json.error ?? '') : '')
         topLoader.done()
         return
       }
@@ -132,6 +157,27 @@ export default function LockPage() {
       setIsLoading(false)
     }
   }, [router, topLoader])
+
+  const handleComplete = useCallback(
+    (code: string) => submitUnlock(code),
+    [submitUnlock]
+  )
+
+  const handleIdentitySubmit = useCallback(
+    (e: React.FormEvent) => {
+      e.preventDefault()
+      if (!identityPasscode || !email.trim()) return
+      submitUnlock(identityPasscode, email.trim())
+    },
+    [identityPasscode, email, submitUnlock]
+  )
+
+  /** 패스코드부터 다시 — 이메일 단계를 벗어나는 유일한 길(잘못 입력했을 때의 탈출구). */
+  const restartFromPasscode = useCallback(() => {
+    setIdentityPasscode(null)
+    setEmail('')
+    setError('')
+  }, [])
 
   const showLock = isLocked || DEV_FORCE_LOCK
   const displaySeconds = DEV_FORCE_LOCK && !isLocked ? 582 : countdown
@@ -159,13 +205,62 @@ export default function LockPage() {
         </div>
       )}
 
-      <PasscodeInput
-        onComplete={handleComplete}
-        disabled={isLoading || showLock}
-        error={showLock ? '' : error}
-        clearOnError
-        label={showLock ? undefined : '패스코드 입력'}
-      />
+      {identityPasscode && !showLock ? (
+        <div className={styles.card}>
+          <div className={styles.cardHeader}>
+            <span className={styles.iconBadge}>
+              <LogIn size={22} strokeWidth={1.75} />
+            </span>
+            <p className={styles.cardTitle}>누구로 로그인하시나요?</p>
+            <p className={styles.cardDesc}>
+              함께 쓰는 계정이라 이 기기에서 한 번만 확인해요.
+              <br />
+              다음부터는 패스코드만 입력하면 돼요.
+            </p>
+          </div>
+          <form onSubmit={handleIdentitySubmit} className={styles.form}>
+            <div className={styles.field}>
+              <label htmlFor="identity-email" className={styles.label}>
+                내 이메일 주소
+              </label>
+              <input
+                id="identity-email"
+                type="email"
+                autoComplete="email"
+                autoFocus
+                className={styles.input}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+              {error && <p className={styles.errorText}>{error}</p>}
+            </div>
+            <button
+              type="submit"
+              disabled={isLoading || !email.trim()}
+              className={styles.btnPrimary}
+            >
+              {isLoading ? (
+                <Loader2 size={18} strokeWidth={1.75} className="animate-spin" />
+              ) : (
+                <LogIn size={18} strokeWidth={1.75} />
+              )}
+              {isLoading ? '확인 중...' : '로그인'}
+            </button>
+            <button type="button" onClick={restartFromPasscode} className={styles.link}>
+              <ArrowLeft size={15} strokeWidth={1.75} aria-hidden />
+              패스코드 다시 입력
+            </button>
+          </form>
+        </div>
+      ) : (
+        <PasscodeInput
+          onComplete={handleComplete}
+          disabled={isLoading || showLock}
+          error={showLock ? '' : error}
+          clearOnError
+          label={showLock ? undefined : '패스코드 입력'}
+        />
+      )}
     </AuthLayout>
   )
 }

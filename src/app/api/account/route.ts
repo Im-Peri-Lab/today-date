@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { deleteSoloAccount } from '@/lib/auth/accountDeletion'
 import { requireCoupleScope } from '@/lib/auth/coupleScope'
+import { DEVICE_USER_COOKIE } from '@/lib/auth/deviceUser'
 import { getSession } from '@/lib/auth/session'
 import { PENDING_USER_COOKIE } from '@/lib/auth/pendingUser'
 
@@ -70,6 +71,10 @@ export async function DELETE() {
     // 초대 수락 직후의 쪽지가 남아 있다면 함께 지운다 — 지워진 커플의 user_id 를
     // 가리키는 쪽지는 아무 의미가 없고, 30분 뒤 만료를 기다릴 이유도 없다.
     res.cookies.delete(PENDING_USER_COOKIE)
+
+    // 기기 기억도 같은 이유로 지운다 — 사라진 커플의 사용자를 1년간 가리키고 있으면,
+    // 같은 이메일로 재가입한 뒤의 첫 로그인이 낡은 커플을 먼저 조회하게 된다.
+    res.cookies.delete(DEVICE_USER_COOKIE)
 
     return res
   } catch (err) {

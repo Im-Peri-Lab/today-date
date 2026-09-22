@@ -725,6 +725,42 @@ test.describe('파트너 초대 · 수락', () => {
     await expect(page.getByRole('link', { name: /파트너 초대/ })).toHaveCount(0)
   })
 
+  test('수락 직후 로그인한 기기는 이후 재로그인에도 그 파트너로 유지된다', async ({ page }) => {
+    await resetStub('solo')
+    await plantInvite({
+      rawToken: RAW_INVITE,
+      email: refs.partnerEmail,
+      coupleId: refs.soloCouple,
+    })
+
+    await page.goto(`/invite?token=${RAW_INVITE}`)
+    await page.keyboard.type(refs.soloPasscode)
+    await page.waitForURL((url) => url.pathname === '/', { timeout: 15_000 })
+
+    const joined = (await readSessionCookie(page))?.user_id
+    const users = await stubRows<StubUserRow>('users')
+    expect(joined).toBe(users.find((u) => u.email === refs.partnerEmail)?.id)
+
+    /*
+     * 여기가 이 기능의 핵심이다. pending-user 쪽지는 1회용이라 두 번째 로그인에는
+     * 없다. 예전에는 그래서 "먼저 만들어진 사용자"(초대자)로 수렴해, 초대받은 사람이
+     * 파트너 화면에서 자기 이메일을 상대로 봤다. 이제는 첫 로그인이 심은 기기 기억이
+     * 그 역할을 이어받는다(§ lib/auth/deviceUser.ts).
+     */
+    await page.context().clearCookies({ name: 'today-date-session' })
+    await page.goto('/lock')
+    await page.keyboard.type(refs.soloPasscode)
+    await page.waitForURL((url) => url.pathname === '/', { timeout: 15_000 })
+
+    expect((await readSessionCookie(page))?.user_id).toBe(joined)
+    expect((await readSessionCookie(page))?.user_id).not.toBe(refs.soloUser)
+
+    // 그래서 파트너 화면에는 초대자(상대)가 보인다 — 자기 이메일이 아니다.
+    await page.goto('/partner/info')
+    await expect(page.getByText(refs.soloEmail)).toBeVisible({ timeout: 15_000 })
+    await expect(page.getByText(refs.partnerEmail)).toHaveCount(0)
+  })
+
   test('같은 초대 링크를 두 번 열어도 두 번째는 거부된다 (used_at)', async ({ page }) => {
     await resetStub('solo')
     await plantInvite({
@@ -909,6 +945,135 @@ test.describe('파트너 초대 · PAIRED 전환 후 격리', () => {
  * 고르는 판정이 뒤집히면 자기 이메일을 파트너로 보게 된다 — 응답 코드로는 절대
  * 드러나지 않는 종류의 버그다. 그래서 A→B / B→A 를 한 테스트에서 교차로 확인한다.
  */
+/**
+ * 세션 주체 — "패스코드를 넣은 사람이 두 파트너 중 누구인가".
+ *
+ * 패스코드는 커플 단위로 하나뿐이라 그 자체로는 사람을 가리키지 않는다. 단서 없이
+ * 먼저 만들어진 사용자로 발급하던 예전 동작에서는, 초대받은 사람이 재로그인할 때마다
+ * 파트너의 세션을 받아 파트너 화면에서 자기 이메일을 상대로 봤다. 응답 코드로는 전혀
+ * 드러나지 않는 종류의 오류이므로, 여기서는 매번 세션 쿠키를 직접 열어 확인한다.
+ *
+ * 단서의 우선순위 판정 자체는 순수 함수 단위 테스트가 표로 덮는다
+ * (§ src/lib/auth/couple.test.ts resolveSessionUser). 이 스펙은 그 판정이 실제 쿠키·
+ * 화면·라우트를 타고 끝까지 이어지는지를 본다.
+ */
+test.describe('세션 주체 · 기기 기억', () => {
+  /** 세션 쿠키만 지운다 = 30일 만료 재로그인(기기 기억은 남는다). 로그아웃과 다른 경로다. */
+  async function expireSessionOnly(page: Page) {
+    await page.context().clearCookies({ name: 'today-date-session' })
+  }
+
+  test('PAIRED 새 기기는 누구인지 묻고, 이메일로 각자 자기 세션을 받는다 (교차)', async ({
+    page,
+    browser,
+  }) => {
+    await resetStub('paired')
+
+    // ── 기기 1: 나중에 합류한 파트너로 로그인 ──
+    await page.goto('/lock')
+    await page.keyboard.type(refs.soloPasscode)
+
+    // 패스코드는 맞았지만 단서가 없다 → 홈으로 가지 않고 이메일을 묻는다.
+    await expect(page.getByText('누구로 로그인하시나요?')).toBeVisible({ timeout: 15_000 })
+    await expect(page).toHaveURL(/\/lock$/)
+    expect(await readSessionCookie(page)).toBeNull()
+
+    await page.getByLabel('내 이메일 주소').fill(refs.partnerEmail)
+    await page.getByRole('button', { name: '로그인' }).click()
+    await page.waitForURL((url) => url.pathname === '/', { timeout: 15_000 })
+
+    const s1 = await readSessionCookie(page)
+    expect(s1?.user_id).toBe(refs.partnerUser)
+    expect(s1?.user_id).not.toBe(refs.soloUser)
+
+    // ── 기기 2: 초대자로 로그인 (같은 패스코드, 다른 이메일) ──
+    const context2 = await browser.newContext()
+    const page2 = await context2.newPage()
+    await page2.goto('/lock')
+    await page2.keyboard.type(refs.soloPasscode)
+    await expect(page2.getByText('누구로 로그인하시나요?')).toBeVisible({ timeout: 15_000 })
+    await page2.getByLabel('내 이메일 주소').fill(refs.soloEmail)
+    await page2.getByRole('button', { name: '로그인' }).click()
+    await page2.waitForURL((url) => url.pathname === '/', { timeout: 15_000 })
+
+    expect((await readSessionCookie(page2))?.user_id).toBe(refs.soloUser)
+
+    // ── 두 기기의 파트너 화면이 서로 상대를 가리킨다 ──
+    await page.goto('/partner/info')
+    await expect(page.getByText(refs.soloEmail)).toBeVisible({ timeout: 15_000 })
+    await expect(page.getByText(refs.partnerEmail)).toHaveCount(0)
+
+    await page2.goto('/partner/info')
+    await expect(page2.getByText(refs.partnerEmail)).toBeVisible({ timeout: 15_000 })
+    await expect(page2.getByText(refs.soloEmail)).toHaveCount(0)
+
+    await context2.close()
+  })
+
+  test('한 번 확인한 기기는 세션이 만료돼도 다시 묻지 않는다 (패스코드만)', async ({ page }) => {
+    await resetStub('paired')
+    await page.goto('/lock')
+    await page.keyboard.type(refs.soloPasscode)
+    await page.getByLabel('내 이메일 주소').fill(refs.partnerEmail)
+    await page.getByRole('button', { name: '로그인' }).click()
+    await page.waitForURL((url) => url.pathname === '/', { timeout: 15_000 })
+
+    await expireSessionOnly(page)
+    await page.goto('/lock')
+    await page.keyboard.type(refs.soloPasscode)
+
+    // 이메일 단계 없이 바로 홈 — 그리고 같은 사람으로 돌아온다.
+    await page.waitForURL((url) => url.pathname === '/', { timeout: 15_000 })
+    expect((await readSessionCookie(page))?.user_id).toBe(refs.partnerUser)
+  })
+
+  test('로그아웃은 기기 기억까지 끊는다 — 다음 로그인 때 다시 묻는다', async ({ page }) => {
+    await resetStub('paired')
+    await page.goto('/lock')
+    await page.keyboard.type(refs.soloPasscode)
+    await page.getByLabel('내 이메일 주소').fill(refs.partnerEmail)
+    await page.getByRole('button', { name: '로그인' }).click()
+    await page.waitForURL((url) => url.pathname === '/', { timeout: 15_000 })
+
+    await page.getByRole('button', { name: '메뉴' }).click()
+    await page.getByRole('menuitem', { name: '로그아웃' }).click()
+    await page.waitForURL(/\/lock$/, { timeout: 15_000 })
+
+    // 기억이 끊겼으므로 다시 묻는다 — 한 기기를 둘이 번갈아 쓸 때의 전환 수단이다.
+    await page.keyboard.type(refs.soloPasscode)
+    await expect(page.getByText('누구로 로그인하시나요?')).toBeVisible({ timeout: 15_000 })
+
+    // 이번에는 반대쪽 사람으로 들어간다.
+    await page.getByLabel('내 이메일 주소').fill(refs.soloEmail)
+    await page.getByRole('button', { name: '로그인' }).click()
+    await page.waitForURL((url) => url.pathname === '/', { timeout: 15_000 })
+    expect((await readSessionCookie(page))?.user_id).toBe(refs.soloUser)
+  })
+
+  test('그 커플의 이메일이 아니면 로그인되지 않는다', async ({ page }) => {
+    await resetStub('paired')
+    await page.goto('/lock')
+    await page.keyboard.type(refs.soloPasscode)
+    await page.getByLabel('내 이메일 주소').fill(refs.outsiderEmail)
+    await page.getByRole('button', { name: '로그인' }).click()
+
+    await expect(page.getByText('이 계정에 등록된 이메일이 아니에요.')).toBeVisible({
+      timeout: 15_000,
+    })
+    await expect(page).toHaveURL(/\/lock$/)
+    expect(await readSessionCookie(page)).toBeNull()
+  })
+
+  test('SOLO 는 후보가 한 명이라 묻지 않는다 (회귀)', async ({ page }) => {
+    await resetStub('solo')
+    await page.goto('/lock')
+    await page.keyboard.type(refs.soloPasscode)
+
+    await page.waitForURL((url) => url.pathname === '/', { timeout: 15_000 })
+    expect((await readSessionCookie(page))?.user_id).toBe(refs.soloUser)
+  })
+})
+
 test.describe('파트너 정보 · 나 아닌 상대', () => {
   test('PAIRED 두 세션이 각자 상대의 이메일·가입일을 받는다 (교차 확인)', async ({
     page,

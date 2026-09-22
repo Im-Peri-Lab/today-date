@@ -3,6 +3,11 @@ import { z } from 'zod'
 import { getSupabaseClient } from '@/lib/supabase/client'
 import { getCoupleUsers, getSoleCouple, pickSessionUser } from '@/lib/auth/couple'
 import { hashPasscode } from '@/lib/auth/passcode'
+import {
+  DEVICE_USER_COOKIE,
+  DEVICE_USER_MAX_AGE,
+  sealDeviceUser,
+} from '@/lib/auth/deviceUser'
 import { getSession } from '@/lib/auth/session'
 
 const schema = z.object({
@@ -66,8 +71,26 @@ export async function POST(req: NextRequest) {
     session.couple_id = couple.id
     await session.save()
 
-    // app-ready 쿠키도 응답에 추가
     const res = NextResponse.json({ success: true })
+
+    /*
+     * 최초 설정도 "이 기기는 이 사람"이 확정되는 지점이므로 기기 기억을 심는다.
+     * 나중에 파트너를 초대해 PAIRED 가 되어도, 이 기기는 계속 설정한 사람으로 남는다
+     * — 그래야 초대자가 재로그인할 때 누구인지 다시 묻지 않는다(§ lib/auth/deviceUser.ts).
+     */
+    res.cookies.set(
+      DEVICE_USER_COOKIE,
+      await sealDeviceUser({ user_id: verifiedUser.id, couple_id: couple.id }),
+      {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: DEVICE_USER_MAX_AGE,
+        path: '/',
+      }
+    )
+
+    // app-ready 쿠키도 응답에 추가
     res.cookies.set('app-ready', '1', {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',

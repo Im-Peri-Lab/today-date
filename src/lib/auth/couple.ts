@@ -112,18 +112,82 @@ export async function getCoupleUsers(coupleId: string): Promise<CoupleUserRow[]>
 /**
  * 세션에 담을 사용자를 고른다 — 인증된 사용자 중 가장 먼저 생성된 사람.
  *
- * 패스코드는 커플 단위로 하나이므로 잠금해제 요청만으로는 두 파트너 중 누가
- * 들어왔는지 알 수 없다. SOLO 에서는 후보가 1명이라 모호함이 없다.
- *
- * PAIRED 에서는 후보가 2명이라 이 함수만으로는 모호하다. 초대 수락 직후의 첫
- * 잠금해제는 pending-user 쿠키가 user_id 를 지정하므로 /api/auth/unlock 이 이 함수를
- * 건너뛴다(src/lib/auth/pendingUser.ts). 그 뒤의 재로그인은 여전히 모호해 먼저 만들어진
- * 사용자로 수렴한다 — 패스코드가 커플 단위 하나라는 설계의 결과이며, 데이터는 커플
- * 단위로 공유되므로 기능상 차이는 없다. 파트너별 구분이 필요해지면 잠금 화면이
- * 이메일을 받거나 파트너별 자격증명을 도입해야 한다.
+ * 후보가 1명인 SOLO 에서만 모호함이 없다. PAIRED 에서 이 함수를 그대로 쓰면 항상
+ * 먼저 만들어진 사용자(=초대자)로 수렴하므로, 잠금해제는 이 함수를 직접 쓰지 않고
+ * resolveSessionUser 를 거친다 — 그 쪽이 단서의 우선순위와 "모호하면 묻는다"를 함께
+ * 판정한다. 이 함수는 그 마지막 단계(후보가 하나뿐인 경우)로만 남는다.
  */
 export function pickSessionUser(users: CoupleUserRow[]): CoupleUserRow | null {
   return users.find((u) => u.email_verified) ?? null
+}
+
+/**
+ * 잠금해제가 세션 주체를 정한 결과.
+ *   resolved      — 이 사용자로 세션을 발급한다.
+ *   needsIdentity — 패스코드는 맞았지만 두 파트너 중 누구인지 알 수 없다 → 이메일을 묻는다.
+ *   emailMismatch — 입력한 이메일이 이 커플의 인증된 사용자와 맞지 않는다.
+ *   none          — 세션에 담을 사용자가 없다(데이터 이상 또는 무효한 쪽지).
+ */
+export type SessionUserResolution =
+  | { kind: 'resolved'; user: CoupleUserRow }
+  | { kind: 'needsIdentity' }
+  | { kind: 'emailMismatch' }
+  | { kind: 'none' }
+
+/** 화면에서 입력받은 이메일 비교용 정규화 — 메모리 안 비교에만 쓴다(저장·조회 형식은 불변). */
+function sameEmail(a: string, b: string): boolean {
+  return a.trim().toLowerCase() === b.trim().toLowerCase()
+}
+
+/**
+ * 잠금해제 시 "이 세션은 누구인가"를 정한다 — 단서의 우선순위를 한곳에 못 박는다.
+ *
+ * 패스코드는 커플 단위로 하나뿐이라 그 자체로는 사람을 가리키지 않는다. 그래서
+ * 커플이 확정된 뒤에도 주체를 정할 단서가 따로 필요하고, 그 단서가 세 종류다.
+ * 아래 순서는 "얼마나 확실한 근거인가"로 정렬돼 있다:
+ *
+ *   1. pending 쪽지  — 서버가 방금 초대 수락을 처리하며 남긴 사실. 가장 확실하다.
+ *      쪽지가 가리키는 행이 없거나 미인증이면 none 으로 닫는다(다른 단서로 되돌리지
+ *      않는다) — 초대받은 사람이 조용히 파트너의 세션을 받는 일이 없어야 한다.
+ *   2. 입력한 이메일  — 사용자가 방금 명시적으로 말한 사실. 기기 기억을 이긴다.
+ *      한 기기를 둘이 번갈아 쓰는 경우의 유일한 탈출구이기도 하다.
+ *   3. 기기 기억     — "이 브라우저의 주인"이라는 과거의 추측. 맞지 않으면(사용자가
+ *      사라졌거나 다른 커플의 기억) 실패시키지 않고 다음 단계로 내려간다.
+ *   4. 후보가 하나   — SOLO. 모호함이 없다.
+ *   5. 그 외         — PAIRED 인데 단서가 없다 → needsIdentity(이메일을 묻는다).
+ *
+ * 순수 함수로 둔 이유: 이 우선순위가 어긋나면 "남의 계정으로 보이는" 종류의 버그가
+ * 되는데, DB·쿠키·HTTP 를 끼고는 표를 다 덮는 테스트를 쓰기 어렵다.
+ */
+export function resolveSessionUser(opts: {
+  /** 이 커플의 사용자 전원(created_at 오름차순, § getCoupleUsers). */
+  users: CoupleUserRow[]
+  pendingUserId?: string | null
+  deviceUserId?: string | null
+  email?: string | null
+}): SessionUserResolution {
+  const { users, pendingUserId, deviceUserId, email } = opts
+  const verified = users.filter((u) => u.email_verified)
+
+  if (pendingUserId) {
+    const user = verified.find((u) => u.id === pendingUserId)
+    return user ? { kind: 'resolved', user } : { kind: 'none' }
+  }
+
+  if (email) {
+    const user = verified.find((u) => sameEmail(u.email, email))
+    return user ? { kind: 'resolved', user } : { kind: 'emailMismatch' }
+  }
+
+  if (deviceUserId) {
+    const user = verified.find((u) => u.id === deviceUserId)
+    if (user) return { kind: 'resolved', user }
+  }
+
+  if (verified.length === 1) return { kind: 'resolved', user: verified[0] }
+  if (verified.length === 0) return { kind: 'none' }
+
+  return { kind: 'needsIdentity' }
 }
 
 /**

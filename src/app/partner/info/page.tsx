@@ -41,12 +41,19 @@ export default async function PartnerInfoPage() {
         <section
           className={cn(styles.card, styles.detailCard, 'mt-5 px-5 py-4 lg:px-6 lg:py-5')}
         >
-          {/* 닉네임은 미설정이 정상 상태다(§ 016) — 설정했을 때만 행을 추가한다. */}
-          {partner.nickname && <DetailRow label="닉네임">{partner.nickname}</DetailRow>}
-          <DetailRow label="이메일">
-            <span className="break-all">{partner.email}</span>
-          </DetailRow>
-          <DetailRow label="가입일">{formatKoreanTimestamp(partner.joinedAt)}</DetailRow>
+          {/*
+            각 행(sheetRow)의 자체 padding-top 이 헤더 없는 카드에서 첫 행 위쪽만
+            유독 넓어 보이게 한다(§ AccountInfoBlock 과 동일 이유). 첫 자식만
+            padding-top 0으로 되돌린다.
+          */}
+          <div className="[&>*:first-child]:!pt-0">
+            {/* 닉네임은 미설정이 정상 상태다(§ 016) — 설정했을 때만 행을 추가한다. */}
+            {partner.nickname && <DetailRow label="닉네임">{partner.nickname}</DetailRow>}
+            <DetailRow label="이메일">
+              <span className="break-all">{partner.email}</span>
+            </DetailRow>
+            <DetailRow label="가입일">{formatKoreanTimestamp(partner.joinedAt)}</DetailRow>
+          </div>
         </section>
       </div>
     </main>

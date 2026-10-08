@@ -22,6 +22,9 @@ export const metadata: Metadata = {
   title: 'Today Date',
   description: '우리 둘만의 데이트 기록',
   manifest: '/manifest.json',
+  // iOS Safari가 이메일처럼 보이는 텍스트를 자동으로 밑줄+링크화하는 것을 막는다 —
+  // 그 자동 밑줄이 줄바꿈 경계에서 끊겨 보이는 문제(계정/파트너 정보 화면의 이메일 표시)가 있었다.
+  formatDetection: { email: false },
 }
 
 export const viewport: Viewport = {

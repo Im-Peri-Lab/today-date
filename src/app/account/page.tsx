@@ -38,7 +38,11 @@ export default async function AccountPage() {
         <p className={styles.pageSubtitle}>닉네임을 설정하면 파트너 화면에 표시돼요 💜</p>
 
         <div className="mt-5">
-          <AccountInfoBlock email={self.email} initialNickname={self.nickname} />
+          <AccountInfoBlock
+            email={self.email}
+            initialNickname={self.nickname}
+            joinedAt={self.created_at}
+          />
         </div>
       </div>
     </main>

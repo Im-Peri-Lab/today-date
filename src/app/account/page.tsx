@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils'
 import styles from '@/components/screens.module.css'
 
 /**
- * 계정 화면 — SOLO/PAIRED 양쪽 모두 접근 가능하다(형제 화면 /partner/info 는 PAIRED
+ * 내 정보 화면 — SOLO/PAIRED 양쪽 모두 접근 가능하다(형제 화면 /partner/info 는 PAIRED
  * 전용, /account/delete 는 SOLO 전용이지만, 닉네임은 둘 다 설정할 수 있는 내 정보다).
  *
  * 세션 user_id 로 "나"를 직접 찾는다 — SOLO 의 users[0] 단정(§ /account/delete)이나
@@ -34,7 +34,7 @@ export default async function AccountPage() {
           홈으로
         </Link>
 
-        <h1 className={cn('mt-4', styles.pageTitle)}>계정</h1>
+        <h1 className={cn('mt-4', styles.pageTitle)}>내 정보</h1>
         <p className={styles.pageSubtitle}>닉네임을 설정하면 파트너 화면에 표시돼요 💜</p>
 
         <div className="mt-5">

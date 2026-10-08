@@ -96,13 +96,13 @@ export function HomeMenu() {
 
   const items: MenuItemDef[] = [
     /*
-     * "계정"(닉네임 설정)은 SOLO/PAIRED 구분 없이 항상 그린다 — 닉네임은 파트너
+     * "내 정보"(닉네임 설정)는 SOLO/PAIRED 구분 없이 항상 그린다 — 닉네임은 파트너
      * 존재 여부와 무관하게 누구나 설정할 수 있는 내 정보다(§ app/account/page.tsx).
      */
     {
       kind: 'link' as const,
       key: 'account',
-      label: '계정',
+      label: '내 정보',
       icon: UserPen,
       href: '/account',
     },
@@ -111,7 +111,7 @@ export function HomeMenu() {
           {
             kind: 'link' as const,
             key: 'partner',
-            label: '파트너',
+            label: '파트너 정보',
             icon: Users,
             href: '/partner/info',
           },
@@ -156,7 +156,7 @@ export function HomeMenu() {
    *
    * 구분선의 역할은 "되돌릴 수 없는 항목을 위의 평범한 항목들과 갈라 두는 것" 하나다.
    * 카드 ⋮ 메뉴가 "구분선은 삭제 앞 하나만"으로 정한 것과 같은 규칙이다(§ 디자인 5-A).
-   * 그래서 파괴적 항목이 없는 조합(PAIRED — 계정 · 파트너 · 로그아웃)에는 선이 없고,
+   * 그래서 파괴적 항목이 없는 조합(PAIRED — 내 정보 · 파트너 정보 · 로그아웃)에는 선이 없고,
    * 파괴적 항목이 첫 항목이면 위에 가를 것이 없으므로 역시 그리지 않는다.
    */
   const firstDestructiveIndex = items.findIndex((item) => item.variant === 'destructive')

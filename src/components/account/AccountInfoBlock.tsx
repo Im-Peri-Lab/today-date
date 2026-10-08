@@ -1,10 +1,10 @@
 'use client'
 
 import { useState } from 'react'
+import { Loader2, Pencil } from 'lucide-react'
 import { toast } from 'sonner'
-import { DetailBlock } from '@/components/track/DetailBlock'
 import { DetailRow } from '@/components/track/DetailRow'
-import { FormField } from '@/components/forms/FormField'
+import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/utils'
 import styles from '@/components/screens.module.css'
@@ -12,12 +12,10 @@ import styles from '@/components/screens.module.css'
 const NICKNAME_MAX_LENGTH = 20
 
 /**
- * 계정 정보 블록(/account) — 이메일(읽기 전용, 인증 식별자)과 닉네임(편집 가능, 표시용)을
- * 한 카드에 담는다. 이메일을 이 블록에서 함께 보여주는 이유: 닉네임이 뭘 바꾸는
- * 값인지("이메일 대신 화면에 보일 이름") 바로 옆에서 확인할 수 있어야 한다.
- *
- * DetailBlock 의 기존 편집/저장/취소 셸을 그대로 재사용한다(§ ActivityDetail 등과
- * 같은 패턴) — 이 화면만을 위한 새 편집 UI를 만들지 않는다.
+ * 내 정보 카드(/account) — 닉네임(편집 가능, 표시용)과 이메일(읽기 전용, 인증 식별자)을
+ * 한 카드에 담는다. /partner/info 와 같은 헤더 없는 카드 형태를 공유하되(§ 디자인 통일),
+ * 편집 가능한 필드가 닉네임 하나뿐이라 카드 전체가 아니라 닉네임 행만 편집 상태를
+ * 갖는다 — DetailBlock(블록 전체 편집)은 이 용도에 맞지 않아 쓰지 않는다.
  */
 export function AccountInfoBlock({
   email,
@@ -66,17 +64,13 @@ export function AccountInfoBlock({
   }
 
   return (
-    <DetailBlock
-      title="계정 정보"
-      editing={editing}
-      onEdit={startEdit}
-      onCancel={cancelEdit}
-      onSave={saveNickname}
-      saving={saving}
+    <section
+      className={cn(styles.card, styles.detailCard, 'px-5 py-4 lg:px-6 lg:py-5')}
     >
-      {editing ? (
-        <div>
-          <FormField label="닉네임" htmlFor="account-nickname">
+      <div className={styles.sheetRow}>
+        <p className={cn('mb-1.5 uppercase tracking-wide', styles.fieldLabel)}>닉네임</p>
+        {editing ? (
+          <div>
             <Input
               id="account-nickname"
               type="text"
@@ -86,23 +80,52 @@ export function AccountInfoBlock({
               value={value}
               onChange={(e) => setValue(e.target.value)}
               disabled={saving}
+              autoFocus
             />
-          </FormField>
-          <p className={cn('mt-1.5 text-xs', styles.sub)}>
-            최대 {NICKNAME_MAX_LENGTH}자. 비워두면 이메일로 표시돼요.
-          </p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2">
-          {/* 이메일은 길어서 줄바꿈이 필요하므로 wide(2열 점유) — § 디자인 10-C */}
-          <DetailRow label="이메일" wide>
-            <span className="break-all">{email}</span>
-          </DetailRow>
-          <DetailRow label="닉네임">
-            {nickname ?? <span className={styles.faint}>설정 안 함</span>}
-          </DetailRow>
-        </div>
-      )}
-    </DetailBlock>
+            <p className={cn('mt-1.5 text-xs', styles.sub)}>
+              최대 {NICKNAME_MAX_LENGTH}자. 비워두면 이메일로 표시돼요.
+            </p>
+            <div className="mt-3 flex gap-2">
+              <Button
+                type="button"
+                onClick={saveNickname}
+                disabled={saving}
+                className={cn(styles.detailPrimaryBtn, 'h-9 gap-1.5 px-4 text-white hover:brightness-105')}
+              >
+                {saving && <Loader2 className="h-4 w-4 animate-spin" />}
+                {saving ? '저장 중...' : '저장'}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={cancelEdit}
+                disabled={saving}
+                className="h-9 px-4"
+              >
+                취소
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <div className="flex items-center gap-1.5">
+            <span className={styles.bodyText}>
+              {nickname ?? <span className={styles.faint}>설정 안 함</span>}
+            </span>
+            <button
+              type="button"
+              className={styles.editGhostBtn}
+              onClick={startEdit}
+              aria-label="닉네임 수정"
+            >
+              <Pencil className="h-4 w-4" />
+            </button>
+          </div>
+        )}
+      </div>
+
+      <DetailRow label="이메일">
+        <span className="break-all">{email}</span>
+      </DetailRow>
+    </section>
   )
 }

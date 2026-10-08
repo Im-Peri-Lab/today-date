@@ -107,13 +107,27 @@ export function AccountInfoBlock({
             </div>
           </div>
         ) : (
-          <div className="flex items-center gap-1.5">
+          /*
+            버튼을 relative 행 안에서 absolute + 세로 중앙 정렬로 띄운다 — flex
+            자식으로 나란히 두면 버튼의 고정 높이(28px)가 텍스트 한 줄(~20px)보다
+            커서 행 자체가 그만큼 늘어나 다음 행(이메일)과의 간격이 유독 넓어
+            보인다(DetailBlock 모서리 펜슬도 같은 이유로 absolute다 — § 디자인 10-B).
+            absolute로 빼면 행 높이는 텍스트 한 줄에만 좌우되고, 버튼은 그 중앙에
+            겹쳐 떠 "라인 오른쪽 끝"에 자연스럽게 고정된다.
+          */
+          <div className="relative pr-9">
             <span className={styles.bodyText}>
               {nickname ?? <span className={styles.faint}>설정 안 함</span>}
             </span>
+            {/*
+              mapActionBtn(28px/16px 글리프, §7)을 재사용한다 — 원래 "인접 액션
+              쌍 전용"이지만 토큰·색은 동일하고, 이 자리는 애초에 absolute라 어느
+              크기든 행 높이에 영향이 없다. editGhostBtn(36px)보다 한 단계 작아
+              텍스트 한 줄 곁에서 과하지 않다.
+            */}
             <button
               type="button"
-              className={styles.editGhostBtn}
+              className={cn(styles.mapActionBtn, 'absolute right-0 top-1/2 -translate-y-1/2')}
               onClick={startEdit}
               aria-label="닉네임 수정"
             >

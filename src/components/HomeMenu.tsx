@@ -15,7 +15,6 @@ import {
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu'
 import { usePartner } from '@/hooks/usePartner'
-import { displayName } from '@/lib/displayName'
 import styles from '@/components/screens.module.css'
 
 /**
@@ -112,9 +111,7 @@ export function HomeMenu() {
           {
             kind: 'link' as const,
             key: 'partner',
-            // 좁은 메뉴 항목이라 닉네임만(미설정 시 이메일로 폴백) — 둘 다 보여줄
-            // 여유가 있는 /partner/info 와 다른 표시 정책이다(§ lib/displayName.ts).
-            label: displayName(partnerData.partner.nickname, partnerData.partner.email),
+            label: '파트너',
             icon: Users,
             href: '/partner/info',
           },
@@ -186,8 +183,7 @@ export function HomeMenu() {
                   render={<Link href={item.href} />}
                 >
                   <Icon />
-                  {/* 파트너 항목은 이메일로 폴백될 수 있어 길다 — 한 줄 말줄임 */}
-                  <span className="min-w-0 flex-1 truncate">{item.label}</span>
+                  {item.label}
                 </DropdownMenuLinkItem>
               </Fragment>
             )

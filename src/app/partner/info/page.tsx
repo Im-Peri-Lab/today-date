@@ -49,12 +49,7 @@ export default async function PartnerInfoPage() {
             <DetailRow label="이메일" wide>
               <span className="break-all">{partner.email}</span>
             </DetailRow>
-            {/*
-              닉네임은 미설정이 정상 상태다(§ 016) — 설정했을 때만 행을 추가한다.
-              이메일(인증 식별자)은 이 화면에서 항상 함께 보여준다 — 닉네임 하나로만
-              가리키면 상대를 바꿔 쓸 수 있는 자리라 식별자가 필요하다(§ displayName
-              과 다르게 이 화면은 "둘 다 보여줄 여유가 있는" 쪽이다).
-            */}
+            {/* 닉네임은 미설정이 정상 상태다(§ 016) — 설정했을 때만 행을 추가한다. */}
             {partner.nickname && <DetailRow label="닉네임">{partner.nickname}</DetailRow>}
             <DetailRow label="가입일">{formatKoreanTimestamp(partner.joinedAt)}</DetailRow>
           </div>

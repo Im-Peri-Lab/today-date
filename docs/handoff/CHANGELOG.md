@@ -625,3 +625,105 @@
 - Home Screen 아이콘이 다크모드에서도 라이트로 보이는 잔여 증상은 앱 코드 문제가 아니라, iOS 18+ "홈 화면 아이콘 모양"이 시스템 다크모드와 **별개의 사용자 Settings 토글**이라는 것으로 확인 — 앱이 강제할 수 없는 영역.
 - 별개로 관찰된 앱 실행 아이콘-줌 전환(SpringBoard 런치 애니메이션) 중 "하트만 있고 타이틀 없는" 라이트 톤 짧은 노출은, `Splash.imageset`과는 다른 시스템 전환 단계에서 AppIcon 어피어런스 variant를 반영하지 못하는 iOS 플랫폼 제약으로 추정되나 코드 레벨로 확정·수정하지 못함 — 오픈 이슈로 남김.
 - PR #116 fast-forward 머지(`chore/capacitor-init`, `9f8f443`), `feature/dark-app-icon` 브랜치 정리.
+
+---
+
+## 2026-09-04 — 커플 앱 전환용 couples/users 스키마 추가 + 단일 워크스페이스 백필 (012, 013)
+
+- `012_couples_users_schema.sql`(PR #118 squash `897b9ce`) — 순수 additive 스키마: `couples`(`passcode_hash`/`failed_attempts`/`locked_until`/`session_version`)·`users`(`couple_id` FK NOT NULL cascade·`email` unique·`email_verified`) 신규, `email_token_purpose` enum에 `invite_partner` 추가, `activities`/`places`/`recommendations_log`에 `couple_id` nullable FK(**on delete restrict**) + 인덱스. `app_config`와 그에 의존하는 인증 로직(`middleware.ts`, `/api/auth/*`)은 한 줄도 안 건드림 — `src/` 변경 0줄, 신규 테이블·컬럼은 아직 어떤 앱 코드도 참조하지 않는 이중 보관 상태.
+- `013_couples_backfill.sql` — `app_config` 단일 row를 `couples` 1행·`users` 1행(`recovery_email` 승계)으로 복제, 세 도메인 테이블의 `couple_id` NULL 행을 백필. 백필 UPDATE가 `touch_updated_at` 트리거를 발동시켜 `updated_at`(목록 정렬 기준)을 덮어쓰는 걸 막기 위해 트리거를 일시 비활성화 후 원복.
+- `activity_categories`/`place_categories`는 대상에서 의도적으로 제외 — 마이그레이션 시드 전역 참조 데이터라 지금 백필하면 카테고리가 1번 커플 소유가 되어 두 번째 커플이 카테고리 0개로 시작한다. `email_tokens`도 제외 — 이메일로만 대상을 식별하는 인증 보조 테이블.
+- 첫 적용에서 검증 블록 SQL 구문 오류(`VALUES`+`string_agg` 조합을 SQL Editor가 릴레이션으로 오해) 발견 → 개별 `if not exists` 검사로 교체, 단일 트랜잭션 전량 롤백 실측 확인. 이어서 민감값(패스코드 해시·복구 이메일) 비교를 `null` 하드코딩이 아니라 DB 안에서 boolean 비교해 `::text`로 내보내는 방식으로 정정. **라이브 DB 적용 완료.**
+- 진단 근거·couple_id 대상 판단 기준 → PROJECT_CONTEXT §20
+
+---
+
+## 2026-09-07 — 인증 단일 출처를 app_config에서 couples/users로 전환
+
+- PR #119 squash `c9845e7` — 앱 코드가 읽고 쓰는 인증 상태를 `app_config`(단일 row)에서 `couples`/`users`(다중 row)로 전환. `app_config`는 삭제하지 않고 동결 백업으로 DB에 남김 — 이후 앱 코드는 읽지도 쓰지도 않는다.
+- `src/lib/auth/couple.ts`(신규) — couples/users 조회·갱신 계층. 커플 특정 경로는 세션 `couple_id`/이메일/"유일한 커플" 셋뿐이고 `id=1` 같은 고정 키는 쓰지 않는다. `getSoleCouple()`은 커플이 정확히 1개일 때만 값을 반환, 여러 개면 임의로 고르지 않고 403.
+- `SessionData`에 `user_id`/`couple_id` 추가. `middleware.ts`는 설정 완료 게이트를 NONE/SOLO/PAIRED 상태 판별로 확장(PAIRED는 판별만, 처리는 SOLO와 동일 — TODO). `session_version` 검증은 세션의 `couple_id`로 해당 커플을 찾아 비교, 조회 실패(일시적 DB 장애)는 전환 이전처럼 통과시켜 전 기기 로그아웃을 방지. `couple_id` 없는 구쿠키(전환 이전 세션)는 만료 처리 → 기존 기기는 재로그인 1회 필요(회귀 아님, 의도된 1회 비용).
+- `/api/auth/{setup/send-verify,setup/verify,setup/passcode,unlock,forgot,reset}` couples/users 기준 전환. `logout`은 DB를 안 봐서 무변경.
+- 검증: lint/유닛(92, 상태 판별 11개 신규)/build/E2E 통과 + 실 프로덕션 데이터(SOLO)에 새 미들웨어를 읽기 전용으로 붙여 쿠키 없음/구세션/불일치/신규 세션 4가지 경로 확인.
+
+---
+
+## 2026-09-07 v2 — activities/places/recommendations_log 커플 데이터 격리
+
+- PR #120 squash `4ad7397` — 013 백필로 `couple_id`는 전 행에 채워져 있었지만 CRUD 라우트가 그 값을 필터로 안 써서, 인증만 통과한 요청이 다른 커플의 행을 읽고 쓸 수 있던 취약점 해소.
+- 조회(SELECT): 목록·상세·대시보드 집계·추천 후보 풀·추천 로그 전부 `.eq('couple_id', session.couple_id)`. 생성(INSERT): `couple_id`를 세션값으로 명시 대입(Zod 스키마에 없어 클라이언트 값은 이미 떨어지지만 라우트에서 한 번 더 못박음). 수정/삭제(UPDATE/DELETE): 신규 `isRowOwnedByCouple`로 소유권 사전 확인 후 아니면 **404**(403이 아님 — id 열거로 남의 데이터 존재를 알려주지 않기 위해), 실행 쿼리에도 `couple_id` 조건을 함께 걸어 확인-실행 사이 경합 차단(PostgREST의 UPDATE/DELETE는 0건 매칭도 오류가 아니므로 조건만 걸면 "0건 변경+200 성공"이 됨).
+- 세션의 커플 확정은 `requireCoupleScope()` 한 곳으로 모음 — `.eq('couple_id', undefined)`가 조건 없는 전체 조회가 되는 사고를 막기 위한 이중 방어. 데이터 계층(`getActivityById`/`getPlaceById`/`getDashboardStats`/`recommend*`)은 `coupleId`를 필수 인자로 받아 호출부 누락을 타입 검사에서 잡음.
+- 검증: 인메모리 PostgREST 대역(`src/test/fakeSupabase.ts`)에 가상 커플 B 행을 심고 커플 A 세션으로 실제 핸들러를 실행하는 30개 테스트, 응답 코드뿐 아니라 DB 최종 상태까지 확인. 격리 로직을 하나씩 되돌리는 변이 10종 전부 실패로 잡힘.
+- `couple_id` NOT NULL 승격은 범위 밖으로 분리 → CHANGELOG 2026-09-08
+
+---
+
+## 2026-09-08 — couple_id NOT NULL 승격(014) + 대시보드 장애 처리 + 실 라우트 E2E 하네스
+
+3개 독립 커밋(PR #121 squash `e67ea24`).
+
+- **`couple_id` NOT NULL 승격(014)** — PR #120에서 "앱의 모든 쓰기 경로가 couple_id를 채운다" 조건이 충족돼 보류가 풀림. 승격 전 세 테이블 NULL 행을 각각 세어 0건 아니면 중단(부분 승격 방지, 실패 시 전체 롤백), 선행 조건도 컬럼별 개별 확인, 이미 NOT NULL인 컬럼은 멱등하게 스킵. 로컬 Postgres 부재로 SQL 사전 실행 불가 — 멱등성·롤백 경계·검증 블록으로 안전성 확보 후 Supabase SQL Editor에서 적용(**라이브 DB 적용 완료**).
+- **대시보드 DB 오류 처리** — `getDashboardStats`가 8개 집계 쿼리의 error를 검사 안 하고 `count ?? 0`으로만 읽어, DB가 완전히 죽어도 200+전부 0이 나가던 버그 수정(빈 워크스페이스와 장애를 구별 못 하는 응답). 8개 결과 error를 모두 검사해 하나라도 있으면 던지고, 실패한 집계 이름을 메시지에 담음. 단위 테스트 4개 추가.
+- **PostgREST 스텁 기반 실 라우트 E2E 하네스(신규)** — 기존 e2e는 `page.route()`로 `/api/*`를 브라우저에서 가로채 라우트 핸들러·미들웨어·데이터 계층에 요청이 도달하지 않았다. `e2e/stub/server.mjs`(PostgREST HTTP 스텁, `.single()`의 406 PGRST116·UPDATE/DELETE 0행 무오류·컬럼 DEFAULT/NOT NULL 등 와이어 규약 재현)를 세우고 Next의 `SUPABASE_URL`을 그쪽으로 돌려 브라우저→Next 서버→미들웨어→라우트→supabase-js→스텁까지 전 구간을 실제 HTTP로 흐르게 함. 실 Supabase 접속이 없어 CI에서 시크릿 없이 상시 실행. `e2e/db/isolation.spec.ts` 신규 19개(커플 A/B 교차 침범: 목록·상세·404·PATCH/DELETE·couple_id 무시·초대 없는 신규가입 SOLO 회귀 등), 격리 로직 되돌리기 변이 7종 전부 실패로 잡힘. 기존 mocking 기반 E2E(비인증 UI 흐름)는 `chromium` 프로젝트로, DB 스펙은 상태 공유 때문에 `chromium-db`(`fullyParallel: false`)로 분리.
+- 이 세 번째 커밋으로 `src/test/*` 유닛 테스트와 병행해 두 계층(유닛=로직, e2e-db=실 HTTP 경로) 검증이 갖춰짐 → PROJECT_CONTEXT §2 기술 스택 갱신 필요
+
+---
+
+## 2026-09-08 v2 — 홈 화면에 error.tsx 오류 경계 추가
+
+- PR #122 squash `2f7c3d1` — 직전 PR에서 `getDashboardStats`가 DB 오류를 throw하게 바뀌었지만 홈 서버 컴포넌트엔 받을 경계가 없어 Next 기본 오류 화면이 뜨던 문제 수정. `/`를 `src/app/(home)/page.tsx`로 옮기고 같은 라우트 그룹에 `error.tsx` 추가 — 라우트 그룹은 URL에 흔적을 안 남기므로 경로는 그대로 `/`, 경계는 홈에만 스코프(`src/app/error.tsx`에 두면 `/list` 등 무관한 화면까지 묶임).
+- 디자인은 기존 시스템 재사용: `PageHeader` 공용 헤더, `pageTitle`/`pageSubtitle` 타이포 토큰, `CloudOff` 아이콘을 `styles.faint`(경고성 빨강 대신 EmptyState 어휘), 재시도 버튼은 `styles.detailPrimaryBtn`.
+- **재시도는 `reset()`만으로 동작하지 않음을 실측 확인**: Next 14.2.35 프로덕션 빌드에서 이 라우트가 한 번 던진 뒤 `router.refresh()`의 RSC 전용 재요청(`?_rsc=`)이 DB 복구 여부와 무관하게 항상 이전 오류 페이로드를 반환(curl로 재현). RSC 헤더 없는 일반 최상위 GET(주소창 새로고침과 동일 경로)만 매번 새로 실행됨을 확인 → 재시도는 `reset()`으로 경계 상태를 지운 뒤 `window.location.reload()`로 최상위 GET을 강제.
+- 검증: 프로덕션 빌드를 `SUPABASE_URL` 죽은 상태로 띄워 오류 화면 렌더 확인, PostgREST 스텁을 그 사이 올려 재시도가 실제로 정상 대시보드 복구하는 것까지 Playwright로 확인. `npm run ci`, e2e 21건 통과.
+
+---
+
+## 2026-09-08 v3 — 파트너 초대로 SOLO → PAIRED 전환 (015)
+
+- PR #123 squash `4d1d221` — 커플에 두 번째 사용자를 붙이는 경로. SOLO(멤버 1명)에서 PAIRED로 넘어가는 세 갈래(초대 발송·초대 수락·자가가입 시 대기 초대 확인)를 모두 구현.
+- **스키마(015)** — `email_tokens.couple_id` 추가(nullable, on delete cascade) + 인덱스 2종. 012는 `email_tokens`를 couple_id 대상에서 의도적으로 제외했었다("이메일로만 대상을 식별하는 인증 보조 테이블") — `verify_email`/`reset_passcode`/`change_email`은 그 판단이 지금도 맞지만(`target_email → users → couple`로 유도 가능), `invite_partner`만 다르다: 발송 시점에 `target_email`이 아직 `users`에 없어(있으면 초대를 막음) 토큰에서 커플을 유도할 방법이 없으므로 ①수락 시 붙일 커플 ②재초대 시 폐기 대상을 이 컬럼으로만 특정한다. **라이브 DB 적용 완료**(SQL Editor 직접 실행 + 검증 8개 전부 pass).
+- **발송**(`POST /api/auth/invite`, SOLO 전용) — 커플은 세션에서만 온다(`requireCoupleScope`, 본문의 `couple_id`는 안 읽음). PAIRED면 토큰조차 안 만들고 409. 이미 어느 `users` 행에 있는 이메일이면 발송 자체를 막음(409, 남의 계정 이메일로 초대 메일이 날아가는 것 방지). 재초대 전 그 커플의 대기 초대를 폐기(`createToken`의 정리가 `(purpose, target_email)` 기준이라 대상 이메일을 바꿔 재초대하면 옛 초대장이 살아남음). 24시간 토큰 + 기존 Resend 인프라.
+- **수락**(`/invite?token=...`, 인증 전 개방 — 미들웨어 `OPEN_PREFIXES`의 TODO를 실제로 열었다) — 토큰 검증 후 PAIRED·이메일 중복을 다시 확인(24시간 사이 상태 변화 대응). `users` 행을 `email_verified=true`로(링크 클릭이 메일함 소유 증명), 패스코드는 새로 안 만들고 커플의 기존 `passcode_hash`를 그대로 씀. 서명된 pending-user 쿠키를 남기고 `/lock`으로 리다이렉트(패스코드가 커플 단위 하나라 `unlock`이 "누가 입력했는지" 알 수 없어, 쪽지가 없으면 방금 합류한 사람이 파트너의 `user_id`로 세션을 받는 문제 방지). 리다이렉트 Location은 상대 경로(`req.url`이 Next 내부 주소를 가리켜 절대 URL로 만들면 오리진이 갈라져 방금 심은 쿠키가 유실 — e2e가 세션 쿠키의 user_id로 이 회귀를 잡음).
+- **자가가입 시 대기 초대 확인**(`send-verify`) — 커플 생성 전에 `findPendingInvite`를 먼저 확인(여기서 새 커플이 생기면 `users.email` 전역 unique 때문에 초대 링크를 눌러도 합류가 영구히 막힘). 대기 초대가 있으면 같은 커플로 재발급하고 화면은 "초대 수락" 안내로 분기.
+- **화면** — SOLO 홈에 "파트너 초대" 진입 행(PAIRED에서는 렌더 안 함), `/partner` 이메일 입력, `/lock`이 초대 결과 배너(성공/만료/중복/이미 PAIRED) 표시.
+- 검증: `e2e/db/isolation.spec.ts`에 19개 시나리오 추가(새 파일 안 만듦 — 스텁 상태가 프로세스 하나에 공유되므로 파일이 갈리면 워커가 나뉘어 상태가 섞임), solo/paired 시드 추가(실제 bcrypt 해시 포함). 변이 검증 11건 중 10건이 스펙에 잡히고, 남은 1건(수락 시 이메일 재확인 무력화)은 `users.email` 전역 unique가 같은 결과를 만들어 통과 — 의도된 이중 방어로 스펙 주석에 기록. `npm run ci` 통과(단위 126건), e2e 40건 통과.
+- 배경·설계 근거 → PROJECT_CONTEXT §1·§2·§20
+
+---
+
+## 2026-09-09 — 파트너 정보 화면 + 초대 진입점 계위 분리
+
+- PR #124 squash `f058ee9` — 홈의 "파트너 초대"가 통계 리스트 안 한 행에 섞여 있던 것(콘텐츠를 반복 열어보는 통계 행과, 계정을 한 번 세팅하는 온보딩 액션은 성격이 다름)을 분리. 삼선 메뉴는 "선언 배열 → 단일 렌더"로 재구성(이동/실행 두 종류로 못박고 표면은 공통 클래스가 맞춤 — 항목이 늘어도 모양이 안 갈림). 이동 항목은 base-ui `Menu.LinkItem`을 감싼 `DropdownMenuLinkItem`으로 실제 `<a>` 렌더.
+- PAIRED일 때만 삼선 메뉴에 "파트너" 항목이 보이고 `/partner/info`가 "세션 user_id가 아닌 나머지 한 명"의 이메일·가입일을 보여준다. 상대를 고르는 판정(`pickPartnerUser`)은 화면과 `/api/partner`가 공유하는 한 곳에 둠 — 후보가 정확히 1명이 아니면(SOLO·데이터 이상·비멤버 세션) null로 닫아 남의 이메일을 고르지 않는다. 초대 화면(`/partner`)이 PAIRED를 홈으로 되돌리는 것과 대칭으로, 이 화면은 상대가 없으면 홈으로 되돌림.
+- **초대 진입점 → 상태 안내 배너로 표면 분리(후속 커밋)** — 카드 표면(흰 면+그림자+hover 부상)을 쓰는 동안은 추천 CTA·통계 행과 대등한 "기능 버튼"으로 읽혔다. accent 틴트 면 + 틴트 보더, 그림자·부상 없는 `styles.notice`로 분리하고 자리도 CTA **위**(제목 바로 아래)로 올림. 문구도 상태를 먼저 말함: "아직 혼자 쓰고 있어요" / "파트너를 초대해 함께 위시리스트를 쌓아보세요". 새 색은 만들지 않고 인증 화면 초대 안내 배너(`auth.module.css .inviteNotice`)의 값을 `--s-notice-bg`/`--s-notice-line` 토큰으로 `.page` 스코프에 들여옴(`--s-accent-soft-bg`를 그대로 못 쓰는 이유는 다크값 `#573f7f`가 칩 크기 기준이라 배너 면적에서 과하게 뜨기 때문). 패스코드 공유 안내도 배너 언어로 통일: 초대 발송 전 폼과, 발송 직후("이제 패스코드를 알려주세요")·초대 메일 양쪽에서 같은 사실을 말함(초대 메일에는 패스코드가 안 담기므로 초대자가 직접 알려주지 않으면 파트너가 링크를 수락해도 로그인 못 함).
+- SKILL.md §5-C(신규, 상태 안내 배너) 반영. 검증: `isolation.spec.ts`에 PAIRED 두 세션 교차 확인(A→B/B→A, 화면+API 양쪽)과 SOLO 미노출·401 시나리오, 메뉴 로그아웃 회귀.
+- 배경·설계 근거 → PROJECT_CONTEXT §5·§19, SKILL §5-C
+
+---
+
+## 2026-09-11 — SOLO 상태 계정 삭제 + 같은 이메일 재가입 경로
+
+- PR #125 squash `b26ecd7` — "상대가 먼저 혼자 가입해버린" 상황을 사용자가 스스로 풀 방법이 없었다(`users.email` 전역 unique + 초대 발송이 기가입 이메일을 거부(`already_registered`)라, 먼저 가입한 쪽이 안 빠지면 영구히 못 합침). SOLO 계정을 지우고 같은 이메일로 다시 시작하는 경로를 만든다. **PAIRED 삭제는 범위 밖**(한 사람 탈퇴가 상대 위시리스트까지 지우는 문제라 상대 동의·데이터 승계를 먼저 정해야 함) — 차단만 하고 별도로 다룸.
+- **삭제 순서는 외래키가 정한다** — 012가 도메인 3종에 `on delete restrict`를 걸어둔 이유("커플 삭제 기능을 만들 때 명시적으로 데이터를 먼저 처리하도록 강제")의 수취인이 이 PR. 순서: ① `activities`/`places`/`recommendations_log`(restrict라 반드시 먼저) → ② `email_tokens`(couple_id=이 커플, cascade지만 명시적으로) → ③ `email_tokens`(target_email=이 커플 사용자, **invite_partner 제외** — cascade가 손대지 않는 행) → ④ `users`(cascade지만 명시적으로) → ⑤ `couples`(마지막).
+- `src/app/account/delete/page.tsx` + `AccountDeleteForm.tsx` + `POST /api/account`(신규) + `src/lib/auth/accountDeletion.ts`(신규). 검증: 단위 테스트 2파일(`accountDeletion.test.ts` 316줄, `accountDeleteRoute.test.ts` 167줄) + `isolation.spec.ts` 확장.
+- 배경 → PROJECT_CONTEXT §19(PAIRED 삭제 백로그로 등록)
+
+---
+
+## 2026-09-11 v2 — 다크모드 파트너 초대 배너 대비 개선
+
+- PR #126 squash `3c2fb1d` — 다크모드에서 "아직 혼자 쓰고 있어요" 배너(`.notice`, 260909 PR #124 신규)가 카드와 거의 구분되지 않던 문제. 원인은 배너 배경/테두리 채도(S28%/22%)가 카드 배경(S35%)보다 오히려 낮게 설정돼 있어, 라이트모드(카드=무채색, 배너=채도100%)와 반대로 다크모드에서는 채도 대비가 역전됐던 것.
+- `--s-notice-bg`/`--s-notice-line` 다크값을 `#2c2440`/`#4a3f63` → `#37265e`/`#57389f`로 명도·채도 모두 또렷이 높임(라이트값 무변경). `npx tsc --noEmit` 통과.
+- SKILL §5-C 다크값 갱신 필요(이 핸드오프 반영 시점에 §5-C를 처음 작성하며 최신값으로 기재).
+
+---
+
+## 2026-09-22 — 세션 주체를 기기별로 기억 (초대받은 사람이 자기 세션을 유지)
+
+- PR #127 squash `de61303` — 초대받은 사람이 재로그인하면 파트너 화면에서 자기 이메일이 "파트너"로 보이는 버그. 원인은 표시 계층이 아니라 **세션 주체 판정**: 패스코드가 커플 단위 하나뿐이라 `/api/auth/unlock`이 누가 입력했는지 알 수 없어 `pickSessionUser`가 먼저 만들어진 사용자(초대자)로 수렴했다. 예외는 초대 수락 직후 pending-user 쪽지 하나뿐인데 1회용·30분이라, 로그아웃·30분 경과·기기 변경 후엔 다시 초대자로 수렴 — PR #123(PAIRED 지원) 때부터 있던 한계였고 주석에도 기록돼 있었으나, PR #124(파트너 화면)가 그 한계를 처음 사용자에게 노출시켰다.
+- 단서를 하나 더 만든다 — "이 기기는 두 파트너 중 이 사람"을 서명된 1년 쿠키로 기억(`src/lib/auth/deviceUser.ts`). 심는 시점 셋: 최초 설정, 초대 수락 후 첫 로그인(쪽지를 이어받음), 이메일로 확인한 로그인. 매 로그인마다 갱신해 세션(30일) 만료와 무관하게 기억이 남아 평소 재로그인은 패스코드 6자리뿐.
+- 단서가 없고 PAIRED면 세션을 발급하지 않고 이메일을 물음(`needsEmail`) — 예전처럼 아무나 골라 발급하던 경로 제거. 이 응답은 패스코드를 통과한 요청에만 나가 멤버가 둘이라는 사실이 밖으로 새지 않는다.
+- 우선순위 판정은 순수 함수 `resolveSessionUser` 한 곳에 모음: **쪽지 > 이메일 > 기기 기억 > 후보 하나 > 묻기**. 쪽지가 가리키는 행이 사라지면 다른 단서로 되돌리지 않고 닫는 기존 불변식은 유지(초대받은 사람이 조용히 파트너의 세션을 받는 일 방지).
+- 로그아웃은 기기 기억까지 지운다(세션 만료="시간이 지났다"와 달리 로그아웃="이 기기에서 나는 로그인 상태가 아니다"라는 선언) — 한 기기를 둘이 번갈아 쓰는 전환 수단이 되고, 잠금 화면에 "다른 사람으로 로그인"을 상시 노출하지 않아도 됨. 계정 삭제(PR #125)도 같은 이유로 지움(사라진 커플을 1년간 가리키면 재가입 첫 로그인이 낡은 커플을 봄).
+- 검증: `resolveSessionUser` 우선순위 표 단위 테스트 13개 + e2e(교차 로그인·기기 기억 유지·로그아웃 후 재확인·잘못된 이메일·SOLO 무질문 회귀·수락 직후 로그인 기기의 재로그인 유지). 이메일 확인 단계가 재가입/재초대를 유발하지 않음(users 행 미증가, 토큰 미생성)도 DB 최종 상태로 못박음.
+- 배경 → PROJECT_CONTEXT §20(세션 주체 판정 vs 표시 계층 교훈)

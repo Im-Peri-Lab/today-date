@@ -1,26 +1,35 @@
 # CURRENT_STATE.md
 
-> **마지막 업데이트: 2026-08-11**
+> **마지막 업데이트: 2026-09-22**
 
 ## 현재 단계
-유지보수 / 점진적 UX 개선 단계 + Capacitor 네이티브 앱 다크모드 스플래시/아이콘 작업 마무리 단계.
+커플(2인) 계정 전환 완료 단계 — 계정 없는 단일 워크스페이스에서 이메일 기반 SOLO/PAIRED 2인
+모델로 전환하는 스키마·인증·데이터 격리·초대·파트너 화면·계정 삭제·세션 주체 판정까지 순차
+병합 완료. 그 외 유지보수 / 점진적 UX 개선, Capacitor 네이티브 앱은 여전히 `main` 미머지 상태로
+보류 중.
 
 ## 현재 한 줄 요약
-자동화 테스트·CI 도입(PR #91) + P2 리팩터 배치(PR #93~95: dark/hover/focus 정합화, 추천위저드
-히스토리 공통화, 폼-API 검증 정합화) + `/list` 다녀온 곳 정렬 보정(PR #99) + 네이밍 용어 매핑
-SKILL.md 반영(PR #100) + 기술 백로그 그룹 1·3 진단·처리(PR #101·#103) + `.mealBadge` 대비 보정
-(PR #105) + 액션 버튼 Tier A/B 통일(PR #106) + 되돌리기 확인 다이얼로그 4곳 통일(PR #108) 모두
-병합 완료 (상세 → CHANGELOG 2026-07-29~2026-08-01). 이어서 `chore/capacitor-init` 브랜치에서
-Capacitor 8.x iOS/Android 네이티브 앱 셸 초기화(PR #111·#112) → 네이티브 부팅 스플래시 오버레이
-도입(PR #113·#114) → 스플래시 콘텐츠 비율 실측 보정 + 다크모드 지원(PR #115) → 다크 CSS가
-`chore/capacitor-init`에만 머지되고 프로덕션엔 배포된 적이 없었던 갭을 발견해 별도 cherry-pick
-PR #117로 프로덕션 재배포 → iOS AppIcon 다크모드 variant 병합(PR #116)까지 순차 완료. 상세 →
-CHANGELOG 2026-08-07~2026-08-11.
+**커플 계정 전환(신규, 260904~260922, PR #118~127)**: `couples`/`users` additive 스키마 +
+단일 워크스페이스 백필(012/013, PR #118) → 인증 단일 출처를 `app_config`에서 `couples`/`users`로
+전환(PR #119) → `activities`/`places`/`recommendations_log` 커플 데이터 격리 + 403 대신 404
+정책(PR #120) → `couple_id` NOT NULL 승격(014) + 대시보드 DB 오류를 200/전부 0으로 삼키지 않게
+수정 + PostgREST 스텁 기반 실 라우트 e2e 하네스 신규(PR #121) → 홈 화면 error.tsx 오류 경계(PR
+#122) → 파트너 초대로 SOLO→PAIRED 전환(015, PR #123) → 파트너 정보 화면 + 초대 진입점을 카드에서
+상태 안내 배너(`styles.notice`, SKILL §5-C 신규)로 계위 분리(PR #124) → SOLO 상태 계정 삭제 +
+같은 이메일 재가입 경로(PR #125) → 다크모드 파트너 초대 배너 대비 보정(PR #126) → 세션 주체를
+기기별로 기억해 초대받은 사람이 재로그인해도 자기 세션을 유지하도록 수정(`deviceUser.ts`,
+`resolveSessionUser`, PR #127) 모두 병합 완료. 상세 → CHANGELOG 2026-09-04~2026-09-22, 배경·
+설계 근거 → PROJECT_CONTEXT §1·§2·§5·§19·§20, 배너 스펙 → SKILL §5-C.
+
+이전 배치(자동화 테스트·CI, P2 리팩터, 네이밍 용어 매핑, 기술 백로그 그룹 1·3, `.mealBadge` 대비
+보정, 액션 버튼 Tier A/B 통일, 되돌리기 확인 다이얼로그 통일, Capacitor 네이티브 앱 셸/스플래시/
+아이콘)는 상세 → CHANGELOG 2026-07-29~2026-08-11.
 
 ## 브랜치 상태
-- `chore/capacitor-init` — PR #111~#116 모두 병합 완료(23 커밋 `main` 대비 앞섬). `main`으로의
-  최종 머지는 아직 진행 안 함 — 사용자 확인 후 진행 예정
-- main 기준 build PASS (PR #117 `main` 반영분 포함)
+- `chore/capacitor-init` — PR #111~#116 모두 병합 완료 상태 그대로 `main` 미머지 유지. 그 사이
+  `main`이 커플 계정 전환(PR #118~127)으로 크게 앞서 나가 이 브랜치의 diverge 폭이 더 커짐 —
+  최종 머지 시 충돌 범위 재점검 필요. 머지 시점·방식은 여전히 사용자 지시 대기
+- main 기준 build PASS (PR #127 반영분 포함)
 
 ## 최근 구현 완료
 - 자동화 테스트·CI, dark/hover/focus 정합화, 추천위저드 History/URL 동기화 공통 훅, 폼-API
@@ -43,16 +52,34 @@ CHANGELOG 2026-08-07~2026-08-11.
 - 다크 CSS 프로덕션 미배포 갭 발견·cherry-pick 재배포(PR #117), WKWebView 네이티브 배경 수정은
   불필요 판정 → 상세 CHANGELOG 2026-08-10
 - iOS AppIcon 다크모드 variant 병합(PR #116) → 상세 CHANGELOG 2026-08-11
+- `couples`/`users` additive 스키마 + 단일 워크스페이스 백필(012/013, PR #118) → 상세 CHANGELOG 2026-09-04
+- 인증 단일 출처 `app_config` → `couples`/`users` 전환(PR #119) → 상세 CHANGELOG 2026-09-07
+- activities/places/recommendations_log 커플 데이터 격리, 소유권 미일치는 403 대신 404(PR #120) → 상세 CHANGELOG 2026-09-07 v2
+- `couple_id` NOT NULL 승격(014) + 대시보드 DB 오류 처리 + PostgREST 스텁 실 라우트 e2e 하네스 신규(PR #121) → 상세 CHANGELOG 2026-09-08
+- 홈 화면 `error.tsx` 오류 경계(PR #122) → 상세 CHANGELOG 2026-09-08 v2
+- 파트너 초대로 SOLO → PAIRED 전환(015: 발송/수락/자가가입 대기초대 확인, PR #123) → 상세 CHANGELOG 2026-09-08 v3
+- 파트너 정보 화면(`/partner/info`) + 초대 진입점을 상태 안내 배너(`styles.notice`)로 계위 분리, 삼선 메뉴 선언 배열화(PR #124) → 상세 CHANGELOG 2026-09-09
+- SOLO 상태 계정 삭제 + 같은 이메일 재가입 경로, 외래키 순서(activities/places/recommendations_log → email_tokens → users → couples)로 삭제(PR #125) → 상세 CHANGELOG 2026-09-11
+- 다크모드 파트너 초대 배너 대비 개선(`--s-notice-bg`/`-line` 다크값 보정, PR #126) → 상세 CHANGELOG 2026-09-11 v2
+- 세션 주체를 기기별로 기억(`deviceUser.ts`) — 초대받은 사람이 재로그인해도 자기 세션 유지(PR #127) → 상세 CHANGELOG 2026-09-22
 
 ## 배포 상태
 - 플랫폼: Vercel
 - URL: `https://today-date-seven.vercel.app`
-- 현재 브랜치: `main` (PR #117 반영 기준)
+- 현재 브랜치: `main` (PR #127 반영 기준)
 
 ## 진행 중 / 남은 작업
 - **`chore/capacitor-init` → `main` 최종 머지**: PR #111~#116 모두 병합 완료 상태지만, 전체
   Capacitor 네이티브 셸 자체를 `main`(프로덕션 배포 소스)에 반영할지는 아직 사용자 확인 전 —
-  머지 시점·방식(ff-only/squash)은 별도로 지시받아 진행할 것
+  머지 시점·방식(ff-only/squash)은 별도로 지시받아 진행할 것. `main`이 그 사이 커플 계정 전환
+  (PR #118~127, 스키마·미들웨어·다수 라우트 변경)으로 크게 앞서 나갔으므로, 실제 머지 시도 전에
+  diverge 범위(특히 `middleware.ts`·`src/app/api/auth/*`)를 다시 살펴야 함
+- **PAIRED 상태 계정 삭제는 범위 밖(PR #125)**: 한 사람의 탈퇴가 상대의 위시리스트까지 지우는
+  문제라 상대 동의·데이터 승계 정책을 먼저 정해야 함. 현재는 PAIRED에서 삭제 자체를 차단만 함 —
+  착수 전 정책 결정 필요(PROJECT_CONTEXT §19)
+- **패스코드 공유는 여전히 수동 안내뿐**: 초대 메일에 패스코드가 담기지 않아(계정 보안상 의도),
+  초대자가 발송 직후 배너 안내를 보고 직접 알려줘야 파트너가 로그인 가능. 자동 전달 채널은 아직
+  없음(의도된 설계인지 향후 개선 대상인지는 미판단 — PROJECT_CONTEXT §19)
 - **오픈 이슈(코드 레벨 미해결)**: 앱 실행 시 SpringBoard 아이콘-줌 전환 중 "하트만 있고 타이틀
   없는" 라이트 톤이 짧게 노출되는 현상 — iOS 플랫폼이 그 전환 단계에서 AppIcon 다크 variant를
   반영하지 못하는 것으로 추정되나 확정된 해결책 없음(CHANGELOG 2026-08-11)

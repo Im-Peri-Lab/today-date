@@ -26,6 +26,17 @@ export const apiMemoSchema = z
   .optional()
   .nullable()
 
+/**
+ * 표시용 닉네임(016) — trim 후 빈 문자열은 "미설정"(null)으로 정규화한다.
+ * null 입력(명시적으로 닉네임을 지움)은 trim/길이 검사를 건너뛰고 그대로 통과한다.
+ */
+export const apiNicknameSchema = z
+  .string()
+  .trim()
+  .max(20, '닉네임은 20자 이하로 입력해 주세요.')
+  .nullable()
+  .transform((v) => (v ? v : null))
+
 export const apiReferenceUrlSchema = z
   .string()
   .refine(isValidReferenceUrl, '올바른 URL 형식이 아닙니다.')

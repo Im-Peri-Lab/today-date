@@ -28,10 +28,12 @@ export interface CoupleUserRow {
   email_verified: boolean
   /** 가입 시각(users.created_at). 세션 사용자 선택 순서와 파트너 화면의 "가입일"이 함께 쓴다. */
   created_at: string
+  /** 화면 표시용 닉네임(016). nullable — 미설정이면 화면이 email 로 폴백한다. 인증 식별자가 아니다. */
+  nickname: string | null
 }
 
 const COUPLE_COLUMNS = 'id, passcode_hash, failed_attempts, locked_until, session_version'
-const USER_COLUMNS = 'id, couple_id, email, email_verified, created_at'
+const USER_COLUMNS = 'id, couple_id, email, email_verified, created_at, nickname'
 
 /**
  * 워크스페이스 상태.
@@ -253,6 +255,28 @@ export async function markUserEmailVerified(email: string): Promise<boolean> {
   if (error) throw new Error(`users 갱신 실패: ${error.message}`)
 
   return (data?.length ?? 0) > 0
+}
+
+/**
+ * 닉네임 설정/수정(최초 설정과 재수정을 구분하지 않는다 — 둘 다 같은 덮어쓰기다).
+ * nickname=null 은 "미설정으로 되돌림"이다(빈 문자열 정규화는 호출부/API 스키마가 맡는다).
+ * 대상 사용자가 없으면 null — 세션 user_id 가 가리키는 행이 사라진 경우다.
+ */
+export async function updateUserNickname(
+  userId: string,
+  nickname: string | null
+): Promise<CoupleUserRow | null> {
+  const supabase = getSupabaseClient()
+  const { data, error } = await supabase
+    .from('users')
+    .update({ nickname })
+    .eq('id', userId)
+    .select(USER_COLUMNS)
+    .maybeSingle()
+
+  if (error) throw new Error(`users 갱신 실패: ${error.message}`)
+
+  return (data as CoupleUserRow | null) ?? null
 }
 
 export function deriveWorkspaceState(

@@ -47,8 +47,14 @@ export default async function PartnerInfoPage() {
             padding-top 0으로 되돌린다.
           */}
           <div className="[&>*:first-child]:!pt-0">
-            {/* 닉네임은 미설정이 정상 상태다(§ 016) — 설정했을 때만 행을 추가한다. */}
-            {partner.nickname && <DetailRow label="닉네임">{partner.nickname}</DetailRow>}
+            {/*
+              미설정이 정상 상태다(§ 016). 행 자체를 숨기지 않고 /account 의
+              "설정 안 함"과 동일하게 표시해, 파트너 화면에서도 닉네임이라는
+              필드가 있다는 것 자체를 알 수 있게 한다(두 화면 구조 통일).
+            */}
+            <DetailRow label="닉네임">
+              {partner.nickname ?? <span className={styles.faint}>설정 안 함</span>}
+            </DetailRow>
             <DetailRow label="이메일">
               <span className="break-all">{partner.email}</span>
             </DetailRow>

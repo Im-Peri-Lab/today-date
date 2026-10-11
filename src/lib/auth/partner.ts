@@ -11,11 +11,13 @@ import { getSession } from '@/lib/auth/session'
  * 지워야 할지 알 수 없으므로 조회 자체가 성립하지 않는다.
  */
 
-/** 파트너 노출 형태 — users 행에서 화면이 쓰는 두 필드만 꺼낸다. */
+/** 파트너 노출 형태 — users 행에서 화면이 쓰는 필드만 꺼낸다. */
 export interface PartnerInfo {
   email: string
   /** users.created_at (ISO timestamptz). 화면에서 "가입일"로 표시한다. */
   joinedAt: string
+  /** 화면 표시용 닉네임(016). nullable — 미설정이면 화면이 email 로 폴백한다. */
+  nickname: string | null
 }
 
 export type PartnerLookup =
@@ -36,6 +38,8 @@ export async function getSessionPartner(): Promise<PartnerLookup> {
 
   return {
     authenticated: true,
-    partner: partner ? { email: partner.email, joinedAt: partner.created_at } : null,
+    partner: partner
+      ? { email: partner.email, joinedAt: partner.created_at, nickname: partner.nickname }
+      : null,
   }
 }

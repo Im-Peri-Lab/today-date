@@ -34,19 +34,28 @@ export default async function PartnerInfoPage() {
           홈으로
         </Link>
 
-        <h1 className={cn('mt-4', styles.pageTitle)}>파트너</h1>
+        <h1 className={cn('mt-4', styles.pageTitle)}>파트너 정보</h1>
         <p className={styles.pageSubtitle}>함께 위시리스트를 쌓고 있는 한 사람 💜</p>
 
+        {/* 헤더 없는 카드 — /account 의 내 정보 카드와 동일한 형태(§ 디자인 통일) */}
         <section
-          className={cn(
-            styles.card,
-            styles.detailCard,
-            'mt-5 px-5 pt-5 pb-4 lg:px-6 lg:pt-6 lg:pb-5',
-          )}
+          className={cn(styles.card, styles.detailCard, 'mt-5 px-5 py-4 lg:px-6 lg:py-5')}
         >
-          <div className="grid grid-cols-1 sm:grid-cols-2">
-            {/* 이메일은 길어서 줄바꿈이 필요하므로 wide(2열 점유) — § 디자인 10-C */}
-            <DetailRow label="이메일" wide>
+          {/*
+            각 행(sheetRow)의 자체 padding-top 이 헤더 없는 카드에서 첫 행 위쪽만
+            유독 넓어 보이게 한다(§ AccountInfoBlock 과 동일 이유). 첫 자식만
+            padding-top 0으로 되돌린다.
+          */}
+          <div className="[&>*:first-child]:!pt-0">
+            {/*
+              미설정이 정상 상태다(§ 016). 행 자체를 숨기지 않고 /account 의
+              "설정 안 함"과 동일하게 표시해, 파트너 화면에서도 닉네임이라는
+              필드가 있다는 것 자체를 알 수 있게 한다(두 화면 구조 통일).
+            */}
+            <DetailRow label="닉네임">
+              {partner.nickname ?? <span className={styles.faint}>설정 안 함</span>}
+            </DetailRow>
+            <DetailRow label="이메일">
               <span className="break-all">{partner.email}</span>
             </DetailRow>
             <DetailRow label="가입일">{formatKoreanTimestamp(partner.joinedAt)}</DetailRow>

@@ -1,11 +1,50 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
+import { z } from 'zod'
 import { deleteSoloAccount } from '@/lib/auth/accountDeletion'
+import { updateUserNickname } from '@/lib/auth/couple'
 import { requireCoupleScope } from '@/lib/auth/coupleScope'
 import { DEVICE_USER_COOKIE } from '@/lib/auth/deviceUser'
 import { getSession } from '@/lib/auth/session'
 import { PENDING_USER_COOKIE } from '@/lib/auth/pendingUser'
+import { readJsonBody, zodErrorResponse } from '@/lib/api/validation'
+import { apiNicknameSchema } from '@/lib/schemas/apiFields'
 
 export const dynamic = 'force-dynamic'
+
+const patchSchema = z.object({
+  nickname: apiNicknameSchema,
+})
+
+/**
+ * 내 닉네임 설정/수정 — 세션의 user_id 가 곧 수정 대상이다(본문으로 사용자를 받지
+ * 않는다, § DELETE 의 couple_id 불변식과 같은 이유: 남의 닉네임을 바꾸는 경로가
+ * 생기지 않아야 한다). requireCoupleScope 가 아니라 세션을 직접 쓰는 이유: 이 갱신은
+ * 커플이 아니라 "이 세션이 누구인가"(user_id) 단위이고, 커플 격리만 확인하는
+ * requireCoupleScope 는 user_id 를 내려주지 않는다.
+ */
+export async function PATCH(req: NextRequest) {
+  try {
+    const bodyResult = await readJsonBody(req)
+    if (!bodyResult.ok) return bodyResult.response
+    const result = patchSchema.safeParse(bodyResult.body)
+    if (!result.success) return zodErrorResponse(result.error)
+
+    const session = await getSession()
+    if (!session.authenticated || !session.user_id) {
+      return NextResponse.json({ error: '인증이 필요합니다.' }, { status: 401 })
+    }
+
+    const updated = await updateUserNickname(session.user_id, result.data.nickname)
+    if (!updated) {
+      return NextResponse.json({ error: '계정을 찾을 수 없습니다.' }, { status: 404 })
+    }
+
+    return NextResponse.json({ data: { nickname: updated.nickname } })
+  } catch (err) {
+    console.error('[PATCH /api/account]', err)
+    return NextResponse.json({ error: '서버 오류가 발생했습니다.' }, { status: 500 })
+  }
+}
 
 /**
  * 계정 삭제 — SOLO 상태의 사용자만 호출할 수 있다.

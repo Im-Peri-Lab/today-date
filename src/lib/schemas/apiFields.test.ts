@@ -4,6 +4,7 @@ import {
   apiCategoryIdSchema,
   apiLocationSchema,
   apiMemoSchema,
+  apiNicknameSchema,
   apiReferenceUrlSchema,
   apiListQueryBase,
   splitCommaIds,
@@ -52,6 +53,38 @@ describe('apiLocationSchema / apiMemoSchema', () => {
     expect(apiLocationSchema.safeParse(null).success).toBe(true)
     expect(apiLocationSchema.safeParse(undefined).success).toBe(true)
     expect(apiLocationSchema.safeParse('').success).toBe(true)
+  })
+})
+
+describe('apiNicknameSchema', () => {
+  it('20자를 초과하면 거부한다', () => {
+    expect(apiNicknameSchema.safeParse('a'.repeat(21)).success).toBe(false)
+  })
+
+  it('20자는 통과한다', () => {
+    expect(apiNicknameSchema.safeParse('a'.repeat(20)).success).toBe(true)
+  })
+
+  it('앞뒤 공백을 trim한다', () => {
+    const result = apiNicknameSchema.safeParse('  민지  ')
+    expect(result.success).toBe(true)
+    if (result.success) expect(result.data).toBe('민지')
+  })
+
+  it('빈 문자열·공백만 입력하면 null(미설정)로 정규화한다', () => {
+    const empty = apiNicknameSchema.safeParse('')
+    expect(empty.success).toBe(true)
+    if (empty.success) expect(empty.data).toBeNull()
+
+    const spaceOnly = apiNicknameSchema.safeParse('   ')
+    expect(spaceOnly.success).toBe(true)
+    if (spaceOnly.success) expect(spaceOnly.data).toBeNull()
+  })
+
+  it('null을 그대로 허용한다(명시적 미설정)', () => {
+    const result = apiNicknameSchema.safeParse(null)
+    expect(result.success).toBe(true)
+    if (result.success) expect(result.data).toBeNull()
   })
 })
 

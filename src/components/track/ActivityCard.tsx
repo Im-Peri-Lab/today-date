@@ -92,7 +92,7 @@ export function ActivityCard({ activity, hideMenu, actionSlot, returnTo }: Activ
             status={activity.status}
             onEditInfo={() => navigate(buildDetailHref(detailPath, { edit: 'info', returnTo }))}
             onEditVisit={() => navigate(buildDetailHref(detailPath, { edit: 'visit', returnTo }))}
-            onDuplicate={() => navigate(stashActivityDuplicate(activity))}
+            onDuplicate={() => navigate(stashActivityDuplicate(activity, returnTo))}
             onDelete={() => setDeleteOpen(true)}
             onMarkVisited={() => setVisitedOpen(true)}
             onRevert={() => setRevertOpen(true)}

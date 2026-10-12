@@ -27,6 +27,7 @@ import {
 import { useWizardUrlSync } from '@/hooks/useWizardUrlSync'
 import { readPlaceResult, stashPlaceResult } from '@/lib/recommend/resultCache'
 import { pushWizardUrl, replaceWizardUrl, currentWizardUrl } from '@/lib/recommend/wizardUrl'
+import { buildDetailHref } from '@/lib/listReturn'
 import {
   type PlaceWizardUrlState,
   readPlaceWizardUrlState,
@@ -235,7 +236,7 @@ export function PlaceRecommendWizard() {
                 <MiniHeart className="h-10 w-10 lg:h-10 lg:w-10" />
                 <p className={cn('mt-3 font-medium', styles.ink)}>가고 싶은 곳을 더 모아보세요</p>
 
-                <Link href="/places/new" className="mx-auto mt-6 block w-full sm:max-w-xs">
+                <Link href={buildDetailHref('/places/new', { returnTo: resultReturnTo })} className="mx-auto mt-6 block w-full sm:max-w-xs">
                   <Button
                     className={cn(
                       'h-10 w-full gap-1.5 text-white hover:brightness-105',

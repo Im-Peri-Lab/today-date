@@ -28,6 +28,7 @@ import {
 import { useWizardUrlSync } from '@/hooks/useWizardUrlSync'
 import { readActivityResult, stashActivityResult } from '@/lib/recommend/resultCache'
 import { pushWizardUrl, replaceWizardUrl, currentWizardUrl } from '@/lib/recommend/wizardUrl'
+import { buildDetailHref } from '@/lib/listReturn'
 import {
   type ActivityWizardUrlState,
   readActivityWizardUrlState,
@@ -304,7 +305,7 @@ export function ActivityRecommendWizard() {
                         <Hourglass className="h-4 w-4" />
                         더 짧은 일정도 볼까요?
                       </Button>
-                      <Link href="/activities/new" className="block w-full">
+                      <Link href={buildDetailHref('/activities/new', { returnTo: resultReturnTo })} className="block w-full">
                         <Button variant="outline" className="h-10 w-full gap-1.5">
                           <Plus className="h-4 w-4" />
                           액티비티 추가하기
@@ -312,7 +313,7 @@ export function ActivityRecommendWizard() {
                       </Link>
                     </>
                   ) : (
-                    <Link href="/activities/new" className="block w-full">
+                    <Link href={buildDetailHref('/activities/new', { returnTo: resultReturnTo })} className="block w-full">
                       <Button
                         className={cn(
                           'h-10 w-full gap-1.5 text-white hover:brightness-105',

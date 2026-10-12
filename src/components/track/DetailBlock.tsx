@@ -110,19 +110,32 @@ export function DetailBlock({
         {children}
       </div>
 
+      {/* 인라인 편집 액션 — 우측 정렬, DOM 순서 = 시각 순서(취소 → 저장, Primary 우측 끝).
+          로딩은 "저장" 라벨 유지 + 스피너 병기로 폭 변화를 최소화하고, 두 버튼 모두
+          transition-colors 로 제한해 저장 중 전환 때 opacity/레이아웃 애니메이션이 겹쳐
+          생기던 취소 버튼 잔상을 없앤다(§12-A). */}
       {editing && (
-        <div className="mt-5 flex gap-2">
+        <div className="mt-5 flex justify-end gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onCancel}
+            disabled={saving}
+            className="h-9 px-4 transition-colors"
+          >
+            취소
+          </Button>
           <Button
             type="button"
             onClick={onSave}
             disabled={saving}
-            className={cn(styles.detailPrimaryBtn, 'h-9 gap-1.5 px-4 text-white hover:brightness-105')}
+            className={cn(
+              styles.detailPrimaryBtn,
+              'h-9 gap-1.5 px-4 text-white transition-colors hover:brightness-105',
+            )}
           >
             {saving && <Loader2 className="h-4 w-4 animate-spin" />}
-            {saving ? '저장 중...' : '저장'}
-          </Button>
-          <Button type="button" variant="outline" onClick={onCancel} disabled={saving} className="h-9 px-4">
-            취소
+            저장
           </Button>
         </div>
       )}

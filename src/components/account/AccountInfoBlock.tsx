@@ -96,24 +96,29 @@ export function AccountInfoBlock({
               <p className={cn('mt-1.5 text-xs', styles.sub)}>
                 최대 {NICKNAME_MAX_LENGTH}자. 비워두면 이메일로 표시돼요.
               </p>
-              <div className="mt-3 flex gap-2">
-                <Button
-                  type="button"
-                  onClick={saveNickname}
-                  disabled={saving}
-                  className={cn(styles.detailPrimaryBtn, 'h-9 gap-1.5 px-4 text-white hover:brightness-105')}
-                >
-                  {saving && <Loader2 className="h-4 w-4 animate-spin" />}
-                  {saving ? '저장 중...' : '저장'}
-                </Button>
+              {/* DetailBlock 과 동일 규칙(§12-A): 우측 정렬, 취소 → 저장, transition-colors 로
+                  저장 중 전환 때 생기는 취소 버튼 잔상을 막는다. */}
+              <div className="mt-3 flex justify-end gap-2">
                 <Button
                   type="button"
                   variant="outline"
                   onClick={cancelEdit}
                   disabled={saving}
-                  className="h-9 px-4"
+                  className="h-9 px-4 transition-colors"
                 >
                   취소
+                </Button>
+                <Button
+                  type="button"
+                  onClick={saveNickname}
+                  disabled={saving}
+                  className={cn(
+                    styles.detailPrimaryBtn,
+                    'h-9 gap-1.5 px-4 text-white transition-colors hover:brightness-105',
+                  )}
+                >
+                  {saving && <Loader2 className="h-4 w-4 animate-spin" />}
+                  {saving ? '저장 중...' : '저장'}
                 </Button>
               </div>
             </div>

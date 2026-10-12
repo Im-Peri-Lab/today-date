@@ -33,7 +33,7 @@ PROJECT_CONTEXT §5(인증 F-01)·§20.
   diverge 폭이 더 커짐 — 최종 머지 시 충돌 범위 재점검 필요. 머지 시점·방식은 여전히 사용자
   지시 대기
 - `feat/partner-nickname` — PR #128 머지 완료, 로컬·리모트 브랜치 모두 삭제됨
-- main 기준 build PASS (PR #128 반영분 포함, PR #129~#131은 tsc·eslint 확인)
+- main 기준 build PASS (PR #128 반영분 포함, PR #129~#131은 tsc·eslint 확인, iOS 실기기 확인은 사용자가 완료)
 
 ## 최근 구현 완료
 - 자동화 테스트·CI, dark/hover/focus 정합화, 추천위저드 History/URL 동기화 공통 훅, 폼-API
@@ -80,8 +80,6 @@ PROJECT_CONTEXT §5(인증 F-01)·§20.
   머지 시점·방식(ff-only/squash)은 별도로 지시받아 진행할 것. `main`이 그 사이 커플 계정 전환
   (PR #118~127) + 닉네임 설정(PR #128)으로 크게 앞서 나갔으므로, 실제 머지 시도 전에
   diverge 범위(특히 `middleware.ts`·`src/app/api/auth/*`)를 다시 살펴야 함
-- **닉네임 편집 버튼 iOS 실기기 미확인(PR #131)**: 상세 편집은 #130에서 실기기 확인을 마쳤지만,
-  `/account` 닉네임 편집은 같은 규칙으로 맞췄을 뿐 실기기에서 잔상이 없는지 보지 않았음
 - **파트너 계정으로의 실 로그인 테스트 미실시(PR #128)**: `/partner/info`의 "닉네임+이메일 동시
   노출"은 상대 계정 이메일을 몰라(조회가 Production Reads 가드에 막힘) 사용자 승인 하에 실 로그인
   검증을 생략하고 코드 레벨 검토로 대체함. 실제 두 계정 교차 확인이 필요하면 상대 이메일을 받아

@@ -111,7 +111,7 @@ export function DetailBlock({
       </div>
 
       {/* 인라인 편집 액션 — 우측 정렬, DOM 순서 = 시각 순서(취소 → 저장, Primary 우측 끝).
-          로딩은 "저장" 라벨 유지 + 스피너 병기로 폭 변화를 최소화하고, 두 버튼 모두
+          로딩은 앱 공통 규칙(§12-A)대로 "저장 중..." + 스피너 프리펜드이고, 두 버튼 모두
           transition-colors 로 제한해 저장 중 전환 때 opacity/레이아웃 애니메이션이 겹쳐
           생기던 취소 버튼 잔상을 없앤다(§12-A). */}
       {editing && (
@@ -135,7 +135,7 @@ export function DetailBlock({
             )}
           >
             {saving && <Loader2 className="h-4 w-4 animate-spin" />}
-            저장
+            {saving ? '저장 중...' : '저장'}
           </Button>
         </div>
       )}

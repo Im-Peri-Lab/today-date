@@ -33,7 +33,7 @@ PROJECT_CONTEXT §5(인증 F-01)·§20.
   diverge 폭이 더 커짐 — 최종 머지 시 충돌 범위 재점검 필요. 머지 시점·방식은 여전히 사용자
   지시 대기
 - `feat/partner-nickname` — PR #128 머지 완료, 로컬·리모트 브랜치 모두 삭제됨
-- main 기준 build PASS (PR #128 반영분 포함)
+- main 기준 build PASS (PR #128 반영분 포함, PR #129~#131은 tsc·eslint 확인)
 
 ## 최근 구현 완료
 - 자동화 테스트·CI, dark/hover/focus 정합화, 추천위저드 History/URL 동기화 공통 훅, 폼-API
@@ -67,11 +67,12 @@ PROJECT_CONTEXT §5(인증 F-01)·§20.
 - 다크모드 파트너 초대 배너 대비 개선(`--s-notice-bg`/`-line` 다크값 보정, PR #126) → 상세 CHANGELOG 2026-09-11 v2
 - 세션 주체를 기기별로 기억(`deviceUser.ts`) — 초대받은 사람이 재로그인해도 자기 세션 유지(PR #127) → 상세 CHANGELOG 2026-09-22
 - 파트너 표시용 닉네임 설정 — `users.nickname`(016), `/account`·`/partner/info` 통일 레이아웃, `PATCH /api/account`(PR #128) → 상세 CHANGELOG 2026-10-12
+- 인라인 편집 저장/취소 버튼 규칙 통일(상세 편집 + 닉네임 편집) — 우측 정렬·취소 → 저장·"저장 중..."(PR #129~#131) → 상세 CHANGELOG 2026-10-12 v2
 
 ## 배포 상태
 - 플랫폼: Vercel
 - URL: `https://today-date-seven.vercel.app`
-- 현재 브랜치: `main` (PR #128 반영 기준, 머지 커밋 `238d3de` — 예외적으로 squash가 아닌 일반 머지)
+- 현재 브랜치: `main` (PR #131 반영 기준. PR #128 머지 커밋 `238d3de`만 예외적으로 squash가 아닌 일반 머지)
 
 ## 진행 중 / 남은 작업
 - **`chore/capacitor-init` → `main` 최종 머지**: PR #111~#116 모두 병합 완료 상태지만, 전체
@@ -79,6 +80,8 @@ PROJECT_CONTEXT §5(인증 F-01)·§20.
   머지 시점·방식(ff-only/squash)은 별도로 지시받아 진행할 것. `main`이 그 사이 커플 계정 전환
   (PR #118~127) + 닉네임 설정(PR #128)으로 크게 앞서 나갔으므로, 실제 머지 시도 전에
   diverge 범위(특히 `middleware.ts`·`src/app/api/auth/*`)를 다시 살펴야 함
+- **닉네임 편집 버튼 iOS 실기기 미확인(PR #131)**: 상세 편집은 #130에서 실기기 확인을 마쳤지만,
+  `/account` 닉네임 편집은 같은 규칙으로 맞췄을 뿐 실기기에서 잔상이 없는지 보지 않았음
 - **파트너 계정으로의 실 로그인 테스트 미실시(PR #128)**: `/partner/info`의 "닉네임+이메일 동시
   노출"은 상대 계정 이메일을 몰라(조회가 Production Reads 가드에 막힘) 사용자 승인 하에 실 로그인
   검증을 생략하고 코드 레벨 검토로 대체함. 실제 두 계정 교차 확인이 필요하면 상대 이메일을 받아

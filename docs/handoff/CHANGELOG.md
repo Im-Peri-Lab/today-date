@@ -735,3 +735,13 @@
 - PR #128(머지 커밋 `238d3de` — 예외적으로 squash 아닌 일반 머지) — `users.nickname` 컬럼(016) 추가, `PATCH /api/account` 신규, `/account`("내 정보")·`/partner/info`("파트너 정보") 신규/통일.
 - 검증: `npm run ci`(lint/vitest/build) 통과, 실 계정 대상 Playwright 스크린샷 확인(라이트/다크/모바일/데스크탑).
 - 배경·설계 근거·교훈 → PROJECT_CONTEXT §5(인증 F-01)·§20
+
+---
+
+## 2026-10-12 v2 — 인라인 편집 저장/취소 버튼 정리 (PR #129~#131)
+
+- PR #129(`62b8ccb`) — 상세 인라인 편집(`/activities/[id]`·`/places/[id]`) 저장 중 취소 버튼 잔상 제거, 버튼 우측 정렬(취소 → 저장), 회귀 스펙 `e2e/inline-edit-actions.spec.ts` 신규.
+- PR #130(`8a20d6a`) — 저장 로딩 라벨을 앱 공통 규칙("저장 중..." + 스피너)으로 복원, #129의 "저장" 라벨 유지 예외 제거. iOS 실기기 확인 완료.
+- PR #131(`6b3f962`) — 닉네임 편집(`/account`) 버튼을 상세 편집과 같은 규칙으로 통일, 삭제 다이얼로그 스피너 크기 명시.
+- 검증: #129·#130은 lint/tsc/단위/build/e2e 통과. #131은 tsc·eslint 통과, iOS 실기기 미확인.
+- 배경·교훈 → PROJECT_CONTEXT §20, 스펙 → SKILL §4-A·§12-A

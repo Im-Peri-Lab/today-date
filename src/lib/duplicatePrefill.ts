@@ -1,7 +1,6 @@
 import type { ActivityFormValues } from '@/lib/schemas/activitySchema'
 import type { PlaceFormValues } from '@/lib/schemas/placeSchema'
 import type { Activity, Place } from '@/types'
-import { buildDetailHref } from '@/lib/listReturn'
 
 /**
  * "복사하기" 임시 저장소 (sessionStorage).

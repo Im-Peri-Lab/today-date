@@ -47,7 +47,8 @@ async function startSampling(page: Page) {
     w.__stop = false
     const buttons = () => Array.from(document.querySelectorAll('button'))
     const cancelsNow = () => buttons().filter((b) => b.textContent?.trim() === '취소')
-    const saveNow = () => buttons().find((b) => b.textContent?.trim() === '저장')
+    const saveNow = () =>
+      buttons().find((b) => /^(저장|저장 중\.\.\.)$/.test(b.textContent?.trim() ?? ''))
     ;(cancelsNow()[0] as HTMLElement & { __orig?: boolean }).__orig = true
     const tick = () => {
       const cancels = cancelsNow()
@@ -91,7 +92,8 @@ async function openInlineEdit(page: Page, target: (typeof TARGETS)[number]) {
   })
   await page.goto(target.path)
   await page.getByRole('button', { name: '등록 정보 수정' }).click()
-  const save = page.getByRole('button', { name: '저장', exact: true })
+  // 로딩 중 라벨이 "저장 중..."으로 바뀌므로 두 상태를 모두 잡는 로케이터를 쓴다.
+  const save = page.getByRole('button', { name: /^저장( 중\.\.\.)?$/ })
   await expect(save).toBeVisible()
   await page.waitForTimeout(300)
   return save
@@ -108,6 +110,7 @@ for (const target of TARGETS) {
     await page.waitForTimeout(100) // 저장 전(정지) 기준 샘플
     await save.click()
     await expect(save.locator('.animate-spin')).toBeVisible()
+    await expect(save).toHaveText('저장 중...') // 앱 공통 로딩 라벨(§12-A)
     await page.waitForTimeout(SAVE_DELAY_MS - 600)
 
     const samples = await stopSampling(page)
@@ -135,9 +138,9 @@ for (const target of TARGETS) {
     const finalX = busy[busy.length - 1].cancelX
     expect(busy[0].cancelX).toBe(finalX)
     expect(busy.every((s) => s.cancelX === finalX)).toBe(true)
-    // 스피너 병기분만큼만 밀린다(저장 버튼 폭 증가 = 스피너 16 + gap 6)
+    // 취소는 저장 버튼 폭 증가분(스피너 + "저장 중..." 라벨)만큼 한 번에 밀린다
     expect(idle[0].cancelX - finalX).toBeGreaterThan(0)
-    expect(idle[0].cancelX - finalX).toBeLessThan(30)
+    expect(idle[0].cancelX - finalX).toBeLessThan(80)
   })
 }
 

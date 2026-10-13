@@ -1,4 +1,6 @@
 import { redirect } from 'next/navigation'
+import Link from 'next/link'
+import { ArrowLeft } from 'lucide-react'
 import { TopBar } from '@/components/TopBar'
 import { DetailRow } from '@/components/track/DetailRow'
 import { getSessionPartner } from '@/lib/auth/partner'
@@ -28,7 +30,12 @@ export default async function PartnerInfoPage() {
   return (
     <main className={styles.page}>
       <div className="mx-auto w-full max-w-lg px-5 pb-16 pt-6 lg:pt-10">
-        <TopBar />
+        <TopBar>
+          <Link href="/" className={styles.backLink}>
+            <ArrowLeft className="h-4 w-4" />
+            홈으로
+          </Link>
+        </TopBar>
 
         <h1 className={cn('mt-4', styles.pageTitle)}>파트너 정보</h1>
         <p className={styles.pageSubtitle}>함께 위시리스트를 쌓고 있는 한 사람 💜</p>

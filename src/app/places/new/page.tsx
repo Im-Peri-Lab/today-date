@@ -4,7 +4,7 @@ import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import { TopBar } from '@/components/TopBar'
 import { PlaceForm } from '@/components/track/PlaceForm'
-import { getReturnLabel, getSafeListReturnTo, HOME_RETURN_TO } from '@/lib/listReturn'
+import { getReturnLabel, getSafeListReturnTo } from '@/lib/listReturn'
 import { cn } from '@/lib/utils'
 import styles from '@/components/screens.module.css'
 
@@ -23,12 +23,10 @@ export default async function NewPlacePage({
     <main className={styles.page}>
       <div className="mx-auto w-full max-w-lg px-5 pb-16 pt-6 lg:pt-10">
         <TopBar>
-          {listReturnTo && listReturnTo !== HOME_RETURN_TO && (
-            <Link href={listReturnTo} className={styles.backLink}>
-              <ArrowLeft className="h-4 w-4" />
-              {backLabel}
-            </Link>
-          )}
+          <Link href={listReturnTo ?? '/'} className={styles.backLink}>
+            <ArrowLeft className="h-4 w-4" />
+            {backLabel}
+          </Link>
         </TopBar>
 
         <h1 className={cn('mt-4', styles.pageTitle)}>다이닝 추가</h1>

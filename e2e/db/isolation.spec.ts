@@ -1596,3 +1596,22 @@ test.describe('계정 삭제 · 화면', () => {
     await expect(page).toHaveURL(/\/$/)
   })
 })
+
+test.describe('상단 줄 · 좌측 "홈으로" + 우측 홈 아이콘', () => {
+  // 좌측 링크의 목적지가 `/`여도 지우지 않는다(SKILL.md §13) — 둘 다 / 로 간다.
+  for (const path of ['/account', '/account/delete', '/partner']) {
+    test(`${path}: 좌측 링크와 우측 홈 아이콘이 모두 / 로 간다`, async ({ page }) => {
+      await loginAsA(page)
+      await page.goto(path)
+
+      const links = page.getByRole('link', { name: '홈으로' })
+      await expect(links).toHaveCount(2)
+      await expect(links.nth(0)).toHaveAttribute('href', '/')
+      await expect(links.nth(1)).toHaveAttribute('href', '/')
+
+      const left = (await links.nth(0).boundingBox())!
+      const right = (await links.nth(1).boundingBox())!
+      expect(left.x).toBeLessThan(right.x)
+    })
+  }
+})

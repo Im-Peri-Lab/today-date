@@ -112,8 +112,9 @@ export function MapLink({ query }: { query: string }) {
       {/* 오른쪽: 액션 2개 (지도 열기 / 앱 선택) — 한 세트로 인접 배치.
           mapActionBtn(28px)로 박스를 줄여 글리프 여백·우측 끝 여백을 좁힌다.
           gap 2px, 비겹침 → 탭 오작동 없음.
-          -mt-1: 28px 버튼의 시각 중심을 ~21px 텍스트 줄 중심에 맞춘다(상단 정렬 보정). */}
-      <span className="-mt-1 flex shrink-0 items-center gap-0.5">
+          -mt-1: 28px 버튼의 시각 중심을 ~21px 텍스트 줄 중심에 맞춘다(상단 정렬 보정).
+          -mr-[3px]: 상세 카드 모서리 연필(DetailBlock)과 글리프 오른쪽 끝을 한 열로 맞춘다(§10-B). */}
+      <span className="-mr-[3px] -mt-1 flex shrink-0 items-center gap-0.5">
         {/* 기본 앱 열기 — 웹은 anchor(새 탭), 앱 스킴은 button(openAppScheme) */}
         {effectiveDefault.requiresApp ? (
           <button

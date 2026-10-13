@@ -830,7 +830,7 @@ description: >
 ```tsx
 <button
   type="button"
-  className={cn(styles.mapActionBtn, 'absolute top-[1.125rem] right-5 lg:right-6')}
+  className={cn(styles.mapActionBtn, 'absolute top-[1.0625rem] right-[1.0625rem] lg:top-[1.3125rem] lg:right-[1.3125rem]')}
   onClick={onEdit}
   aria-label={`${title} 수정`}
 >
@@ -838,7 +838,7 @@ description: >
 </button>
 ```
 
-`styles.mapActionBtn`(28px, 글리프 16px) 상태별 색 — 복사하기 버튼과 인접 쌍이라 28px 컴팩트 버튼을 쓴다. **오른쪽 끝은 카드 콘텐츠 패딩에 연동**(`right-5 lg:right-6` = `px-5 lg:px-6`)해, 같은 카드 안 `MapLink`(§10-I) 지도·▾ 박스와 모든 폭에서 한 열로 맞춘다(고정 px 금지 — lg에서 패딩이 늘면 어긋남). 등록 정보·방문 기록 두 블록 모두 `DetailBlock` 공용 처리. top은 `1.125rem` 고정. `.editGhostBtn`(36px)은 이제 이 블록에서 쓰지 않는다:
+`styles.mapActionBtn`(28px, 글리프 16px) 상태별 색 — 복사하기 버튼과 인접 쌍이라 28px 컴팩트 버튼을 쓴다. **위치는 카드 패딩 − 3px에 연동**: `top/right = 1.0625rem`(lg `1.3125rem`) = 17/21px. 글리프(박스 안 6px) 기준 카드 모서리와의 간격이 **위·오른쪽 모두 23px(lg 27px)로 같아** 모서리 비율이 정사각으로 보이고, 뱃지 줄(약 22px, 세로 중심 = 패딩+11px)의 세로 중심에도 놓인다. 같은 카드 안 `MapLink` 지도·▾ 쌍은 `-mr-[3px]`로 글리프 오른쪽 끝을 같은 열에 맞춘다(§10-I). 고정 px 금지 — lg에서 패딩이 늘면 어긋난다. 등록 정보·방문 기록 두 블록 모두 `DetailBlock` 공용 처리. `.editGhostBtn`(36px)은 이제 이 블록에서 쓰지 않는다:
 
 | 상태 | 배경 | 색상 |
 |---|---|---|
@@ -848,7 +848,7 @@ description: >
 
 헤더 콘텐츠 영역에 `pr-10` 추가해 버튼과 텍스트 겹침 방지.
 
-**복사하기 버튼 (등록 정보 블록 전용, `onCopy`)**: 상단 ⋮ 메뉴는 항목이 복사하기 하나뿐이라 "선택지가 여러 개"라는 메뉴 신호가 거짓이어서 제거했고, 연필 **바로 왼쪽**에 단독 버튼으로 둔다. 연필과 같은 `styles.mapActionBtn`(28px·글리프 `h-4 w-4`, §10-I 인접 액션 쌍 예외 재사용) + `absolute top-[1.125rem] right-12 lg:right-[3.25rem]`(연필 right + 28px = 48px/52px; 글리프 간격 12px) — 텍스트 행 flex 흐름에 끼우지 않고 absolute로 빼서 고정크기 버튼이 한 줄 행 높이를 늘리지 않게 한다(연필과 같은 top → 세로 중심선 일치). 아이콘은 카드 ⋮ 메뉴 복사하기와 같은 lucide `Copy`. 편집 모드에선 연필과 함께 숨김. `onCopy`가 있으면 헤더 영역 `pr-10` 대신 `pr-16`으로 버튼 2개 몫을 비운다. 동작은 `stashActivityDuplicate`/`stashPlaceDuplicate` + `returnTo` 전달(§13) 그대로. `DuplicateMenu` 컴포넌트는 삭제됨.
+**복사하기 버튼 (등록 정보 블록 전용, `onCopy`)**: 상단 ⋮ 메뉴는 항목이 복사하기 하나뿐이라 "선택지가 여러 개"라는 메뉴 신호가 거짓이어서 제거했고, 연필 **바로 왼쪽**에 단독 버튼으로 둔다. 연필과 같은 `styles.mapActionBtn`(28px·글리프 `h-4 w-4`, §10-I 인접 액션 쌍 예외 재사용) + `absolute top-[1.0625rem] right-[2.8125rem] lg:top-[1.3125rem] lg:right-[3.0625rem]`(연필 right + 28px = 45px/49px; 글리프 간격 12px) — 텍스트 행 flex 흐름에 끼우지 않고 absolute로 빼서 고정크기 버튼이 한 줄 행 높이를 늘리지 않게 한다(연필과 같은 top → 세로 중심선 일치). 아이콘은 카드 ⋮ 메뉴 복사하기와 같은 lucide `Copy`. 편집 모드에선 연필과 함께 숨김. `onCopy`가 있으면 헤더 영역 `pr-10` 대신 `pr-16`으로 버튼 2개 몫을 비운다. 동작은 `stashActivityDuplicate`/`stashPlaceDuplicate` + `returnTo` 전달(§13) 그대로. `DuplicateMenu` 컴포넌트는 삭제됨.
 
 ---
 
@@ -1016,7 +1016,7 @@ export const STATUS_LABELS: Record<Status, string> = {
 **레이아웃 (좌우 분리):**
 - 루트 `flex w-full items-start` — `items-start`로 왼쪽 텍스트를 상단 정렬해 **라벨↔내용 여백을 다른 DetailRow(소요시간·지역 등)와 동일하게 맞춘다**(28px 버튼이 행을 키우고 center 정렬로 텍스트가 밀리던 문제 방지).
 - **왼쪽(값)**: `inline-flex min-w-0 flex-1 items-center gap-1.5` — `MapPin`(faint) + 위치 텍스트. **순수 텍스트(비링크, 클릭 동작 없음)**, `min-w-0 truncate`로 긴 값 잘림.
-- **오른쪽(액션)**: `flex shrink-0 items-center gap-0.5` + **`-mt-1`** — 지도 열기 아이콘(`Map`) + `▾`(`ChevronDown`) 앱 선택. 두 버튼 모두 `.mapActionBtn`(28px, §7). `gap-0.5`로 두 버튼을 한 세트로 인접(비겹침). **`-mt-1`은 28px 버튼의 시각 중심을 ~21px 텍스트 줄 중심에 맞추는 보정**(상단 정렬로 버튼이 텍스트보다 처지는 것 방지).
+- **오른쪽(액션)**: `flex shrink-0 items-center gap-0.5` + **`-mt-1`** — 지도 열기 아이콘(`Map`) + `▾`(`ChevronDown`) 앱 선택. 두 버튼 모두 `.mapActionBtn`(28px, §7). `gap-0.5`로 두 버튼을 한 세트로 인접(비겹침). **`-mt-1`은 28px 버튼의 시각 중심을 ~21px 텍스트 줄 중심에 맞추는 보정**(상단 정렬로 버튼이 텍스트보다 처지는 것 방지). **`-mr-[3px]`는 카드 모서리 연필(`DetailBlock`, §10-B)과 글리프 오른쪽 끝을 한 열로 맞추는 보정**(글리프 간격 카드 패딩+3px).
 - 접근성: 지도 열기 `aria-label="지도에서 열기"`, `▾` `aria-label="지도 앱 선택"`, 시트 항목별 `${label}에서 열기`.
 
 **지도 앱 config (`src/lib/map.ts`):**

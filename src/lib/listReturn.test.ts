@@ -1,8 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import {
-  getAfterSaveReturnTo,
+  getReturnLabel,
   getSafeListReturnTo,
-  getSafeNewReturnTo,
   isRecommendReturnTo,
   RECOMMEND_RETURN_PATHS,
 } from './listReturn'
@@ -22,8 +21,25 @@ describe('getSafeListReturnTo', () => {
     }
   })
 
+  it('홈 경로를 허용한다', () => {
+    expect(getSafeListReturnTo('/')).toBe('/')
+  })
+
+  it('상세 경로를 허용하고, 그 상세의 returnTo는 재귀 검증해 안전한 값만 남긴다', () => {
+    expect(getSafeListReturnTo('/activities/abc?returnTo=%2Flist%3Ftab%3Dactivity')).toBe(
+      '/activities/abc?returnTo=%2Flist%3Ftab%3Dactivity'
+    )
+    expect(getSafeListReturnTo('/places/abc?edit=info&returnTo=https%3A%2F%2Fevil.com')).toBe(
+      '/places/abc'
+    )
+    expect(
+      getSafeListReturnTo('/places/b?returnTo=%2Fplaces%2Fa%3FreturnTo%3D%252F')
+    ).toBe('/places/b?returnTo=%2Fplaces%2Fa%3FreturnTo%3D%252F')
+  })
+
   it('허용 목록에 없는 경로는 차단한다', () => {
-    expect(getSafeListReturnTo('/activities/123')).toBeUndefined()
+    expect(getSafeListReturnTo('/account')).toBeUndefined()
+    expect(getSafeListReturnTo('/activities/a/b')).toBeUndefined()
   })
 
   it('절대 URL(외부 오리진)은 차단한다', () => {
@@ -58,34 +74,13 @@ describe('isRecommendReturnTo', () => {
   })
 })
 
-describe('getSafeNewReturnTo / getAfterSaveReturnTo', () => {
-  it('목록·추천 결과는 기존 검증과 동일하게 통과한다', () => {
-    expect(getSafeNewReturnTo('/list?tab=place')).toBe('/list?tab=place')
-    expect(getSafeNewReturnTo('/recommend/place?step=result')).toBe('/recommend/place?step=result')
-  })
-
-  it('상세 경로를 허용하고, 그 상세의 returnTo는 안전한 값만 남긴다', () => {
-    expect(getSafeNewReturnTo('/activities/abc?returnTo=%2Flist%3Ftab%3Dactivity')).toBe(
-      '/activities/abc?returnTo=%2Flist%3Ftab%3Dactivity'
-    )
-    expect(getSafeNewReturnTo('/places/abc?edit=info&returnTo=https%3A%2F%2Fevil.com')).toBe(
-      '/places/abc'
-    )
-  })
-
-  it('상세가 아닌 경로·외부 오리진은 차단한다', () => {
-    expect(getSafeNewReturnTo('/account')).toBeUndefined()
-    expect(getSafeNewReturnTo('/activities/a/b')).toBeUndefined()
-    expect(getSafeNewReturnTo('//evil.example.com/activities/1')).toBeUndefined()
-    expect(getSafeListReturnTo('/activities/abc')).toBeUndefined()
-  })
-
-  it('저장 후 상세의 returnTo는 출발 상세의 returnTo를 이어받는다', () => {
-    expect(getAfterSaveReturnTo('/activities/abc?returnTo=%2Flist%3Ftab%3Dactivity')).toBe(
-      '/list?tab=activity'
-    )
-    expect(getAfterSaveReturnTo('/places/abc')).toBeUndefined()
-    expect(getAfterSaveReturnTo('/list?tab=place')).toBe('/list?tab=place')
-    expect(getAfterSaveReturnTo(undefined)).toBeUndefined()
+describe('getReturnLabel', () => {
+  it('returnTo 종류별 라벨, 없으면 fallback', () => {
+    expect(getReturnLabel(undefined, '홈으로')).toBe('홈으로')
+    expect(getReturnLabel(undefined, '목록으로')).toBe('목록으로')
+    expect(getReturnLabel('/', '목록으로')).toBe('홈으로')
+    expect(getReturnLabel('/list?tab=place', '홈으로')).toBe('목록으로')
+    expect(getReturnLabel('/recommend/place?step=result', '홈으로')).toBe('추천 결과로')
+    expect(getReturnLabel('/activities/abc?returnTo=%2F', '홈으로')).toBe('상세로')
   })
 })

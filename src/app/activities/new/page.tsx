@@ -3,12 +3,7 @@ import { getSession } from '@/lib/auth/session'
 import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import { ActivityForm } from '@/components/track/ActivityForm'
-import {
-  getAfterSaveReturnTo,
-  getSafeNewReturnTo,
-  isDetailReturnTo,
-  isRecommendReturnTo,
-} from '@/lib/listReturn'
+import { getReturnLabel, getSafeListReturnTo } from '@/lib/listReturn'
 import { cn } from '@/lib/utils'
 import styles from '@/components/screens.module.css'
 
@@ -20,14 +15,8 @@ export default async function NewActivityPage({
   const session = await getSession()
   if (!session.authenticated) redirect('/lock')
   const { from, returnTo } = await searchParams
-  const listReturnTo = getSafeNewReturnTo(returnTo)
-  const backLabel = !listReturnTo
-    ? '홈으로'
-    : isDetailReturnTo(listReturnTo)
-      ? '상세로'
-      : isRecommendReturnTo(listReturnTo)
-        ? '추천 결과로'
-        : '목록으로'
+  const listReturnTo = getSafeListReturnTo(returnTo)
+  const backLabel = getReturnLabel(listReturnTo, '홈으로')
 
   return (
     <main className={styles.page}>
@@ -47,7 +36,7 @@ export default async function NewActivityPage({
             'mt-5 px-5 pt-5 pb-4 lg:px-6 lg:pt-6 lg:pb-5',
           )}
         >
-          <ActivityForm prefill={from === 'copy'} returnTo={getAfterSaveReturnTo(listReturnTo)} />
+          <ActivityForm prefill={from === 'copy'} returnTo={listReturnTo} />
         </div>
       </div>
     </main>

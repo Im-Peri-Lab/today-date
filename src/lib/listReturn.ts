@@ -16,8 +16,13 @@ export interface ListUrlState {
 }
 
 export const DEFAULT_LIST_RETURN_TO = '/list'
+export const HOME_RETURN_TO = '/'
 
-// 추천위저드 결과 화면 경로 — getSafeListReturnTo 화이트리스트와 isRecommendReturnTo 판별이
+// 상세 화면 경로(/activities/[id], /places/[id]) — 복사하기로 신규 등록에 들어올 때 "바로 이전 상세"로
+// 돌아가기 위한 returnTo 대상.
+const DETAIL_PATH_PATTERN = /^\/(activities|places)\/[^/]+$/
+
+// 추천위저드 결과 화면 경로 — getSafeListReturnTo 허용 목록과 isRecommendReturnTo 판별이
 // 공유하는 단일 출처. 새 위저드 경로가 추가되면 여기에만 더한다.
 export const RECOMMEND_RETURN_PATHS = ['/recommend/activity', '/recommend/place'] as const
 
@@ -62,21 +67,30 @@ export function buildDetailHref(
   return query ? `${pathname}?${query}` : pathname
 }
 
-export function getSafeListReturnTo(value: string | string[] | null | undefined) {
+export function getSafeListReturnTo(value: string | string[] | null | undefined): string | undefined {
   const raw = Array.isArray(value) ? value[0] : value
   if (!raw || !raw.startsWith('/')) return undefined
 
   try {
     const base = new URL('https://today-date.local')
     const url = new URL(raw, base)
-    // 오픈 리다이렉트 방지: 오리진이 같고, 경로가 허용 목록(목록 화면 + 추천위저드 결과 화면)
-    // 중 하나일 때만 통과시킨다. 새 반환 대상 화면을 추가할 땐 이 배열만 늘린다.
+    // 오픈 리다이렉트 방지: 오리진이 같고, 경로가 허용 목록(홈·목록·추천위저드 결과·상세) 중
+    // 하나일 때만 통과시킨다. 새 반환 대상 화면을 추가할 땐 이 함수만 늘린다.
+    if (url.origin !== base.origin) return undefined
+
+    if (url.pathname === HOME_RETURN_TO) return HOME_RETURN_TO
+
+    if (DETAIL_PATH_PATTERN.test(url.pathname)) {
+      // 상세는 자기 returnTo(재귀 검증)만 남기고 edit 등 다른 파라미터는 버린다.
+      return buildDetailHref(url.pathname, {
+        returnTo: getSafeListReturnTo(url.searchParams.get('returnTo')),
+      })
+    }
+
     const isAllowedPath =
       url.pathname === DEFAULT_LIST_RETURN_TO ||
       (RECOMMEND_RETURN_PATHS as readonly string[]).includes(url.pathname)
-    if (url.origin !== base.origin || !isAllowedPath) {
-      return undefined
-    }
+    if (!isAllowedPath) return undefined
 
     return `${url.pathname}${url.search}`
   } catch {
@@ -84,7 +98,7 @@ export function getSafeListReturnTo(value: string | string[] | null | undefined)
   }
 }
 
-/** returnTo가 목록이 아니라 추천위저드 결과 화면을 가리키는지 — 상세 화면의 복귀 버튼 라벨 분기에 사용. */
+/** returnTo가 목록이 아니라 추천위저드 결과 화면을 가리키는지. */
 export function isRecommendReturnTo(value: string | undefined): boolean {
   if (!value) return false
   return (RECOMMEND_RETURN_PATHS as readonly string[]).some(
@@ -92,43 +106,20 @@ export function isRecommendReturnTo(value: string | undefined): boolean {
   )
 }
 
-// 신규 등록 화면 전용: 복사하기로 들어올 때 "바로 이전 상세"로 돌아가야 하므로 상세 경로도 허용한다.
-// 상세 화면 자신의 returnTo(getSafeListReturnTo)는 그대로 목록/추천 결과만 허용한다.
-const DETAIL_PATH_PATTERN = /^\/(activities|places)\/[^/]+$/
-
+/** returnTo가 상세 화면(/activities/[id], /places/[id])을 가리키는지. */
 export function isDetailReturnTo(value: string | undefined): boolean {
   if (!value) return false
   return DETAIL_PATH_PATTERN.test(value.split('?')[0])
 }
 
 /**
- * 신규 등록 화면의 returnTo 검증 — 목록·추천 결과 + 상세 경로.
- * 상세는 경로와 그 상세의 returnTo(안전한 값만)로 다시 조립한다(edit 등 다른 파라미터는 버린다).
+ * 상단 복귀 버튼 라벨 — 상세·신규 등록 화면 공용 단일 출처.
+ * returnTo가 없을 때의 라벨만 화면마다 다르다(상세=목록으로, 신규=홈으로).
  */
-export function getSafeNewReturnTo(value: string | string[] | null | undefined) {
-  const listSafe = getSafeListReturnTo(value)
-  if (listSafe) return listSafe
-
-  const raw = Array.isArray(value) ? value[0] : value
-  if (!raw || !raw.startsWith('/')) return undefined
-  try {
-    const base = new URL('https://today-date.local')
-    const url = new URL(raw, base)
-    if (url.origin !== base.origin || !DETAIL_PATH_PATTERN.test(url.pathname)) return undefined
-    return buildDetailHref(url.pathname, {
-      returnTo: getSafeListReturnTo(url.searchParams.get('returnTo')),
-    })
-  } catch {
-    return undefined
-  }
-}
-
-/**
- * 신규 등록 저장 후 열리는 새 상세의 returnTo. 복사 출발이 상세였다면 그 상세의 returnTo(목록/추천 결과)를
- * 이어받는다 — 새 상세의 상단 버튼이 원본 상세가 아니라 원래 출발 목록을 가리키게 한다.
- */
-export function getAfterSaveReturnTo(newReturnTo: string | undefined): string | undefined {
-  if (!newReturnTo || !isDetailReturnTo(newReturnTo)) return newReturnTo
-  const base = new URL('https://today-date.local')
-  return getSafeListReturnTo(new URL(newReturnTo, base).searchParams.get('returnTo'))
+export function getReturnLabel(returnTo: string | undefined, fallback: string): string {
+  if (!returnTo) return fallback
+  if (returnTo === HOME_RETURN_TO) return '홈으로'
+  if (isDetailReturnTo(returnTo)) return '상세로'
+  if (isRecommendReturnTo(returnTo)) return '추천 결과로'
+  return '목록으로'
 }

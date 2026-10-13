@@ -39,7 +39,7 @@ import {
   STATUS_LABELS,
   STATUS_MENU_LABELS,
 } from '@/lib/labels'
-import { buildDetailHref, DEFAULT_LIST_RETURN_TO, isRecommendReturnTo } from '@/lib/listReturn'
+import { buildDetailHref, DEFAULT_LIST_RETURN_TO, getReturnLabel } from '@/lib/listReturn'
 import { stashActivityDuplicate } from '@/lib/duplicatePrefill'
 import { cn } from '@/lib/utils'
 import { resolveHref } from '@/lib/url'
@@ -71,7 +71,7 @@ export function ActivityDetail({ id, initialData, initialEdit, returnTo }: Props
   const [visitedOpen, setVisitedOpen] = useState(false)
   const [revertOpen, setRevertOpen] = useState(false)
   const listHref = returnTo ?? DEFAULT_LIST_RETURN_TO
-  const listLabel = isRecommendReturnTo(returnTo) ? '추천 결과로' : '목록으로'
+  const listLabel = getReturnLabel(returnTo, '목록으로')
 
   const {
     register,

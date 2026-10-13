@@ -1,6 +1,5 @@
 import { redirect } from 'next/navigation'
-import Link from 'next/link'
-import { ArrowLeft } from 'lucide-react'
+import { TopBar } from '@/components/TopBar'
 import { AccountDeleteForm } from '@/components/account/AccountDeleteForm'
 import { DetailRow } from '@/components/track/DetailRow'
 import { deriveWorkspaceState, getCoupleById, getCoupleUsers } from '@/lib/auth/couple'
@@ -49,10 +48,7 @@ export default async function AccountDeletePage() {
   return (
     <main className={styles.page}>
       <div className="mx-auto w-full max-w-lg px-5 pb-16 pt-6 lg:pt-10">
-        <Link href="/" className={styles.backLink}>
-          <ArrowLeft className="h-4 w-4" />
-          홈으로
-        </Link>
+        <TopBar />
 
         <h1 className={cn('mt-4', styles.pageTitle)}>계정 삭제</h1>
         <p className={styles.pageSubtitle}>

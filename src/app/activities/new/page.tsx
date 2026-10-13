@@ -2,8 +2,9 @@ import { redirect } from 'next/navigation'
 import { getSession } from '@/lib/auth/session'
 import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
+import { TopBar } from '@/components/TopBar'
 import { ActivityForm } from '@/components/track/ActivityForm'
-import { getReturnLabel, getSafeListReturnTo } from '@/lib/listReturn'
+import { getReturnLabel, getSafeListReturnTo, HOME_RETURN_TO } from '@/lib/listReturn'
 import { cn } from '@/lib/utils'
 import styles from '@/components/screens.module.css'
 
@@ -21,10 +22,14 @@ export default async function NewActivityPage({
   return (
     <main className={styles.page}>
       <div className="mx-auto w-full max-w-lg px-5 pb-16 pt-6 lg:pt-10">
-        <Link href={listReturnTo ?? '/'} className={styles.backLink}>
-          <ArrowLeft className="h-4 w-4" />
-          {backLabel}
-        </Link>
+        <TopBar>
+          {listReturnTo && listReturnTo !== HOME_RETURN_TO && (
+            <Link href={listReturnTo} className={styles.backLink}>
+              <ArrowLeft className="h-4 w-4" />
+              {backLabel}
+            </Link>
+          )}
+        </TopBar>
 
         <h1 className={cn('mt-4', styles.pageTitle)}>액티비티 추가</h1>
         <p className={styles.pageSubtitle}>함께 하고 싶은 액티비티를 위시리스트에 추가해요</p>

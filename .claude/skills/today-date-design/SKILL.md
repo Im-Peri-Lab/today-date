@@ -293,7 +293,7 @@ description: >
 
 **액션 버튼 위계 = Tier A(40px) / Tier B(36px) 두 단계.** 색(Primary 단색 채움/outline/ghost/destructive)은 중요도·성격을 구분하는 용도일 뿐 높이에는 관여하지 않는다 — 같은 Tier면 색과 무관하게 같은 높이를 쓴다.
 
-**이 표는 텍스트/풀폭 액션 버튼 전용이다.** 아이콘 버튼(`headerNavBtn`·`iconBtn`·`editGhostBtn`·`mapActionBtn`은 §7, FAB는 §9, 다이얼로그 우상단 닫기 X는 §11)은 이 표 범위 밖이며 별도 재검토 대상(백로그)이다. 인증 화면(`/lock`·`/forgot`·`/reset`·`/setup`) 버튼(46px, `src/components/auth/auth.module.css`의 `.btnPrimary`/`.btnSecondary`)도 처음부터 별도 시스템이라 이 표 범위 밖 — 변경 없음.
+**이 표는 텍스트/풀폭 액션 버튼 전용이다.** 아이콘 버튼(`headerNavBtn`·`iconBtn`·`mapActionBtn`은 §7, FAB는 §9, 다이얼로그 우상단 닫기 X는 §11)은 이 표 범위 밖이며 별도 재검토 대상(백로그)이다. 인증 화면(`/lock`·`/forgot`·`/reset`·`/setup`) 버튼(46px, `src/components/auth/auth.module.css`의 `.btnPrimary`/`.btnSecondary`)도 처음부터 별도 시스템이라 이 표 범위 밖 — 변경 없음.
 
 ### Tier A — 화면/다이얼로그 풀폭 핵심 액션: **40px** (`h-10`) · `w-full` · radius 10px
 
@@ -431,7 +431,7 @@ description: >
 | **소형 컨트롤** | `.segmentBtn` / `.chip` / `.filterToggle` / `.resetBtn` / `.option` / `.tab` / `.backLink` / `.brandLink` / `.ratingStar` / `.dialogCloseBtn` / FAB / auth 버튼 / shadcn `default`·`secondary`·`ghost`·`link`·`outline`·`destructive` | border(또는 color) + 2px glow 알파 0.5 | `box-shadow: var(--s-focus-ring)` |
 | **카드·박스형** | `.cardInteractive` (Link 포함 `:has(a:focus-visible)`) / `.optionCard` | border + 3px glow 알파 0.5 | `box-shadow: var(--s-focus-ring-card)` |
 | **인라인 텍스트 링크** | auth `.link` / `.textLink` / 참고 링크 `<a>` | outline none + accent 색 + 2px underline | CSS underline |
-| **중성 보조** | `.iconBtn` / `.editGhostBtn` / `.mapActionBtn` / `HomeMenu` / DropdownMenuItem | hover와 동일 중성 면 (글로우 없음) | §7 그대로 유지 |
+| **중성 보조** | `.iconBtn` / `.mapActionBtn` / `HomeMenu` / DropdownMenuItem | hover와 동일 중성 면 (글로우 없음) | §7 그대로 유지 |
 
 **규칙:**
 - 모든 `:focus-visible` box-shadow는 `var(--token, fallback)` 참조. 리터럴 `0 0 0 Xpx rgba(...)` 하드코딩 금지.
@@ -523,7 +523,7 @@ description: >
 
 ### hover 언어 — "콘텐츠 vs 유틸리티" (의도된 구분)
 - **콘텐츠 요소**(카드·칩·옵션 카드 — 사용자가 *고르는* 대상): hover = **accent 보더**. 카드 `--s-card-hover-border`(라벤더 알파), 칩·옵션 비활성 `--s-active-line` 보더. **추천 위저드 옵션 카드(`.optionCard`)는 hover 시 리스트 카드(`.cardInteractive`)와 동일한 부상**(`translateY(-2px)` + `--s-card-shadow-hover`, `@media(hover)` 한정·`:active`에서 `translateY(0)`).
-- **유틸리티 아이콘 버튼**(도구 — `.headerNavBtn` 검색/홈/메뉴, `.iconBtn` 카드 ⋮케밥(로그아웃은 햄버거 메뉴 항목), `.editGhostBtn` 연필(사용처 0), ghost `X` 닫기): hover = **중성 회색**(라이트 `#eceaf3`=`--s-card-border-strong`, 다크 보라 소프트 `--s-accent-soft-bg`). §7·§10-B·금지규칙 4 그대로 유지 — accent로 **바꾸지 않는다**.
+- **유틸리티 아이콘 버튼**(도구 — `.headerNavBtn` 검색/홈/메뉴, `.iconBtn` 카드 ⋮케밥(로그아웃은 햄버거 메뉴 항목), ghost `X` 닫기): hover = **중성 회색**(라이트 `#eceaf3`=`--s-card-border-strong`, 다크 보라 소프트 `--s-accent-soft-bg`). §7·§10-B·금지규칙 4 그대로 유지 — accent로 **바꾸지 않는다**.
 - **모바일 sticky hover 방어**: `.headerNavBtn:hover`는 반드시 `@media (hover: hover)` 안에서만 적용한다. iOS WebKit에서 터치 후 클라이언트 라우팅으로 같은 좌표의 헤더 버튼이 재사용될 때 hover 시각 상태가 남는 것을 막기 위한 공용 규칙이며, 검색·홈·메뉴에 모두 적용된다. `:focus-visible`은 키보드 접근성 상태이므로 hover 미디어쿼리와 합치지 않고 항상 별도로 유지한다.
 - **둘이 다른 건 버그가 아니라 의도**다: 고르는 콘텐츠는 accent로 "선택 가능"을 암시, 도구 버튼은 중성으로 차분하게. (하단 삭제 `styles.detailDeleteBtn`만 destructive 틴트 — 별도 예외.)
 
@@ -638,15 +638,15 @@ description: >
     - **상세 화면(DetailRow 안)**: `styles.faint`(`--s-faint`) 명시 → 카테고리 아이콘(`styles.accent`)보다 한 단계 약한 위계. `className={cn('h-3.5 w-3.5 shrink-0', styles.faint)}` 패턴 사용.
   - **유틸리티 아이콘 버튼 기본 색·stroke (확정, 단일 출처 = `screens.module.css` 맨 아래 공통 블록)**: `.headerNavBtn`(검색·홈·메뉴, 44px/22px) · `.mapActionBtn`(연필·복사하기·지도·▾, 28px/16px) · `.iconBtn`(카드 ⋮, 44px/20px) · `.dialogCloseBtn`(다이얼로그 X, 28px/16px) 네 계열이 **같은 색·같은 stroke**를 쓴다. 색 = **라이트 `color-mix(in srgb, var(--s-ink) 50%, var(--s-sub))`**(≈ `rgb(66,65,90)`, 흰 배경 대비 ≈ 9.8:1) / **다크 `ink 30% + sub 70%`**(≈ `rgb(191,185,204)`, 카드면 대비 ≈ 8.6:1). **stroke 1.25**(lucide 기본 2 를 CSS 로 덮어씀). 새 토큰 없이 기존 `--s-ink`/`--s-sub` 혼합만 쓰고, `color-mix` 미지원 엔진용 폴백 줄(`--s-sub`)을 바로 위에 둔다. hover/focus 색·크기는 변경 없음(각 클래스의 상태 규칙이 더 높은 specificity 로 덮는다). `.dialogCloseBtn` 의 기본 색은 `dialog.tsx` Tailwind 유틸이 아니라 이 공통 블록이 정한다(유틸에는 hover 색만 남김). **다크가 라이트와 비율이 다른 이유**: 어두운 면 위의 가는 밝은 선은 같은 비율에서 더 밝고 굵게 번져 보여, 라이트와 같은 50% 로는 제목(ink)과 같은 "텍스트"로 읽혔다. 다크 렌더 비교(50/30/15%) 후 30% 로 확정. 배경: 헤더/카드 아이콘 이질감 해소(상세·계정 화면에서 두 계열이 처음 함께 보임), 색이 연하고 두께만 어중간히 줄어 투박해 보이던 문제 → 선은 더 가늘게, 색은 더 선명하게. 새 유틸 아이콘 버튼은 이 공통 블록의 선택자 목록에 클래스를 추가한다(색·stroke 를 개별 클래스에서 따로 선언하지 않는다). 후보 비교 기록: ink 100% 는 아이콘이 제목·본문 텍스트와 같은 진하기로 "텍스트"처럼 읽혀 기각, stroke 1.5 는 선이 굵어 기각, 현 색 유지+1.25 는 작은 아이콘이 거의 안 보여 기각.
   - 유틸리티 아이콘 버튼(`styles.headerNavBtn` / `styles.iconBtn`): 기본 색은 위 공통 혼합색, hover 시 라이트는 중성 면 `#eceaf3`+`ink`, 다크는 보라 소프트. `.headerNavBtn`은 검색·홈·메뉴 헤더 내비게이션 전용이고, `.iconBtn`은 카드 ⋮케밥 전용이다(로그아웃은 햄버거 메뉴 항목). (유틸리티 도구라 **중성 hover** 유지 — 콘텐츠 요소의 accent hover와 의도적으로 구분, §5-A.)
-  - **키보드 포커스(`:focus-visible`) = hover와 동일한 중성 면** (`headerNavBtn`·`iconBtn`·`editGhostBtn`): 브라우저 기본 outline을 끄고(`outline:none`) 중성 회색 면으로 표시. **입력 글로우(box-shadow 링) 쓰지 않는다**(글로우는 입력 필드 전용, §5). `.headerNavBtn:hover`만 `@media (hover: hover)`로 제한하며 `:focus-visible`은 그 밖에 유지한다.
-- **유틸 아이콘 글리프 크기 (탭타깃별 통일, 확정)**: **44px 탭타깃 버튼(`.iconBtn` — 카드 ⋮케밥) → 글리프 20px(`h-5 w-5`)** / **36px 버튼(`.editGhostBtn`) → 글리프 16px(`h-4 w-4`) — 261013(PR #133) 기준 코드 사용처 0, 정리 예정(CSS·이 문서 언급 제거 대기)** / **28px 버튼(`.mapActionBtn` — 위치 행 지도열기/▾ 인라인 액션 쌍 §10-I, 상세 블록 복사하기+연필 쌍 §10-B) → 글리프 16px(`h-4 w-4`)**. 탭타깃 크기(44/36) 자체는 유지하고 글리프만 이 규칙으로 맞춘다. `.mapActionBtn`(28px)은 **한 행에 두 버튼이 인접하는 인라인 액션 쌍 전용**의 컴팩트 예외 — 글리프 좌우 여백을 6px로 좁혀 두 버튼이 한 세트로 읽히게 한다. 단독 유틸 버튼에는 쓰지 않는다(36/44 유지).
-  - **28px 사용처(`.mapActionBtn`) 전수 (261013)**: ① 위치 행 지도 열기·▾(`MapLink`, 행 flex 흐름, 쌍 gap 2px) ② 상세 카드 모서리 연필·복사하기(`DetailBlock`, absolute, gap 0, §10-B) ③ 닉네임 연필(`AccountInfoBlock`, 행 안 absolute 세로 중앙). 오른쪽 끝 기준은 **카드 콘텐츠 패딩 + 3px(글리프 기준)** — ①②가 한 열(§10-B·§10-I).
+  - **키보드 포커스(`:focus-visible`) = hover와 동일한 중성 면** (`headerNavBtn`·`iconBtn`): 브라우저 기본 outline을 끄고(`outline:none`) 중성 회색 면으로 표시. **입력 글로우(box-shadow 링) 쓰지 않는다**(글로우는 입력 필드 전용, §5). `.headerNavBtn:hover`만 `@media (hover: hover)`로 제한하며 `:focus-visible`은 그 밖에 유지한다.
+- **유틸 아이콘 글리프 크기 (탭타깃별 통일, 확정)**: **44px 탭타깃 버튼(`.headerNavBtn` 검색·홈·메뉴) → 글리프 22px(`h-[22px] w-[22px]`)** (`.iconBtn` 카드 ⋮케밥은 아래 의도된 예외 — 20px) / **28px 버튼(`.mapActionBtn` — 위치 행 지도열기/▾ 인라인 액션 쌍 §10-I, 상세 블록 복사하기+연필 쌍 §10-B) → 글리프 16px(`h-4 w-4`)**. 탭타깃 크기(44/28) 자체는 유지하고 글리프만 이 규칙으로 맞춘다. `.mapActionBtn`(28px)은 **한 행에 두 버튼이 인접하는 인라인 액션 쌍 전용**의 컴팩트 예외 — 글리프 좌우 여백을 6px로 좁혀 두 버튼이 한 세트로 읽히게 한다. 단독 유틸 버튼에는 쓰지 않는다(44 유지).
+  - **28px 사용처(`.mapActionBtn`) 전수 (261013)**: ① 위치 행 지도 열기·▾(`MapLink`, 행 flex 흐름, 쌍 gap 0 — 연필·복사하기 쌍과 같은 박스 맞닿음 규칙) ② 상세 카드 모서리 연필·복사하기(`DetailBlock`, absolute, gap 0, §10-B) ③ 닉네임 연필(`AccountInfoBlock`, 행 안 absolute 세로 중앙). 오른쪽 끝 기준은 **카드 콘텐츠 패딩 + 3px(글리프 기준)** — ①②가 한 열(§10-B·§10-I).
   - **탭 영역 트레이드오프(수용)**: 28px는 44px 권장보다 작다. 글리프 간격을 좁히려고 박스를 줄인 의도된 선택이라 **투명 패딩 등 탭 영역 보완은 하지 않는다.** 사용자가 "누르기 불편하다"는 신호를 줄 때만 위 3곳(+상세 복사하기)을 **일괄** 재검토한다(일부만 고치면 다시 어긋남, PROJECT_CONTEXT §20).
-  - **44px 계열 글리프(현황)**: 헤더 `.headerNavBtn` 22px / 카드 ⋮ `.iconBtn` 20px — 2px 차이는 알려진 불일치이며 통일(⋮ 22px)은 후속 청크(PROJECT_CONTEXT §19 그룹 5). `.iconBtn:hover`는 `(hover: hover)` 가드가 없어 터치 후 hover 면이 남을 수 있다(알려진 버그, 수정 예정). 다이얼로그 X(`.dialogCloseBtn`, 28px/16px)는 포커스에 글로우 링을 써 다른 아이콘 버튼(중성 면)과 다르다(보류).
+  - **44px 계열 글리프 — 카드 ⋮ `.iconBtn`만 20px (의도된 예외, 261013)**: 44px 박스 글리프는 헤더 `.headerNavBtn` 22px로 통일하는 것이 규칙이고 규칙 자체는 유지한다. 단 카드 ⋮(`ItemMenu`, `h-5 w-5`)만 20px을 유지한다. 근거: 22px로 올려 같은 조건(라이트/다크 × 390/1280)에서 20px과 나란히 캡처 비교한 결과, 카드 안에서는 ⋮ 세 점이 22px일 때 과하게 도드라져 제목·메타보다 시선을 끌었다(사용자 시각 판단). 헤더 아이콘은 카드 밖 독립 클러스터라 22px이 어울리지만, 카드 ⋮는 제목·메타 줄과 같은 면 안에 있어 한 단계 작아야 위계가 맞다. 색·stroke는 공통 블록(§7)을 그대로 따른다. 새 44px 박스 아이콘 버튼이 카드 내부에 들어가면 이 예외를 따르고, 헤더·화면 상단 클러스터면 22px을 쓴다. 다이얼로그 X(`.dialogCloseBtn`, 28px/16px)는 포커스에 글로우 링을 써 다른 아이콘 버튼(중성 면)과 다르다(보류).
 - **`.headerNavBtn` (헤더 내비게이션 클러스터 전용, 신설 260714)**: 홈 화면 헤더(검색+메뉴), 그 외 화면 헤더(홈+메뉴) 2종 조합 전용. 탭타깃은 `.iconBtn`과 동일한 44px을 유지하되(리스크 없음), **글리프만 22px(`h-[22px] w-[22px]`)로 확대**하고 버튼 간 `gap`도 4px→0px로 좁힌다. 도입 배경: 헤더 아이콘 간격이 헐렁해 보인다는 관찰을 진단한 결과, **탭타깃이 헐거운 게 아니라 44px 박스 안 20px 글리프의 여백 비율이 커 보이는 것**으로 판정 — 탭타깃을 줄이는 대신 글리프 비율을 키워 해소. 카드 ⋮ 메뉴·로그아웃(`.iconBtn`, 20px 글리프)은 헤더와 별개 컨텍스트라 이 변경의 영향을 받지 않는다. `.headerNavBtn:hover`는 모바일 sticky hover 방지를 위해 `@media (hover: hover)` 안에 두고, `:focus-visible`은 별도 규칙으로 미디어쿼리 밖에 유지한다(§5-A).
 - **펼침/드롭다운 셰브런**: 접었다 펴는 UI(지도앱 선택 `MapLink`, `ui/select`, **리스트 필터 토글**)는 `ChevronDown`(`h-4 w-4`, 16px)을 **우측 끝에 고정**으로 둔다. **열림 시 180° 회전 등 회전 애니메이션은 넣지 않는다** — 펼침 상태는 색/`aria-expanded`로만 표현(앱 공용 관례, 신규 회전 언어 도입 금지).
 - strokeWidth: 카테고리 `2`, CTA 그라데이션 배지 내부 아이콘 `1.75`, **유틸리티 아이콘 버튼 4계열 `1.25`**(공통 블록, 위 "유틸리티 아이콘 버튼 기본 색·stroke"). 크기가 다른 아이콘의 굵기는 stroke 숫자가 아니라 환산 px(글리프 px × stroke / 24)로 비교한다 — 22px/2 ≈ 1.83px, 16px/2 ≈ 1.33px.
-- 크기 관례: 리스트 카드 메타 `h-3 w-3`, 상세 화면 DetailRow 메타 `h-3.5 w-3.5`, 헤더 내비게이션(`.headerNavBtn`) `h-[22px] w-[22px]`, 카드 ⋮ 메뉴(`.iconBtn`) `h-5`.
+- 크기 관례: 리스트 카드 메타 `h-3 w-3`, 상세 화면 DetailRow 메타 `h-3.5 w-3.5`, 헤더 내비게이션(`.headerNavBtn`) `h-[22px] w-[22px]`, 카드 ⋮ 메뉴(`.iconBtn`, 의도된 예외) `h-5 w-5`.
 - 참고: 장식용 하트/💜는 카피(서브카피·빈 상태 문구)에만 등장 — 기능 아이콘 자리에는 절대 넣지 않는다.
 
 ---
@@ -843,7 +843,7 @@ description: >
 </button>
 ```
 
-`styles.mapActionBtn`(28px, 글리프 16px) 상태별 색 — 복사하기 버튼과 인접 쌍이라 28px 컴팩트 버튼을 쓴다. **위치는 카드 패딩 − 3px에 연동**: `top/right = 1.0625rem`(lg `1.3125rem`) = 17/21px. 글리프(박스 안 6px) 기준 카드 모서리와의 간격이 **위·오른쪽 모두 23px(lg 27px)로 같아** 모서리 비율이 정사각으로 보이고, 뱃지 줄(약 22px, 세로 중심 = 패딩+11px)의 세로 중심에도 놓인다. 같은 카드 안 `MapLink` 지도·▾ 쌍은 `-mr-[3px]`로 글리프 오른쪽 끝을 같은 열에 맞춘다(§10-I). 고정 px 금지 — lg에서 패딩이 늘면 어긋난다. 등록 정보·방문 기록 두 블록 모두 `DetailBlock` 공용 처리. `.editGhostBtn`(36px)은 이제 이 블록에서 쓰지 않는다:
+`styles.mapActionBtn`(28px, 글리프 16px) 상태별 색 — 복사하기 버튼과 인접 쌍이라 28px 컴팩트 버튼을 쓴다. **위치는 카드 패딩 − 3px에 연동**: `top/right = 1.0625rem`(lg `1.3125rem`) = 17/21px. 글리프(박스 안 6px) 기준 카드 모서리와의 간격이 **위·오른쪽 모두 23px(lg 27px)로 같아** 모서리 비율이 정사각으로 보이고, 뱃지 줄(약 22px, 세로 중심 = 패딩+11px)의 세로 중심에도 놓인다. 같은 카드 안 `MapLink` 지도·▾ 쌍은 `-mr-[3px]`로 글리프 오른쪽 끝을 같은 열에 맞춘다(§10-I). 고정 px 금지 — lg에서 패딩이 늘면 어긋난다. 등록 정보·방문 기록 두 블록 모두 `DetailBlock` 공용 처리.:
 
 | 상태 | 배경 | 색상 |
 |---|---|---|
@@ -1021,7 +1021,7 @@ export const STATUS_LABELS: Record<Status, string> = {
 **레이아웃 (좌우 분리):**
 - 루트 `flex w-full items-start` — `items-start`로 왼쪽 텍스트를 상단 정렬해 **라벨↔내용 여백을 다른 DetailRow(소요시간·지역 등)와 동일하게 맞춘다**(28px 버튼이 행을 키우고 center 정렬로 텍스트가 밀리던 문제 방지).
 - **왼쪽(값)**: `inline-flex min-w-0 flex-1 items-center gap-1.5` — `MapPin`(faint) + 위치 텍스트. **순수 텍스트(비링크, 클릭 동작 없음)**, `min-w-0 truncate`로 긴 값 잘림.
-- **오른쪽(액션)**: `flex shrink-0 items-center gap-0.5` + **`-mt-1`** — 지도 열기 아이콘(`Map`) + `▾`(`ChevronDown`) 앱 선택. 두 버튼 모두 `.mapActionBtn`(28px, §7). `gap-0.5`로 두 버튼을 한 세트로 인접(비겹침). **`-mt-1`은 28px 버튼의 시각 중심을 ~21px 텍스트 줄 중심에 맞추는 보정**(상단 정렬로 버튼이 텍스트보다 처지는 것 방지). **`-mr-[3px]`는 카드 모서리 연필(`DetailBlock`, §10-B)과 글리프 오른쪽 끝을 한 열로 맞추는 보정**(글리프 간격 카드 패딩+3px).
+- **오른쪽(액션)**: `flex shrink-0 items-center gap-0` + **`-mt-1`** — 지도 열기 아이콘(`Map`) + `▾`(`ChevronDown`) 앱 선택. 두 버튼 모두 `.mapActionBtn`(28px, §7). `gap-0`으로 두 28px 박스를 맞닿게 해 한 세트로 인접(비겹침, 연필·복사하기 쌍과 동일 규칙). 글리프 잉크 간 실제 거리는 연필·복사하기 13.5px / 지도·▾ 17.0px — 3.5px 차이는 ▾ 그림이 작아(9×5px) 생기는 아이콘 모양 차이라 의도된 것이며 조정하지 않는다(261013 실측: 네 아이콘 모두 박스 28×28·글리프 프레임 16×16·잉크 정중앙). **`-mt-1`은 28px 버튼의 시각 중심을 ~21px 텍스트 줄 중심에 맞추는 보정**(상단 정렬로 버튼이 텍스트보다 처지는 것 방지). **`-mr-[3px]`는 카드 모서리 연필(`DetailBlock`, §10-B)과 글리프 오른쪽 끝을 한 열로 맞추는 보정**(글리프 간격 카드 패딩+3px).
 - 접근성: 지도 열기 `aria-label="지도에서 열기"`, `▾` `aria-label="지도 앱 선택"`, 시트 항목별 `${label}에서 열기`.
 
 **지도 앱 config (`src/lib/map.ts`):**
@@ -1259,7 +1259,7 @@ requestAnimationFrame(() => router.push(listHref))
 ## 백로그 (별도 작업 필요 — 미해결)
 
 - **`.detailDeleteBtn` 라이트 hover 불투명도 불일치** → **해결 (dark/hover/focus 정합화 패스)**: 라이트 hover를 공통 토큰(`var(--s-destructive-soft-bg)`, `/0.1`)으로 교체해 `/0.15`와의 불일치를 해소. 라이트 시각이 `0.15→0.1`로 옅어지는 변경이라 사용자 사인오프 받아 적용. (다크는 §5-B대로 이 표면 전용값 `/0.20`·`/0.26` 그대로 유지.)
-- **다크 hover "2계열 분리" 의심 (PROJECT_CONTEXT §19 그룹 1)** → **기각/종결 (260730, PR #101)**: 전수 재진단 결과 실제로 통일이 필요한 항목은 없었음. `.iconBtn`/`.headerNavBtn`/`.dialogCloseBtn`/`.editGhostBtn`/`.mapActionBtn`의 다크 hover가 라이트와 다른 토큰(중성→accent)을 쓰는 건 §5-A가 이미 확정한 "콘텐츠 vs 유틸리티" 의도된 구분이었고, `.detailDeleteBtn` hover/active 텍스트색이 다크에서도 고정인 것도 §5-B가 이미 명시한 설계(전경색은 솔리드 단일 출처, 소프트 배경과 안 섞음)였다. 실측(Playwright 실제 렌더 픽셀 샘플링)으로 `.detailDeleteBtn` hover 텍스트 대비도 확인: 라이트 CR≈3.18 / 다크 CR≈4.37 — 다크가 오히려 더 또렷해 "다크만 무대응이라 깨진다"는 가설도 기각. 유일한 실제 조치는 코드베이스에 남아있던 마지막 dead Tailwind `dark:` 클래스(미사용 컴포넌트 `select.tsx`/`tabs.tsx`) 삭제.
+- **다크 hover "2계열 분리" 의심 (PROJECT_CONTEXT §19 그룹 1)** → **기각/종결 (260730, PR #101)**: 전수 재진단 결과 실제로 통일이 필요한 항목은 없었음. `.iconBtn`/`.headerNavBtn`/`.dialogCloseBtn`/`.mapActionBtn`(및 당시 존재하던 `.editGhostBtn`)의 다크 hover가 라이트와 다른 토큰(중성→accent)을 쓰는 건 §5-A가 이미 확정한 "콘텐츠 vs 유틸리티" 의도된 구분이었고, `.detailDeleteBtn` hover/active 텍스트색이 다크에서도 고정인 것도 §5-B가 이미 명시한 설계(전경색은 솔리드 단일 출처, 소프트 배경과 안 섞음)였다. 실측(Playwright 실제 렌더 픽셀 샘플링)으로 `.detailDeleteBtn` hover 텍스트 대비도 확인: 라이트 CR≈3.18 / 다크 CR≈4.37 — 다크가 오히려 더 또렷해 "다크만 무대응이라 깨진다"는 가설도 기각. 유일한 실제 조치는 코드베이스에 남아있던 마지막 dead Tailwind `dark:` 클래스(미사용 컴포넌트 `select.tsx`/`tabs.tsx`) 삭제.
 - **카드 그리드 구현 방식 통합 검토 (PROJECT_CONTEXT §19 그룹 3)** → **기각/종결 (260730)**: `/list`(CSS Grid)와 추천 결과(flex-wrap)의 렌더 폭을 Playwright로 실측한 결과 PC(≥1024px)는 완전 동일(265px)했지만 640~900px 2열 구간에서 최대 140px 차이가 있었다. 사용자 확인 결과 이 차이는 버그가 아니라 "`/list`=전체 목록이라 트랙을 채우는 게 자연스럽고, 추천 결과=소수 큐레이션 갤러리라 고정폭+가운데 정렬이 자연스럽다"는 의도된 디자인 판단으로 확정됨 — 코드 변경 없이 §3-B에 의도된 예외로 문서화. `sm:max-w-[280px]` 캡은 변경 금지.
 - **spacing 토큰 표준화 (PROJECT_CONTEXT §19 그룹 3)** → **부분 완료 (260730)**: §8의 수렴 트리거("정보 뱃지 케이스 2~3개 누적")가 `.mealBadge`/`.visitedTag`/`.filterCount`로 충족되어, `.mealBadge`·`.visitedTag`의 padding만 `--s-badge-padding-*-info`/`--s-badge-padding-*-status` 토큰으로 승격(값 변경 없음, PR #71 역할 분리에 따라 병합하지 않음). `--s-space-*` 범용 체계 도입은 계속 보류 — Tailwind 유틸리티 spacing은 이미 일관된 스케일이라 대상이 아니었고, `.filterCount`(카운터 성격)는 이번 범위 제외.
 

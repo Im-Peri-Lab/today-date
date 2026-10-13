@@ -138,8 +138,7 @@ export function AccountInfoBlock({
               {/*
                 mapActionBtn(28px/16px 글리프, §7)을 재사용한다 — 원래 "인접 액션
                 쌍 전용"이지만 토큰·색은 동일하고, 이 자리는 애초에 absolute라 어느
-                크기든 행 높이에 영향이 없다. editGhostBtn(36px)보다 한 단계 작아
-                텍스트 한 줄 곁에서 과하지 않다.
+                크기든 행 높이에 영향이 없다. 28px라 텍스트 한 줄 곁에서 과하지 않다.
               */}
               <button
                 type="button"

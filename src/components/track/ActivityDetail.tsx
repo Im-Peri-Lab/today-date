@@ -19,7 +19,6 @@ import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { CategoryBadge } from './CategoryBadge'
 import { ActivityFields } from './ActivityFields'
-import { DuplicateMenu } from './DuplicateMenu'
 import { DetailBlock } from './DetailBlock'
 import { DetailRow } from './DetailRow'
 import { VisitRecordBlock } from './VisitRecordBlock'
@@ -192,7 +191,6 @@ export function ActivityDetail({ id, initialData, initialEdit, returnTo }: Props
           <ArrowLeft className="h-4 w-4" />
           {listLabel}
         </Link>
-        {activity && !editingInfo && <DuplicateMenu onDuplicate={handleDuplicate} />}
       </div>
 
       {isLoading ? (
@@ -215,6 +213,7 @@ export function ActivityDetail({ id, initialData, initialEdit, returnTo }: Props
               onCancel={exitEditInfo}
               onSave={onSaveInfo}
               saving={isSubmitting || update.isPending}
+              onCopy={handleDuplicate}
               blockTitle={activity.title}
               blockCategory={
                 activity.category ? <CategoryBadge category={activity.category} /> : undefined

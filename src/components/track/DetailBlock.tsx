@@ -1,7 +1,7 @@
 'use client'
 
 import { ReactNode } from 'react'
-import { Pencil, Loader2 } from 'lucide-react'
+import { Pencil, Copy, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import styles from '@/components/screens.module.css'
@@ -14,6 +14,11 @@ interface DetailBlockProps {
   onCancel: () => void
   onSave: () => void
   saving: boolean
+  /**
+   * 복사하기 (보기 모드 전용). 제공되면 연필 버튼 바로 왼쪽에 단독 버튼으로 노출.
+   * 연필과 같은 absolute 패턴 — 텍스트 행 흐름에 끼우지 않아 행 높이를 늘리지 않는다.
+   */
+  onCopy?: () => void
   /**
    * 블록 헤더에 표시할 아이템 제목 (보기 모드 전용).
    * 제공되면 섹션 라벨(title)을 숨기고 이 제목을 h1으로 표시한다.
@@ -47,6 +52,7 @@ export function DetailBlock({
   onCancel,
   onSave,
   saving,
+  onCopy,
   blockTitle,
   blockCategory,
   headerExtra,
@@ -64,11 +70,12 @@ export function DetailBlock({
         'px-5 pt-5 pb-4 lg:px-6 lg:pt-6 lg:pb-5',
       )}
     >
-      {/* 고스트 연필 버튼 — absolute로 카드 우상단 모서리에 밀착 */}
+      {/* 연필 버튼 — absolute. 박스 top/right = 카드 패딩 − 3px(17/21px): 위·오른쪽 글리프 간격이 같고
+          (23/27px), 뱃지 줄(약 22px) 세로 중심에 놓인다. MapLink 쌍도 -mr-[3px]로 같은 열. */}
       {!editing && (
         <button
           type="button"
-          className={cn(styles.editGhostBtn, 'absolute top-3.5 right-3.5')}
+          className={cn(styles.mapActionBtn, 'absolute top-[1.0625rem] right-[1.0625rem] lg:top-[1.3125rem] lg:right-[1.3125rem]')}
           onClick={onEdit}
           aria-label={`${title} 수정`}
         >
@@ -76,9 +83,21 @@ export function DetailBlock({
         </button>
       )}
 
+      {/* 복사하기 — 연필 바로 왼쪽: 연필 right + 28px (45/49px) */}
+      {!editing && onCopy && (
+        <button
+          type="button"
+          className={cn(styles.mapActionBtn, 'absolute top-[1.0625rem] right-[2.8125rem] lg:top-[1.3125rem] lg:right-[3.0625rem]')}
+          onClick={onCopy}
+          aria-label="복사하기"
+        >
+          <Copy className="h-4 w-4" />
+        </button>
+      )}
+
       {/* 블록 헤더 — showHeader 일 때만 렌더 */}
       {showHeader && (
-        <div className={cn(!editing && 'pr-10')}>
+        <div className={cn(!editing && (onCopy ? 'pr-16' : 'pr-10'))}>
           {/* 섹션 라벨: blockTitle이 없는 블록(방문 기록 등)에서만 표시 */}
           {!blockTitle && (
             <h2 className={cn('text-sm font-medium', styles.ink)}>

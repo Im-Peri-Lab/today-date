@@ -12,7 +12,6 @@ import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { CategoryBadge } from './CategoryBadge'
 import { PlaceFields } from './PlaceFields'
-import { DuplicateMenu } from './DuplicateMenu'
 import { DetailBlock } from './DetailBlock'
 import { DetailRow } from './DetailRow'
 import { VisitRecordBlock } from './VisitRecordBlock'
@@ -170,7 +169,6 @@ export function PlaceDetail({ id, initialData, initialEdit, returnTo }: Props) {
           <ArrowLeft className="h-4 w-4" />
           {listLabel}
         </Link>
-        {place && !editingInfo && <DuplicateMenu onDuplicate={handleDuplicate} />}
       </div>
 
       {isLoading ? (
@@ -193,6 +191,7 @@ export function PlaceDetail({ id, initialData, initialEdit, returnTo }: Props) {
               onCancel={exitEditInfo}
               onSave={onSaveInfo}
               saving={isSubmitting || update.isPending}
+              onCopy={handleDuplicate}
               blockTitle={place.title}
               blockCategory={
                 place.category ? <CategoryBadge category={place.category} /> : undefined

@@ -537,7 +537,7 @@ description: >
 - **미방문(wishlist)**: 정보 수정 → 복사하기 → 다녀온 곳으로 → (구분선) 삭제
 - **방문완료(visited)**: 정보 수정 → 기록 수정 → 복사하기 → 가보고 싶은 곳으로 → (구분선) 삭제
 
-**순서 근거**: 정보 수정·기록 수정·복사하기는 편집·생성 계열 일반 액션(상태 변경보다 위), 상태 변경(다녀온 곳으로/가보고 싶은 곳으로)은 그 아래, 삭제는 파괴적 액션이라 맨 끝. **구분선은 삭제 앞 하나만** 둔다(중간 구분선 없음). 복사하기는 상세 상단 ⋮(`DuplicateMenu`)와 동일 액션이며 `stashActivityDuplicate`/`stashPlaceDuplicate`(`src/lib/duplicatePrefill.ts`) 공용 헬퍼로 DB 즉시 생성 없이 신규 폼 prefill 로 이동한다.
+**순서 근거**: 정보 수정·기록 수정·복사하기는 편집·생성 계열 일반 액션(상태 변경보다 위), 상태 변경(다녀온 곳으로/가보고 싶은 곳으로)은 그 아래, 삭제는 파괴적 액션이라 맨 끝. **구분선은 삭제 앞 하나만** 둔다(중간 구분선 없음). 복사하기는 상세 등록 정보 블록의 단독 복사 버튼(§10-B, `DetailBlock` `onCopy`)과 동일 액션이며 `stashActivityDuplicate`/`stashPlaceDuplicate`(`src/lib/duplicatePrefill.ts`) 공용 헬퍼로 DB 즉시 생성 없이 신규 폼 prefill 로 이동한다.
 
 ### 토큰 공유 주의
 - `--s-active-fill`/`--s-active-line`은 `/list` 필터 칩·세그먼트·상태 토글과 **공유**된다. 상태 색을 바꿀 땐 토큰 정의값을 건드리지 말고 **사용처 클래스**(`.chipActive` 등)에서만 조정한다 — 토큰값을 바꾸면 StepDots·CTA까지 휩쓸려 회귀한다.
@@ -637,7 +637,7 @@ description: >
     - **상세 화면(DetailRow 안)**: `styles.faint`(`--s-faint`) 명시 → 카테고리 아이콘(`styles.accent`)보다 한 단계 약한 위계. `className={cn('h-3.5 w-3.5 shrink-0', styles.faint)}` 패턴 사용.
   - 유틸리티 아이콘 버튼(`styles.headerNavBtn` / `styles.iconBtn`): `sub`, hover 시 라이트는 중성 면 `#eceaf3`+`ink`, 다크는 보라 소프트. `.headerNavBtn`은 검색·홈·메뉴 헤더 내비게이션 전용이고, `.iconBtn`은 카드 ⋮케밥·로그아웃용이다. (유틸리티 도구라 **중성 hover** 유지 — 콘텐츠 요소의 accent hover와 의도적으로 구분, §5-A.)
   - **키보드 포커스(`:focus-visible`) = hover와 동일한 중성 면** (`headerNavBtn`·`iconBtn`·`editGhostBtn`): 브라우저 기본 outline을 끄고(`outline:none`) 중성 회색 면으로 표시. **입력 글로우(box-shadow 링) 쓰지 않는다**(글로우는 입력 필드 전용, §5). `.headerNavBtn:hover`만 `@media (hover: hover)`로 제한하며 `:focus-visible`은 그 밖에 유지한다.
-- **유틸 아이콘 글리프 크기 (탭타깃별 통일, 확정)**: **44px 탭타깃 버튼(`.iconBtn` — ⋮케밥·로그아웃) → 글리프 20px(`h-5 w-5`)** / **36px 버튼(`.editGhostBtn` 연필) → 글리프 16px(`h-4 w-4`)** / **28px 버튼(`.mapActionBtn` — 위치 행 지도열기/▾ 인라인 액션 쌍, §10-I) → 글리프 16px(`h-4 w-4`)**. 탭타깃 크기(44/36) 자체는 유지하고 글리프만 이 규칙으로 맞춘다. `.mapActionBtn`(28px)은 **한 행에 두 버튼이 인접하는 인라인 액션 쌍 전용**의 컴팩트 예외 — 글리프 좌우 여백을 6px로 좁혀 두 버튼이 한 세트로 읽히게 한다. 단독 유틸 버튼에는 쓰지 않는다(36/44 유지).
+- **유틸 아이콘 글리프 크기 (탭타깃별 통일, 확정)**: **44px 탭타깃 버튼(`.iconBtn` — ⋮케밥·로그아웃) → 글리프 20px(`h-5 w-5`)** / **36px 버튼(`.editGhostBtn`) → 글리프 16px(`h-4 w-4`)** / **28px 버튼(`.mapActionBtn` — 위치 행 지도열기/▾ 인라인 액션 쌍 §10-I, 상세 블록 복사하기+연필 쌍 §10-B) → 글리프 16px(`h-4 w-4`)**. 탭타깃 크기(44/36) 자체는 유지하고 글리프만 이 규칙으로 맞춘다. `.mapActionBtn`(28px)은 **한 행에 두 버튼이 인접하는 인라인 액션 쌍 전용**의 컴팩트 예외 — 글리프 좌우 여백을 6px로 좁혀 두 버튼이 한 세트로 읽히게 한다. 단독 유틸 버튼에는 쓰지 않는다(36/44 유지).
 - **`.headerNavBtn` (헤더 내비게이션 클러스터 전용, 신설 260714)**: 홈 화면 헤더(검색+메뉴), 그 외 화면 헤더(홈+메뉴) 2종 조합 전용. 탭타깃은 `.iconBtn`과 동일한 44px을 유지하되(리스크 없음), **글리프만 22px(`h-[22px] w-[22px]`)로 확대**하고 버튼 간 `gap`도 4px→0px로 좁힌다. 도입 배경: 헤더 아이콘 간격이 헐렁해 보인다는 관찰을 진단한 결과, **탭타깃이 헐거운 게 아니라 44px 박스 안 20px 글리프의 여백 비율이 커 보이는 것**으로 판정 — 탭타깃을 줄이는 대신 글리프 비율을 키워 해소. 카드 ⋮ 메뉴·로그아웃(`.iconBtn`, 20px 글리프)은 헤더와 별개 컨텍스트라 이 변경의 영향을 받지 않는다. `.headerNavBtn:hover`는 모바일 sticky hover 방지를 위해 `@media (hover: hover)` 안에 두고, `:focus-visible`은 별도 규칙으로 미디어쿼리 밖에 유지한다(§5-A).
 - **펼침/드롭다운 셰브런**: 접었다 펴는 UI(지도앱 선택 `MapLink`, `ui/select`, **리스트 필터 토글**)는 `ChevronDown`(`h-4 w-4`, 16px)을 **우측 끝에 고정**으로 둔다. **열림 시 180° 회전 등 회전 애니메이션은 넣지 않는다** — 펼침 상태는 색/`aria-expanded`로만 표현(앱 공용 관례, 신규 회전 언어 도입 금지).
 - strokeWidth: 카테고리 `2`, CTA 그라데이션 배지 내부 아이콘 `1.75`.
@@ -785,7 +785,7 @@ description: >
 
 | 블록 | 섹션 라벨 | 근거 |
 |---|---|---|
-| 등록 정보 | 숨김(`blockTitle` 있으면 렌더 안 함) | 제목·카테고리·상태 태그가 자체 식별 |
+| 등록 정보 | 숨김(`blockTitle` 있으면 렌더 안 함) | 제목·카테고리·상태 태그가 자체 식별. 우상단에 복사하기(`onCopy`)+연필 버튼 (§10-B) |
 | 방문 기록 | `<h2>` 유지 ("방문 기록"), 톤은 필드 라벨과 동일 | 스크린리더 섹션 탐색 보장 |
 
 블록 헤더 라벨 톤: 시멘틱은 `<h2>` 유지하되 스타일은 폼 필드 라벨("제목"·"메모" 등)과 같은 결 — `text-sm font-medium` + `styles.ink`(`--s-ink`). 예전 `text-xs uppercase` + `sub`는 쓰지 않는다(`DetailBlock` showHeader 경로에 반영).
@@ -814,6 +814,7 @@ description: >
     </span>
   }
   editing={editingInfo}
+  onCopy={handleDuplicate}
   onEdit={startEditInfo} onCancel={exitEditInfo} onSave={onSaveInfo} saving={isSubmitting}
 >
   {/* 필드 그리드 */}
@@ -829,7 +830,7 @@ description: >
 ```tsx
 <button
   type="button"
-  className={cn(styles.editGhostBtn, 'absolute top-3.5 right-3.5')}
+  className={cn(styles.mapActionBtn, 'absolute top-[1.0625rem] right-[1.0625rem] lg:top-[1.3125rem] lg:right-[1.3125rem]')}
   onClick={onEdit}
   aria-label={`${title} 수정`}
 >
@@ -837,7 +838,7 @@ description: >
 </button>
 ```
 
-`styles.editGhostBtn` 상태별 색:
+`styles.mapActionBtn`(28px, 글리프 16px) 상태별 색 — 복사하기 버튼과 인접 쌍이라 28px 컴팩트 버튼을 쓴다. **위치는 카드 패딩 − 3px에 연동**: `top/right = 1.0625rem`(lg `1.3125rem`) = 17/21px. 글리프(박스 안 6px) 기준 카드 모서리와의 간격이 **위·오른쪽 모두 23px(lg 27px)로 같아** 모서리 비율이 정사각으로 보이고, 뱃지 줄(약 22px, 세로 중심 = 패딩+11px)의 세로 중심에도 놓인다. 같은 카드 안 `MapLink` 지도·▾ 쌍은 `-mr-[3px]`로 글리프 오른쪽 끝을 같은 열에 맞춘다(§10-I). 고정 px 금지 — lg에서 패딩이 늘면 어긋난다. 등록 정보·방문 기록 두 블록 모두 `DetailBlock` 공용 처리. `.editGhostBtn`(36px)은 이제 이 블록에서 쓰지 않는다:
 
 | 상태 | 배경 | 색상 |
 |---|---|---|
@@ -846,6 +847,8 @@ description: >
 | hover 다크 | `--s-accent-soft-bg` (`#573f7f`) | `--s-accent` (`#c084fc`) |
 
 헤더 콘텐츠 영역에 `pr-10` 추가해 버튼과 텍스트 겹침 방지.
+
+**복사하기 버튼 (등록 정보 블록 전용, `onCopy`)**: 상단 ⋮ 메뉴는 항목이 복사하기 하나뿐이라 "선택지가 여러 개"라는 메뉴 신호가 거짓이어서 제거했고, 연필 **바로 왼쪽**에 단독 버튼으로 둔다. 연필과 같은 `styles.mapActionBtn`(28px·글리프 `h-4 w-4`, §10-I 인접 액션 쌍 예외 재사용) + `absolute top-[1.0625rem] right-[2.8125rem] lg:top-[1.3125rem] lg:right-[3.0625rem]`(연필 right + 28px = 45px/49px; 글리프 간격 12px) — 텍스트 행 flex 흐름에 끼우지 않고 absolute로 빼서 고정크기 버튼이 한 줄 행 높이를 늘리지 않게 한다(연필과 같은 top → 세로 중심선 일치). 아이콘은 카드 ⋮ 메뉴 복사하기와 같은 lucide `Copy`. 편집 모드에선 연필과 함께 숨김. `onCopy`가 있으면 헤더 영역 `pr-10` 대신 `pr-16`으로 버튼 2개 몫을 비운다. 동작은 `stashActivityDuplicate`/`stashPlaceDuplicate` + `returnTo` 전달(§13) 그대로. `DuplicateMenu` 컴포넌트는 삭제됨.
 
 ---
 
@@ -1013,7 +1016,7 @@ export const STATUS_LABELS: Record<Status, string> = {
 **레이아웃 (좌우 분리):**
 - 루트 `flex w-full items-start` — `items-start`로 왼쪽 텍스트를 상단 정렬해 **라벨↔내용 여백을 다른 DetailRow(소요시간·지역 등)와 동일하게 맞춘다**(28px 버튼이 행을 키우고 center 정렬로 텍스트가 밀리던 문제 방지).
 - **왼쪽(값)**: `inline-flex min-w-0 flex-1 items-center gap-1.5` — `MapPin`(faint) + 위치 텍스트. **순수 텍스트(비링크, 클릭 동작 없음)**, `min-w-0 truncate`로 긴 값 잘림.
-- **오른쪽(액션)**: `flex shrink-0 items-center gap-0.5` + **`-mt-1`** — 지도 열기 아이콘(`Map`) + `▾`(`ChevronDown`) 앱 선택. 두 버튼 모두 `.mapActionBtn`(28px, §7). `gap-0.5`로 두 버튼을 한 세트로 인접(비겹침). **`-mt-1`은 28px 버튼의 시각 중심을 ~21px 텍스트 줄 중심에 맞추는 보정**(상단 정렬로 버튼이 텍스트보다 처지는 것 방지).
+- **오른쪽(액션)**: `flex shrink-0 items-center gap-0.5` + **`-mt-1`** — 지도 열기 아이콘(`Map`) + `▾`(`ChevronDown`) 앱 선택. 두 버튼 모두 `.mapActionBtn`(28px, §7). `gap-0.5`로 두 버튼을 한 세트로 인접(비겹침). **`-mt-1`은 28px 버튼의 시각 중심을 ~21px 텍스트 줄 중심에 맞추는 보정**(상단 정렬로 버튼이 텍스트보다 처지는 것 방지). **`-mr-[3px]`는 카드 모서리 연필(`DetailBlock`, §10-B)과 글리프 오른쪽 끝을 한 열로 맞추는 보정**(글리프 간격 카드 패딩+3px).
 - 접근성: 지도 열기 `aria-label="지도에서 열기"`, `▾` `aria-label="지도 앱 선택"`, 시트 항목별 `${label}에서 열기`.
 
 **지도 앱 config (`src/lib/map.ts`):**
@@ -1121,7 +1124,7 @@ try {
 
 ### 프로그래매틱 이동엔 항상 topLoader (막대 생략하지 말 것)
 
-옛 지침은 "API 대기 없는 즉시 이동이면 막대 없어도 무방"이었으나, 실사용에서 **즉시 이동도 체감 지연이 있어** 카드 ⋮ 메뉴 이동(복사하기/수정)·상세 ⋮ 복사하기·상세 삭제 확인 후 목록 전환 등 **프로그래매틱 `router.push`에는 모두 topLoader를 적용**하는 것으로 정정한다. `<Link>`가 아닌 이동은 자동 막대가 없으므로 직접 `topLoader.start()`를 호출한다.
+옛 지침은 "API 대기 없는 즉시 이동이면 막대 없어도 무방"이었으나, 실사용에서 **즉시 이동도 체감 지연이 있어** 카드 ⋮ 메뉴 이동(복사하기/수정)·상세 복사하기·상세 삭제 확인 후 목록 전환 등 **프로그래매틱 `router.push`에는 모두 topLoader를 적용**하는 것으로 정정한다. `<Link>`가 아닌 이동은 자동 막대가 없으므로 직접 `topLoader.start()`를 호출한다.
 
 **캐시 warm 라우트의 조기 붕괴 + `requestAnimationFrame` 해법**: `nextjs-toploader`는 `history.pushState` 시점에 `done()`한다. 이동 대상이 App Router 캐시에 **warm**하면(이미 방문한 목록 등) `router.push`가 **동기적으로 즉시 커밋**되어, `start()`→`done()`이 브라우저 페인트 한 번 사이에 붕괴한다 → 막대가 아예 안 보인다. 캐시 온도와 무관하게 노출을 보장하려면 `start()` 직후 **한 프레임 뒤에** push 한다:
 

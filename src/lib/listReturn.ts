@@ -91,3 +91,44 @@ export function isRecommendReturnTo(value: string | undefined): boolean {
     (p) => value === p || value.startsWith(`${p}?`)
   )
 }
+
+// 신규 등록 화면 전용: 복사하기로 들어올 때 "바로 이전 상세"로 돌아가야 하므로 상세 경로도 허용한다.
+// 상세 화면 자신의 returnTo(getSafeListReturnTo)는 그대로 목록/추천 결과만 허용한다.
+const DETAIL_PATH_PATTERN = /^\/(activities|places)\/[^/]+$/
+
+export function isDetailReturnTo(value: string | undefined): boolean {
+  if (!value) return false
+  return DETAIL_PATH_PATTERN.test(value.split('?')[0])
+}
+
+/**
+ * 신규 등록 화면의 returnTo 검증 — 목록·추천 결과 + 상세 경로.
+ * 상세는 경로와 그 상세의 returnTo(안전한 값만)로 다시 조립한다(edit 등 다른 파라미터는 버린다).
+ */
+export function getSafeNewReturnTo(value: string | string[] | null | undefined) {
+  const listSafe = getSafeListReturnTo(value)
+  if (listSafe) return listSafe
+
+  const raw = Array.isArray(value) ? value[0] : value
+  if (!raw || !raw.startsWith('/')) return undefined
+  try {
+    const base = new URL('https://today-date.local')
+    const url = new URL(raw, base)
+    if (url.origin !== base.origin || !DETAIL_PATH_PATTERN.test(url.pathname)) return undefined
+    return buildDetailHref(url.pathname, {
+      returnTo: getSafeListReturnTo(url.searchParams.get('returnTo')),
+    })
+  } catch {
+    return undefined
+  }
+}
+
+/**
+ * 신규 등록 저장 후 열리는 새 상세의 returnTo. 복사 출발이 상세였다면 그 상세의 returnTo(목록/추천 결과)를
+ * 이어받는다 — 새 상세의 상단 버튼이 원본 상세가 아니라 원래 출발 목록을 가리키게 한다.
+ */
+export function getAfterSaveReturnTo(newReturnTo: string | undefined): string | undefined {
+  if (!newReturnTo || !isDetailReturnTo(newReturnTo)) return newReturnTo
+  const base = new URL('https://today-date.local')
+  return getSafeListReturnTo(new URL(newReturnTo, base).searchParams.get('returnTo'))
+}

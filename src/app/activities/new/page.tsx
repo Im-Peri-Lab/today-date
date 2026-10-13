@@ -3,7 +3,12 @@ import { getSession } from '@/lib/auth/session'
 import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import { ActivityForm } from '@/components/track/ActivityForm'
-import { getSafeListReturnTo, isRecommendReturnTo } from '@/lib/listReturn'
+import {
+  getAfterSaveReturnTo,
+  getSafeNewReturnTo,
+  isDetailReturnTo,
+  isRecommendReturnTo,
+} from '@/lib/listReturn'
 import { cn } from '@/lib/utils'
 import styles from '@/components/screens.module.css'
 
@@ -15,14 +20,21 @@ export default async function NewActivityPage({
   const session = await getSession()
   if (!session.authenticated) redirect('/lock')
   const { from, returnTo } = await searchParams
-  const listReturnTo = getSafeListReturnTo(returnTo)
+  const listReturnTo = getSafeNewReturnTo(returnTo)
+  const backLabel = !listReturnTo
+    ? '홈으로'
+    : isDetailReturnTo(listReturnTo)
+      ? '상세로'
+      : isRecommendReturnTo(listReturnTo)
+        ? '추천 결과로'
+        : '목록으로'
 
   return (
     <main className={styles.page}>
       <div className="mx-auto w-full max-w-lg px-5 pb-16 pt-6 lg:pt-10">
         <Link href={listReturnTo ?? '/'} className={styles.backLink}>
           <ArrowLeft className="h-4 w-4" />
-          {listReturnTo ? (isRecommendReturnTo(listReturnTo) ? '추천 결과로' : '목록으로') : '홈으로'}
+          {backLabel}
         </Link>
 
         <h1 className={cn('mt-4', styles.pageTitle)}>액티비티 추가</h1>
@@ -35,7 +47,7 @@ export default async function NewActivityPage({
             'mt-5 px-5 pt-5 pb-4 lg:px-6 lg:pt-6 lg:pb-5',
           )}
         >
-          <ActivityForm prefill={from === 'copy'} returnTo={listReturnTo} />
+          <ActivityForm prefill={from === 'copy'} returnTo={getAfterSaveReturnTo(listReturnTo)} />
         </div>
       </div>
     </main>

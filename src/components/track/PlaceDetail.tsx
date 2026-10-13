@@ -132,7 +132,7 @@ export function PlaceDetail({ id, initialData, initialEdit, returnTo }: Props) {
   // start() 직후 한 프레임 뒤에 push 해, 시작된 프로그레스 바가 먼저 보이도록 한다.
   function handleDuplicate() {
     if (!place) return
-    const href = stashPlaceDuplicate(place, returnTo)
+    const href = stashPlaceDuplicate(place, buildDetailHref(`/places/${id}`, { returnTo }))
     topLoader.start()
     requestAnimationFrame(() => router.push(href))
   }

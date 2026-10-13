@@ -40,7 +40,7 @@ export function ItemMenu({
       <DropdownMenuTrigger
         render={<button type="button" className={styles.iconBtn} aria-label="더보기" />}
       >
-        <MoreVertical className="h-5 w-5" />
+        <MoreVertical className="h-[22px] w-[22px]" />
       </DropdownMenuTrigger>
       <DropdownMenuContent>
         <DropdownMenuItem onClick={onEditInfo}>

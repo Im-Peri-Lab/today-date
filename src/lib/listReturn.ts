@@ -20,7 +20,8 @@ export const HOME_RETURN_TO = '/'
 
 // 상세 화면 경로(/activities/[id], /places/[id]) — 복사하기로 신규 등록에 들어올 때 "바로 이전 상세"로
 // 돌아가기 위한 returnTo 대상.
-const DETAIL_PATH_PATTERN = /^\/(activities|places)\/[^/]+$/
+// 마지막 세그먼트 'new'는 신규 등록 화면(정적 라우트)이라 id가 될 수 없으므로 제외한다.
+const DETAIL_PATH_PATTERN = /^\/(activities|places)\/(?!new$)[^/]+$/
 
 // 추천위저드 결과 화면 경로 — getSafeListReturnTo 허용 목록과 isRecommendReturnTo 판별이
 // 공유하는 단일 출처. 새 위저드 경로가 추가되면 여기에만 더한다.

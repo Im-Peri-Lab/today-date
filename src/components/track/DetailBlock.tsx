@@ -74,7 +74,7 @@ export function DetailBlock({
       {!editing && (
         <button
           type="button"
-          className={cn(styles.editGhostBtn, 'absolute top-3.5 right-3.5')}
+          className={cn(styles.mapActionBtn, 'absolute top-[1.125rem] right-[1.125rem]')}
           onClick={onEdit}
           aria-label={`${title} 수정`}
         >
@@ -82,11 +82,11 @@ export function DetailBlock({
         </button>
       )}
 
-      {/* 복사하기 — 연필(right 14px + 36px) 바로 왼쪽: right 50px(3.125rem) */}
+      {/* 복사하기 — 연필(right 18px + 28px) 바로 왼쪽: right 46px(2.875rem) */}
       {!editing && onCopy && (
         <button
           type="button"
-          className={cn(styles.editGhostBtn, 'absolute top-3.5 right-[3.125rem]')}
+          className={cn(styles.mapActionBtn, 'absolute top-[1.125rem] right-[2.875rem]')}
           onClick={onCopy}
           aria-label="복사하기"
         >
@@ -96,7 +96,7 @@ export function DetailBlock({
 
       {/* 블록 헤더 — showHeader 일 때만 렌더 */}
       {showHeader && (
-        <div className={cn(!editing && (onCopy ? 'pr-[4.5rem]' : 'pr-10'))}>
+        <div className={cn(!editing && (onCopy ? 'pr-16' : 'pr-10'))}>
           {/* 섹션 라벨: blockTitle이 없는 블록(방문 기록 등)에서만 표시 */}
           {!blockTitle && (
             <h2 className={cn('text-sm font-medium', styles.ink)}>

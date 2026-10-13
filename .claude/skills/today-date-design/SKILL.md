@@ -637,7 +637,7 @@ description: >
     - **상세 화면(DetailRow 안)**: `styles.faint`(`--s-faint`) 명시 → 카테고리 아이콘(`styles.accent`)보다 한 단계 약한 위계. `className={cn('h-3.5 w-3.5 shrink-0', styles.faint)}` 패턴 사용.
   - 유틸리티 아이콘 버튼(`styles.headerNavBtn` / `styles.iconBtn`): `sub`, hover 시 라이트는 중성 면 `#eceaf3`+`ink`, 다크는 보라 소프트. `.headerNavBtn`은 검색·홈·메뉴 헤더 내비게이션 전용이고, `.iconBtn`은 카드 ⋮케밥·로그아웃용이다. (유틸리티 도구라 **중성 hover** 유지 — 콘텐츠 요소의 accent hover와 의도적으로 구분, §5-A.)
   - **키보드 포커스(`:focus-visible`) = hover와 동일한 중성 면** (`headerNavBtn`·`iconBtn`·`editGhostBtn`): 브라우저 기본 outline을 끄고(`outline:none`) 중성 회색 면으로 표시. **입력 글로우(box-shadow 링) 쓰지 않는다**(글로우는 입력 필드 전용, §5). `.headerNavBtn:hover`만 `@media (hover: hover)`로 제한하며 `:focus-visible`은 그 밖에 유지한다.
-- **유틸 아이콘 글리프 크기 (탭타깃별 통일, 확정)**: **44px 탭타깃 버튼(`.iconBtn` — ⋮케밥·로그아웃) → 글리프 20px(`h-5 w-5`)** / **36px 버튼(`.editGhostBtn` 연필) → 글리프 16px(`h-4 w-4`)** / **28px 버튼(`.mapActionBtn` — 위치 행 지도열기/▾ 인라인 액션 쌍, §10-I) → 글리프 16px(`h-4 w-4`)**. 탭타깃 크기(44/36) 자체는 유지하고 글리프만 이 규칙으로 맞춘다. `.mapActionBtn`(28px)은 **한 행에 두 버튼이 인접하는 인라인 액션 쌍 전용**의 컴팩트 예외 — 글리프 좌우 여백을 6px로 좁혀 두 버튼이 한 세트로 읽히게 한다. 단독 유틸 버튼에는 쓰지 않는다(36/44 유지).
+- **유틸 아이콘 글리프 크기 (탭타깃별 통일, 확정)**: **44px 탭타깃 버튼(`.iconBtn` — ⋮케밥·로그아웃) → 글리프 20px(`h-5 w-5`)** / **36px 버튼(`.editGhostBtn`) → 글리프 16px(`h-4 w-4`)** / **28px 버튼(`.mapActionBtn` — 위치 행 지도열기/▾ 인라인 액션 쌍 §10-I, 상세 블록 복사하기+연필 쌍 §10-B) → 글리프 16px(`h-4 w-4`)**. 탭타깃 크기(44/36) 자체는 유지하고 글리프만 이 규칙으로 맞춘다. `.mapActionBtn`(28px)은 **한 행에 두 버튼이 인접하는 인라인 액션 쌍 전용**의 컴팩트 예외 — 글리프 좌우 여백을 6px로 좁혀 두 버튼이 한 세트로 읽히게 한다. 단독 유틸 버튼에는 쓰지 않는다(36/44 유지).
 - **`.headerNavBtn` (헤더 내비게이션 클러스터 전용, 신설 260714)**: 홈 화면 헤더(검색+메뉴), 그 외 화면 헤더(홈+메뉴) 2종 조합 전용. 탭타깃은 `.iconBtn`과 동일한 44px을 유지하되(리스크 없음), **글리프만 22px(`h-[22px] w-[22px]`)로 확대**하고 버튼 간 `gap`도 4px→0px로 좁힌다. 도입 배경: 헤더 아이콘 간격이 헐렁해 보인다는 관찰을 진단한 결과, **탭타깃이 헐거운 게 아니라 44px 박스 안 20px 글리프의 여백 비율이 커 보이는 것**으로 판정 — 탭타깃을 줄이는 대신 글리프 비율을 키워 해소. 카드 ⋮ 메뉴·로그아웃(`.iconBtn`, 20px 글리프)은 헤더와 별개 컨텍스트라 이 변경의 영향을 받지 않는다. `.headerNavBtn:hover`는 모바일 sticky hover 방지를 위해 `@media (hover: hover)` 안에 두고, `:focus-visible`은 별도 규칙으로 미디어쿼리 밖에 유지한다(§5-A).
 - **펼침/드롭다운 셰브런**: 접었다 펴는 UI(지도앱 선택 `MapLink`, `ui/select`, **리스트 필터 토글**)는 `ChevronDown`(`h-4 w-4`, 16px)을 **우측 끝에 고정**으로 둔다. **열림 시 180° 회전 등 회전 애니메이션은 넣지 않는다** — 펼침 상태는 색/`aria-expanded`로만 표현(앱 공용 관례, 신규 회전 언어 도입 금지).
 - strokeWidth: 카테고리 `2`, CTA 그라데이션 배지 내부 아이콘 `1.75`.
@@ -830,7 +830,7 @@ description: >
 ```tsx
 <button
   type="button"
-  className={cn(styles.editGhostBtn, 'absolute top-3.5 right-3.5')}
+  className={cn(styles.mapActionBtn, 'absolute top-[1.125rem] right-[1.125rem]')}
   onClick={onEdit}
   aria-label={`${title} 수정`}
 >
@@ -838,7 +838,7 @@ description: >
 </button>
 ```
 
-`styles.editGhostBtn` 상태별 색:
+`styles.mapActionBtn`(28px, 글리프 16px) 상태별 색 — 복사하기 버튼과 인접 쌍이라 28px 컴팩트 버튼을 쓴다(글리프 위치는 예전 36px 버튼과 동일: 박스 28px를 top/right 18px에 둠). `.editGhostBtn`(36px)은 이제 이 블록에서 쓰지 않는다:
 
 | 상태 | 배경 | 색상 |
 |---|---|---|
@@ -848,7 +848,7 @@ description: >
 
 헤더 콘텐츠 영역에 `pr-10` 추가해 버튼과 텍스트 겹침 방지.
 
-**복사하기 버튼 (등록 정보 블록 전용, `onCopy`)**: 상단 ⋮ 메뉴는 항목이 복사하기 하나뿐이라 "선택지가 여러 개"라는 메뉴 신호가 거짓이어서 제거했고, 연필 **바로 왼쪽**에 단독 버튼으로 둔다. 같은 `styles.editGhostBtn`(36px·글리프 `h-4 w-4`) + `absolute top-3.5 right-[3.125rem]`(연필 right 14px + 36px) — 텍스트 행 flex 흐름에 끼우지 않고 absolute로 빼서 고정크기 버튼이 한 줄 행 높이를 늘리지 않게 한다(연필과 같은 top → 세로 중심선 일치). 아이콘은 카드 ⋮ 메뉴 복사하기와 같은 lucide `Copy`. 편집 모드에선 연필과 함께 숨김. `onCopy`가 있으면 헤더 영역 `pr-10` 대신 `pr-[4.5rem]`으로 버튼 2개 몫을 비운다. 동작은 `stashActivityDuplicate`/`stashPlaceDuplicate` + `returnTo` 전달(§13) 그대로. `DuplicateMenu` 컴포넌트는 삭제됨.
+**복사하기 버튼 (등록 정보 블록 전용, `onCopy`)**: 상단 ⋮ 메뉴는 항목이 복사하기 하나뿐이라 "선택지가 여러 개"라는 메뉴 신호가 거짓이어서 제거했고, 연필 **바로 왼쪽**에 단독 버튼으로 둔다. 연필과 같은 `styles.mapActionBtn`(28px·글리프 `h-4 w-4`, §10-I 인접 액션 쌍 예외 재사용) + `absolute top-[1.125rem] right-[2.875rem]`(연필 right 18px + 28px; 글리프 간격 약 16px→12px) — 텍스트 행 flex 흐름에 끼우지 않고 absolute로 빼서 고정크기 버튼이 한 줄 행 높이를 늘리지 않게 한다(연필과 같은 top → 세로 중심선 일치). 아이콘은 카드 ⋮ 메뉴 복사하기와 같은 lucide `Copy`. 편집 모드에선 연필과 함께 숨김. `onCopy`가 있으면 헤더 영역 `pr-10` 대신 `pr-16`으로 버튼 2개 몫을 비운다. 동작은 `stashActivityDuplicate`/`stashPlaceDuplicate` + `returnTo` 전달(§13) 그대로. `DuplicateMenu` 컴포넌트는 삭제됨.
 
 ---
 

@@ -830,7 +830,7 @@ description: >
 ```tsx
 <button
   type="button"
-  className={cn(styles.mapActionBtn, 'absolute top-[1.125rem] right-[1.125rem]')}
+  className={cn(styles.mapActionBtn, 'absolute top-[1.125rem] right-5 lg:right-6')}
   onClick={onEdit}
   aria-label={`${title} 수정`}
 >
@@ -838,7 +838,7 @@ description: >
 </button>
 ```
 
-`styles.mapActionBtn`(28px, 글리프 16px) 상태별 색 — 복사하기 버튼과 인접 쌍이라 28px 컴팩트 버튼을 쓴다(글리프 위치는 예전 36px 버튼과 동일: 박스 28px를 top/right 18px에 둠). `.editGhostBtn`(36px)은 이제 이 블록에서 쓰지 않는다:
+`styles.mapActionBtn`(28px, 글리프 16px) 상태별 색 — 복사하기 버튼과 인접 쌍이라 28px 컴팩트 버튼을 쓴다. **오른쪽 끝은 카드 콘텐츠 패딩에 연동**(`right-5 lg:right-6` = `px-5 lg:px-6`)해, 같은 카드 안 `MapLink`(§10-I) 지도·▾ 박스와 모든 폭에서 한 열로 맞춘다(고정 px 금지 — lg에서 패딩이 늘면 어긋남). 등록 정보·방문 기록 두 블록 모두 `DetailBlock` 공용 처리. top은 `1.125rem` 고정. `.editGhostBtn`(36px)은 이제 이 블록에서 쓰지 않는다:
 
 | 상태 | 배경 | 색상 |
 |---|---|---|
@@ -848,7 +848,7 @@ description: >
 
 헤더 콘텐츠 영역에 `pr-10` 추가해 버튼과 텍스트 겹침 방지.
 
-**복사하기 버튼 (등록 정보 블록 전용, `onCopy`)**: 상단 ⋮ 메뉴는 항목이 복사하기 하나뿐이라 "선택지가 여러 개"라는 메뉴 신호가 거짓이어서 제거했고, 연필 **바로 왼쪽**에 단독 버튼으로 둔다. 연필과 같은 `styles.mapActionBtn`(28px·글리프 `h-4 w-4`, §10-I 인접 액션 쌍 예외 재사용) + `absolute top-[1.125rem] right-[2.875rem]`(연필 right 18px + 28px; 글리프 간격 약 16px→12px) — 텍스트 행 flex 흐름에 끼우지 않고 absolute로 빼서 고정크기 버튼이 한 줄 행 높이를 늘리지 않게 한다(연필과 같은 top → 세로 중심선 일치). 아이콘은 카드 ⋮ 메뉴 복사하기와 같은 lucide `Copy`. 편집 모드에선 연필과 함께 숨김. `onCopy`가 있으면 헤더 영역 `pr-10` 대신 `pr-16`으로 버튼 2개 몫을 비운다. 동작은 `stashActivityDuplicate`/`stashPlaceDuplicate` + `returnTo` 전달(§13) 그대로. `DuplicateMenu` 컴포넌트는 삭제됨.
+**복사하기 버튼 (등록 정보 블록 전용, `onCopy`)**: 상단 ⋮ 메뉴는 항목이 복사하기 하나뿐이라 "선택지가 여러 개"라는 메뉴 신호가 거짓이어서 제거했고, 연필 **바로 왼쪽**에 단독 버튼으로 둔다. 연필과 같은 `styles.mapActionBtn`(28px·글리프 `h-4 w-4`, §10-I 인접 액션 쌍 예외 재사용) + `absolute top-[1.125rem] right-12 lg:right-[3.25rem]`(연필 right + 28px = 48px/52px; 글리프 간격 12px) — 텍스트 행 flex 흐름에 끼우지 않고 absolute로 빼서 고정크기 버튼이 한 줄 행 높이를 늘리지 않게 한다(연필과 같은 top → 세로 중심선 일치). 아이콘은 카드 ⋮ 메뉴 복사하기와 같은 lucide `Copy`. 편집 모드에선 연필과 함께 숨김. `onCopy`가 있으면 헤더 영역 `pr-10` 대신 `pr-16`으로 버튼 2개 몫을 비운다. 동작은 `stashActivityDuplicate`/`stashPlaceDuplicate` + `returnTo` 전달(§13) 그대로. `DuplicateMenu` 컴포넌트는 삭제됨.
 
 ---
 

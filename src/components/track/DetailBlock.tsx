@@ -70,11 +70,11 @@ export function DetailBlock({
         'px-5 pt-5 pb-4 lg:px-6 lg:pt-6 lg:pb-5',
       )}
     >
-      {/* 고스트 연필 버튼 — absolute로 카드 우상단 모서리에 밀착 */}
+      {/* 연필 버튼 — absolute, 박스 오른쪽 끝을 카드 콘텐츠 패딩(px-5 / lg:px-6)에 맞춰 MapLink와 한 열 */}
       {!editing && (
         <button
           type="button"
-          className={cn(styles.mapActionBtn, 'absolute top-[1.125rem] right-[1.125rem]')}
+          className={cn(styles.mapActionBtn, 'absolute top-[1.125rem] right-5 lg:right-6')}
           onClick={onEdit}
           aria-label={`${title} 수정`}
         >
@@ -82,11 +82,11 @@ export function DetailBlock({
         </button>
       )}
 
-      {/* 복사하기 — 연필(right 18px + 28px) 바로 왼쪽: right 46px(2.875rem) */}
+      {/* 복사하기 — 연필 바로 왼쪽: 연필 right(카드 패딩 20/24px) + 28px = 48/52px */}
       {!editing && onCopy && (
         <button
           type="button"
-          className={cn(styles.mapActionBtn, 'absolute top-[1.125rem] right-[2.875rem]')}
+          className={cn(styles.mapActionBtn, 'absolute top-[1.125rem] right-12 lg:right-[3.25rem]')}
           onClick={onCopy}
           aria-label="복사하기"
         >

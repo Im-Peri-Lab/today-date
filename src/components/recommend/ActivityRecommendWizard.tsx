@@ -421,7 +421,12 @@ export function ActivityRecommendWizard() {
           자체이므로 목적지 이동형("홈으로"+Link). 2단계부터는 이미 선택한 값이 있어
           되돌릴 대상이 생기므로 상태 리셋형("처음부터"+reset())으로 분기(§13). */}
       <TopBar className="mb-3">
-        {step !== 1 && (
+        {step === 1 ? (
+          <Link href="/" className={cn('inline-flex items-center gap-1.5 text-sm', styles.backLink)}>
+            <ArrowLeft className="h-4 w-4" />
+            홈으로
+          </Link>
+        ) : (
           <button
             type="button"
             onClick={reset}

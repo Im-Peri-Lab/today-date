@@ -24,7 +24,7 @@ import { placeFormSchema, type PlaceFormValues } from '@/lib/schemas/placeSchema
 import { REVERT_TO_WISHLIST_PATCH } from '@/lib/revertPatch'
 import type { Place } from '@/types'
 import { MEAL_LABELS, STATUS_LABELS, STATUS_MENU_LABELS } from '@/lib/labels'
-import { buildDetailHref, DEFAULT_LIST_RETURN_TO, getReturnLabel, HOME_RETURN_TO } from '@/lib/listReturn'
+import { buildDetailHref, DEFAULT_LIST_RETURN_TO, getReturnLabel } from '@/lib/listReturn'
 import { stashPlaceDuplicate } from '@/lib/duplicatePrefill'
 import { cn } from '@/lib/utils'
 import { resolveHref } from '@/lib/url'
@@ -166,13 +166,10 @@ export function PlaceDetail({ id, initialData, initialEdit, returnTo }: Props) {
   return (
     <div className="mx-auto w-full max-w-lg px-5 pb-16 pt-6 lg:pt-10">
       <TopBar>
-        {/* returnTo 가 홈이면 우측 홈 아이콘과 목적지가 같아 텍스트 링크는 그리지 않는다. */}
-        {listHref !== HOME_RETURN_TO && (
-          <Link href={listHref} className={styles.backLink}>
-            <ArrowLeft className="h-4 w-4" />
-            {listLabel}
-          </Link>
-        )}
+        <Link href={listHref} className={styles.backLink}>
+          <ArrowLeft className="h-4 w-4" />
+          {listLabel}
+        </Link>
       </TopBar>
 
       {isLoading ? (

@@ -12,7 +12,9 @@ import {
   CookingPot,
   Coffee,
   Martini,
-  Cake,
+  Wheat,
+  ChefHat,
+  EggFried,
   Pin,
   Tag,
   type LucideIcon,
@@ -42,7 +44,9 @@ export const CATEGORY_ICONS: Record<string, LucideIcon> = {
   중식: CookingPot,
   카페: Coffee,
   바: Martini,
-  디저트: Cake,
+  아시안: Wheat,
+  뷔페: ChefHat,
+  브런치: EggFried,
   // 공통
   미분류: Pin,
 }

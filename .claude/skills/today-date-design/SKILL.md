@@ -636,7 +636,8 @@ description: >
   - 메타 줄 아이콘(Clock/Sun/Moon/MapPin/Utensils 등):
     - **리스트 카드(ActivityCard/PlaceCard)**: 아이콘 색 지정 없이 부모 div(`styles.sub`) 상속.
     - **상세 화면(DetailRow 안)**: `styles.faint`(`--s-faint`) 명시 → 카테고리 아이콘(`styles.accent`)보다 한 단계 약한 위계. `className={cn('h-3.5 w-3.5 shrink-0', styles.faint)}` 패턴 사용.
-  - 유틸리티 아이콘 버튼(`styles.headerNavBtn` / `styles.iconBtn`): `sub`, hover 시 라이트는 중성 면 `#eceaf3`+`ink`, 다크는 보라 소프트. `.headerNavBtn`은 검색·홈·메뉴 헤더 내비게이션 전용이고, `.iconBtn`은 카드 ⋮케밥·로그아웃용이다. (유틸리티 도구라 **중성 hover** 유지 — 콘텐츠 요소의 accent hover와 의도적으로 구분, §5-A.)
+  - **유틸리티 아이콘 버튼 기본 색·stroke (확정, 단일 출처 = `screens.module.css` 맨 아래 공통 블록)**: `.headerNavBtn`(검색·홈·메뉴, 44px/22px) · `.mapActionBtn`(연필·복사하기·지도·▾, 28px/16px) · `.iconBtn`(카드 ⋮, 44px/20px) · `.dialogCloseBtn`(다이얼로그 X, 28px/16px) 네 계열이 **같은 색·같은 stroke**를 쓴다. 색 = **라이트 `color-mix(in srgb, var(--s-ink) 50%, var(--s-sub))`**(≈ `rgb(66,65,90)`, 흰 배경 대비 ≈ 9.8:1) / **다크 `ink 30% + sub 70%`**(≈ `rgb(191,185,204)`, 카드면 대비 ≈ 8.6:1). **stroke 1.25**(lucide 기본 2 를 CSS 로 덮어씀). 새 토큰 없이 기존 `--s-ink`/`--s-sub` 혼합만 쓰고, `color-mix` 미지원 엔진용 폴백 줄(`--s-sub`)을 바로 위에 둔다. hover/focus 색·크기는 변경 없음(각 클래스의 상태 규칙이 더 높은 specificity 로 덮는다). `.dialogCloseBtn` 의 기본 색은 `dialog.tsx` Tailwind 유틸이 아니라 이 공통 블록이 정한다(유틸에는 hover 색만 남김). **다크가 라이트와 비율이 다른 이유**: 어두운 면 위의 가는 밝은 선은 같은 비율에서 더 밝고 굵게 번져 보여, 라이트와 같은 50% 로는 제목(ink)과 같은 "텍스트"로 읽혔다. 다크 렌더 비교(50/30/15%) 후 30% 로 확정. 배경: 헤더/카드 아이콘 이질감 해소(상세·계정 화면에서 두 계열이 처음 함께 보임), 색이 연하고 두께만 어중간히 줄어 투박해 보이던 문제 → 선은 더 가늘게, 색은 더 선명하게. 후보 비교 기록: ink 100% 는 아이콘이 제목·본문 텍스트와 같은 진하기로 "텍스트"처럼 읽혀 기각, stroke 1.5 는 선이 굵어 기각, 현 색 유지+1.25 는 작은 아이콘이 거의 안 보여 기각.
+  - 유틸리티 아이콘 버튼(`styles.headerNavBtn` / `styles.iconBtn`): 기본 색은 위 공통 혼합색, hover 시 라이트는 중성 면 `#eceaf3`+`ink`, 다크는 보라 소프트. `.headerNavBtn`은 검색·홈·메뉴 헤더 내비게이션 전용이고, `.iconBtn`은 카드 ⋮케밥·로그아웃용이다. (유틸리티 도구라 **중성 hover** 유지 — 콘텐츠 요소의 accent hover와 의도적으로 구분, §5-A.)
   - **키보드 포커스(`:focus-visible`) = hover와 동일한 중성 면** (`headerNavBtn`·`iconBtn`·`editGhostBtn`): 브라우저 기본 outline을 끄고(`outline:none`) 중성 회색 면으로 표시. **입력 글로우(box-shadow 링) 쓰지 않는다**(글로우는 입력 필드 전용, §5). `.headerNavBtn:hover`만 `@media (hover: hover)`로 제한하며 `:focus-visible`은 그 밖에 유지한다.
 - **유틸 아이콘 글리프 크기 (탭타깃별 통일, 확정)**: **44px 탭타깃 버튼(`.iconBtn` — ⋮케밥·로그아웃) → 글리프 20px(`h-5 w-5`)** / **36px 버튼(`.editGhostBtn`) → 글리프 16px(`h-4 w-4`) — 261013(PR #133) 기준 코드 사용처 0, 정리 예정(CSS·이 문서 언급 제거 대기)** / **28px 버튼(`.mapActionBtn` — 위치 행 지도열기/▾ 인라인 액션 쌍 §10-I, 상세 블록 복사하기+연필 쌍 §10-B) → 글리프 16px(`h-4 w-4`)**. 탭타깃 크기(44/36) 자체는 유지하고 글리프만 이 규칙으로 맞춘다. `.mapActionBtn`(28px)은 **한 행에 두 버튼이 인접하는 인라인 액션 쌍 전용**의 컴팩트 예외 — 글리프 좌우 여백을 6px로 좁혀 두 버튼이 한 세트로 읽히게 한다. 단독 유틸 버튼에는 쓰지 않는다(36/44 유지).
   - **28px 사용처(`.mapActionBtn`) 전수 (261013)**: ① 위치 행 지도 열기·▾(`MapLink`, 행 flex 흐름, 쌍 gap 2px) ② 상세 카드 모서리 연필·복사하기(`DetailBlock`, absolute, gap 0, §10-B) ③ 닉네임 연필(`AccountInfoBlock`, 행 안 absolute 세로 중앙). 오른쪽 끝 기준은 **카드 콘텐츠 패딩 + 3px(글리프 기준)** — ①②가 한 열(§10-B·§10-I).
@@ -846,7 +847,7 @@ description: >
 
 | 상태 | 배경 | 색상 |
 |---|---|---|
-| 기본 | 투명 | `--s-faint` (`#9ca3af` / `#8c84a0`) |
+| 기본 | 투명 | 공통 아이콘 버튼 색(§7): 라이트 `--s-ink` 50% + `--s-sub` 50% ≈ `rgb(66,65,90)` / 다크 `--s-ink` 30% + `--s-sub` 70% ≈ `rgb(191,185,204)`, stroke 1.25 — 종전 `--s-faint`에서 상향 |
 | hover 라이트 | `--s-card-border-strong` (`#eceaf3`) | `--s-ink` (`#1a1033`) |
 | hover 다크 | `--s-accent-soft-bg` (`#573f7f`) | `--s-accent` (`#c084fc`) |
 

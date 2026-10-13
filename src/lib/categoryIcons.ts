@@ -13,6 +13,7 @@ import {
   Coffee,
   Martini,
   Cake,
+  Wheat,
   Pin,
   Tag,
   type LucideIcon,
@@ -43,6 +44,7 @@ export const CATEGORY_ICONS: Record<string, LucideIcon> = {
   카페: Coffee,
   바: Martini,
   디저트: Cake,
+  아시안: Wheat,
   // 공통
   미분류: Pin,
 }

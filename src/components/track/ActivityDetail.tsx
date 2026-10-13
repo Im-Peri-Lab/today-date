@@ -39,7 +39,7 @@ import {
   STATUS_LABELS,
   STATUS_MENU_LABELS,
 } from '@/lib/labels'
-import { buildDetailHref, DEFAULT_LIST_RETURN_TO, isRecommendReturnTo } from '@/lib/listReturn'
+import { buildDetailHref, DEFAULT_LIST_RETURN_TO, getReturnLabel } from '@/lib/listReturn'
 import { stashActivityDuplicate } from '@/lib/duplicatePrefill'
 import { cn } from '@/lib/utils'
 import { resolveHref } from '@/lib/url'
@@ -71,7 +71,7 @@ export function ActivityDetail({ id, initialData, initialEdit, returnTo }: Props
   const [visitedOpen, setVisitedOpen] = useState(false)
   const [revertOpen, setRevertOpen] = useState(false)
   const listHref = returnTo ?? DEFAULT_LIST_RETURN_TO
-  const listLabel = isRecommendReturnTo(returnTo) ? '추천 결과로' : '목록으로'
+  const listLabel = getReturnLabel(returnTo, '목록으로')
 
   const {
     register,
@@ -150,7 +150,7 @@ export function ActivityDetail({ id, initialData, initialEdit, returnTo }: Props
   // start() 직후 한 프레임 뒤에 push 해, 시작된 프로그레스 바가 먼저 보이도록 한다.
   function handleDuplicate() {
     if (!activity) return
-    const href = stashActivityDuplicate(activity)
+    const href = stashActivityDuplicate(activity, buildDetailHref(`/activities/${id}`, { returnTo }))
     topLoader.start()
     requestAnimationFrame(() => router.push(href))
   }

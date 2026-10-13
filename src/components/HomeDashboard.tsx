@@ -7,6 +7,7 @@ import { PageHeader } from '@/components/PageHeader'
 import { useDashboardStats, type DashboardStats } from '@/hooks/useDashboardStats'
 import type { WorkspaceState } from '@/lib/auth/couple'
 import { STATUS_LABELS } from '@/lib/labels'
+import { HOME_RETURN_TO } from '@/lib/listReturn'
 import { cn } from '@/lib/utils'
 import styles from '@/components/screens.module.css'
 
@@ -225,7 +226,7 @@ export function HomeDashboard({
         </StatSection>
       </div>
 
-      <HomeFab />
+      <HomeFab returnTo={HOME_RETURN_TO} />
     </div>
   )
 }

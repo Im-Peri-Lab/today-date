@@ -3,7 +3,7 @@ import { getSession } from '@/lib/auth/session'
 import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import { ActivityForm } from '@/components/track/ActivityForm'
-import { getSafeListReturnTo } from '@/lib/listReturn'
+import { getReturnLabel, getSafeListReturnTo } from '@/lib/listReturn'
 import { cn } from '@/lib/utils'
 import styles from '@/components/screens.module.css'
 
@@ -16,13 +16,14 @@ export default async function NewActivityPage({
   if (!session.authenticated) redirect('/lock')
   const { from, returnTo } = await searchParams
   const listReturnTo = getSafeListReturnTo(returnTo)
+  const backLabel = getReturnLabel(listReturnTo, '홈으로')
 
   return (
     <main className={styles.page}>
       <div className="mx-auto w-full max-w-lg px-5 pb-16 pt-6 lg:pt-10">
         <Link href={listReturnTo ?? '/'} className={styles.backLink}>
           <ArrowLeft className="h-4 w-4" />
-          {listReturnTo ? '목록으로' : '홈으로'}
+          {backLabel}
         </Link>
 
         <h1 className={cn('mt-4', styles.pageTitle)}>액티비티 추가</h1>

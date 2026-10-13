@@ -114,7 +114,7 @@ export function MapLink({ query }: { query: string }) {
           gap 2px, 비겹침 → 탭 오작동 없음.
           -mt-1: 28px 버튼의 시각 중심을 ~21px 텍스트 줄 중심에 맞춘다(상단 정렬 보정).
           -mr-[3px]: 상세 카드 모서리 연필(DetailBlock)과 글리프 오른쪽 끝을 한 열로 맞춘다(§10-B). */}
-      <span className="-mr-[3px] -mt-1 flex shrink-0 items-center gap-0">
+      <span className="-mr-[3px] -mt-1 flex shrink-0 items-center gap-0.5">
         {/* 기본 앱 열기 — 웹은 anchor(새 탭), 앱 스킴은 button(openAppScheme) */}
         {effectiveDefault.requiresApp ? (
           <button

@@ -636,7 +636,8 @@ description: >
   - 메타 줄 아이콘(Clock/Sun/Moon/MapPin/Utensils 등):
     - **리스트 카드(ActivityCard/PlaceCard)**: 아이콘 색 지정 없이 부모 div(`styles.sub`) 상속.
     - **상세 화면(DetailRow 안)**: `styles.faint`(`--s-faint`) 명시 → 카테고리 아이콘(`styles.accent`)보다 한 단계 약한 위계. `className={cn('h-3.5 w-3.5 shrink-0', styles.faint)}` 패턴 사용.
-  - 유틸리티 아이콘 버튼(`styles.headerNavBtn` / `styles.iconBtn`): `sub`, hover 시 라이트는 중성 면 `#eceaf3`+`ink`, 다크는 보라 소프트. `.headerNavBtn`은 검색·홈·메뉴 헤더 내비게이션 전용이고, `.iconBtn`은 카드 ⋮케밥·로그아웃용이다. (유틸리티 도구라 **중성 hover** 유지 — 콘텐츠 요소의 accent hover와 의도적으로 구분, §5-A.)
+  - **헤더/카드 아이콘 기본 색·stroke (확정)**: `.headerNavBtn`(검색·홈·메뉴, 44px/22px) = `color-mix(in srgb, var(--s-sub) 75%, var(--s-faint))` (라이트 ≈ `rgb(119,126,140)`, 다크 ≈ `rgb(161,153,178)`) + **stroke 1.75**(`.headerNavBtn svg`, lucide 기본 2를 CSS로 덮어씀). `.mapActionBtn`(연필·복사하기·지도, 28px/16px) = `color-mix(in srgb, var(--s-sub) 50%, var(--s-faint))` (라이트 ≈ `rgb(131,138,152)`, 다크 ≈ `rgb(154,146,172)`) + **stroke 2 유지**. 새 토큰 없이 기존 `--s-sub`/`--s-faint` 혼합만 쓰며, `color-mix` 미지원 엔진용 폴백 줄(각각 `--s-sub`/`--s-faint`)을 바로 위에 둔다. hover/focus 색·크기는 변경 없음. 배경: 헤더/카드 아이콘 이질감 해소(상세·계정 화면에서 두 계열이 처음 함께 보임, 라이트 색 차이 49→12 · 다크 28→7단계로 축소, 같은 상대 비율), 홈 화면 가독성 검토 후 stroke 1.75로 확정(1.5는 검색·햄버거가 너무 흐려 기각). 대비(흰 배경): 헤더 ≈4.1:1, 카드 ≈3.5:1.
+  - 유틸리티 아이콘 버튼(`styles.headerNavBtn` / `styles.iconBtn`): `sub`(`.headerNavBtn`은 위 혼합색), hover 시 라이트는 중성 면 `#eceaf3`+`ink`, 다크는 보라 소프트. `.headerNavBtn`은 검색·홈·메뉴 헤더 내비게이션 전용이고, `.iconBtn`은 카드 ⋮케밥·로그아웃용이다. (유틸리티 도구라 **중성 hover** 유지 — 콘텐츠 요소의 accent hover와 의도적으로 구분, §5-A.)
   - **키보드 포커스(`:focus-visible`) = hover와 동일한 중성 면** (`headerNavBtn`·`iconBtn`·`editGhostBtn`): 브라우저 기본 outline을 끄고(`outline:none`) 중성 회색 면으로 표시. **입력 글로우(box-shadow 링) 쓰지 않는다**(글로우는 입력 필드 전용, §5). `.headerNavBtn:hover`만 `@media (hover: hover)`로 제한하며 `:focus-visible`은 그 밖에 유지한다.
 - **유틸 아이콘 글리프 크기 (탭타깃별 통일, 확정)**: **44px 탭타깃 버튼(`.iconBtn` — ⋮케밥·로그아웃) → 글리프 20px(`h-5 w-5`)** / **36px 버튼(`.editGhostBtn`) → 글리프 16px(`h-4 w-4`) — 261013(PR #133) 기준 코드 사용처 0, 정리 예정(CSS·이 문서 언급 제거 대기)** / **28px 버튼(`.mapActionBtn` — 위치 행 지도열기/▾ 인라인 액션 쌍 §10-I, 상세 블록 복사하기+연필 쌍 §10-B) → 글리프 16px(`h-4 w-4`)**. 탭타깃 크기(44/36) 자체는 유지하고 글리프만 이 규칙으로 맞춘다. `.mapActionBtn`(28px)은 **한 행에 두 버튼이 인접하는 인라인 액션 쌍 전용**의 컴팩트 예외 — 글리프 좌우 여백을 6px로 좁혀 두 버튼이 한 세트로 읽히게 한다. 단독 유틸 버튼에는 쓰지 않는다(36/44 유지).
   - **28px 사용처(`.mapActionBtn`) 전수 (261013)**: ① 위치 행 지도 열기·▾(`MapLink`, 행 flex 흐름, 쌍 gap 2px) ② 상세 카드 모서리 연필·복사하기(`DetailBlock`, absolute, gap 0, §10-B) ③ 닉네임 연필(`AccountInfoBlock`, 행 안 absolute 세로 중앙). 오른쪽 끝 기준은 **카드 콘텐츠 패딩 + 3px(글리프 기준)** — ①②가 한 열(§10-B·§10-I).
@@ -846,7 +847,7 @@ description: >
 
 | 상태 | 배경 | 색상 |
 |---|---|---|
-| 기본 | 투명 | `--s-faint` (`#9ca3af` / `#8c84a0`) |
+| 기본 | 투명 | `--s-sub` 50% + `--s-faint` 50% `color-mix` (라이트 ≈ `rgb(131,138,152)` / 다크 ≈ `rgb(154,146,172)`; 종전 `--s-faint`에서 상향 — §7 헤더 아이콘과의 이질감 해소) |
 | hover 라이트 | `--s-card-border-strong` (`#eceaf3`) | `--s-ink` (`#1a1033`) |
 | hover 다크 | `--s-accent-soft-bg` (`#573f7f`) | `--s-accent` (`#c084fc`) |
 

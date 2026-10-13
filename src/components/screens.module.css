@@ -589,13 +589,20 @@
   width: 2.75rem;
   height: 2.75rem;
   border-radius: 0.75rem;
+  /* 기본 색 = --s-sub 75% + --s-faint 25%(라이트 ≈ rgb(119,126,140)). color-mix 미지원 엔진은 윗줄 sub 로 폴백.
+     카드 .mapActionBtn(50%)과의 진하기 차이를 줄이되 홈 아이콘 대비(≈4.1:1)는 유지. §7 */
   color: var(--s-sub, #6b7280);
+  color: color-mix(in srgb, var(--s-sub, #6b7280) 75%, var(--s-faint, #9ca3af));
   background: transparent;
   border: none;
   cursor: pointer;
   transition:
     background 140ms ease,
     color 140ms ease;
+}
+/* 22px 글리프는 stroke 2 면 16px 카드 아이콘(.mapActionBtn)보다 선이 1.4배 굵게 그려진다 → 1.75 로 한 단계 낮춘다(§7). */
+.headerNavBtn svg {
+  stroke-width: 1.75;
 }
 @media (hover: hover) {
   .headerNavBtn:hover:not(:disabled) {
@@ -1370,7 +1377,9 @@
   height: 1.75rem;
   flex-shrink: 0;
   border-radius: 0.5rem;
+  /* 기본 색 = --s-sub 50% + --s-faint 50%(라이트 ≈ rgb(131,138,152)). 폴백은 종전 faint. §7·§10-B */
   color: var(--s-faint, #9ca3af);
+  color: color-mix(in srgb, var(--s-sub, #6b7280) 50%, var(--s-faint, #9ca3af));
   background: transparent;
   border: none;
   cursor: pointer;

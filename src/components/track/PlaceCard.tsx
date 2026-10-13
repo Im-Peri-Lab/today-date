@@ -76,7 +76,7 @@ export function PlaceCard({ place, hideMenu, actionSlot, returnTo }: PlaceCardPr
     <div className={cn(styles.card, styles.cardInteractive, 'group relative')}>
       {!hideMenu && (
         <div
-          className="absolute right-1.5 top-1.5 z-10"
+          className="absolute right-2.5 top-2.5 z-10"
           onClick={(e) => e.stopPropagation()}
         >
           <ItemMenu

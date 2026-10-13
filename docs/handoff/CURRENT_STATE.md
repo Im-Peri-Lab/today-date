@@ -144,7 +144,7 @@ PROJECT_CONTEXT §5(인증 F-01)·§20.
 - PR #106(액션 버튼 Tier 통일) Vercel 프리뷰 실기기 확인 — `/activities/new`(활동·다이닝), 홈
   검색 다이얼로그, 방문기록 저장 다이얼로그, 되돌리기 다이얼로그(현재는 `RevertConfirmDialog`)
   4곳. 세션 환경 제약으로 미실행
-- 아이콘 버튼 크기 통일: 28px 쌍(`mapActionBtn`)은 PR #133으로, 색·stroke는 PR #135로 정리됨. 44px(`headerNavBtn`/`iconBtn`) 글리프 통일·FAB 56px·다이얼로그 닫기는 위 보류 2~4번과 PROJECT_CONTEXT §19 그룹 5 참고. 위저드 "처음부터"/"홈으로" 구현 방식 불일치(ghost 버튼 vs 텍스트 링크)는 PR #106 범위 밖으로 분리된 채 미판단
+- 아이콘 버튼 크기 통일: 28px 쌍(`mapActionBtn`)은 PR #133으로, 색·stroke는 PR #135로 정리됨. 헤더(`headerNavBtn`) 40/22·카드 ⋮(`iconBtn`) 36/20 박스는 여백 비율 기준으로 재정의됨(261013, SKILL §7). FAB 56px·다이얼로그 닫기는 위 보류 2~4번과 PROJECT_CONTEXT §19 그룹 5 참고. 위저드 "처음부터"/"홈으로" 구현 방식 불일치(ghost 버튼 vs 텍스트 링크)는 PR #106 범위 밖으로 분리된 채 미판단
 - 다이닝 위저드 "상세 화면 → 추천 결과로 복귀" 실제 왕복 E2E — `/places/[id]` 상세는 서버
   컴포넌트가 Supabase를 직접 조회해 DB 없이는 자동화 불가, 카드 returnTo·결과 캐시 복원
   검증으로 대체(실제 왕복은 기존 아이폰 실기기 수동 검증으로 확인됨)

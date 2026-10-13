@@ -530,13 +530,13 @@
   }
 }
 
-/* ── 아이콘 버튼 (헤더 홈/메뉴, 카드 더보기) — 최소 44x44 탭 타깃 ── */
+/* ── 카드 더보기(⋮) 아이콘 버튼 — 36x36 박스 / 20px 글리프 (§7 여백 비율 0.40) ── */
 .iconBtn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2.75rem;
-  height: 2.75rem;
+  width: 2.25rem;
+  height: 2.25rem;
   border-radius: 0.75rem;
   background: transparent;
   border: none;
@@ -579,16 +579,15 @@
 }
 
 /*
- * 헤더 내비게이션 클러스터 전용(검색/홈/햄버거) — .iconBtn과 탭타깃(44px)은 동일하나
- * 글리프만 22px로 확대 + 서로 gap 0으로 밀착. 카드 ⋮ 메뉴·로그아웃은 .iconBtn 그대로 유지.
- * §7 참고.
+ * 헤더 내비게이션 클러스터 전용(검색/홈/햄버거) — 40x40 박스 / 22px 글리프(§7 여백 비율 0.41) +
+ * 서로 gap 0으로 밀착. 카드 ⋮ 메뉴는 .iconBtn(36px/20px)으로 별개 계열. §7 참고.
  */
 .headerNavBtn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2.75rem;
-  height: 2.75rem;
+  width: 2.5rem;
+  height: 2.5rem;
   border-radius: 0.75rem;
   background: transparent;
   border: none;

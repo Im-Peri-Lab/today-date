@@ -87,7 +87,7 @@ export function DetailBlock({
       {!editing && onCopy && (
         <button
           type="button"
-          className={cn(styles.mapActionBtn, 'absolute top-[1.0625rem] right-[2.8125rem] lg:top-[1.3125rem] lg:right-[3.0625rem]')}
+          className={cn(styles.mapActionBtn, 'absolute top-[1.0625rem] right-[2.9375rem] lg:top-[1.3125rem] lg:right-[3.1875rem]')}
           onClick={onCopy}
           aria-label="복사하기"
         >

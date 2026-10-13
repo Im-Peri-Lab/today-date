@@ -1,6 +1,6 @@
 # CURRENT_STATE.md
 
-> **마지막 업데이트: 2026-10-12**
+> **마지막 업데이트: 2026-10-13**
 
 ## 현재 단계
 커플(2인) 계정 전환 완료 + 파트너 표시용 닉네임 추가 단계 — 계정 없는 단일 워크스페이스에서
@@ -9,6 +9,13 @@
 그 외 유지보수 / 점진적 UX 개선, Capacitor 네이티브 앱은 여전히 `main` 미머지 상태로 보류 중.
 
 ## 현재 한 줄 요약
+**신규 등록·상세 상단 복귀 버튼 `returnTo` 누락 수정(신규, 261013, PR #132)**: 복사하기(리스트
+카드·상세)·추천 결과 0건 "추가하기"·홈 FAB가 실제 출발 화면을 가리키도록 `returnTo`를 넘기게
+했고, `getSafeListReturnTo`가 홈(`/`)·상세 경로까지 허용하도록 확장, 라벨은 `getReturnLabel`
+단일 출처("목록으로"/"추천 결과로"/"상세로"/"홈으로"). 상세 → CHANGELOG 2026-10-13, 설계·교훈 →
+PROJECT_CONTEXT §12·§20, 라벨 스펙 → SKILL §13. 화면 클릭 확인은 사용자가 완료.
+
+이전 배치:
 **파트너 표시용 닉네임 설정(신규, 261012, PR #128)**: `users.nickname` nullable 컬럼(016,
 additive) 추가 → `/account`("내 정보")에서 설정/재수정, `/partner/info`("파트너 정보")에서
 닉네임+이메일 함께 표시(미설정 시 "설정 안 함") → 두 화면을 헤더 없는 동일 카드·동일 필드
@@ -33,7 +40,8 @@ PROJECT_CONTEXT §5(인증 F-01)·§20.
   diverge 폭이 더 커짐 — 최종 머지 시 충돌 범위 재점검 필요. 머지 시점·방식은 여전히 사용자
   지시 대기
 - `feat/partner-nickname` — PR #128 머지 완료, 로컬·리모트 브랜치 모두 삭제됨
-- main 기준 build PASS (PR #128 반영분 포함, PR #129~#131은 tsc·eslint 확인, iOS 실기기 확인은 사용자가 완료)
+- main 기준 build PASS (PR #128 반영분 포함, PR #129~#131은 tsc·eslint 확인, iOS 실기기 확인은 사용자가 완료. PR #132는 CI(lint/vitest/e2e/Vercel) 통과, 화면 클릭 검증은 사용자가 완료)
+- `fix/new-entry-returnto-propagation` — PR #132 머지 완료, 로컬·리모트 브랜치 삭제됨
 
 ## 최근 구현 완료
 - 자동화 테스트·CI, dark/hover/focus 정합화, 추천위저드 History/URL 동기화 공통 훅, 폼-API
@@ -68,13 +76,20 @@ PROJECT_CONTEXT §5(인증 F-01)·§20.
 - 세션 주체를 기기별로 기억(`deviceUser.ts`) — 초대받은 사람이 재로그인해도 자기 세션 유지(PR #127) → 상세 CHANGELOG 2026-09-22
 - 파트너 표시용 닉네임 설정 — `users.nickname`(016), `/account`·`/partner/info` 통일 레이아웃, `PATCH /api/account`(PR #128) → 상세 CHANGELOG 2026-10-12
 - 인라인 편집 저장/취소 버튼 규칙 통일(상세 편집 + 닉네임 편집) — 우측 정렬·취소 → 저장·"저장 중..."(PR #129~#131) → 상세 CHANGELOG 2026-10-12 v2
+- 복사하기·추천 0건 "추가하기"·홈 FAB의 `returnTo` 전달 + 상단 복귀 버튼 라벨 통일(PR #132) → 상세 CHANGELOG 2026-10-13
 
 ## 배포 상태
 - 플랫폼: Vercel
 - URL: `https://today-date-seven.vercel.app`
-- 현재 브랜치: `main` (PR #131 반영 기준. PR #128 머지 커밋 `238d3de`만 예외적으로 squash가 아닌 일반 머지)
+- 현재 브랜치: `main` (PR #132 반영 기준, 머지 커밋 `7bcd64e`. PR #128 머지 커밋 `238d3de`만 예외적으로 squash가 아닌 일반 머지)
 
 ## 진행 중 / 남은 작업
+- **복귀 흐름 E2E 없음(PR #132)**: 리스트 카드 복사하기·상세 복사하기·추천 0건 "추가하기"·홈 FAB →
+  신규 → 저장 → 새 상세의 상단 버튼은 사용자가 화면에서 직접 확인했지만 자동화 회귀 장치는
+  단위 테스트(`listReturn.test.ts`)뿐이다(PROJECT_CONTEXT §19 그룹 7)
+- **홈 버튼 확장(상세·위저드 등)은 미결정**: 현재 홈 버튼은 `/list` 한 곳뿐이고 좌상단에 "홈으로"가
+  이미 있는 화면이 7곳이라, 넣으려면 겹치는 링크 처리 방침부터 정해야 함(PROJECT_CONTEXT §19 그룹 7)
+- 추천 결과에서 온 상세를 삭제한 뒤 결과 화면 캐시에 항목이 남는지 미확인(PROJECT_CONTEXT §19 그룹 7)
 - **`chore/capacitor-init` → `main` 최종 머지**: PR #111~#116 모두 병합 완료 상태지만, 전체
   Capacitor 네이티브 셸 자체를 `main`(프로덕션 배포 소스)에 반영할지는 아직 사용자 확인 전 —
   머지 시점·방식(ff-only/squash)은 별도로 지시받아 진행할 것. `main`이 그 사이 커플 계정 전환

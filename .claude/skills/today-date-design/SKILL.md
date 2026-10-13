@@ -537,7 +537,7 @@ description: >
 - **미방문(wishlist)**: 정보 수정 → 복사하기 → 다녀온 곳으로 → (구분선) 삭제
 - **방문완료(visited)**: 정보 수정 → 기록 수정 → 복사하기 → 가보고 싶은 곳으로 → (구분선) 삭제
 
-**순서 근거**: 정보 수정·기록 수정·복사하기는 편집·생성 계열 일반 액션(상태 변경보다 위), 상태 변경(다녀온 곳으로/가보고 싶은 곳으로)은 그 아래, 삭제는 파괴적 액션이라 맨 끝. **구분선은 삭제 앞 하나만** 둔다(중간 구분선 없음). 복사하기는 상세 상단 ⋮(`DuplicateMenu`)와 동일 액션이며 `stashActivityDuplicate`/`stashPlaceDuplicate`(`src/lib/duplicatePrefill.ts`) 공용 헬퍼로 DB 즉시 생성 없이 신규 폼 prefill 로 이동한다.
+**순서 근거**: 정보 수정·기록 수정·복사하기는 편집·생성 계열 일반 액션(상태 변경보다 위), 상태 변경(다녀온 곳으로/가보고 싶은 곳으로)은 그 아래, 삭제는 파괴적 액션이라 맨 끝. **구분선은 삭제 앞 하나만** 둔다(중간 구분선 없음). 복사하기는 상세 등록 정보 블록의 단독 복사 버튼(§10-B, `DetailBlock` `onCopy`)과 동일 액션이며 `stashActivityDuplicate`/`stashPlaceDuplicate`(`src/lib/duplicatePrefill.ts`) 공용 헬퍼로 DB 즉시 생성 없이 신규 폼 prefill 로 이동한다.
 
 ### 토큰 공유 주의
 - `--s-active-fill`/`--s-active-line`은 `/list` 필터 칩·세그먼트·상태 토글과 **공유**된다. 상태 색을 바꿀 땐 토큰 정의값을 건드리지 말고 **사용처 클래스**(`.chipActive` 등)에서만 조정한다 — 토큰값을 바꾸면 StepDots·CTA까지 휩쓸려 회귀한다.
@@ -785,7 +785,7 @@ description: >
 
 | 블록 | 섹션 라벨 | 근거 |
 |---|---|---|
-| 등록 정보 | 숨김(`blockTitle` 있으면 렌더 안 함) | 제목·카테고리·상태 태그가 자체 식별 |
+| 등록 정보 | 숨김(`blockTitle` 있으면 렌더 안 함) | 제목·카테고리·상태 태그가 자체 식별. 우상단에 복사하기(`onCopy`)+연필 버튼 (§10-B) |
 | 방문 기록 | `<h2>` 유지 ("방문 기록"), 톤은 필드 라벨과 동일 | 스크린리더 섹션 탐색 보장 |
 
 블록 헤더 라벨 톤: 시멘틱은 `<h2>` 유지하되 스타일은 폼 필드 라벨("제목"·"메모" 등)과 같은 결 — `text-sm font-medium` + `styles.ink`(`--s-ink`). 예전 `text-xs uppercase` + `sub`는 쓰지 않는다(`DetailBlock` showHeader 경로에 반영).
@@ -814,6 +814,7 @@ description: >
     </span>
   }
   editing={editingInfo}
+  onCopy={handleDuplicate}
   onEdit={startEditInfo} onCancel={exitEditInfo} onSave={onSaveInfo} saving={isSubmitting}
 >
   {/* 필드 그리드 */}
@@ -846,6 +847,8 @@ description: >
 | hover 다크 | `--s-accent-soft-bg` (`#573f7f`) | `--s-accent` (`#c084fc`) |
 
 헤더 콘텐츠 영역에 `pr-10` 추가해 버튼과 텍스트 겹침 방지.
+
+**복사하기 버튼 (등록 정보 블록 전용, `onCopy`)**: 상단 ⋮ 메뉴는 항목이 복사하기 하나뿐이라 "선택지가 여러 개"라는 메뉴 신호가 거짓이어서 제거했고, 연필 **바로 왼쪽**에 단독 버튼으로 둔다. 같은 `styles.editGhostBtn`(36px·글리프 `h-4 w-4`) + `absolute top-3.5 right-[3.125rem]`(연필 right 14px + 36px) — 텍스트 행 flex 흐름에 끼우지 않고 absolute로 빼서 고정크기 버튼이 한 줄 행 높이를 늘리지 않게 한다(연필과 같은 top → 세로 중심선 일치). 아이콘은 카드 ⋮ 메뉴 복사하기와 같은 lucide `Copy`. 편집 모드에선 연필과 함께 숨김. `onCopy`가 있으면 헤더 영역 `pr-10` 대신 `pr-[4.5rem]`으로 버튼 2개 몫을 비운다. 동작은 `stashActivityDuplicate`/`stashPlaceDuplicate` + `returnTo` 전달(§13) 그대로. `DuplicateMenu` 컴포넌트는 삭제됨.
 
 ---
 
@@ -1121,7 +1124,7 @@ try {
 
 ### 프로그래매틱 이동엔 항상 topLoader (막대 생략하지 말 것)
 
-옛 지침은 "API 대기 없는 즉시 이동이면 막대 없어도 무방"이었으나, 실사용에서 **즉시 이동도 체감 지연이 있어** 카드 ⋮ 메뉴 이동(복사하기/수정)·상세 ⋮ 복사하기·상세 삭제 확인 후 목록 전환 등 **프로그래매틱 `router.push`에는 모두 topLoader를 적용**하는 것으로 정정한다. `<Link>`가 아닌 이동은 자동 막대가 없으므로 직접 `topLoader.start()`를 호출한다.
+옛 지침은 "API 대기 없는 즉시 이동이면 막대 없어도 무방"이었으나, 실사용에서 **즉시 이동도 체감 지연이 있어** 카드 ⋮ 메뉴 이동(복사하기/수정)·상세 복사하기·상세 삭제 확인 후 목록 전환 등 **프로그래매틱 `router.push`에는 모두 topLoader를 적용**하는 것으로 정정한다. `<Link>`가 아닌 이동은 자동 막대가 없으므로 직접 `topLoader.start()`를 호출한다.
 
 **캐시 warm 라우트의 조기 붕괴 + `requestAnimationFrame` 해법**: `nextjs-toploader`는 `history.pushState` 시점에 `done()`한다. 이동 대상이 App Router 캐시에 **warm**하면(이미 방문한 목록 등) `router.push`가 **동기적으로 즉시 커밋**되어, `start()`→`done()`이 브라우저 페인트 한 번 사이에 붕괴한다 → 막대가 아예 안 보인다. 캐시 온도와 무관하게 노출을 보장하려면 `start()` 직후 **한 프레임 뒤에** push 한다:
 

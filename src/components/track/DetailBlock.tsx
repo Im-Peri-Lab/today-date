@@ -1,7 +1,7 @@
 'use client'
 
 import { ReactNode } from 'react'
-import { Pencil, Loader2 } from 'lucide-react'
+import { Pencil, Copy, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import styles from '@/components/screens.module.css'
@@ -14,6 +14,11 @@ interface DetailBlockProps {
   onCancel: () => void
   onSave: () => void
   saving: boolean
+  /**
+   * 복사하기 (보기 모드 전용). 제공되면 연필 버튼 바로 왼쪽에 단독 버튼으로 노출.
+   * 연필과 같은 absolute 패턴 — 텍스트 행 흐름에 끼우지 않아 행 높이를 늘리지 않는다.
+   */
+  onCopy?: () => void
   /**
    * 블록 헤더에 표시할 아이템 제목 (보기 모드 전용).
    * 제공되면 섹션 라벨(title)을 숨기고 이 제목을 h1으로 표시한다.
@@ -47,6 +52,7 @@ export function DetailBlock({
   onCancel,
   onSave,
   saving,
+  onCopy,
   blockTitle,
   blockCategory,
   headerExtra,
@@ -76,9 +82,21 @@ export function DetailBlock({
         </button>
       )}
 
+      {/* 복사하기 — 연필(right 14px + 36px) 바로 왼쪽: right 50px(3.125rem) */}
+      {!editing && onCopy && (
+        <button
+          type="button"
+          className={cn(styles.editGhostBtn, 'absolute top-3.5 right-[3.125rem]')}
+          onClick={onCopy}
+          aria-label="복사하기"
+        >
+          <Copy className="h-4 w-4" />
+        </button>
+      )}
+
       {/* 블록 헤더 — showHeader 일 때만 렌더 */}
       {showHeader && (
-        <div className={cn(!editing && 'pr-10')}>
+        <div className={cn(!editing && (onCopy ? 'pr-[4.5rem]' : 'pr-10'))}>
           {/* 섹션 라벨: blockTitle이 없는 블록(방문 기록 등)에서만 표시 */}
           {!blockTitle && (
             <h2 className={cn('text-sm font-medium', styles.ink)}>

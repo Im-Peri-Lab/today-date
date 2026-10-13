@@ -106,7 +106,7 @@ PROJECT_CONTEXT §5(인증 F-01)·§20.
 ## 배포 상태
 - 플랫폼: Vercel
 - URL: `https://today-date-seven.vercel.app`
-- 현재 브랜치: `main` (PR #139 반영 기준, 머지 커밋 `625b923`. PR #128 머지 커밋 `238d3de`만 예외적으로 squash가 아닌 일반 머지)
+- 현재 브랜치: `main` (PR #142 반영 기준, 머지 커밋 `bea0bcf`. PR #128 머지 커밋 `238d3de`만 예외적으로 squash가 아닌 일반 머지)
 
 ## 진행 중 / 남은 작업
 

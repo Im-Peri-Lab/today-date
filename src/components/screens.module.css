@@ -545,12 +545,14 @@
     background 140ms ease,
     color 140ms ease;
 }
-.iconBtn:hover:not(:disabled) {
-  /* 라이트: 보라 소프트(#f5f0ff) 대신 컨트롤 보더와 같은 결의 연한 중성 면 + 기본 텍스트 */
-  background: var(--s-card-border-strong, #eceaf3);
-  color: var(--s-ink, #1a1033);
+@media (hover: hover) {
+  .iconBtn:hover:not(:disabled) {
+    /* 라이트: 보라 소프트(#f5f0ff) 대신 컨트롤 보더와 같은 결의 연한 중성 면 + 기본 텍스트 */
+    background: var(--s-card-border-strong, #eceaf3);
+    color: var(--s-ink, #1a1033);
+  }
 }
-@media (prefers-color-scheme: dark) {
+@media (prefers-color-scheme: dark) and (hover: hover) {
   .iconBtn:hover:not(:disabled) {
     /* 다크 현행 유지. 라이트 규칙과 별도 재선언 + 다른 토큰(중성→accent) 사용은 토큰 값이
        못 바뀌어서가 아니라 SKILL.md §5-A가 명시한 "유틸리티 아이콘 hover는 다크에서만
@@ -1098,10 +1100,12 @@
  * 라이트: --s-card-border-strong(#eceaf3 회색), 다크: --s-accent-soft-bg(#573f7f 보라).
  * portal 상속: 라이트는 :root 값, 다크는 .dialogPopup 재선언 값으로 해석.
  */
-.dialogCloseBtn:hover {
-  background: var(--s-card-border-strong, #eceaf3);
+@media (hover: hover) {
+  .dialogCloseBtn:hover {
+    background: var(--s-card-border-strong, #eceaf3);
+  }
 }
-@media (prefers-color-scheme: dark) {
+@media (prefers-color-scheme: dark) and (hover: hover) {
   /* .iconBtn과 동일 이유(SKILL.md §5-A) — 중성→accent 전환은 의도적 구분, 통일 대상 아님. */
   .dialogCloseBtn:hover {
     background: var(--s-accent-soft-bg, #573f7f);

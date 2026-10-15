@@ -630,7 +630,7 @@ description: >
 왜: 아이콘은 `lucide-react` 단색 선으로 통일해 톤을 맞춘다. DB에 저장된 카테고리 이모지는 화면 아이콘으로 쓰지 않는다.
 
 - 라이브러리: **`lucide-react`만** 사용. 기능 아이콘으로 **이모지 사용 금지**.
-- 카테고리 아이콘은 이름→lucide 매핑(`src/lib/categoryIcons.ts`, `CategoryIcon` 컴포넌트로 렌더 — `src/components/track/categoryIcon.tsx`)으로만 고른다. DB `category.icon`(이모지)은 렌더하지 않는다. 장소 카테고리 "아시안"은 `Wheat`(곡물·쌀·면), "뷔페"는 `ChefHat`, "브런치"는 `EggFried`(모두 기존 카테고리 아이콘과 겹치지 않음). "디저트"는 018에서 제거됨(카페로 흡수).
+- 카테고리 아이콘은 이름→lucide 매핑(`src/lib/categoryIcons.ts`, `CategoryIcon` 컴포넌트로 렌더 — `src/components/track/categoryIcon.tsx`)으로만 고른다. DB `category.icon`(이모지)은 렌더하지 않는다. 장소 카테고리 "아시안"은 `Wheat`(곡물·쌀·면), "뷔페"는 `ChefHat`, "브런치"는 `EggFried`(모두 기존 카테고리 아이콘과 겹치지 않음). "디저트"는 018에서 제거됨(카페로 흡수). 액티비티 카테고리 "운동"은 `Dumbbell`, "쇼핑"은 `ShoppingBag`(019, 순서는 DB `sort_order`: 레저·운동·쇼핑·체험·문화·축제·자연·여행·미분류).
 - **아이콘 색 기준**:
   - 카테고리 아이콘 `styles.catIcon`: `--s-accent`(라이트 `#7c3aed` / 다크 `#c084fc`). 활성 칩 안에서는 `--s-active-on`(흰)으로 전환.
   - 메타 줄 아이콘(Clock/Sun/Moon/MapPin/Utensils 등):

@@ -287,7 +287,7 @@ export function ListView() {
       <PageHeader title="우리의 위시리스트" homeNav />
 
       {/* 탭 */}
-      <div className={cn(styles.tabBar, 'mt-3')} role="tablist">
+      <div className={cn(styles.tabBar, 'mt-4')} role="tablist">
         <button
           type="button"
           role="tab"

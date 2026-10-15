@@ -80,7 +80,7 @@ description: >
 | `--s-accent-pink` | `#db2777` | `#f18fb5` | 장소(place) 브랜드 핑크 전경 |
 | `--s-accent-pink-soft-bg` | `#fbeaf3` | `#3a2433` | 장소 위시리스트 칩 배경 |
 | `--s-accent-chip-tint` | `var(--s-accent-soft-bg)` | `#2c2440` | 활동 위시리스트 칩 배경 (다크는 accent-soft-bg `#573f7f`보다 어두운 미세 틴트) |
-| `--s-chip-neutral-bg` | `var(--s-card-border-strong)` | `var(--s-card-bg)` | 다녀온 곳 칩 중성 배경 |
+| `--s-chip-neutral-bg` | `var(--s-card-border-strong)` | `var(--s-card-border-strong)` (`#3a2f4e`) | 다녀온 곳 칩 중성 배경 — 라이트·다크 같은 매핑. 다크는 카드(`#241a36`) 대비 1.33:1(종전 `--s-card-bg` 였을 땐 1.0:1이라 칩 면이 안 보였음) |
 | `--s-label-muted` | `#8b8798` | `#908aa0` | 행 미리보기·중성 칩 텍스트 (sub↔faint 중간 톤; 섹션 라벨은 `--s-sub`) |
 | `--s-icon-muted` | `#c7c3d2` | `#4f4960` | chevron 등 중성 진입 아이콘 |
 
@@ -262,7 +262,8 @@ description: >
 - 빈 상태 문구는 한 줄 말줄임 대신 **최대 2줄**(`line-clamp: 2`)로 접고 `word-break: keep-all`로 어절 단위로 끊는다. 모바일에서는 두 섹션의 줄바꿈 위치를 맞추기 위해 **"아직 담은 / 곳이 없어요"**, **"아직 다녀온 / 곳이 없어요"**로 강제 줄바꿈한다(`<br className="lg:hidden">`, 둘째 줄이 "곳이 없어요"로 같아 위아래가 정렬됨). lg 이상은 한 줄. 모바일에서는 해당 행 높이가 ~82px로 커진다(빈 계정에서만 보이는 상태이므로 허용).
 - 개수는 있는데 제목을 못 받은 경우(방어 분기)는 폭과 무관하게 개수만 보여준다.
 - 다녀온 곳 타일의 체크 배지(`.statCheckBadge`)는 개수 ≥ 1일 때만 칩 우상단에 붙는다(기존 규칙 유지).
-- 다크에서 "다녀온 곳" 중성 칩 면(`--s-chip-neutral-bg`)이 카드 배경과 비슷해 거의 보이지 않는다(기존 현상, 이번 변경과 무관 — 필요 시 별도 작업).
+- 다크에서 "다녀온 곳" 중성 칩 면(`--s-chip-neutral-bg`)은 `--s-card-border-strong`(`#3a2f4e`)을 쓴다 — 카드 배경과 같은 값이던 종전 매핑이 칩 면을 지우던 문제를 수정(라이트와 같은 토큰). 아이콘(`--s-label-muted`/`--s-faint`)은 이 면 위에서 3.5~3.7:1.
+- **미리보기 정렬 기준**: 위시리스트 타일의 "최근 항목"은 등록(`created_at`) 최신순, **다녀온 곳 타일은 `/list` 와 같은 규칙**(방문일 `visited_at` 최신 → 같으면 `updated_at` 최신, 방문일 없으면 뒤로). 규칙은 `lib/data/listOrder.ts` `orderByListRule` 하나를 `/api/activities`·`/api/places`·`getDashboardStats` 가 공유한다 — 홈의 1번 항목이 `/list` 의 1번 카드와 항상 같다.
 
 ---
 

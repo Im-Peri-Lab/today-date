@@ -177,7 +177,7 @@ html.dark body {
     --s-accent-pink: #f18fb5;
     --s-accent-pink-soft-bg: #3a2433;
     --s-accent-chip-tint: #2c2440;  /* accent-soft-bg(#573f7f)보다 어두운 미세 틴트 — 활동 칩 전용 */
-    --s-chip-neutral-bg: var(--s-card-bg, #241a36);
+    --s-chip-neutral-bg: var(--s-card-border-strong, #3a2f4e); /* 라이트와 같은 매핑 — 카드(#241a36)보다 한 단계 밝아 칩 면이 보임(1.33:1) */
     --s-label-muted: #908aa0;
     --s-icon-muted: #4f4960;
   }

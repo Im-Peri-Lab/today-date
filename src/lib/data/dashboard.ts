@@ -1,10 +1,16 @@
 import { getSupabaseClient } from '@/lib/supabase/client'
 import type { DashboardStats } from '@/hooks/useDashboardStats'
+import { orderByListRule } from '@/lib/data/listOrder'
 
 /** 8개 집계 쿼리 결과에서 오류 검사에 필요한 최소 형태. */
 type QueryOutcome = { error: { message: string } | null }
 
-/** 홈 대시보드 집계 — 세션 커플의 행만 센다(다른 커플의 개수/제목이 섞이면 그 자체로 유출이다). */
+/**
+ * 홈 대시보드 집계 — 세션 커플의 행만 센다(다른 커플의 개수/제목이 섞이면 그 자체로 유출이다).
+ *
+ * 미리보기 제목의 정렬: 위시리스트는 등록 최신순, 다녀온 곳은 `/list` 와 같은 규칙(방문일 최신 →
+ * 마지막 수정 최신)이라 홈의 "최근 항목"이 `/list` 의 1번 카드와 일치한다(§ listOrder.ts).
+ */
 export async function getDashboardStats(coupleId: string): Promise<DashboardStats> {
   const supabase = getSupabaseClient()
   const countOpts = { count: 'exact' as const, head: true }
@@ -20,8 +26,8 @@ export async function getDashboardStats(coupleId: string): Promise<DashboardStat
     supabase.from('places').select('*', countOpts).eq('status', 'visited').eq('couple_id', coupleId),
     supabase.from('activities').select('title').eq('status', 'wishlist').eq('couple_id', coupleId).order('created_at', titleOpts).limit(2),
     supabase.from('places').select('title').eq('status', 'wishlist').eq('couple_id', coupleId).order('created_at', titleOpts).limit(2),
-    supabase.from('activities').select('title').eq('status', 'visited').eq('couple_id', coupleId).order('created_at', titleOpts).limit(2),
-    supabase.from('places').select('title').eq('status', 'visited').eq('couple_id', coupleId).order('created_at', titleOpts).limit(2),
+    orderByListRule(supabase.from('activities').select('title').eq('status', 'visited').eq('couple_id', coupleId), 'visited').limit(2),
+    orderByListRule(supabase.from('places').select('title').eq('status', 'visited').eq('couple_id', coupleId), 'visited').limit(2),
   ])
 
   /**

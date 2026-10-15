@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { getSupabaseClient } from '@/lib/supabase/client'
 import { requireCoupleScope } from '@/lib/auth/coupleScope'
+import { orderByListRule } from '@/lib/data/listOrder'
 import { readJsonBody, zodErrorResponse } from '@/lib/api/validation'
 import {
   apiTitleSchema,
@@ -59,14 +60,9 @@ export async function GET(req: NextRequest) {
       .eq('couple_id', scope.coupleId)
       .eq('status', status)
 
-    // 다녀온 곳: 다녀온 날짜 최신순, 같으면 다녀온 곳으로 바꾼(마지막 수정) 날짜 최신순.
-    // 그 외(위시리스트 등)는 기존대로 등록 최신순.
-    query =
-      status === 'visited'
-        ? query
-            .order('visited_at', { ascending: false, nullsFirst: false })
-            .order('updated_at', { ascending: false })
-        : query.order('created_at', { ascending: false })
+    // 다녀온 곳: 다녀온 날짜 최신순, 같으면 마지막 수정 최신순 / 그 외: 등록 최신순.
+    // 규칙은 홈 대시보드 미리보기와 공유한다(§ lib/data/listOrder.ts).
+    query = orderByListRule(query, status)
 
     const ids = splitCommaIds(category_id)
     if (ids.length > 1) query = query.in('category_id', ids)

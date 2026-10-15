@@ -103,24 +103,29 @@ description: >
 
 왜: 화면 안에서 항목들을 묶는 "그룹 헤더 라벨"은 행 제목보다 약하되 미리보기보다 또렷해야 위계가 읽힌다. 화면마다 제각각이었던 값을 아래와 같이 정의한다.
 
-**표준값 (홈 `.statSectionHeader` 기준, 확정):**
+**표준값 (`.sectionLabel` 기준 — /list FilterGroup 등 일반 섹션/그룹 라벨):**
 - font-size: **12px**
 - font-weight: **600**
 - color: **`--s-sub`** (라이트 `#6b7280` / 다크 `#a8a0b8`)
+
+**홈 섹션 제목(`.statSectionHeader`)은 예외 — 독립 클래스, 14px / 600 / `--s-ink` (확정):**
+- "가보고 싶은 곳"/"다녀온 곳"은 타일 2열 그리드를 이끄는 **화면 최상위 구획 제목**이라 일반 그룹 라벨(12px/`--s-sub`)보다 한 단계 올렸다. 상태(가보고 싶은/다녀온)를 이 제목이 전담하므로 타일 제목에는 상태 동사를 쓰지 않는다(§ 3-C).
+- font-size는 `--type-*` 토큰을 쓰지 않고 `0.875rem`을 직접 선언한다(모바일·PC 동일). `.sectionLabel`·`.fieldLabel`·`--type-section-label`과 **독립**이라 /list 필터 라벨·삭제 화면 등에는 영향이 없다.
+- 타일 제목(`.statRowTitle`, 15px→PC 16px/600/`--s-ink`)과 색·굵기가 같고 크기만 1~2px 다르다. 구분은 **위치**(헤더는 카드 밖 좌측 정렬, 제목은 카드 안)와 헤더 아래 7px(PC 8px) 간격에 의존한다. 헤더를 키우거나 타일 제목을 줄여 크기 차를 더 좁히지 말 것.
 
 **위계 3단계 (홈 기준):**
 
 | 요소 | font-size | font-weight | color 토큰 | 라이트 |
 |---|---|---|---|---|
-| 행 제목 (`.statRowTitle`) | **15px** → PC 16px | **600** | `--s-ink` | `#1a1033` | ← feat/typography-scale 수렴됨 |
-| **섹션 라벨 (`.statSectionHeader`)** | **12px** | **600** | **`--s-sub`** | **`#6b7280`** |
-| 미리보기 (`.statRowPreview`) | 12px (토큰) | 400 | `--s-label-muted` | `#8b8798` |
+| **섹션 제목 (`.statSectionHeader`)** | **14px** | **600** | **`--s-ink`** | **`#1a1033`** |
+| 타일 제목 (`.statRowTitle`) | **15px** → PC 16px | **600** | `--s-ink` | `#1a1033` | ← feat/typography-scale 수렴됨 |
+| 둘째 줄 (`.statRowPreview`) | 12px (토큰) | 400 | `--s-label-muted` | `#8b8798` |
 
 **현황 및 확장 가이드:**
 
 | 화면 | 구현 | 현재값 | 표준 적용 여부 |
 |---|---|---|---|
-| 홈 `.statSectionHeader` | `screens.module.css` | 12px / 600 / `--s-sub` | ✅ 적용됨 |
+| 홈 `.statSectionHeader` | `screens.module.css` | 14px / 600 / `--s-ink` (독립 클래스, 위 예외) | ✅ 적용됨 |
 | `/list` `FilterGroup` 라벨 | `ListView.tsx` `styles.sectionLabel` | 12px / 600 / `--s-sub` (`#6b7280`) | ✅ 적용됨 |
 | 추천 위저드 질문 라벨 | `ActivityRecommendWizard.tsx` `text-sm + styles.sub` | 14px / 400 / `--s-sub` | ⏳ 별도 작업 — 14px가 적합한지 재검토 후 결정 |
 
@@ -135,7 +140,7 @@ description: >
 | `--type-page-title` | 27px (1.6875rem) | 30px (1.875rem) | 600 | `--s-ink` | `.pageTitle` | 페이지 h1 (상세·폼 제목) |
 | `--type-card-title` | 18px (1.125rem) | 18px | 600 | `--s-ink` | `.cardTitle` | 리스트·인증 카드 제목 |
 | `--type-card-title-sm` | 15px (0.9375rem) | 16px (1rem) | 600 | `--s-ink` | `.cardTitleSm` | 홈 통계 행 제목 |
-| `--type-section-label` | 12px (0.75rem) | 12px | 600 | `--s-sub` | `.sectionLabel` | 섹션 헤더 (독립 구획 제목) |
+| `--type-section-label` | 12px (0.75rem) | 12px | 600 | `--s-sub` | `.sectionLabel` | 섹션 헤더 (독립 구획 제목) — 홈 `.statSectionHeader`는 제외(14px/`--s-ink`, § 2-A) |
 | `--type-body` | 14px (0.875rem) | 14px | 400 | `--s-ink` | `.bodyText` | 본문·값 |
 | `--type-preview-meta` | 12px (0.75rem) | 12px | 400 | `--s-label-muted` | `.previewMetaText` | 미리보기·메타 |
 | `--type-caption` | 12px (0.75rem) | 12px | 400 | `--s-faint` | `.captionText` | 캡션·약한 라벨 (등록일 등 메타) |
@@ -157,12 +162,12 @@ description: >
 
 | 클래스 | weight | 역할 | 예 |
 |---|---|---|---|
-| `.sectionLabel` | **600** | **섹션 헤더**: 위/아래 콘텐츠 블록을 나누는 독립 구획 제목. 값에 종속되지 않고 홀로 떠 있어 또렷해야 함 | 홈/리스트 "가보고 싶은 곳"·FilterGroup 라벨 |
+| `.sectionLabel` | **600** | **섹션 헤더**: 위/아래 콘텐츠 블록을 나누는 독립 구획 제목. 값에 종속되지 않고 홀로 떠 있어 또렷해야 함 | /list FilterGroup 라벨 (홈 "가보고 싶은 곳"은 독립 클래스 `.statSectionHeader`, § 2-A 예외) |
 | `.fieldLabel` | **500** | **필드명**: 바로 아래 값과 1:1로 붙어 그 값을 설명. 값에 종속되므로 값보다 약해야 함 | 상세 화면 "소요시간"·"위치"·"메모" |
 
 - size·color는 두 클래스 모두 동일: 12px / `--s-sub`.
 - **판정 기준**: 독립적으로 구획을 나누면 600 (`.sectionLabel`), 특정 값에 붙은 이름이면 500 (`.fieldLabel`).
-- `.sectionLabel`을 수정하면 홈/리스트 섹션 헤더 전체에 영향. `.fieldLabel`은 상세 `DetailRow`만 적용.
+- `.sectionLabel`을 수정하면 /list 필터 라벨·계정 삭제 화면 등에 영향(홈 섹션 제목은 영향 없음). `.fieldLabel`은 상세 `DetailRow`만 적용.
 
 **상세 화면 값 위계 (내림차순 강도):**
 
@@ -223,14 +228,41 @@ description: >
 | PC 컨테이너 폭 | `max-w-3xl` (768px) | 더 넓히면 추천 2열 과하게 벌어지고 통계 행 횡 늘어짐 — 768px 유지 |
 | 추천 CTA 카드 padding | `p-5` (20px) | 주연 카드 존재감. 줄이지 말 것 |
 | 추천 CTA 아이콘↔텍스트 | `mt-4` (16px) | 주연 여백. 줄이지 말 것 |
-| 통계 행 상하 padding | 12px | 제목 15px 무게에 맞춘 값 |
-| 통계 행 아이콘↔텍스트 gap | 12px | 동일 |
+| 통계 타일 상하 padding | 12px | 제목 15px 무게에 맞춘 값 |
+| 통계 타일 아이콘↔텍스트 gap | 12px | 동일 |
 | 정렬 | 좌측 | 추천·통계 모두. 가운데 정렬 금지 |
 
-**위계**: 페이지 h1(주연) > 추천 카드(준주연, 16px semibold) > 통계 행(조연, 15px semibold).  
+**위계**: 페이지 h1(주연) > 추천 카드(준주연, 16px semibold) > 통계 타일(조연, 15px semibold).  
 추천 제목 `text-base`(16px)는 리스트 카드 `.cardTitle`(18px)과 구분되는 자리이므로 키우지 말 것.
 
 홈 컨테이너는 공통 컨테이너가 아닌 `HomeDashboard.tsx` 개별 선언 — 홈만 변경해도 `/list`·상세·추가 화면에 영향 없음.
+
+### 3-C. 홈 바로가기 타일 — 2열 그리드 + 제목 간소화 + 반응형 둘째 줄 (확정)
+
+"가보고 싶은 곳"/"다녀온 곳" 섹션 안의 액티비티·다이닝 바로가기. 예전엔 섹션당 풀폭 행 2개를 한 카드에 쌓았고(제목 "가보고 싶은 액티비티" + 설명 + `>`), 지금은 **개별 카드 2개를 가로 2열로 배치**한다(위 추천 CTA와 같은 2열 리듬).
+
+| 항목 | 값 |
+|---|---|
+| 그리드 | `.statGrid` — `repeat(2, minmax(0, 1fr))`, gap 12px / lg 16px (`minmax(0,…)`로 긴 항목명이 열 폭을 밀지 못하게 함) |
+| 타일 | `<Link class="statSectionCard statRow">` 한 요소(카드 + 행). 조연 카드 표면(§ 3 조연 규칙)·14px radius 그대로 |
+| 구조 | `칩(32px/PC 36px) \| (제목 / 둘째 줄) \| >` 가로 한 줄. `>`(`.statRowChevron`)는 **항상 표시**(오른쪽 끝, 세로 가운데) |
+| 높이 | 모바일 ~69px / PC ~70px — 추천 CTA 카드(136px)의 절반. 제목과 둘째 줄 사이는 2px(`.statRowPreview` margin-top)로 붙인다. 칩 높이 기준으로 줄을 나눠 간격을 벌리지 말 것 |
+| 제목 | **"액티비티" / "다이닝"만**. "가보고 싶은 액티비티" 같은 상태 동사는 쓰지 않는다 — 상태는 섹션 제목(`STATUS_LABELS`)이 전담 |
+
+**둘째 줄 (breakpoint = lg 1024px, /list 탭과 같은 앱 공통 기준):**
+
+| 폭 | 내용 | 클래스 |
+|---|---|---|
+| 모바일(<1024px) | 개수만 — "3개"(액티비티) / "2곳"(다이닝) | `.statRowPreview.statRowCount` |
+| lg 이상 | "최근 항목명 외 N개/N곳"(N = 개수 − 1, 0이면 항목명만). 항목명만 말줄임, "외 N개"는 항상 보임 | `.statRowPreview.statRowRecent` (+ `.statRowRecentTitle`/`.statRowRecentMore`) |
+| 0개 | **폭과 무관하게 기존 빈 상태 문구** — 가보고 싶은 곳 "아직 담은 곳이 없어요" / 다녀온 곳 "아직 다녀온 곳이 없어요". "0개"로 쓰지 않는다 | `.statRowPreviewEmpty` |
+
+- 왜 모바일에서 항목명을 뺐나: 타일 하나가 약 169px라 칩·`>`를 빼면 텍스트 영역이 ~76px뿐이다. 항목명을 넣으면 "뮤지…", "성수동…"처럼 무엇인지 알 수 없게 잘린다(개수가 `>`에 밀려 사라지는 경우도 있었음). 데스크탑은 폭이 넉넉해 항목명이 말줄임 없이 들어간다.
+- `.statRowCount`/`.statRowRecent`는 `.statRowPreview`(display:block)보다 **뒤에 선언**해 display를 덮는다. 순서를 바꾸면 모바일에서도 항목명 줄이 보인다. Tailwind `hidden lg:flex`로 대신하지 말 것(CSS 모듈 클래스가 이겨서 적용되지 않는다).
+- 빈 상태 문구는 한 줄 말줄임 대신 **최대 2줄**(`line-clamp: 2`)로 접고 `word-break: keep-all`로 어절 단위로 끊는다. 모바일에서는 해당 행 높이가 ~82px로 커진다(빈 계정에서만 보이는 상태이므로 허용).
+- 개수는 있는데 제목을 못 받은 경우(방어 분기)는 폭과 무관하게 개수만 보여준다.
+- 다녀온 곳 타일의 체크 배지(`.statCheckBadge`)는 개수 ≥ 1일 때만 칩 우상단에 붙는다(기존 규칙 유지).
+- 다크에서 "다녀온 곳" 중성 칩 면(`--s-chip-neutral-bg`)이 카드 배경과 비슷해 거의 보이지 않는다(기존 현상, 이번 변경과 무관 — 필요 시 별도 작업).
 
 ---
 
@@ -472,7 +504,7 @@ description: >
 
 ### 카드 내부 행(statRow) 포커스 — inset 링 패턴
 
-카드 안에 행(`<a>`)이 쌓이는 구조(`statSectionCard` > `statRow`)는 **overflow가 잘려 외부 글로우가 안 보인다**. 이 경우 `inset` 그림자로 카드 안쪽에서 링을 그린다:
+카드 안에 행(`<a>`)이 있는 구조(홈 타일은 `statSectionCard`와 `statRow`가 같은 `<a>` 요소 — § 3-C)는 **overflow가 잘려 외부 글로우가 안 보인다**. 이 경우 `inset` 그림자로 카드 안쪽에서 링을 그린다:
 
 ```css
 .statRow:focus-visible {

@@ -9,7 +9,7 @@ import { cn } from '@/lib/utils'
 import styles from '@/components/screens.module.css'
 
 /**
- * 메인 화면 공용 페이지 헤더 — 브랜드(로고) 줄 + 제목/서브카피.
+ * 메인 화면 공용 페이지 헤더 — 브랜드(로고) 줄 + 제목(+ 선택 서브카피).
  * 헤더~제목~서브카피 블록의 세로 간격을 두 화면(홈/리스트)에서 픽셀 단위로 동일하게 유지.
  * homeNav=true 면 하위 화면용: 로고/홈 버튼이 홈(`/`)으로 이동.
  */
@@ -19,7 +19,7 @@ export function PageHeader({
   homeNav = false,
 }: {
   title: string
-  subtitle: string
+  subtitle?: string
   homeNav?: boolean
 }) {
   const brand = (
@@ -53,7 +53,7 @@ export function PageHeader({
 
       <div className="mt-6 lg:mt-8">
         <h1 className={styles.pageTitle}>{title}</h1>
-        <p className={styles.pageSubtitle}>{subtitle}</p>
+        {subtitle && <p className={styles.pageSubtitle}>{subtitle}</p>}
       </div>
     </>
   )

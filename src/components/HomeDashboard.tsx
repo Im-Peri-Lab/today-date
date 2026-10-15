@@ -172,13 +172,13 @@ export function HomeDashboard({
         'mx-auto w-full max-w-xl px-5 pb-16 pt-6 lg:max-w-3xl lg:px-8 lg:pb-24 lg:pt-12'
       )}
     >
-      <PageHeader title="오늘, 우리 어떻게 보낼까?" subtitle="위시리스트에서 골라드릴게요 💜" />
+      <PageHeader title="오늘, 우리 어떻게 보낼까?" />
 
       {/* 페어링 전 상태 안내 — 기능 카드들보다 위(별도 계위) */}
       {workspaceState === 'SOLO' && <PartnerInviteNotice />}
 
       {/* 메인 CTA — 정사각 통통 카드 2열 */}
-      <div className="mt-5 grid grid-cols-2 gap-3 lg:mt-5 lg:gap-4">
+      <div className="mt-6 grid grid-cols-2 gap-3 lg:mt-6 lg:gap-4">
         <CtaCard
           href="/recommend/activity"
           icon={<Sparkles className="h-5 w-5" strokeWidth={1.75} />}

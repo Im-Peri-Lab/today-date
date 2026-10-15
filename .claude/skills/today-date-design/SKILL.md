@@ -609,19 +609,20 @@ description: >
 
 복붙:
 ```tsx
-<PageHeader title="우리의 위시리스트" subtitle="함께 쌓아온 곳들" homeNav />
+<PageHeader title="우리의 위시리스트" homeNav />
 // 홈에서는 homeNav 생략(로고가 링크 아님), 하위 화면은 homeNav={true}
+// subtitle은 선택(optional). 홈·리스트 모두 서브카피를 두지 않는다(제목과 역할이 겹쳐 삭제)
 ```
 
 - **홈 아이콘 표준 (필수)**: 홈(`/`)을 제외한 **모든 화면**의 우측 상단에 `.headerNavBtn`(40px 박스/22px `Home` 글리프) 홈 아이콘을 둔다. 위치는 **헤더 우측 고정**. `/list`는 `PageHeader`의 `homeNav`로 로고와 함께 두 곳 모두 홈을 가리키는 것이 의도된 예외(중복 유지). 그 외 하위 화면(상세·신규 등록·추천 위저드 전 단계·`/account`·`/account/delete`·`/partner`·`/partner/info`)은 `PageHeader`가 없는 "뒤로가기 줄 + 제목" 구조라 공용 **`TopBar`**(`src/components/TopBar.tsx`)를 쓴다: `<TopBar>{좌측 뒤로가기}</TopBar>`(좌측 링크는 항상 둔다 — §13) — 우측 홈 아이콘은 TopBar가 렌더하고 줄 높이(20px)는 기존 텍스트 링크와 동일하게 유지(`-my-3`). 위저드처럼 아래 간격이 필요하면 `className="mb-3"`. 새 버튼 스타일·클래스를 만들지 말 것.
 - **브랜드 줄**: `MiniHeart`(보라→핑크 그라데이션 하트, `h-6 w-6` / lg `h-7 w-7`) + `Today Date` 텍스트(`styles.brand`: `1rem`/weight 500/letter-spacing `-0.01em`, lg `text-lg`), 둘 사이 `gap-2.5`. 우측 아이콘 그룹(`flex items-center gap-0`)은 **검색 버튼(`HomeSearchButton`, 홈 전용 = `homeNav=false`)** + 홈 버튼(하위 화면 = `homeNav=true`) + 햄버거 메뉴(`HomeMenu`), 모두 `.headerNavBtn`(40px 박스 + 22px 글리프, §7 참고). **아이콘 간 gap은 0px** — 각 아이콘의 40px 박스 자체는 그대로 두고 사이 간격만 붙여 시각적으로 조밀하게 한다. 검색과 홈 버튼은 상호 배타(검색=홈, 홈 버튼=하위 화면). 검색 버튼은 클릭 시 검색어 입력 오버레이(§11 입력 폼 다이얼로그)를 띄운다.
 - **제목 블록 간격**: 헤더 → 제목 블록 `mt-6 lg:mt-8`(24/32px, 공용 `PageHeader`).
-- **서브카피 아래 간격(다음 요소에 맞춰 조정)**: 다음 요소의 **자체 패딩까지 고려**해 두 화면이 비슷한 시각적 공백으로 읽히게 한다.
-  - 홈(`/`)처럼 서브카피 바로 아래 **카드**(자체 상단 패딩 없음)가 오면 `mt-5`(20px) — `HomeDashboard` CTA 그리드(`lg:mt-5`).
-  - 리스트(`/list`)처럼 **자체 상하 패딩(~10px)이 있는 탭**이 오면 `mt-3`(12px) — `ListView` `tabBar`. (마진 12px + 탭 내부 패딩 ≈ 홈의 20px 공백과 같은 리듬)
+- **타이틀 아래 간격(다음 요소에 맞춰 조정)**: 홈·리스트 모두 서브카피를 두지 않으므로 타이틀 바로 아래 요소와의 간격이다. 다음 요소의 **자체 패딩까지 고려**해 두 화면이 비슷한 시각적 공백으로 읽히게 한다.
+  - 홈(`/`)처럼 타이틀 바로 아래 **카드**(탭 같은 별도 상하 패딩 없음)가 오면 `mt-6`(24px) — `HomeDashboard` CTA 그리드(`lg:mt-6`).
+  - 리스트(`/list`)처럼 **자체 상하 패딩(~10px)이 있는 탭**이 오면 `mt-4`(16px) — `ListView` `tabBar`. 탭 글자 박스 상단까지가 타이틀 박스 하단에서 16+10=26px로, 홈 카드 상단 24px과 같은 리듬이다. (margin만 홈과 같은 24px로 맞추면 탭 패딩이 더해져 리스트가 더 넓어 보인다 — 그래서 margin 숫자는 홈보다 작게 둔다.)
   - 원칙: 균등한 마진 숫자 맞추기가 아니라 **눈에 보이는 공백**을 두 화면에서 맞춘다.
 - **제목** `styles.pageTitle`: `font-size 1.7rem`(~27px), lg `1.875rem`(30px) / **weight 600 (semibold)** / letter-spacing `-0.01em` / line-height `1.2`. (bold 700 아님 — 중간 톤)
-- **서브카피** `styles.pageSubtitle`: `margin-top 0.25rem`(lg `0.375rem`), `font 0.875rem`(lg `1.125rem`), color `sub`.
+- **서브카피** `styles.pageSubtitle`: `margin-top 0.25rem`(lg `0.375rem`), `font 0.875rem`(lg `1.125rem`), color `sub`. **현재 홈·리스트는 서브카피를 쓰지 않는다**(제목만 남김). `subtitle` prop을 넘길 때만 렌더.
 
 ---
 

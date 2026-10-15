@@ -284,10 +284,10 @@ export function ListView() {
   return (
     <div className={cn(styles.listBottom, 'mx-auto w-full max-w-4xl px-5 pt-6 lg:px-8 lg:pt-12')}>
       {/* 헤더 + 제목/서브카피 (공용 PageHeader — 홈과 동일 간격) */}
-      <PageHeader title="우리의 위시리스트" subtitle="함께 쌓아온 곳들" homeNav />
+      <PageHeader title="우리의 위시리스트" homeNav />
 
       {/* 탭 */}
-      <div className={cn(styles.tabBar, 'mt-3')} role="tablist">
+      <div className={cn(styles.tabBar, 'mt-4')} role="tablist">
         <button
           type="button"
           role="tab"

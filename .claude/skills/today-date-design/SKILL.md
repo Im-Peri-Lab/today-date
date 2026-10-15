@@ -667,6 +667,8 @@ description: >
 
 - 라이브러리: **`lucide-react`만** 사용. 기능 아이콘으로 **이모지 사용 금지**.
 - 카테고리 아이콘은 이름→lucide 매핑(`src/lib/categoryIcons.ts`, `CategoryIcon` 컴포넌트로 렌더 — `src/components/track/categoryIcon.tsx`)으로만 고른다. DB `category.icon`(이모지)은 렌더하지 않는다. 장소 카테고리 "아시안"은 `Wheat`(곡물·쌀·면), "뷔페"는 `ChefHat`, "브런치"는 `EggFried`(모두 기존 카테고리 아이콘과 겹치지 않음). "디저트"는 018에서 제거됨(카페로 흡수). 액티비티 카테고리 "운동"은 `Dumbbell`, "쇼핑"은 `ShoppingBag`(019, 순서는 DB `sort_order`: 레저·운동·쇼핑·체험·문화·축제·자연·여행·미분류).
+- **타입(액티비티/다이닝) 상징 아이콘 (신규 확정)**: 액티비티 = **`Sparkles`**, 다이닝 = **`UtensilsCrossed`**. "이 항목/진입점이 어느 타입인가"를 나타내는 자리에만 쓴다 — 홈 FAB 메뉴("액티비티 추가"/"다이닝 추가", `HomeFab`), 홈 바로가기 타일 칩(`HomeDashboard` `StatTile`), 홈 CTA("오늘 뭐할까?"/"오늘 뭐먹을까?", `CtaCard` — `styles.gradIcon` + `h-5 w-5`/stroke 1.75), 추천 위저드 질문·결과 화면 상단 그라데이션 아이콘(`ActivityRecommendWizard`/`PlaceRecommendWizard`). 이 매핑을 한곳에 모은 파일은 없다(`categoryIcons.ts`는 카테고리명→아이콘, `labels.ts`는 시간대·장소유형 아이콘뿐) — 각 사용처에 인라인으로 박혀 있으므로 바꿀 때 위 사용처를 함께 고친다. 예전 다이닝 상징은 `MapPin`이었으나 `MapPin`이 위치·지역 필드 아이콘과 겹쳐 `UtensilsCrossed`로 교체했다(다른 곳에 쓰이지 않던 아이콘이라 새로 충돌하지 않음).
+  - **혼동 금지(같은 글리프 겹침 방지)**: `MapPin` = **위치/지역 데이터 필드**(`ActivityCard`·`PlaceCard` 정보·배지 줄, `PlaceDetail` 지역 행, `MapLink` 위치 라벨)만. `Map` = 지도 앱 열기(`MapLink`). `Utensils` = **식사 시간대·"양식" 카테고리**(`PlaceCard`·`PlaceDetail` 식사시간, 위저드 점심 옵션, `categoryIcons`). 다이닝 **타입** 상징으로 `MapPin`/`Utensils`를 쓰지 않는다. 위저드 질문 화면처럼 `UtensilsCrossed`(타입)와 `Utensils`(점심 옵션)가 한 화면에 함께 나오는 곳은 크기·배경으로 구분된다(타입 = 그라데이션 면 `h-8 w-8` 배지 안 `h-5 w-5`, 점심 옵션 = 옵션 카드 안 작은 글리프).
 - **아이콘 색 기준**:
   - 카테고리 아이콘 `styles.catIcon`: `--s-accent`(라이트 `#7c3aed` / 다크 `#c084fc`). 활성 칩 안에서는 `--s-active-on`(흰)으로 전환.
   - 메타 줄 아이콘(Clock/Sun/Moon/MapPin/Utensils 등):

@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { Plus, Sparkles, MapPin } from 'lucide-react'
+import { Plus, Sparkles, UtensilsCrossed } from 'lucide-react'
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -32,7 +32,7 @@ export function HomeFab({ returnTo }: { returnTo?: string }) {
         <DropdownMenuItem
           onClick={() => router.push(buildDetailHref('/places/new', { returnTo }))}
         >
-          <MapPin />
+          <UtensilsCrossed />
           다이닝 추가
         </DropdownMenuItem>
       </DropdownMenuContent>

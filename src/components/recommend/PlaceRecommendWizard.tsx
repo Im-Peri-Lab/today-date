@@ -9,7 +9,7 @@ import {
   Sparkles,
   RotateCcw,
   Plus,
-  MapPin,
+  UtensilsCrossed,
   Utensils,
   Sunset,
   Loader2,
@@ -216,7 +216,7 @@ export function PlaceRecommendWizard() {
 
         <div className="mb-6 text-center">
           <span className={cn(styles.gradIcon, 'h-8 w-8')}>
-            <MapPin className="h-5 w-5" strokeWidth={1.75} />
+            <UtensilsCrossed className="h-5 w-5" strokeWidth={1.75} />
           </span>
           <h1 className={cn('mt-3 text-xl font-semibold', styles.ink)}>
             {result.reason.replace(/\s*💜\s*$/, '')}
@@ -333,7 +333,7 @@ export function PlaceRecommendWizard() {
       <div className={cn(styles.card, 'px-6 py-8 lg:px-8 lg:py-10')}>
         <div className="mb-6 text-center">
           <span className={cn(styles.gradIcon, 'h-8 w-8')}>
-            <MapPin className="h-5 w-5" strokeWidth={1.75} />
+            <UtensilsCrossed className="h-5 w-5" strokeWidth={1.75} />
           </span>
           <h1 className={cn('mt-3 text-xl font-semibold', styles.ink)}>오늘 뭐먹을까?</h1>
         </div>

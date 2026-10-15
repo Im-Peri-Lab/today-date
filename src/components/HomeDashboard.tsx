@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { Sparkles, MapPin, Check, ChevronRight, UserPlus } from 'lucide-react'
+import { Sparkles, UtensilsCrossed, Check, ChevronRight, UserPlus } from 'lucide-react'
 import { HomeFab } from '@/components/HomeFab'
 import { PageHeader } from '@/components/PageHeader'
 import { useDashboardStats, type DashboardStats } from '@/hooks/useDashboardStats'
@@ -44,7 +44,7 @@ function StatTile({
   const unit = type === 'activity' ? '개' : '곳'
   const href = `/list?tab=${type === 'activity' ? 'activity' : 'place'}&status=${status}`
   const showBadge = status === 'visited' && count > 0
-  const Icon = type === 'activity' ? Sparkles : MapPin
+  const Icon = type === 'activity' ? Sparkles : UtensilsCrossed
   const recent = previewTitles[0]
   const more = count - 1
 
@@ -201,7 +201,7 @@ export function HomeDashboard({
         />
         <CtaCard
           href="/recommend/place"
-          icon={<MapPin className="h-5 w-5" strokeWidth={1.75} />}
+          icon={<UtensilsCrossed className="h-5 w-5" strokeWidth={1.75} />}
           title="오늘 뭐먹을까?"
           subtitle="다이닝 추천 받기"
         />

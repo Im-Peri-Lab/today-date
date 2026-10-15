@@ -64,7 +64,10 @@ function StatTile({
         <span className={styles.statRowTitle}>{label}</span>
         {count === 0 ? (
           <span className={cn(styles.statRowPreview, styles.statRowPreviewEmpty)}>
-            {status === 'visited' ? '아직 다녀온 곳이 없어요' : '아직 담은 곳이 없어요'}
+            {status === 'visited' ? '아직 다녀온' : '아직 담은'}{' '}
+            {/* 모바일은 두 섹션 모두 "곳이 없어요"가 둘째 줄이 되도록 접는다(위아래 통일) */}
+            <br className="lg:hidden" />
+            곳이 없어요
           </span>
         ) : recent ? (
           <>

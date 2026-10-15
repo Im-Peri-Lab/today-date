@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { Sparkles, MapPin, Check, ChevronRight, UserPlus } from 'lucide-react'
+import { Sparkles, UtensilsCrossed, Check, ChevronRight, UserPlus } from 'lucide-react'
 import { HomeFab } from '@/components/HomeFab'
 import { PageHeader } from '@/components/PageHeader'
 import { useDashboardStats, type DashboardStats } from '@/hooks/useDashboardStats'
@@ -11,23 +11,6 @@ import { HOME_RETURN_TO } from '@/lib/listReturn'
 import { cn } from '@/lib/utils'
 import styles from '@/components/screens.module.css'
 
-// ── 미리보기 문자열 생성 ─────────────────────────
-function buildPreview(
-  type: 'activity' | 'place',
-  status: 'wishlist' | 'visited',
-  count: number,
-  previewTitles: string[]
-): string {
-  if (count === 0) {
-    return status === 'visited' ? '아직 다녀온 곳이 없어요' : '아직 담은 곳이 없어요'
-  }
-  const unit = type === 'activity' ? '개' : '곳'
-  const shown = previewTitles.slice(0, 2)
-  const remaining = count - shown.length
-  const base = shown.join(' · ')
-  return remaining > 0 ? `${base} 외 ${remaining}${unit}` : base
-}
-
 // ── 칩 스타일 선택 ───────────────────────────────
 function chipClass(type: 'activity' | 'place', status: 'wishlist' | 'visited'): string {
   if (type === 'activity' && status === 'wishlist') return styles.statChipActWish
@@ -36,8 +19,17 @@ function chipClass(type: 'activity' | 'place', status: 'wishlist' | 'visited'): 
   return styles.statChipPlcVis
 }
 
-// ── StatRow ──────────────────────────────────────
-function StatRow({
+// ── StatTile ─────────────────────────────────────
+/**
+ * 섹션(가보고 싶은 곳/다녀온 곳) 안의 바로가기 타일. 상태는 섹션 제목이 전담하므로
+ * 타일 제목은 종류("액티비티"/"다이닝")만 쓴다.
+ *
+ * 둘째 줄은 폭에 따라 달라진다(lg = 1024px, /list 탭과 같은 기준):
+ *   - 모바일: 개수만("3개"/"2곳") — 타일 하나가 ~169px라 항목명을 넣으면 "뮤지…"로 잘린다.
+ *   - lg 이상: "최근 항목명 외 N개/N곳".
+ * 0개일 때는 폭과 무관하게 빈 상태 문구를 그대로 쓴다("0개"로 쓰지 않는다).
+ */
+function StatTile({
   type,
   status,
   count,
@@ -48,22 +40,16 @@ function StatRow({
   count: number
   previewTitles: string[]
 }) {
-  const label =
-    type === 'activity'
-      ? status === 'wishlist'
-        ? '가보고 싶은 액티비티'
-        : '다녀온 액티비티'
-      : status === 'wishlist'
-        ? '가보고 싶은 다이닝'
-        : '다녀온 다이닝'
-
+  const label = type === 'activity' ? '액티비티' : '다이닝'
+  const unit = type === 'activity' ? '개' : '곳'
   const href = `/list?tab=${type === 'activity' ? 'activity' : 'place'}&status=${status}`
-  const preview = buildPreview(type, status, count, previewTitles)
   const showBadge = status === 'visited' && count > 0
-  const Icon = type === 'activity' ? Sparkles : MapPin
+  const Icon = type === 'activity' ? Sparkles : UtensilsCrossed
+  const recent = previewTitles[0]
+  const more = count - 1
 
   return (
-    <Link href={href} className={styles.statRow}>
+    <Link href={href} className={cn(styles.statSectionCard, styles.statRow)}>
       <div className={styles.statChipWrap}>
         <div className={cn(styles.statChip, chipClass(type, status))}>
           <Icon strokeWidth={1.75} />
@@ -76,9 +62,37 @@ function StatRow({
       </div>
       <div className={styles.statRowContent}>
         <span className={styles.statRowTitle}>{label}</span>
-        <span className={cn(styles.statRowPreview, count === 0 && styles.statRowPreviewEmpty)}>
-          {preview}
-        </span>
+        {count === 0 ? (
+          <span className={cn(styles.statRowPreview, styles.statRowPreviewEmpty)}>
+            {status === 'visited' ? '아직 다녀온' : '아직 담은'}{' '}
+            {/* 모바일은 두 섹션 모두 "곳이 없어요"가 둘째 줄이 되도록 접는다(위아래 통일) */}
+            <br className="lg:hidden" />
+            곳이 없어요
+          </span>
+        ) : recent ? (
+          <>
+            <span className={cn(styles.statRowPreview, styles.statRowCount)}>
+              {count}
+              {unit}
+            </span>
+            <span className={cn(styles.statRowPreview, styles.statRowRecent)}>
+              <span className={styles.statRowRecentTitle}>{recent}</span>
+              {more > 0 && (
+                <span className={styles.statRowRecentMore}>
+                  {' '}
+                  외 {more}
+                  {unit}
+                </span>
+              )}
+            </span>
+          </>
+        ) : (
+          // 개수는 있는데 제목을 못 받은 경우(방어) — 폭과 무관하게 개수만
+          <span className={styles.statRowPreview}>
+            {count}
+            {unit}
+          </span>
+        )}
       </div>
       <ChevronRight className={styles.statRowChevron} strokeWidth={1.75} aria-hidden="true" />
     </Link>
@@ -90,7 +104,7 @@ function StatSection({ label, children }: { label: string; children: React.React
   return (
     <div>
       <p className={styles.statSectionHeader}>{label}</p>
-      <div className={styles.statSectionCard}>{children}</div>
+      <div className={styles.statGrid}>{children}</div>
     </div>
   )
 }
@@ -187,7 +201,7 @@ export function HomeDashboard({
         />
         <CtaCard
           href="/recommend/place"
-          icon={<MapPin className="h-5 w-5" strokeWidth={1.75} />}
+          icon={<UtensilsCrossed className="h-5 w-5" strokeWidth={1.75} />}
           title="오늘 뭐먹을까?"
           subtitle="다이닝 추천 받기"
         />
@@ -196,13 +210,13 @@ export function HomeDashboard({
       {/* 통계 — 행형 리스트 2섹션 */}
       <div className={styles.statSections}>
         <StatSection label={STATUS_LABELS.wishlist}>
-          <StatRow
+          <StatTile
             type="activity"
             status="wishlist"
             count={data?.wishlistActivities ?? 0}
             previewTitles={data?.wishlistActivityTitles ?? []}
           />
-          <StatRow
+          <StatTile
             type="place"
             status="wishlist"
             count={data?.wishlistPlaces ?? 0}
@@ -211,13 +225,13 @@ export function HomeDashboard({
         </StatSection>
 
         <StatSection label={STATUS_LABELS.visited}>
-          <StatRow
+          <StatTile
             type="activity"
             status="visited"
             count={data?.visitedActivities ?? 0}
             previewTitles={data?.visitedActivityTitles ?? []}
           />
-          <StatRow
+          <StatTile
             type="place"
             status="visited"
             count={data?.visitedPlaces ?? 0}

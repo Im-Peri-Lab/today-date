@@ -141,7 +141,7 @@ description: >
 |---|---|---|---|---|---|---|
 | `--type-page-title` | 27px (1.6875rem) | 30px (1.875rem) | 600 | `--s-ink` | `.pageTitle` | 페이지 h1 (상세·폼 제목) |
 | `--type-card-title` | 18px (1.125rem) | 18px | 600 | `--s-ink` | `.cardTitle` | 리스트·인증 카드 제목 |
-| `--type-card-title-sm` | 15px (0.9375rem) | 16px (1rem) | 600 | `--s-ink` | `.cardTitleSm` | 홈 통계 행 제목 |
+| `--type-card-title-sm` | 15px (0.9375rem) | 16px (1rem) | 600 | `--s-ink` | `.cardTitleSm` | 홈 통계 타일 제목 |
 | `--type-section-label` | 12px (0.75rem) | 12px | 600 | `--s-sub` | `.sectionLabel` | 섹션 헤더 (독립 구획 제목) — 홈 `.statSectionHeader`는 제외(14px/`--s-ink`, § 2-A) |
 | `--type-body` | 14px (0.875rem) | 14px | 400 | `--s-ink` | `.bodyText` | 본문·값 |
 | `--type-preview-meta` | 12px (0.75rem) | 12px | 400 | `--s-label-muted` | `.previewMetaText` | 미리보기·메타 |
@@ -227,7 +227,7 @@ description: >
 | 항목 | 값 | 이유 |
 |---|---|---|
 | 모바일 컨테이너 폭 | `max-w-xl` (576px) | 유지 |
-| PC 컨테이너 폭 | `max-w-3xl` (768px) | 더 넓히면 추천 2열 과하게 벌어지고 통계 행 횡 늘어짐 — 768px 유지 |
+| PC 컨테이너 폭 | `max-w-3xl` (768px) | 더 넓히면 추천 2열·통계 2열 타일이 과하게 벌어짐 — 768px 유지 |
 | 추천 CTA 카드 padding | `p-5` (20px) | 주연 카드 존재감. 줄이지 말 것 |
 | 추천 CTA 아이콘↔텍스트 | `mt-4` (16px) | 주연 여백. 줄이지 말 것 |
 | 통계 타일 상하 padding | 12px | 제목 15px 무게에 맞춘 값 |

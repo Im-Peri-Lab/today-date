@@ -1,5 +1,7 @@
 import {
   Waves,
+  Dumbbell,
+  ShoppingBag,
   Puzzle,
   Drama,
   PartyPopper,
@@ -31,6 +33,8 @@ import {
 export const CATEGORY_ICONS: Record<string, LucideIcon> = {
   // 액티비티
   레저: Waves,
+  운동: Dumbbell,
+  쇼핑: ShoppingBag,
   체험: Puzzle,
   문화: Drama,
   축제: PartyPopper,

@@ -609,8 +609,9 @@ description: >
 
 복붙:
 ```tsx
-<PageHeader title="우리의 위시리스트" subtitle="함께 쌓아온 곳들" homeNav />
+<PageHeader title="우리의 위시리스트" homeNav />
 // 홈에서는 homeNav 생략(로고가 링크 아님), 하위 화면은 homeNav={true}
+// subtitle은 선택(optional). 홈·리스트 모두 서브카피를 두지 않는다(제목과 역할이 겹쳐 삭제)
 ```
 
 - **홈 아이콘 표준 (필수)**: 홈(`/`)을 제외한 **모든 화면**의 우측 상단에 `.headerNavBtn`(40px 박스/22px `Home` 글리프) 홈 아이콘을 둔다. 위치는 **헤더 우측 고정**. `/list`는 `PageHeader`의 `homeNav`로 로고와 함께 두 곳 모두 홈을 가리키는 것이 의도된 예외(중복 유지). 그 외 하위 화면(상세·신규 등록·추천 위저드 전 단계·`/account`·`/account/delete`·`/partner`·`/partner/info`)은 `PageHeader`가 없는 "뒤로가기 줄 + 제목" 구조라 공용 **`TopBar`**(`src/components/TopBar.tsx`)를 쓴다: `<TopBar>{좌측 뒤로가기}</TopBar>`(좌측 링크는 항상 둔다 — §13) — 우측 홈 아이콘은 TopBar가 렌더하고 줄 높이(20px)는 기존 텍스트 링크와 동일하게 유지(`-my-3`). 위저드처럼 아래 간격이 필요하면 `className="mb-3"`. 새 버튼 스타일·클래스를 만들지 말 것.
@@ -621,7 +622,7 @@ description: >
   - 리스트(`/list`)처럼 **자체 상하 패딩(~10px)이 있는 탭**이 오면 `mt-3`(12px) — `ListView` `tabBar`. (마진 12px + 탭 내부 패딩 ≈ 홈의 20px 공백과 같은 리듬)
   - 원칙: 균등한 마진 숫자 맞추기가 아니라 **눈에 보이는 공백**을 두 화면에서 맞춘다.
 - **제목** `styles.pageTitle`: `font-size 1.7rem`(~27px), lg `1.875rem`(30px) / **weight 600 (semibold)** / letter-spacing `-0.01em` / line-height `1.2`. (bold 700 아님 — 중간 톤)
-- **서브카피** `styles.pageSubtitle`: `margin-top 0.25rem`(lg `0.375rem`), `font 0.875rem`(lg `1.125rem`), color `sub`.
+- **서브카피** `styles.pageSubtitle`: `margin-top 0.25rem`(lg `0.375rem`), `font 0.875rem`(lg `1.125rem`), color `sub`. **현재 홈·리스트는 서브카피를 쓰지 않는다**(제목만 남김). `subtitle` prop을 넘길 때만 렌더.
 
 ---
 

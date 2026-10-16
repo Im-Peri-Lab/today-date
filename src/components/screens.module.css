@@ -1838,7 +1838,10 @@
  * ═══════════════════════════════════════════════════════════════════════════ */
 .ctaCard {
   --cta-scrim-rgb: 0, 0, 0;
-  --cta-scrim: 0.4;     /* 왼쪽 글자 쪽 스크림 농도 */
+  --cta-scrim: 0.15;    /* 왼쪽 글자 쪽 스크림 농도(라이트: 밝은 톤). 다크는 아래 media 에서 0.4/0.43 으로 복원 */
+  --cta-veil: 0.12;     /* 라이트 전체를 밝히는 흰 베일(::before). 다크 0 */
+  --cta-halo-1: 0.7;    /* 라이트 글자 후광(스크림과 같은 색상각의 진한 색) — 스크림을 낮춘 만큼 글자 대비를 보강 */
+  --cta-halo-2: 0.55;
   --cta-scrim-end: 62%; /* 번지는 폭 — 오른쪽 그래픽 평균 밝기는 약 1% 이내로만 어두워진다 */
   --cta-size-a: 240%;   /* 액티비티(별) 이미지 높이 — 배너 높이 대비 */
   --cta-pos-a: 58%;     /* 세로 위치: 0%=위 맞춤 100%=아래 맞춤 */
@@ -1910,7 +1913,7 @@
 
 .ctaCard.ctaDining {
   --cta-scrim-rgb: 125, 7, 66; /* 배경 가장 진한 지점 rgb(252,90,171)(H330°)의 어두운 버전 */
-  --cta-scrim: 0.43;           /* 색 교체로 떨어진 w768 제목 대비 보정(0.40→0.43) — 액티비티는 낙폭이 작아 0.40 유지 */
+  --cta-scrim: 0.18;           /* 다이닝은 액티비티보다 +0.03 (색 교체로 w768 제목 대비가 가장 크게 떨어져 보정) */
   background-color: #ff7aa8;
   background-image:
     linear-gradient(to right, rgba(var(--cta-scrim-rgb), var(--cta-scrim)), transparent var(--cta-scrim-end)),
@@ -1922,6 +1925,31 @@
   background-position: 0 0, right var(--cta-x-d) top var(--cta-pos-d);
   background-repeat: no-repeat;
   box-shadow: 0 12px 28px -14px rgba(255, 95, 162, 0.55);
+}
+
+/* 라이트 밝기 베일 — 배너 전체를 살짝 밝힌다(글자·화살표는 z-index 1 로 그 위) */
+.ctaCard::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, var(--cta-veil));
+  pointer-events: none;
+}
+
+/* 다크: 라이트용 조정(스크림 완화·베일·후광)을 되돌린다(액티비티 0.40 / 다이닝 0.43, 검정 그림자) — 다크는 톤을 바꾸지 않는다 */
+@media (prefers-color-scheme: dark) {
+  .ctaCard {
+    --cta-scrim: 0.4;
+    --cta-veil: 0;
+  }
+
+  .ctaCard .ctaText {
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  }
+
+  .ctaCard.ctaDining {
+    --cta-scrim: 0.43;
+  }
 }
 
 /* 키보드 포커스 링 — 위 box-shadow 가 .cardInteractive 의 포커스 링을 덮지 않게 한다 */
@@ -1936,8 +1964,10 @@
   flex: 1;
   min-width: 0;
   padding-right: 72px;
-  /* 작은 글자(11~13px)의 가독성 보강 — 배경이 연한 그라데이션이라 흰 글자가 묻힌다. 중립 검정 그림자로 배경과 분리 */
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  /* 작은 글자(11~13px)의 가독성 보강 — 배경이 연한 그라데이션이라 흰 글자가 묻힌다. 라이트는 스크림과 같은 색상각의 진한 색 후광(탁해지지 않게 검정 대신), 다크는 아래 media 에서 중립 검정 그림자 */
+  text-shadow:
+    0 1px 2px rgba(var(--cta-scrim-rgb), var(--cta-halo-1)),
+    0 0 12px rgba(var(--cta-scrim-rgb), var(--cta-halo-2));
 }
 
 /* 영문 라벨 — 대문자, 자간 살짝 */

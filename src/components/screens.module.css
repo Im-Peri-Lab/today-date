@@ -1449,15 +1449,16 @@
 
 /* 두 섹션을 세로로 쌓는 컨테이너 */
 .statSections {
-  margin-top: 1.5rem; /* mt-6 */
+  margin-top: 30px; /* 배너 ↔ 첫 섹션 제목. 모바일은 화면이 늘어지지 않게 완만하게(24→30), lg 는 40 */
   display: flex;
   flex-direction: column;
-  gap: 11px;
+  gap: 15px; /* 섹션 사이 (11→15) */
 }
 
 @media (min-width: 1024px) {
   .statSections {
-    gap: 13px;
+    margin-top: 40px;
+    gap: 28px;
   }
 }
 
@@ -1466,12 +1467,12 @@
   font-size: 0.875rem; /* 14px — 모바일·PC 동일 */
   font-weight: 600;
   color: var(--s-ink, #1a1033);
-  margin-bottom: 7px;
+  margin-bottom: 8px;
 }
 
 @media (min-width: 1024px) {
   .statSectionHeader {
-    margin-bottom: 8px;
+    margin-bottom: 10px;
   }
 }
 
@@ -1488,8 +1489,9 @@
 .statRow {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px 11px;
+  gap: 10px;
+  padding: 14px 14px;
+  min-height: 88px; /* 카드 느낌 */
   text-decoration: none;
   transition: background 120ms ease;
 }
@@ -1511,8 +1513,9 @@
 
 @media (min-width: 1024px) {
   .statRow {
-    gap: 12px;
-    padding: 12px 14px;
+    gap: 14px;
+    padding: 20px 18px;
+    min-height: 88px;
   }
 }
 
@@ -1527,26 +1530,26 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
-  border-radius: 9px;
+  width: 40px;
+  height: 40px;
+  border-radius: 11px;
 }
 
 .statChip > svg {
-  width: 16px;
-  height: 16px;
+  width: 20px;
+  height: 20px;
 }
 
 @media (min-width: 1024px) {
   .statChip {
-    width: 36px;
-    height: 36px;
-    border-radius: 11px;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
   }
 
   .statChip > svg {
-    width: 18px;
-    height: 18px;
+    width: 22px;
+    height: 22px;
   }
 }
 
@@ -1612,7 +1615,102 @@
 .statGrid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
+  gap: 16px;
+}
+
+/* 모바일 2·3줄 — 항목명(말줄임) / "외 N개" */
+.statRowItem,
+.statRowMore {
+  display: block;
+}
+
+/* 세로 2단 타일 — 1단: 작은 아이콘 + 제목 + 화살표 / 2단: 텍스트(카드 전체 폭) */
+.statTile {
+  position: relative;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start; /* 줄 수가 달라도 같은 행 타일의 제목 높이를 맞춘다 */
+  gap: 6px;
+  padding: 12px 14px;
+  min-height: 0;
+}
+
+.statTileHead {
+  display: flex;
+  align-items: center;
+  gap: 10px; /* 아이콘 ↔ 제목 */
+  min-width: 0;
+  padding-right: 22px; /* 세로 중앙 쉐브론 자리 */
+}
+
+/* 쉐브론 — 내용 줄 수와 무관하게 타일 전체 높이의 세로 중앙, 오른쪽 고정 */
+.statTile .statRowChevron {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.statTileTitle {
+  flex: 1;
+  min-width: 0;
+}
+
+.statTileBody {
+  min-width: 0;
+  padding-right: 22px; /* 쉐브론과 겹치지 않게 */
+}
+
+.statTileBody > span > .statRowPreview,
+.statTileBody > .statRowPreview {
+  margin-top: 0;
+}
+
+/* 텍스트 줄 높이에 맞춘 작은 칩 */
+.statTile .statChip {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+}
+
+.statTile .statChip > svg {
+  width: 16px;
+  height: 16px;
+}
+
+.statTile .statCheckBadge {
+  width: 12px;
+  height: 12px;
+  top: -4px;
+  right: -4px;
+  border-width: 1px;
+}
+
+.statTile .statCheckBadge > svg {
+  width: 6px;
+  height: 6px;
+}
+
+@media (min-width: 1024px) {
+  .statTile {
+    padding: 16px 18px;
+    gap: 8px;
+    min-height: 0;
+  }
+
+  .statTile .statRowChevron {
+    right: 16px;
+  }
+
+  .statTile .statChip {
+    width: 30px;
+    height: 30px;
+  }
+
+  .statTile .statChip > svg {
+    width: 17px;
+    height: 17px;
+  }
 }
 
 /* 둘째 줄 — 모바일은 개수만, lg 이상은 "최근 항목명 외 N". (.statRowPreview 뒤에 선언해 display를 덮는다) */
@@ -1634,10 +1732,11 @@
 
 @media (min-width: 1024px) {
   .statGrid {
-    gap: 16px;
+    gap: 20px;
   }
 
-  .statRowCount {
+  .statRowItem,
+  .statRowMore {
     display: none;
   }
 
@@ -1725,4 +1824,198 @@
 .iconBtn svg,
 .dialogCloseBtn svg {
   stroke-width: 1.25;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+ * 추천 CTA 배너 (홈 "오늘 뭐할까?" / "오늘 뭐먹을까?")
+ *  가로 배너: 왼쪽 글자(영문 라벨·제목·설명) + 오른쪽 아래 원형 화살표. 모바일 1열 / lg 2열은 HomeDashboard 그리드가 결정.
+ *  이미지(public/images)는 구워진 둥근 모서리를 잘라낸 버전이다. 모서리는 배너의 border-radius + overflow:hidden 이 담당(이중 모서리 없음).
+ *  background-size 는 "높이 기준 %"(배너 높이 대비)만 정하고 폭은 비율대로 따라온다 — 늘어나거나 찌그러지지 않는다.
+ *  background-position 은 right 고정 + 세로 %만 조정한다(오른쪽 안쪽 여백은 이미지 끝에 단색 띠를 만들어서 쓰지 않는다).
+ *  가장 위 레이어 = 왼쪽(글자 쪽) 스크림: 배경의 가장 진한 색과 같은 색상각의 어두운 색(검정은 채도까지 깎아 탁해진다).
+ *  라이트·다크 동일 — 다크 전용 규칙 없음(이미지가 어두운 페이지 위에서도 충분히 떠 보인다).
+ * ═══════════════════════════════════════════════════════════════════════════ */
+.ctaCard {
+  --cta-scrim-rgb: 0, 0, 0;
+  --cta-scrim: 0.15;    /* 왼쪽 글자 쪽 스크림 농도(라이트: 밝은 톤). 다크는 아래 media 에서 0.4/0.43 으로 복원 */
+  --cta-veil: 0.12;     /* 라이트 전체를 밝히는 흰 베일(::before). 다크 0 */
+  --cta-halo-1: 0.7;    /* 라이트 글자 후광(스크림과 같은 색상각의 진한 색) — 스크림을 낮춘 만큼 글자 대비를 보강 */
+  --cta-halo-2: 0.55;
+  --cta-scrim-end: 62%; /* 번지는 폭 — 오른쪽 그래픽 평균 밝기는 약 1% 이내로만 어두워진다 */
+  --cta-size-a: 240%;   /* 액티비티(별) 이미지 높이 — 배너 높이 대비 */
+  --cta-pos-a: 58%;     /* 세로 위치: 0%=위 맞춤 100%=아래 맞춤 */
+  --cta-size-d: 190%;   /* 다이닝(포크·나이프) */
+  --cta-pos-d: 67%;
+  --cta-x-a: -26px;     /* 가로 오프셋: 음수 = 그래픽을 오른쪽으로(이미지 끝은 배너 밖으로 넘친다). 화살표 버튼(오른쪽 16px+44px)과 겹치지 않는 한계값 */
+  --cta-x-d: -32px;
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  min-height: 104px;
+  padding: 20px 22px;
+  overflow: hidden;
+  border: none;
+  border-radius: 1.25rem;
+  box-shadow: 0 12px 28px -14px rgba(122, 90, 245, 0.5);
+  text-decoration: none;
+}
+
+/* 태블릿(배너 536px): 배너가 넓어져 그래픽을 한 단계 키운다 */
+@media (min-width: 491px) and (max-width: 1023px) {
+  .ctaCard {
+    --cta-size-a: 280%;
+    --cta-size-d: 220%;
+    --cta-x-a: -32px;
+    --cta-x-d: -42px;
+  }
+}
+
+/* 좁은 화면(배너 ≤ 280px, 320px 기기): 도형을 줄여 제목 끝·화살표와 떨어뜨린다 */
+@media (max-width: 22.5em) {
+  .ctaCard {
+    --cta-size-a: 160%;
+    --cta-pos-a: 60%;
+    --cta-size-d: 125%;
+    --cta-pos-d: 70%;
+    --cta-x-a: 0px;
+    --cta-x-d: -8px;
+  }
+}
+
+/* 브라우저 글자 크기 확대(≈150%)로 배너가 커진 경우 — em 기준이라 글자 설정이 커지면 390px 화면도 이 구간에 들어온다(16.25em).
+   위의 좁은 화면 규칙과 같은 breakpoint 를 쓰되 한 단계 더 줄인다 */
+@media (max-width: 16.5em) {
+  .ctaCard {
+    --cta-size-a: 130%;
+    --cta-pos-a: 62%;
+    --cta-size-d: 100%;
+    --cta-pos-d: 74%;
+    --cta-x-a: 0px;
+    --cta-x-d: 0px;
+  }
+}
+
+.ctaCard.ctaActivity {
+  --cta-scrim-rgb: 19, 8, 125; /* 배경 가장 진한 지점 rgb(107,92,252)(H246°)의 어두운 버전 */
+  background-color: #8f7bf8;
+  background-image:
+    linear-gradient(to right, rgba(var(--cta-scrim-rgb), var(--cta-scrim)), transparent var(--cta-scrim-end)),
+    url('/images/cta-banner-activity.png');
+  background-image:
+    linear-gradient(to right, rgba(var(--cta-scrim-rgb), var(--cta-scrim)), transparent var(--cta-scrim-end)),
+    image-set(url('/images/cta-banner-activity.webp') type('image/webp'), url('/images/cta-banner-activity.png') type('image/png'));
+  background-size: 100% 100%, auto var(--cta-size-a);
+  background-position: 0 0, right var(--cta-x-a) top var(--cta-pos-a);
+  background-repeat: no-repeat;
+}
+
+.ctaCard.ctaDining {
+  --cta-scrim-rgb: 125, 7, 66; /* 배경 가장 진한 지점 rgb(252,90,171)(H330°)의 어두운 버전 */
+  --cta-scrim: 0.18;           /* 다이닝은 액티비티보다 +0.03 (색 교체로 w768 제목 대비가 가장 크게 떨어져 보정) */
+  background-color: #ff7aa8;
+  background-image:
+    linear-gradient(to right, rgba(var(--cta-scrim-rgb), var(--cta-scrim)), transparent var(--cta-scrim-end)),
+    url('/images/cta-banner-dining.png');
+  background-image:
+    linear-gradient(to right, rgba(var(--cta-scrim-rgb), var(--cta-scrim)), transparent var(--cta-scrim-end)),
+    image-set(url('/images/cta-banner-dining.webp') type('image/webp'), url('/images/cta-banner-dining.png') type('image/png'));
+  background-size: 100% 100%, auto var(--cta-size-d);
+  background-position: 0 0, right var(--cta-x-d) top var(--cta-pos-d);
+  background-repeat: no-repeat;
+  box-shadow: 0 12px 28px -14px rgba(255, 95, 162, 0.55);
+}
+
+/* 라이트 밝기 베일 — 배너 전체를 살짝 밝힌다(글자·화살표는 z-index 1 로 그 위) */
+.ctaCard::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, var(--cta-veil));
+  pointer-events: none;
+}
+
+/* 다크: 라이트용 조정(스크림 완화·베일·후광)을 되돌린다(액티비티 0.40 / 다이닝 0.43, 검정 그림자) — 다크는 톤을 바꾸지 않는다 */
+@media (prefers-color-scheme: dark) {
+  .ctaCard {
+    --cta-scrim: 0.4;
+    --cta-veil: 0;
+  }
+
+  .ctaCard .ctaText {
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  }
+
+  .ctaCard.ctaDining {
+    --cta-scrim: 0.43;
+  }
+}
+
+/* 키보드 포커스 링 — 위 box-shadow 가 .cardInteractive 의 포커스 링을 덮지 않게 한다 */
+.ctaCard.ctaCard:focus-visible {
+  box-shadow: var(--s-focus-ring-card, 0 0 0 3px rgba(124, 58, 237, 0.5));
+}
+
+/* 화살표(44px + 오른쪽 16px + 간격 12px) 밑으로 글자가 들어가지 않게 텍스트 쪽에 자리 확보 */
+.ctaText {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  min-width: 0;
+  padding-right: 72px;
+  /* 작은 글자(11~13px)의 가독성 보강 — 배경이 연한 그라데이션이라 흰 글자가 묻힌다. 라이트는 스크림과 같은 색상각의 진한 색 후광(탁해지지 않게 검정 대신), 다크는 아래 media 에서 중립 검정 그림자 */
+  text-shadow:
+    0 1px 2px rgba(var(--cta-scrim-rgb), var(--cta-halo-1)),
+    0 0 12px rgba(var(--cta-scrim-rgb), var(--cta-halo-2));
+}
+
+/* 영문 라벨 — 대문자, 자간 살짝 */
+.ctaEyebrow {
+  display: block;
+  margin-bottom: 2px;
+  font-size: 0.6875rem; /* 11px */
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  color: #ffffff;
+}
+
+.ctaTitle {
+  display: block;
+  color: #ffffff;
+  font-size: 1.375rem; /* 22px */
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+}
+
+.ctaSub {
+  display: block;
+  word-break: keep-all; /* 어절 중간에서 끊기지 않게(한글) */
+  margin-top: 4px;
+  color: #ffffff;
+  font-size: 0.8125rem; /* 13px */
+  line-height: 1.25rem; /* 20px */
+}
+
+/* 화살표 — 오른쪽 아래(서브카피 줄 높이). 가운데는 배경 도형(별·포크/나이프)과 겹치고 시선이 둘로 갈린다 */
+.ctaArrow {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 9999px;
+  background: #ffffff;
+  color: #5b34e6;
+  box-shadow: 0 4px 12px -4px rgba(60, 20, 120, 0.3);
+}
+
+.ctaArrow svg {
+  width: 20px;
+  height: 20px;
 }

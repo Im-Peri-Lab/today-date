@@ -1449,15 +1449,16 @@
 
 /* 두 섹션을 세로로 쌓는 컨테이너 */
 .statSections {
-  margin-top: 1.5rem; /* mt-6 */
+  margin-top: 30px; /* 배너 ↔ 첫 섹션 제목. 모바일은 화면이 늘어지지 않게 완만하게(24→30), lg 는 40 */
   display: flex;
   flex-direction: column;
-  gap: 11px;
+  gap: 15px; /* 섹션 사이 (11→15) */
 }
 
 @media (min-width: 1024px) {
   .statSections {
-    gap: 13px;
+    margin-top: 40px;
+    gap: 28px;
   }
 }
 
@@ -1466,12 +1467,12 @@
   font-size: 0.875rem; /* 14px — 모바일·PC 동일 */
   font-weight: 600;
   color: var(--s-ink, #1a1033);
-  margin-bottom: 7px;
+  margin-bottom: 8px;
 }
 
 @media (min-width: 1024px) {
   .statSectionHeader {
-    margin-bottom: 8px;
+    margin-bottom: 10px;
   }
 }
 

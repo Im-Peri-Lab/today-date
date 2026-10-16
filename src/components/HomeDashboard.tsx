@@ -204,7 +204,7 @@ export function HomeDashboard({
     <div
       className={cn(
         styles.fill,
-        'mx-auto w-full max-w-xl px-5 pb-16 pt-6 lg:max-w-3xl lg:px-8 lg:pb-24 lg:pt-12'
+        'mx-auto w-full max-w-xl px-5 pb-20 pt-6 lg:max-w-3xl lg:px-8 lg:pb-24 lg:pt-12'
       )}
     >
       <PageHeader title="오늘, 우리 어떻게 보낼까?" subtitle="우리 둘의 데이트를 채워가는 공간" />

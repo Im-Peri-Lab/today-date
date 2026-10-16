@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { Sparkles, UtensilsCrossed, Check, ChevronRight, UserPlus } from 'lucide-react'
+import { Sparkles, UtensilsCrossed, Check, ChevronRight, ArrowRight, UserPlus } from 'lucide-react'
 import { HomeFab } from '@/components/HomeFab'
 import { PageHeader } from '@/components/PageHeader'
 import { useDashboardStats, type DashboardStats } from '@/hooks/useDashboardStats'
@@ -49,19 +49,24 @@ function StatTile({
   const more = count - 1
 
   return (
-    <Link href={href} className={cn(styles.statSectionCard, styles.statRow)}>
-      <div className={styles.statChipWrap}>
-        <div className={cn(styles.statChip, chipClass(type, status))}>
-          <Icon strokeWidth={1.75} />
+    <Link href={href} className={cn(styles.statSectionCard, styles.statRow, styles.statTile)}>
+      {/* 1단: 작은 아이콘 + 제목 + 화살표 (한 줄) */}
+      <div className={styles.statTileHead}>
+        <div className={styles.statChipWrap}>
+          <div className={cn(styles.statChip, chipClass(type, status))}>
+            <Icon strokeWidth={1.75} />
+          </div>
+          {showBadge && (
+            <span className={styles.statCheckBadge} aria-hidden="true">
+              <Check strokeWidth={3} />
+            </span>
+          )}
         </div>
-        {showBadge && (
-          <span className={styles.statCheckBadge} aria-hidden="true">
-            <Check strokeWidth={3} />
-          </span>
-        )}
+        <span className={cn(styles.statRowTitle, styles.statTileTitle)}>{label}</span>
+        <ChevronRight className={styles.statRowChevron} strokeWidth={1.75} aria-hidden="true" />
       </div>
-      <div className={styles.statRowContent}>
-        <span className={styles.statRowTitle}>{label}</span>
+      {/* 2단: 텍스트만, 카드 전체 폭 */}
+      <div className={styles.statTileBody}>
         {count === 0 ? (
           <span className={cn(styles.statRowPreview, styles.statRowPreviewEmpty)}>
             {status === 'visited' ? '아직 다녀온' : '아직 담은'}{' '}
@@ -71,10 +76,13 @@ function StatTile({
           </span>
         ) : recent ? (
           <>
-            <span className={cn(styles.statRowPreview, styles.statRowCount)}>
-              {count}
-              {unit}
-            </span>
+            <span className={cn(styles.statRowPreview, styles.statRowItem)}>{recent}</span>
+            {more > 0 && (
+              <span className={cn(styles.statRowPreview, styles.statRowMore)}>
+                외 {more}
+                {unit}
+              </span>
+            )}
             <span className={cn(styles.statRowPreview, styles.statRowRecent)}>
               <span className={styles.statRowRecentTitle}>{recent}</span>
               {more > 0 && (
@@ -94,7 +102,6 @@ function StatTile({
           </span>
         )}
       </div>
-      <ChevronRight className={styles.statRowChevron} strokeWidth={1.75} aria-hidden="true" />
     </Link>
   )
 }
@@ -110,26 +117,40 @@ function StatSection({ label, children }: { label: string; children: React.React
 }
 
 // ── CtaCard ──────────────────────────────────────
+/**
+ * 추천 CTA 배너 — 배경 이미지(public/images) + 왼쪽 스크림 위에 영문 라벨·제목·설명, 오른쪽 아래 원형 화살표.
+ * 배경 크기·위치·스크림은 screens.module.css 의 .ctaCard 변수가 폭별로 정한다.
+ */
 function CtaCard({
   href,
-  icon,
+  kind,
+  eyebrow,
   title,
   subtitle,
 }: {
   href: string
-  icon: React.ReactNode
+  kind: 'activity' | 'dining'
+  eyebrow: string
   title: string
   subtitle: string
 }) {
   return (
     <Link
       href={href}
-      className={cn(styles.card, styles.cardInteractive, 'flex flex-col p-5')}
+      className={cn(
+        styles.card,
+        styles.cardInteractive,
+        styles.ctaCard,
+        kind === 'activity' ? styles.ctaActivity : styles.ctaDining
+      )}
     >
-      <span className={cn(styles.gradIcon, 'h-8 w-8')}>{icon}</span>
-      <span className="mt-4 block">
-        <span className={cn('block text-base font-semibold lg:text-lg', styles.ink)}>{title}</span>
-        <span className={cn('mt-0.5 block text-sm', styles.sub)}>{subtitle}</span>
+      <span className={styles.ctaText}>
+        <span className={styles.ctaEyebrow}>{eyebrow}</span>
+        <span className={styles.ctaTitle}>{title}</span>
+        <span className={styles.ctaSub}>{subtitle}</span>
+      </span>
+      <span className={styles.ctaArrow} aria-hidden="true">
+        <ArrowRight className="h-5 w-5" strokeWidth={2.25} />
       </span>
     </Link>
   )
@@ -186,24 +207,26 @@ export function HomeDashboard({
         'mx-auto w-full max-w-xl px-5 pb-16 pt-6 lg:max-w-3xl lg:px-8 lg:pb-24 lg:pt-12'
       )}
     >
-      <PageHeader title="오늘, 우리 어떻게 보낼까?" />
+      <PageHeader title="오늘, 우리 어떻게 보낼까?" subtitle="우리 둘의 데이트를 채워가는 공간" />
 
       {/* 페어링 전 상태 안내 — 기능 카드들보다 위(별도 계위) */}
       {workspaceState === 'SOLO' && <PartnerInviteNotice />}
 
-      {/* 메인 CTA — 정사각 통통 카드 2열 */}
-      <div className="mt-6 grid grid-cols-2 gap-3 lg:mt-6 lg:gap-4">
+      {/* 메인 CTA — 모바일 1열 배너 / 데스크탑(lg) 2열 */}
+      <div className="mt-5 grid grid-cols-1 gap-3 lg:grid-cols-2 lg:gap-4">
         <CtaCard
           href="/recommend/activity"
-          icon={<Sparkles className="h-5 w-5" strokeWidth={1.75} />}
+          kind="activity"
+          eyebrow="ACTIVITY"
           title="오늘 뭐할까?"
-          subtitle="액티비티 추천 받기"
+          subtitle="딱 맞는 데이트 활동 추천 받기"
         />
         <CtaCard
           href="/recommend/place"
-          icon={<UtensilsCrossed className="h-5 w-5" strokeWidth={1.75} />}
+          kind="dining"
+          eyebrow="DINING"
           title="오늘 뭐먹을까?"
-          subtitle="다이닝 추천 받기"
+          subtitle="딱 좋은 데이트 맛집 추천 받기"
         />
       </div>
 

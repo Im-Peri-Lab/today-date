@@ -758,6 +758,7 @@ description: >
 | 정보 줄 → 별점/날짜(구분선 포함) | 기존 유지 (`mt-2.5 pt-2.5` + `styles.divider`) | `isVisited` 시에만, 구분선으로 분리된 별개 푸터 |
 
 - 출처: `ActivityCard.tsx` / `PlaceCard.tsx`의 인라인 Tailwind 클래스(간격 전용 `--s-*` 토큰은 없음). 카드 Link 패딩은 `p-3.5`(14px) 유지.
+- **⋮ 메뉴 자리 비우기 = 헤더 덩어리에만 (PR #149, 261019)**: 카드 Link는 `p-3.5`(사방 14px, 메뉴 유무와 무관)이고, ⋮(`absolute top-2.5 right-2.5`, 36px 박스 → 카드 오른쪽 끝에서 46px·위에서 46px까지 점유)와 실제로 겹치는 **카테고리 줄·제목 줄에만 `pr-8`**(`!hideMenu && 'pr-8'`)을 준다(14+32=46px → 박스와 정확히 맞닿고 겹침 없음). 메타 줄·정보 줄·별점/후기 푸터(구분선 포함)는 카드 오른쪽 패딩까지 전체 폭을 쓴다. **Link 전체에 `pr-11`을 주던 방식으로 되돌리지 말 것** — 메뉴와 무관한 아래 줄까지 오른쪽이 잘려 구분선이 끝까지 이어지지 않고 메모·후기 말줄임이 일찍 끊겼다(사용자 실기기 관찰). 카드 상단에 새 줄을 넣거나 카테고리 줄을 없애 제목이 46px 위로 올라가는 등 ⋮ 높이 안에 들어오는 요소가 바뀌면 그 요소에도 같은 `pr-8`을 준다.
 - **ActivityCard / PlaceCard 두 카드는 항상 정확히 같은 값**으로 동기화한다(한쪽만 바꾸지 말 것).
 - 이 간격 클래스에는 `dark:`·`sm:`·`lg:` 프리픽스를 붙이지 않는다 → 라이트/다크·모바일/데스크탑 동일.
 
@@ -798,7 +799,7 @@ description: >
 - **단일 출처(`lib/date.ts`):** 단일 = `formatDotDateCompact(iso)`, 기간(activity 전용) = `formatDotDateRangeCompact(start, end)`(단일/동일일이면 내부적으로 `formatDotDateCompact`로 축약). 두 카드 모두 이 함수만 쓴다(하드코딩·`formatDotDate` 직접 호출 금지).
 - **ActivityCard:** `visited_end_at` 있으면 `formatDotDateRangeCompact`, 없으면 `formatDotDateCompact`. **PlaceCard:** 기간 기능 없음 → 항상 `formatDotDateCompact`(포맷 통일만, 로직 변경 없음).
 - **상세 화면은 이 규칙에서 제외:** `ActivityDetail`·`PlaceDetail`·`VisitRecordBlock`은 **요일 포함 풀 포맷**(`formatDotDate`/`formatDotDateRange`, `YYYY.MM.DD (요일)`) 그대로 유지한다(§4-B ④). 카드=축약, 상세=풀 — 의도된 레이어 차이.
-- **기간 한 줄 표시 — 별점 sm 폭 축소로 확보(실측):** 날짜 자리 = `행 폭 − 별점 − gap 8px`. 데스크탑 3열(≥1024px, 카드 266.66px → 행 폭 206.66px)에서 별점 sm을 **16px→14px(폭 88→78px, §10-H)** 로 줄여 날짜 자리를 **120.66px** 확보 → range 최장 케이스(`YY.MM.DD ~ YY.MM.DD`, 자연폭 **112.20px**)가 **1줄**(여유 ≈8.5px). 축소 전엔 자리 110.66px로 **1.55px 부족 → 2줄** 감김이었다. 모바일 1·2열은 원래 여유. **`whitespace-nowrap` 강제 금지** — nowrap이면 별점+날짜가 행 폭을 넘겨 ⋮ 케밥 메뉴와 겹침/잘림. 별점 축약으로 해소했으므로 nowrap은 불필요하며, 회귀시키지 말 것.
+- **기간 한 줄 표시 — 별점 sm 폭 축소로 확보(실측):** 날짜 자리 = `행 폭 − 별점 − gap 8px`. 데스크탑 3열(≥1024px, 카드 266.66px)에서 당시 행 폭 206.66px(Link `pr-11` 기준)이라 별점 sm을 **16px→14px(폭 88→78px, §10-H)** 로 줄여 날짜 자리를 **120.66px** 확보 → range 최장 케이스(`YY.MM.DD ~ YY.MM.DD`, 자연폭 **112.20px**)가 **1줄**(여유 ≈8.5px). 축소 전엔 자리 110.66px로 **1.55px 부족 → 2줄** 감김이었다. PR #149로 푸터가 오른쪽 패딩(14px)까지 쓰게 되어 행 폭 236.66px·날짜 자리 150.66px로 여유가 더 커졌다(별점 14px는 그대로 유지). 모바일 1·2열은 원래 여유. **`whitespace-nowrap` 강제 금지** — nowrap이면 좁은 폭에서 별점+날짜가 카드 패딩을 넘어 잘림. 별점 축약으로 해소했으므로 nowrap은 불필요하며, 회귀시키지 말 것.
 
 ### 8-B. 시간대(time_of_day) 표시 규칙
 

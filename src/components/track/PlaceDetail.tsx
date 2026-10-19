@@ -8,7 +8,7 @@ import { useState, useRef, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
-import { ArrowLeft, Trash2, CheckCircle2, Undo2, MapPin, ExternalLink, Utensils } from 'lucide-react'
+import { ArrowLeft, Trash2, CheckCircle2, Undo2, Compass, ExternalLink, Utensils } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { CategoryBadge } from './CategoryBadge'
@@ -238,7 +238,7 @@ export function PlaceDetail({ id, initialData, initialEdit, returnTo }: Props) {
                   {place.area && (
                     <DetailRow label="지역">
                       <span className="inline-flex items-center gap-1.5">
-                        <MapPin className={cn('h-3.5 w-3.5 shrink-0', styles.faint)} />
+                        <Compass className={cn('h-3.5 w-3.5 shrink-0', styles.faint)} />
                         {place.area}
                       </span>
                     </DetailRow>

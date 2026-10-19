@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useTopLoader } from 'nextjs-toploader'
 import { useState, type ReactNode } from 'react'
 import { toast } from 'sonner'
-import { MapPin, Utensils, StickyNote } from 'lucide-react'
+import { Compass, MapPin, Utensils, StickyNote } from 'lucide-react'
 import { CategoryBadge } from './CategoryBadge'
 import { ItemMenu } from './ItemMenu'
 import { RatingStars } from './RatingStars'
@@ -106,7 +106,7 @@ export function PlaceCard({ place, hideMenu, actionSlot, returnTo }: PlaceCardPr
         <div className={cn('mb-1 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-xs', styles.sub)}>
           {place.area && (
             <span className="inline-flex items-center gap-1 whitespace-nowrap">
-              <MapPin className="h-3 w-3 shrink-0" />
+              <Compass className="h-3 w-3 shrink-0" />
               {place.area}
             </span>
           )}
@@ -120,16 +120,28 @@ export function PlaceCard({ place, hideMenu, actionSlot, returnTo }: PlaceCardPr
 
         {/* 정보 줄: 항상 렌더(내용 없어도 min-h-5로 자리 유지) → 메모/위치 유무와 무관하게
             카드 높이·별점/날짜 줄 위치가 일정하다. 아이콘으로 메모/위치 구분.
-            스타일은 배지(메타) 줄과 동일(text-xs + styles.sub) — 카드 위계 통일. */}
+            스타일은 배지(메타) 줄과 동일(text-xs + styles.sub) — 카드 위계 통일.
+            위시리스트에서 메모·위치가 모두 없으면 같은 한 줄 슬롯에 faint 안내 문구를 둔다(높이 동일). */}
         <div className={cn('flex min-h-5 items-center gap-1 text-xs', styles.sub)}>
           {InfoIcon && <InfoIcon className="h-3 w-3 shrink-0" />}
-          {infoText && <span className="line-clamp-1">{infoText}</span>}
+          {infoText ? (
+            <span className="line-clamp-1">{infoText}</span>
+          ) : !isVisited ? (
+            <span className={cn('line-clamp-1', styles.faint)}>위치 또는 메모가 없습니다</span>
+          ) : null}
         </div>
 
         {isVisited && (
-          <div className={cn('mt-2.5 flex items-center gap-2 pt-2.5 text-xs', styles.divider, styles.sub)}>
-            {place.rating ? <RatingStars value={place.rating} size="sm" /> : null}
-            {place.visited_at && <span>{formatDotDateCompact(place.visited_at)}</span>}
+          <div className={cn('mt-2.5 pt-2.5 text-xs', styles.divider, styles.sub)}>
+            <div className="flex items-center gap-2">
+              {place.rating ? <RatingStars value={place.rating} size="sm" /> : null}
+              {place.visited_at && <span>{formatDotDateCompact(place.visited_at)}</span>}
+            </div>
+            {/* 후기 한 줄 미리보기: 정보 줄(메모)과 같은 text-xs + line-clamp-1. 후기 유무와 무관하게
+                min-h-4(text-xs 줄 높이 16px) 슬롯을 항상 유지해 카드 높이를 고정하고, 없으면 faint 안내 문구. */}
+            <p className={cn('mt-1.5 min-h-4 line-clamp-1', !place.review_note && styles.faint)}>
+              {place.review_note || '후기가 없습니다'}
+            </p>
           </div>
         )}
       </Link>

@@ -100,17 +100,19 @@ export function ActivityCard({ activity, hideMenu, actionSlot, returnTo }: Activ
         </div>
       )}
 
+      {/* ⋮ 메뉴(우상단 absolute)는 카테고리·제목 줄과만 겹치므로 그 두 줄에만 pr-8.
+          메타·정보 줄과 별점/후기 구분선은 카드 오른쪽 패딩까지 꽉 채운다. */}
       <Link
         href={buildDetailHref(detailPath, { returnTo })}
-        className={cn('block p-3.5', hideMenu ? 'pr-3.5' : 'pr-11')}
+        className="block p-3.5"
       >
         {activity.category && (
-          <div className="mb-0.5">
+          <div className={cn('mb-0.5', !hideMenu && 'pr-8')}>
             <CategoryBadge category={activity.category} />
           </div>
         )}
 
-        <h3 className={cn('mb-3 line-clamp-1', styles.cardTitle)}>{activity.title}</h3>
+        <h3 className={cn('mb-3 line-clamp-1', !hideMenu && 'pr-8', styles.cardTitle)}>{activity.title}</h3>
 
         <div className={cn('mb-1 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-xs', styles.sub)}>
           <span className="inline-flex items-center gap-1 whitespace-nowrap">

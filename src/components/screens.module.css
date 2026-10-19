@@ -309,6 +309,16 @@
 .faint {
   color: var(--s-faint, #9ca3af);
 }
+/* 카드 빈 값 안내(위치/메모·후기 없음). 라이트는 faint 그대로, 다크는 faint(#8c84a0)가 sub(#a8a0b8)와
+   너무 가까워 구분이 안 되므로 카드 면과 섞어 한 단계 더 낮춘다(≈#6f6682, 카드 대비 3:1). */
+.emptyHint {
+  color: var(--s-faint, #9ca3af);
+}
+@media (prefers-color-scheme: dark) {
+  .emptyHint {
+    color: color-mix(in srgb, var(--s-faint, #8c84a0) 72%, var(--s-card-bg, #241a36));
+  }
+}
 .accent {
   color: var(--s-accent, #7c3aed);
 }
@@ -643,6 +653,13 @@
 /* ── 구분선 ────────────────────────────────────── */
 .divider {
   border-top: 1px solid var(--s-divider, #ece7f5);
+}
+/* 다크: --s-divider(#2c2442)는 카드(#241a36) 대비 ≈1.1:1이라 카드 푸터 구분선이 사라진다 →
+   컨트롤 보더 토큰(#3a2f4e, 1.33:1)으로 올린다. .divider 는 ActivityCard·PlaceCard 만 사용. */
+@media (prefers-color-scheme: dark) {
+  .divider {
+    border-top-color: var(--s-card-border-strong, #3a2f4e);
+  }
 }
 
 /* ════════════════════════════════════════════════

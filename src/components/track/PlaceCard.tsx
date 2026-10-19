@@ -127,7 +127,7 @@ export function PlaceCard({ place, hideMenu, actionSlot, returnTo }: PlaceCardPr
           {infoText ? (
             <span className="line-clamp-1">{infoText}</span>
           ) : !isVisited ? (
-            <span className={cn('line-clamp-1', styles.faint)}>위치 또는 메모가 없습니다</span>
+            <span className={cn('line-clamp-1', styles.emptyHint)}>위치 또는 메모가 없습니다</span>
           ) : null}
         </div>
 
@@ -139,7 +139,7 @@ export function PlaceCard({ place, hideMenu, actionSlot, returnTo }: PlaceCardPr
             </div>
             {/* 후기 한 줄 미리보기: 정보 줄(메모)과 같은 text-xs + line-clamp-1. 후기 유무와 무관하게
                 min-h-4(text-xs 줄 높이 16px) 슬롯을 항상 유지해 카드 높이를 고정하고, 없으면 faint 안내 문구. */}
-            <p className={cn('mt-1.5 min-h-4 line-clamp-1', !place.review_note && styles.faint)}>
+            <p className={cn('mt-1.5 min-h-4 line-clamp-1', !place.review_note && styles.emptyHint)}>
               {place.review_note || '후기가 없습니다'}
             </p>
           </div>

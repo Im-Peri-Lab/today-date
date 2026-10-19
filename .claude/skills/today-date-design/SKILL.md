@@ -787,8 +787,8 @@ description: >
   ```
 - **아이콘 의미 매핑(`lucide-react`)**: 메모 = `StickyNote` / 활동 위치(`location`) = `MapPin`.
 - **`area`(장소 지역)와 혼동 금지**: PlaceCard의 `area`는 정보 줄이 아니라 **배지(메타) 줄**에서 `Compass`로 별도 노출한다(위치 `MapPin`과 글리프 분리). 정보 줄 위시리스트 빈 상태·후기 미리보기는 아래 참조.
-- **위시리스트 빈 정보 줄**: 메모·위치 모두 없으면 같은 슬롯에 `styles.faint` 안내 "위치 또는 메모가 없습니다"(`line-clamp-1`, 높이 `min-h-5` 그대로). 다녀온 카드는 기존대로 빈 슬롯.
-- **다녀온 카드 후기 미리보기**: 별점·날짜 줄 아래 `review_note`를 `<p className="mt-1.5 min-h-4 line-clamp-1">`(푸터 `text-xs`+`styles.sub` 상속)로 한 줄 표시. `min-h-4`(16px) 슬롯을 항상 유지해 후기 유무와 무관하게 카드 높이를 고정하고, 후기가 없으면 `styles.faint`로 "후기가 없습니다"를 표시한다(`ActivityCard`·`PlaceCard` 공통).
+- **위시리스트 빈 정보 줄**: 메모·위치 모두 없으면 같은 슬롯에 `styles.emptyHint` 안내 "위치 또는 메모가 없습니다"(`line-clamp-1`, 높이 `min-h-5` 그대로). 다녀온 카드는 기존대로 빈 슬롯.
+- **다녀온 카드 후기 미리보기**: 별점·날짜 줄 아래 `review_note`를 `<p className="mt-1.5 min-h-4 line-clamp-1">`(푸터 `text-xs`+`styles.sub` 상속)로 한 줄 표시. `min-h-4`(16px) 슬롯을 항상 유지해 후기 유무와 무관하게 카드 높이를 고정하고, 후기가 없으면 `styles.emptyHint`로 "후기가 없습니다"를 표시한다(`ActivityCard`·`PlaceCard` 공통). `.emptyHint`는 라이트 `--s-faint` 그대로, 다크는 faint를 카드 면과 72% 혼합(≈`#6f6682`, 카드 대비 3:1)해 sub와 구분한다. 푸터 구분선 `.divider`는 다크에서 `--s-card-border-strong`(`#3a2f4e`)을 쓴다(`--s-divider` `#2c2442`는 카드 대비 ≈1.1:1이라 안 보였음).
 
 #### 방문일/기간 표시 포맷 — 카드 레이어는 "요일 생략 · 연도 2자리"로 통일 (확정)
 

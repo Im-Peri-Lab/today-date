@@ -524,6 +524,8 @@ Claude Code가 PR 생성 → squash 머지 → 원격·로컬 정리를 한 번�
 ActivityCard·PlaceCard 모두 동일한 정보 줄 우선순위(memo→location fallback)·아이콘 매핑(location=MapPin/memo=StickyNote)·고정 높이(min-h-5) 원칙을 쓴다. 최초엔 PlaceCard가 memo 고정 표시였으나(260707 v2), 260725에 ActivityCard와 동일한 fallback으로 대칭화(PR #82) — 메모 없는 다이닝 카드가 정보 줄이 항상 비어있던 문제를 해소. 구체 스펙은 SKILL.md가 단일 출처.
 → **SKILL §8-A**
 
+**빈 값 처리(PR #148, 261019)**: 위시리스트(`!isVisited`)는 메모·위치가 모두 없으면 정보 줄 슬롯에 "위치 또는 메모가 없습니다"(`styles.emptyHint`). 다녀온 카드는 별점·날짜 줄 아래 후기 한 줄(`min-h-4` 슬롯 상시 유지, 없으면 "후기가 없습니다")로 줄 간 카드 높이를 고정한다(후기 없을 때 렌더 생략하던 첫 안은 3열에서 높이가 들쭉날쭉해 폐기). 다이닝 `area` 아이콘은 `Compass`, `location`은 `MapPin`. 다크에서 안내 문구는 `emptyHint`(faint+카드 혼합)로 sub와 구분, 푸터 `.divider`는 `--s-card-border-strong`.
+
 ### 목록 정렬 규칙 (신규, 260729, PR #99)
 
 - 위시리스트(`status=wishlist`): 등록(`created_at`) 최신순 — 기존 동작 유지.

@@ -1465,17 +1465,40 @@
  * ════════════════════════════════════════════════ */
 
 /* 두 섹션을 세로로 쌓는 컨테이너 */
+/* 모바일 세로 여백 — 배너 ↔ 첫 섹션(16~30)·섹션 사이(12~15)는 "남는 높이"로 정한다.
+   뷰포트 단위(svh)로 여백을 계산하면 브라우저마다 svh 값이 달라(사파리 ≈684, 크롬은 더 큼) 구간이 어긋나고,
+   min-height(100svh) 바닥값과의 차이가 카드 아래 배경 꼬리로 남았다. 그래서 두 곳은 flex 스페이서
+   (.statSlack, .statGapSlack)가 기본값에서 시작해 남는 높이만큼만 상한까지 늘어난다 —
+   낮은 화면(남는 높이 0)은 최솟값, 높은 화면은 종전 최댓값. flex-grow = (최대 - 최소)라 두 스페이서가 동시에 상한에 닿는다.
+   섹션 제목 아래·타일 padding 은 컴포넌트 안쪽이라 스페이서를 못 두어 svh clamp 유지(.statSectionHeader, .statTile).
+   헤더·제목·배너는 고정(리스트 화면과 맞춘 시작선 유지). */
 .statSections {
-  margin-top: 30px; /* 배너 ↔ 첫 섹션 제목. 모바일은 화면이 늘어지지 않게 완만하게(24→30), lg 는 40 */
   display: flex;
   flex-direction: column;
-  gap: 15px; /* 섹션 사이 (11→15) */
+  flex: 3 0 auto; /* 남는 높이 중 섹션 사이 스페이서(.statGapSlack) 몫만큼 받는다 — 상한 위 잔여는 아래 꼬리로 */
+}
+
+/* 배너 ↔ 첫 섹션 제목 16~30 */
+.statSlack {
+  flex: 14 0 16px;
+  max-height: 30px;
+}
+
+/* 섹션 사이 12~15 */
+.statGapSlack {
+  flex: 3 0 12px;
+  max-height: 15px;
 }
 
 @media (min-width: 1024px) {
   .statSections {
+    flex: 0 0 auto;
     margin-top: 40px;
     gap: 28px;
+  }
+  .statSlack,
+  .statGapSlack {
+    display: none;
   }
 }
 
@@ -1484,7 +1507,7 @@
   font-size: 0.875rem; /* 14px — 모바일·PC 동일 */
   font-weight: 600;
   color: var(--s-ink, #1a1033);
-  margin-bottom: 8px;
+  margin-bottom: clamp(4px, 2.0619svh - 10.021px, 8px); /* 4~8, 화면 높이 비례(.statSections 주석) */
 }
 
 @media (min-width: 1024px) {
@@ -1648,7 +1671,7 @@
   align-items: stretch;
   justify-content: flex-start; /* 줄 수가 달라도 같은 행 타일의 제목 높이를 맞춘다 */
   gap: 6px;
-  padding: 12px 14px;
+  padding: clamp(10px, 1.0309svh + 2.9897px, 12px) 14px; /* 위아래 10~12, 화면 높이 비례(.statSections 주석) */
   min-height: 0;
 }
 

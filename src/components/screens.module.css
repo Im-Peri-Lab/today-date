@@ -1465,11 +1465,14 @@
  * ════════════════════════════════════════════════ */
 
 /* 두 섹션을 세로로 쌓는 컨테이너 */
+/* 모바일 세로 여백은 화면 높이에 비례한다 — 680svh 이하 = 가장 촘촘한 값, 874svh 이상 = 원래 값, 그 사이는 직선.
+   낮은 화면(상단 주소창 + 하단 메뉴바 등)에서 카드 영역이 위로 올라와 스크롤 없이 다 보이게 한다.
+   헤더·제목·배너는 고정(리스트 화면과 맞춘 시작선 유지) — 배너 아래만 줄인다. 기울기 = (최대 - 최소) / 194 */
 .statSections {
-  margin-top: 30px; /* 배너 ↔ 첫 섹션 제목. 모바일은 화면이 늘어지지 않게 완만하게(24→30), lg 는 40 */
+  margin-top: clamp(16px, 7.2165svh - 33.072px, 30px); /* 배너 ↔ 첫 섹션 제목 16~30, lg 는 40 */
   display: flex;
   flex-direction: column;
-  gap: 15px; /* 섹션 사이 (11→15) */
+  gap: clamp(12px, 1.5464svh + 1.4845px, 15px); /* 섹션 사이 12~15 */
 }
 
 @media (min-width: 1024px) {
@@ -1484,7 +1487,7 @@
   font-size: 0.875rem; /* 14px — 모바일·PC 동일 */
   font-weight: 600;
   color: var(--s-ink, #1a1033);
-  margin-bottom: 8px;
+  margin-bottom: clamp(4px, 2.0619svh - 10.021px, 8px); /* 4~8, 화면 높이 비례(.statSections 주석) */
 }
 
 @media (min-width: 1024px) {
@@ -1648,7 +1651,7 @@
   align-items: stretch;
   justify-content: flex-start; /* 줄 수가 달라도 같은 행 타일의 제목 높이를 맞춘다 */
   gap: 6px;
-  padding: 12px 14px;
+  padding: clamp(10px, 1.0309svh + 2.9897px, 12px) 14px; /* 위아래 10~12, 화면 높이 비례(.statSections 주석) */
   min-height: 0;
 }
 

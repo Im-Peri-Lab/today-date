@@ -50,7 +50,7 @@ export default function HomeError({
       <div
         className={cn(
           styles.fill,
-          'mx-auto w-full max-w-xl px-5 pb-16 pt-6 lg:max-w-3xl lg:px-8 lg:pt-12'
+          'mx-auto w-full max-w-xl px-5 pb-16 pt-4 lg:max-w-3xl lg:px-8 lg:pt-12'
         )}
       >
         <PageHeader

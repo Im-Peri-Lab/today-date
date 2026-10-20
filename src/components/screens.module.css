@@ -39,10 +39,9 @@
    *  - 카드 그림자(--s-card-shadow): 중성 멀티레이어 → 컨트롤(보더)보다 한 단계 더 떠 보임.
    * (다크는 아래 @media 에서 보라 톤으로 오버라이드 — 기존 유지)
    */
-  /* 라이트 페이지 배경 토큰 — .page::before(화면 고정 레이어)가 참조. 값 = .page 그라데이션 끝색(#f4f0fa).
-     .page 는 min-height:100svh 라 사파리 하단 바 상태(svh < lvh)에서 .page 밖 하단 띠가 생기는데, 그 띠를 칠하는 게
-     이 고정 레이어다(html 배경 위에 그려진다). 끝색과 맞춰 연보라가 끊겨 보이지 않게 한다(이전 #fafafb 는 회백색 띠). */
-  --s-page-bg-light: #f4f0fa;
+  /* 라이트 페이지 배경 토큰 — .page::before 가 참조. 홈에서만 #F4F2FA 로 오버라이드해 흰 카드가 떠 보이게.
+     전체 확장 시 이 값만 수정하면 모든 .page 화면에 일괄 적용된다. */
+  --s-page-bg-light: #fafafb;
 
   --s-card-bg: #ffffff;
   --s-card-border-strong: #eceaf3;

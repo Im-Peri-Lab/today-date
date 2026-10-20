@@ -3,7 +3,6 @@ import localFont from 'next/font/local'
 import NextTopLoader from 'nextjs-toploader'
 import { Toaster } from '@/components/ui/sonner'
 import { NativeBootOverlay } from '@/components/boot/NativeBootOverlay'
-import { ViewportDebug } from '@/components/ViewportDebug'
 import { Providers } from './providers'
 import { cn } from '@/lib/utils'
 import './globals.css'
@@ -47,7 +46,6 @@ export default function RootLayout({
         {/* color = --s-active-line (#7c3aed). CSS 변수는 JS inline-style 주입 방식 특성상 직접 참조 불가 */}
         <NextTopLoader color="#7c3aed" height={2} showSpinner={false} />
         <NativeBootOverlay />
-        <ViewportDebug />
         <Providers>{children}</Providers>
         <Toaster
           position="top-center"

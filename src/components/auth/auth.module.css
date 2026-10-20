@@ -656,3 +656,20 @@
     color: #fb7185;
   }
 }
+
+/*
+ * iOS 사파리는 웹 영역(svh/dvh) 밖 — 상태바 뒤 위쪽과 하단 바 뒤 아래쪽 — 을 body 배경색으로 칠한다
+ * (실기기 측정: 웹 영역 714pt / 화면 874pt, 원색 칠하기에서 두 바깥 영역이 body 색으로 나옴.
+ *  html·.page::before·main 색을 바꿔도 소용없었던 이유). 그래서 body 바탕색을 그라데이션 끝색(#f4f0fa)으로 맞춘다.
+ * 문서 높이·스크롤 불변. 다크는 globals.css 의 body 다크색을 그대로 쓴다.
+ * 라이트 = html.dark 가 아님, 다크 = html.dark 이거나 OS 다크이면서 html.light 가 아님 (globals.css 와 같은 규칙).
+ */
+html:not(:global(.dark)) body:has(.page) {
+  background-color: #f4f0fa;
+}
+
+@media (prefers-color-scheme: dark) {
+  html:not(:global(.light)) body:has(.page) {
+    background-color: #0a0712;
+  }
+}

@@ -236,6 +236,23 @@
 }
 
 /*
+ * .page 화면의 html 배경 = 그라데이션 끝색(#f4f0fa).
+ * 사파리 하단 바 상태(svh < lvh)에서 .page 밖 하단 띠가 생기는데, iOS 실기기에서는 화면 고정 레이어(.page::before)가
+ * 그 영역까지 덮지 못해 html 바탕(흰색)이 하단 바 뒤로 비쳤다(고정 레이어 색만 바꾼 수정으로는 해소 안 됨, 실기기 확인).
+ * 그래서 바탕(html)도 끝색으로 맞춘다 — 문서 높이·스크롤 불변. 다크는 .page 가 투명이라 html 다크색(globals.css)을 쓴다.
+ * 라이트 = html.dark 가 아님, 다크 = html.dark 이거나 OS 다크이면서 html.light 가 아님 (globals.css 와 같은 규칙).
+ */
+html:not(:global(.dark)):has(.page) {
+  background-color: #f4f0fa;
+}
+
+@media (prefers-color-scheme: dark) {
+  html:not(:global(.light)):has(.page) {
+    background-color: #0a0712;
+  }
+}
+
+/*
  * 배경을 뷰포트에 고정된 레이어로 분리한다(콘텐츠 길이가 달라져도 안 움직임).
  * 라이트: --s-page-bg-light 토큰 참조(기본 #fafafb). 홈 배경은 .pageHome background가 담당.
  * CSS 커스텀 프로퍼티는 ::before 가 position:fixed여도 생성 요소(.page)에서 상속됨.

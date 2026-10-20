@@ -230,6 +230,9 @@ export function HomeDashboard({
         />
       </div>
 
+      {/* 배너 ↔ 첫 섹션 여백(모바일 16~30, 남는 높이만큼 늘어남 — lg 는 .statSections margin-top) */}
+      <div className={styles.statSlack} aria-hidden />
+
       {/* 통계 — 행형 리스트 2섹션 */}
       <div className={styles.statSections}>
         <StatSection label={STATUS_LABELS.wishlist}>
@@ -246,6 +249,9 @@ export function HomeDashboard({
             previewTitles={data?.wishlistPlaceTitles ?? []}
           />
         </StatSection>
+
+        {/* 섹션 사이 여백(모바일 12~15 — lg 는 .statSections gap) */}
+        <div className={styles.statGapSlack} aria-hidden />
 
         <StatSection label={STATUS_LABELS.visited}>
           <StatTile

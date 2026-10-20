@@ -843,6 +843,7 @@ description: >
 - **일반 화면(홈 `/`·리스트 `/list`·상세 `/activities/[id]`·추가 `/activities/new` 등) + 전역 `html/body`**: **`min-height: 100svh`로 통일**.
   - 근거: `svh`는 정적이라 **주소창 토글에도 문서 높이가 안 변해 스크롤 출렁임이 없다**. 콘텐츠가 짧으면 주소창 숨김 상태에서 하단에 약간의 흰 여백이 남을 수 있으나(svh 특성), 일반 화면은 `.page::before`(fixed 배경)가 덮어 대부분 가려지고, **출렁임 제거 이득이 더 커서 이 방식을 채택**한다.
   - 위치: `screens.module.css` `.page`(`min-height:100svh`), `globals.css` html/body(`100svh`), 추천 페이지 `min-h-svh`.
+  - **웹 영역 밖은 못 칠한다(261020 실기기)**: 주소창이 떠 있는 사파리의 상태바 뒤·하단 바 뒤는 웹 영역(예: 714pt/화면 874pt) 밖이라 `body` 배경색으로 칠해진다 — 위·아래를 따로 칠할 수 없고 `html`·`.page::before`·`body`·`box-shadow` 로도 해결되지 않았다(전부 걷어냄). 하단 흰 띠는 내용이 한 화면에 들어오는 화면의 기존 현상으로 감수한다. 인증 화면(`dvh`)도 마찬가지로 웹 영역 밖은 흰색이다.
 - **인증 화면(`/lock`·`/forgot`·`/reset`·`/setup`·`/setup/verify`)**: `AuthLayout` → `auth.module.css`의 **`.page`는 `100dvh`(동적)** 사용. **전역 `.page`(`screens.module.css`)와 이름만 같은 별개 클래스라 독립적.**
   - 근거: 인증 `.page`는 배경 그라데이션을 **요소 자체에** 얹으므로, `dvh`로 가시영역을 추종해야 ① 콘텐츠가 한 화면에 들어오고(주소창 접히면 lvh까지 확장) ② 배경이 항상 뷰포트를 채워 **흰 여백이 없다**.
   - 콘텐츠 정렬은 `.group`의 **`margin-block: auto`**: 여유가 있으면 세로 중앙, 넘치면 마진이 0이 되어 **상단부터 + 자연 스크롤** → 어떤 기기·글꼴에서도 **잘리지 않는다**(footer도 `.bodyGroup` 안 in-flow로 일원화, 하단 고정 모드 없음).

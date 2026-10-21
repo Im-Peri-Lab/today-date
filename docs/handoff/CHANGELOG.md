@@ -1,6 +1,6 @@
 # CHANGELOG.md
 
-> **마지막 업데이트: 2026-10-20 (PR #134~#150 반영)**
+> **마지막 업데이트: 2026-10-21 (PR #134~#151 반영)**
 
 > 260531~261020 핸드오프 전체를 날짜순으로 기록한 변경 이력입니다. 새 AI는 일반적으로 `PROJECT_CONTEXT.md`와 `CURRENT_STATE.md`만 먼저 읽고, 과거 판단 근거가 필요할 때 이 문서를 참고하세요.
 
@@ -910,3 +910,14 @@
   - 이 브랜치의 `main` 대비 최종 변경은 홈 여백 스페이서 작업뿐(HomeDashboard·screens.module.css·ListView·error.tsx·SKILL.md).
 - **알려진 한계(수용)**: ① 하단 바 뒤 흰 띠는 내용이 한 화면에 들어오는 다른 짧은 화면과 같은 기존 현상으로 감수. ② 실기기(웹 영역 714pt)에서 홈 문서가 748pt 라 여백을 최솟값으로 줄여도 약 34pt 스크롤이 남는다 — 원래 목표는 684pt 기준이었고 실제 상태가 714pt 였기 때문. 더 줄이려면 `pb-20`(80px, 솔로 FAB 겹침 방지, §3-A 실측 근거)을 건드려야 해 이번엔 보류.
 - 검증: lint·test(179)·build 통과, CI(Lint·Test·Build / E2E / Vercel) 전부 통과. Vercel 프리뷰에서 사용자 실기기 확인(사파리 스크롤 시 배경 끊김 / 인증 레이아웃 영향 / `.page`↔비`.page` 전환 깜빡임) 후 squash 머지(`d55f411`), 작업 브랜치 삭제.
+
+---
+
+## 2026-10-21 — 홈 추천 배너 이미지 preload (PR #151)
+
+- **문제**: 홈 로딩 중 추천 배너(ACTIVITY·DINING)가 폴백 단색(`background-color`)으로 먼저 뜨다가 이미지가 들어오며 전환됨. 의도한 연출이 아니라, 배너 이미지가 CSS `background-image`(`image-set` WebP/PNG)라 **CSS 가 적용된 뒤에야 다운로드가 시작**되는 구조의 부수 효과. 이미지는 단일 파일(2108×660 / 2156×708)이고 해상도별 분기는 없다(형식만 `image-set` 으로 선택, 크기는 `background-size` 변수로 조절).
+- **변경**: `src/app/(home)/page.tsx` 의 `<main>` 안에 `<link rel="preload" as="image" type="image/webp">` 두 개(`cta-banner-activity.webp`, `cta-banner-dining.webp`)를 추가. **홈에서만** 받는다(layout 에 두면 다른 화면도 약 77KB 를 받음).
+- **주의**: preload 의 `href`·`type` 이 `screens.module.css` 의 `image-set`(WebP)과 정확히 같아야 한다(다르면 같은 이미지를 두 번 받음). 배너 파일명·형식을 바꾸면 이 링크도 같이 고칠 것. 렌더되는 결과·이미지 선택 로직은 그대로.
+- **효과(실측 감각)**: 맥 Chrome Slow 4G 에서 미세하게 빨라진 정도로 체감 개선은 크지 않다. preload 가 줄이는 것은 "CSS 해석 후 요청 시작" 대기뿐이고 이미지 수신·디코딩 시간은 그대로이며, 링크가 `<main>` 안이라 `<head>` 의 CSS 보다 늦게 발견되기 때문. 첫 페인트의 단색 구간은 여전히 남는다.
+- **보류한 추가 개선(거슬릴 때 진행)**: ① 폴백 단색을 이미지 톤의 그라데이션으로 바꿔 전환 차이 줄이기(JS 불필요, 체감 개선 가장 큼) ② 배너 이미지 폭 축소(2100px → 1000~1200px, lg 선명도 확인 필요) ③ JS 페이드인은 하이드레이션·캐시·`prefers-reduced-motion` 부작용으로 비추천.
+- 검증: tsc·eslint·build 통과, CI(Lint·Test·Build / E2E / Vercel) 전부 통과, squash 머지(`5f55af4`), 작업 브랜치 삭제.

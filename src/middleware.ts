@@ -2,7 +2,8 @@ export const runtime = 'nodejs'
 
 import { NextRequest, NextResponse } from 'next/server'
 import { unsealData } from 'iron-session'
-import { getCoupleById, getWorkspaceStatus, WorkspaceState } from '@/lib/auth/couple'
+import { getWorkspaceStatus, WorkspaceState } from '@/lib/auth/couple'
+import { isSessionVersionCurrent } from '@/lib/auth/sessionVersionCache'
 import { sessionOptions, SessionData } from '@/lib/auth/session'
 
 // /setup, /api/auth/setup/* 는 미설정 상태에서도 접근 가능
@@ -116,16 +117,17 @@ export async function middleware(req: NextRequest) {
 
     // session_version 검증 (패스코드 리셋 후 세션 무효화)
     if (session.sessionVersion !== undefined) {
+      let versionCurrent = true
       try {
-        const couple = await getCoupleById(session.couple_id)
-
-        // 커플 행이 사라졌으면 그 세션도 무효다.
-        if (!couple || couple.session_version !== session.sessionVersion) {
-          return expireSession(req, pathname, '세션이 만료되었습니다.')
-        }
+        // 15초 TTL 인메모리 캐시를 거친다(§ lib/auth/sessionVersionCache.ts).
+        // 커플 행이 사라졌거나 버전이 다르면 false — 그 세션은 무효다.
+        versionCurrent = await isSessionVersionCurrent(session.couple_id, session.sessionVersion)
       } catch {
         // 조회 자체가 실패한 것은 세션이 무효라는 근거가 아니다 —
         // 일시적 DB 장애로 로그인된 기기가 전부 튕기지 않도록 통과시킨다(전환 이전과 동일).
+      }
+      if (!versionCurrent) {
+        return expireSession(req, pathname, '세션이 만료되었습니다.')
       }
     }
 

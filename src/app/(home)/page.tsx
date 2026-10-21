@@ -28,6 +28,10 @@ export default async function HomePage() {
 
   return (
     <main className={cn(styles.page, styles.pageHome)}>
+      {/* 추천 배너는 CSS background-image 라 CSS 적용 후에야 받기 시작한다 — 단색 → 이미지 깜빡임을 줄이려
+          홈에서만 미리 받는다. href·type 은 screens.module.css 의 image-set(WebP)과 정확히 같아야 한다(다르면 이중 다운로드). */}
+      <link rel="preload" as="image" href="/images/cta-banner-activity.webp" type="image/webp" />
+      <link rel="preload" as="image" href="/images/cta-banner-dining.webp" type="image/webp" />
       <HomeDashboard
         initialStats={initialStats}
         workspaceState={deriveWorkspaceState(couple, users)}

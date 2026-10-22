@@ -1,8 +1,8 @@
 # CHANGELOG.md
 
-> **마지막 업데이트: 2026-10-21 (PR #134~#151 반영)**
+> **마지막 업데이트: 2026-10-22 (PR #134~#153 반영)**
 
-> 260531~261020 핸드오프 전체를 날짜순으로 기록한 변경 이력입니다. 새 AI는 일반적으로 `PROJECT_CONTEXT.md`와 `CURRENT_STATE.md`만 먼저 읽고, 과거 판단 근거가 필요할 때 이 문서를 참고하세요.
+> 260531~261022 핸드오프 전체를 날짜순으로 기록한 변경 이력입니다. 새 AI는 일반적으로 `PROJECT_CONTEXT.md`와 `CURRENT_STATE.md`만 먼저 읽고, 과거 판단 근거가 필요할 때 이 문서를 참고하세요.
 
 ---
 
@@ -921,3 +921,36 @@
 - **효과(실측 감각)**: 맥 Chrome Slow 4G 에서 미세하게 빨라진 정도로 체감 개선은 크지 않다. preload 가 줄이는 것은 "CSS 해석 후 요청 시작" 대기뿐이고 이미지 수신·디코딩 시간은 그대로이며, 링크가 `<main>` 안이라 `<head>` 의 CSS 보다 늦게 발견되기 때문. 첫 페인트의 단색 구간은 여전히 남는다.
 - **보류한 추가 개선(거슬릴 때 진행)**: ① 폴백 단색을 이미지 톤의 그라데이션으로 바꿔 전환 차이 줄이기(JS 불필요, 체감 개선 가장 큼) ② 배너 이미지 폭 축소(2100px → 1000~1200px, lg 선명도 확인 필요) ③ JS 페이드인은 하이드레이션·캐시·`prefers-reduced-motion` 부작용으로 비추천.
 - 검증: tsc·eslint·build 통과, CI(Lint·Test·Build / E2E / Vercel) 전부 통과, squash 머지(`5f55af4`), 작업 브랜치 삭제.
+
+---
+
+## 2026-10-22 — 전역 로딩 지연 진단 + 함수 리전 고정 + 미들웨어 session_version 캐시 (PR #152, #153)
+
+사용자 피드백("앱 전체가 느리고, 첫 인증코드 화면부터 오래 걸림")에 대해 **코드·설정 읽기와 프로덕션 curl 측정만으로 진단한 뒤**(수정 없음) 두 가지를 반영했다. 로그인 후 화면(홈·`/list`·상세)은 세션 쿠키가 없어 렌더 시간을 실측하지 못했고 Lighthouse 도 쓰지 못했다.
+
+### 진단에서 관찰된 사실 (원인 단정 아님)
+- **번들·이미지**: `next.config.mjs` 가 비어 있고 `next/dynamic` 사용 0건. `next/image` 미사용(배너는 CSS `image-set`), 원본 PNG 약 1.4~1.5MB 가 `public/` 에 남아 있으나 WebP 는 약 38~40KB 로 서비스됨. `/lock` 의 JS·CSS gzip 전송 합계 약 186KB.
+- **캐싱·렌더링**: 모든 페이지가 `getSession()`(cookies) 때문에 동적 렌더. Supabase 클라이언트는 모든 fetch 에 `cache: 'no-store'` 를 강제(client.ts 주석: 데이터 캐시 오염 사고 대응). 서버 측 데이터 캐시 없음.
+- **쿼리 패턴**: N+1 없음. 홈은 서버에서 `couples`·`users`·통계 8개를 `Promise.all` 로 병렬 조회(최소 10쿼리). `/list` 는 서버에서 데이터를 받지 않고 렌더 후 클라이언트가 API 3건(카테고리 2 + 현재 트랙 목록 1)을 요청. `GET /api/activities` 는 `select *`·페이지네이션 없음. 정렬 키·복합 인덱스 없음(단일 컬럼 인덱스만).
+- **미들웨어(src/middleware.ts)**: 매처가 `_next/static`·`_next/image`·`favicon.ico` 만 제외해 `/api/*` 도 모두 통과한다. 보호 경로·API 요청마다 `couples` 를 DB 에서 재조회해 `session_version` 을 비교했다. `app-ready` 쿠키가 없으면 설정 완료 확인으로 `couples`(+`users`) 조회가 더 붙는다 — 쿠키 유무에 따른 `/lock` TTFB 가 약 0.95s vs 0.15s(curl, 5회). `app-ready` 는 **패스코드 최초 설정 때만**(`setup/passcode`) 발급되며 `maxAge` 30일, 갱신 없음. 초대 수락 기기 등 최초 설정을 하지 않은 기기에는 발급되지 않는다. 값 검증 없이 `=== '1'` 문자열 비교만 한다.
+- **`unlock` API**: bcrypt cost 10(`bcryptjs`, 순수 JS). 정상 경로 DB 호출 3~4회 순차(커플 조회 1~2 → bcrypt → `getCoupleUsers` → `couples` UPDATE).
+- **홈 `couples` 중복 조회**: 미들웨어의 `getCoupleById` 와 홈 페이지의 `getCoupleById` 가 같은 호출이다(미들웨어가 조회 결과를 헤더·쿠키로 넘기는 경로 없음). 화면당 `couples`/`users` 조회 합계(미들웨어 포함, `app-ready` 있음): 홈 3~4, `/list` 4, 상세 1~2.
+- **`session_version` 의도**: 쿠키(iron-session)에 `sessionVersion` 이 봉인돼 있으나 서버 측 세션 저장소가 없어, 다른 기기의 쿠키를 무효화하려면 DB 의 `couples.session_version` 과 비교해야 한다. 값이 바뀌는 곳은 **패스코드 재설정(`/api/auth/reset`, +1) 한 곳뿐**이다(로그아웃·탈퇴·잠금은 바꾸지 않음). 최초 도입은 `a6ddc37`(2026-05-28, F-01)이며 도입 시점의 성능 논의 기록은 없다. 조회 실패는 통과(fail-open) 설계(CHANGELOG 2026-09-07).
+- **함수 리전**: 프로덕션 응답 `X-Vercel-Id: icn1::iad1::…` → 엣지는 서울, 함수는 미지정 기본값 `iad1`(`vercel.json` 없음). Supabase 는 ap-southeast-2(시드니)라는 것이 사용자 쪽 확인 사항이다(코드·저장소에는 기록 없음).
+
+### PR #152 — `vercel.json` 으로 함수 리전 고정 (`ce2476f`)
+- `vercel.json` 신규, `regions: ["syd1"]` 만 지정(functions·headers 등 다른 설정 없음). `syd1`(ap-southeast-2)은 Vercel 지원 리전, Hobby 는 단일 리전만 허용.
+- 머지 후 프로덕션 확인: 빈 본문 `POST /api/auth/unlock` 응답 `X-Vercel-Id: icn1::syd1::…` — 함수 리전이 `iad1` → `syd1` 로 바뀐 것을 확인(함수가 실행돼야 헤더에 리전이 붙으므로 미들웨어에서 401 로 막히는 요청으로는 확인 불가).
+- **알려진 한계**: 미들웨어는 엣지 번들(`middleware-manifest.json` 의 `regions: null`)이고 Vercel 문서상 미들웨어는 리전 설정과 무관하게 전 리전에서 실행 → **미들웨어의 DB 조회 구간은 이 설정으로 줄지 않을 수 있다**. 서울→시드니 함수 구간은 길어져 DB 쿼리가 적은 요청은 오히려 느려질 수 있다.
+
+### PR #153 — 미들웨어 `session_version` 15초 TTL 인메모리 캐시 (`362e38b`)
+- 신규 `src/lib/auth/sessionVersionCache.ts`(`couple_id` 키 `Map`, 외부 의존성 없음, 상한 1000개) + `middleware.ts` 의 `getCoupleById` 를 `isSessionVersionCurrent` 로 교체. `app-ready`·인증·`couple_id` 검사 등 다른 검증은 불변. 단위 테스트 8건 추가.
+- 동작 변화: ① 캐시 미스·TTL 만료 → 기존과 동일하게 DB 조회 후 비교 ② TTL 안에서 쿠키 버전 = 캐시 버전이면 DB 없이 통과 ③ **패스코드 재설정 후 다른 기기의 옛 세션이 인스턴스당 최대 15초 유효**(허용한 트레이드오프) ④ 계정 삭제로 커플이 없는 경우(null)도 TTL 동안 캐시되어 같은 범위로 무효 판정 ⑤ DB 조회 실패는 기존 fail-open 유지, 실패 결과는 캐시하지 않음.
+- **설계 조정(요청안에서 바뀐 부분)**: 캐시 값과 쿠키 값이 **다르면 만료 처리 전에 DB 를 한 번 재조회**한다. 요청안 그대로면 "재설정 → 새 패스코드로 로그인" 직후 `unlock` 이 DB 의 새 버전을 쿠키에 넣는데, 같은 인스턴스 캐시가 옛 값이라 정상 쿠키가 불일치로 튕기는 회귀가 생긴다. 캐시는 "일치" 판정만 단축한다.
+- **한계**: 엣지 isolate 마다 캐시가 따로여서 콜드 스타트 시 첫 요청은 DB 조회, 인스턴스가 바뀌면 적중률이 떨어질 수 있다(미확인). #152 와 코드 충돌 없음(독립).
+
+### 효과 — 실측 미완
+- 사용자 체감: 캐시 프리뷰에서 로그인 정상, 화면 전환 속도는 "아주 약간 개선, 체감상 크지 않음". 리전 고정 후의 체감·수치는 **아직 기록 없음**.
+- 쿼리 1회 비용은 `/lock` 의 `app-ready` 유무 차이(약 0.8s, 순차 2쿼리)로부터 대략 0.4s 안팎으로 **추정**했을 뿐 직접 측정한 값이 아니다.
+- 두 변경 모두 줄이지 못하는 구간(홈 서버 렌더의 10쿼리 왕복, `/list` 의 렌더 후 API 3건 왕복, bcrypt·순차 DB 호출)이 남아 있다. 원인 확정은 하지 않았다.
+- 검증: lint·tsc·test(187)·build 통과, CI(Lint·Test·Build / E2E / Vercel) 전부 통과, 두 PR 모두 squash 머지, 작업 브랜치(`perf/vercel-region-pin`, `perf/middleware-session-cache`) 삭제.

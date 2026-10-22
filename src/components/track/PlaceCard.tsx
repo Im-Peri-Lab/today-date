@@ -40,9 +40,11 @@ export function PlaceCard({ place, hideMenu, actionSlot, returnTo }: PlaceCardPr
 
   // 카드 ⋮ 메뉴발 화면 이동: router.push 는 프로그레스 바가 자동으로 뜨지 않아
   // 등록/삭제 경로와 동일하게 push 직전 topLoader.start()로 진행 표시를 맞춘다.
+  // 대상이 라우터 캐시에 있으면 push 가 즉시 커밋돼 바가 페인트 전에 끝나므로(pushState 시점에
+  // done) start() 한 프레임 뒤에 push 한다.
   function navigate(href: string) {
     topLoader.start()
-    router.push(href)
+    requestAnimationFrame(() => router.push(href))
   }
 
   function handleRevert() {

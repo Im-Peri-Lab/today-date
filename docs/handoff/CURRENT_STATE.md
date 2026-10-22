@@ -172,3 +172,12 @@ PROJECT_CONTEXT §5(인증 F-01)·§20.
 - Android 스플래시 실기기 홈 화면 확인(다크모드 포함), Galaxy 실기기 QA — 하드웨어 미확보로 보류
 - `ActivityDetail.tsx`/`PlaceDetail.tsx`의 `onSaveInfo` 정규화 정리(PR #95의 `emptyToNull`
   재사용 여지) — PR #95 범위(ActivityForm/PlaceForm) 밖이라 의도적으로 보류
+
+## 알려진 이슈 — PWA 상단 로딩바 흐림
+
+- **증상**: iOS 27.0.1(2026-10-21 업데이트)에서 홈 화면에 추가한 PWA(standalone)에서만 상단 로딩바(`#nprogress .bar`)가 반투명 레이어에 가려진 듯 흐리게 보임. Safari 탭·PC/모바일 크롬에서는 정상.
+- **원인 판단**: 저장소 변경이 아니라 iOS 쪽 동작으로 봄. 최근 3주간 manifest·viewport/themeColor·`apple-mobile-web-app-*` 메타·서비스워커·Capacitor 설정 변경 없음(`apple-mobile-web-app-status-bar-style`은 미지정, 기본값 사용 중). 배경색 작업(#146·#147·#150)과도 무관.
+- **실기기 진단 결과**(Vercel 프리뷰 PWA, 안전영역 아래 위치별 2px 고정 바 비교): +0 거의 안 보임 / +8 흐림 / +24 약간 부드러움 / +48·+96 선명. 스크롤되는(absolute) 줄과 하단 고정 줄은 처음 진단에서 선명했으나 +120 위치라 구간 밖이어서였음. 이후 absolute를 +8에 두고 다시 확인하니 흐림 — 고정 여부가 아니라 상태바 아래 약 20pt 구간 자체가 문제.
+- **시도한 수정과 보류 사유**: 바를 `safe-area-inset-top + 28px` 로 내리면 선명해지지만 홈·리스트 헤더(로고·아이콘 줄)와 바짝 붙어 보여 레이아웃을 해침 → 반영 보류. `apple-mobile-web-app-status-bar-style` 명시는 기본값과 같을 가능성이 커 시험하지 않음.
+- **참고**: 바 끝의 사선 글로우는 nextjs-toploader 기본 효과(`.peg` box-shadow)이며 `<NextTopLoader shadow={false}>` 로 끌 수 있음(미반영). 진단·시험은 `fix/pwa-status-bar-overlay` 브랜치(마지막 커밋 `0c607d1`)에서 했고 머지 없이 삭제함.
+- **재개 조건**: 이후 iOS 업데이트에서 구간이 바뀌었는지 재확인, 또는 헤더 상단 여백을 늘리는 디자인 변경을 할 때 바를 +24~28px 로 내리는 안을 함께 검토.

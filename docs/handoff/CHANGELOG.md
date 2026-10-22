@@ -1,6 +1,6 @@
 # CHANGELOG.md
 
-> **마지막 업데이트: 2026-10-22 (PR #134~#153 반영)**
+> **마지막 업데이트: 2026-10-22 (PR #134~#154 반영)**
 
 > 260531~261022 핸드오프 전체를 날짜순으로 기록한 변경 이력입니다. 새 AI는 일반적으로 `PROJECT_CONTEXT.md`와 `CURRENT_STATE.md`만 먼저 읽고, 과거 판단 근거가 필요할 때 이 문서를 참고하세요.
 
@@ -954,3 +954,26 @@
 - 쿼리 1회 비용은 `/lock` 의 `app-ready` 유무 차이(약 0.8s, 순차 2쿼리)로부터 대략 0.4s 안팎으로 **추정**했을 뿐 직접 측정한 값이 아니다.
 - 두 변경 모두 줄이지 못하는 구간(홈 서버 렌더의 10쿼리 왕복, `/list` 의 렌더 후 API 3건 왕복, bcrypt·순차 DB 호출)이 남아 있다. 원인 확정은 하지 않았다.
 - 검증: lint·tsc·test(187)·build 통과, CI(Lint·Test·Build / E2E / Vercel) 전부 통과, 두 PR 모두 squash 머지, 작업 브랜치(`perf/vercel-region-pin`, `perf/middleware-session-cache`) 삭제.
+
+---
+
+## 2026-10-22 v2 — topLoader 수동 이동 정합: FAB·카드 ⋮ 메뉴 (PR #154)
+
+"홈/리스트 카드·상단 아이콘을 탭해도 시각 반응이 없다"는 피드백에 대해 **코드 읽기로만 진단한 뒤**(실기기 타이밍 측정 없음) 그중 SKILL §12 패턴과 어긋난 두 곳만 고쳤다.
+
+### 진단에서 관찰된 사실 (원인 단정 아님)
+- topLoader 는 `layout.tsx` 의 `<NextTopLoader color="#7c3aed" height={2} showSpinner={false} />` 하나(nextjs-toploader 3.9.17). 자동 트리거는 `document` 클릭 리스너가 가장 가까운 `<a>` 를 찾아 `nprogress.start()` 를 부르는 것뿐이고, 클릭~`start()` 사이 디바운스·스로틀·rAF 는 없다. 종료는 `history.pushState`/`replaceState` 패치와 `popstate`·`pagehide` 에서 `done()`.
+- 홈 통계 행·추천 CTA 카드·리스트 카드 본문·헤더 홈 아이콘(`PageHeader`·`TopBar`)·햄버거 메뉴 항목은 전부 `<Link>` 라 자동 경로를 탄다. 검색 아이콘과 카드 ⋮ 트리거는 이동 없이 다이얼로그·메뉴만 연다.
+- `src/app` 아래 `loading.tsx` 는 `setup/verify` 하나뿐. nprogress 의 막대 전환은 `speed` 200ms 이고 종료 시 페이드 200ms+200ms 를 둔다.
+- `.headerNavBtn`·`.iconBtn` 에는 `:active` 규칙이 없고(`:hover` 는 `@media (hover: hover)` 안), `.cardInteractive:active` 는 `translateY(0)` 인데 기본 상태도 이미 0 이라 변화가 없다. `:active` 반응이 있는 것은 `.statRow`(배경색)와 `.fab`(`scale(0.96)`) 뿐.
+- 어긋나 있던 두 곳: ① `HomeFab` 의 메뉴 항목은 `router.push` 만 호출(`useTopLoader` import 도 없음) ② `ActivityCard`/`PlaceCard` 의 `navigate()` 는 `start()` 직후 동기 `router.push`(상세 화면 복사하기·삭제 경로는 이미 rAF 지연 적용).
+
+### PR #154 — start → rAF → push 정합 (`9ece727`)
+- `HomeFab`: `useTopLoader()` + `navigate(href)`(`start()` 후 `requestAnimationFrame(() => router.push(href))`) 신설, 두 메뉴 항목이 사용.
+- `ActivityCard`·`PlaceCard`: `navigate()` 한 곳에 rAF 지연 적용 — 정보 수정·기록 수정·복사하기 세 경로가 함께 바뀜.
+- 이동 목적지·UX 불변. 새 패턴 없이 SKILL §12 의 기존 패턴 재사용. 사용자가 Vercel 프리뷰에서 FAB·카드 ⋮ 메뉴 이동 시 막대가 보임을 확인.
+
+### 범위 밖 (남김)
+- `<Link>` 탭 체감: 대상이 prefetch·캐시 warm 이면 `start()`→`pushState`→`done()` 이 거의 붙어 막대가 안 보일 수 있다는 것은 **코드상 추론이며 실측하지 않았다**. 별도 작업(route-level `loading.tsx`)에서 다룰 예정 — `pushState` 시점을 바꿀 수 있어 이번 rAF 지연과의 상호작용을 그때 함께 확인할 것.
+- CSS `:active` 탭 피드백(`.headerNavBtn`·`.iconBtn`·`.cardInteractive`)은 로더와 별개의 작업으로 보류.
+- 검증: tsc·lint 통과, CI(Lint·Test·Build / E2E / Vercel) 전부 통과, squash 머지, 작업 브랜치(`fix/toploader-triggers`) 삭제.

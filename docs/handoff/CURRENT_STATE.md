@@ -1,6 +1,6 @@
 # CURRENT_STATE.md
 
-> **마지막 업데이트: 2026-10-22 (PR #134~#153 반영)**
+> **마지막 업데이트: 2026-10-22 (PR #134~#154 반영)**
 
 ## 현재 단계
 커플(2인) 계정 전환 완료 + 파트너 표시용 닉네임 추가 단계 — 계정 없는 단일 워크스페이스에서
@@ -111,12 +111,13 @@ PROJECT_CONTEXT §5(인증 F-01)·§20.
 - 홈 배너↔첫 섹션·섹션 사이 여백을 `svh clamp()` 대신 flex 스페이서(`.statSlack`/`.statGapSlack`)로 — 남는 높이만큼만 16~30 / 12~15로 늘어남, 홈·`/list`·홈 error 상단 `pt-6`→`pt-4`. 사파리 하단 바 뒤 영역은 웹 영역 밖(body 색)이라 CSS 로 칠할 수 없음을 실기기로 확인, 시도한 수정은 모두 걷어냄(PR #150) → 상세 CHANGELOG 2026-10-20
 - 홈에서만 추천 배너 WebP 두 장을 `<link rel="preload">` 로 미리 받아 단색→이미지 전환 구간 단축(효과는 미세, 단색 구간은 남음). 거슬리면 폴백 그라데이션부터(PR #151) → 상세 CHANGELOG 2026-10-21
 - 전역 로딩 지연 대응 1·2차: `vercel.json` 으로 함수 리전을 `iad1` → `syd1`(Supabase ap-southeast-2 권역)로 고정(PR #152, 프로덕션 `X-Vercel-Id: icn1::syd1::…` 확인) + 미들웨어 `session_version` 검증을 `couple_id` 기준 15초 TTL 인메모리 캐시로 감쌈(PR #153, 재설정 후 다른 기기 옛 세션이 인스턴스당 최대 15초 유효 — 허용한 트레이드오프). 진단 결과·사실 목록 → 상세 CHANGELOG 2026-10-22
+- topLoader 수동 이동 정합: `HomeFab` 메뉴 항목과 카드 ⋮ 메뉴(정보 수정·기록 수정·복사하기)가 `start()` → `requestAnimationFrame` → `router.push` 순서를 따름(상세 화면 경로와 동일, PR #154). `<Link>` 탭 체감·CSS `:active` 피드백은 범위 밖 → 상세 CHANGELOG 2026-10-22 v2
 
 ## 배포 상태
 - 플랫폼: Vercel
 - URL: `https://today-date-seven.vercel.app`
 - 함수 리전: `syd1`(`vercel.json`, PR #152). 미들웨어는 엣지 실행이라 이 설정과 무관
-- 현재 브랜치: `main` (PR #153 반영 기준, 머지 커밋 `362e38b`. PR #128 머지 커밋 `238d3de`만 예외적으로 squash가 아닌 일반 머지)
+- 현재 브랜치: `main` (PR #154 반영 기준, 머지 커밋 `9ece727`. PR #128 머지 커밋 `238d3de`만 예외적으로 squash가 아닌 일반 머지)
 
 ## 진행 중 / 남은 작업
 
@@ -136,6 +137,7 @@ PROJECT_CONTEXT §5(인증 F-01)·§20.
 11. **사파리 하단 바 뒤 흰 띠 + 홈 약 34pt 스크롤 잔존(261020, 수용한 한계)**: 주소창이 떠 있으면 웹 영역(예: 714pt) 밖 상태바·하단 바 뒤는 사파리가 `body` 색으로 칠해 CSS 로 위·아래를 따로 칠할 수 없다(`html`·`.page::before`·`body` 단색·`box-shadow`·진단 오버레이 시도 전부 걷어냄 — CHANGELOG 2026-10-20 "재시도 금지" 목록 참고). 홈은 웹 영역 714pt 에서 문서 748pt 라 여백 최솟값에도 약 34pt 스크롤이 남는다 — 더 줄이려면 `pb-20`(FAB 겹침 방지)을 건드려야 해 보류.
 11. 상세 "추천 결과로"는 Link push라 브라우저 뒤로가기와 히스토리 동작이 다르다 — 문제 여부 미판단, 보류
 12. **전역 로딩 지연 — 효과 미측정, 후속 판단 대기(261022)**: PR #152(리전)·#153(캐시) 반영 뒤 로그인 후 홈·`/list`·상세의 Network 탭 Waiting 값을 이전과 비교한 기록이 없다(캐시만 있던 프리뷰에서 사용자 체감은 "아주 약간 개선"). 아직 손대지 않은 구간(CHANGELOG 2026-10-22 "효과" 절): 홈 서버 렌더의 10쿼리 왕복과 미들웨어·페이지의 `getCoupleById` 중복 호출, `/list` 의 렌더 후 클라이언트 API 3건 왕복, `unlock` 의 bcrypt + 순차 DB 3~4회, `app-ready` 쿠키가 없는 기기에서 `/lock` 마다 붙는 미들웨어 DB 조회, `GET /api/activities` 의 `select *`·무페이지네이션. 측정 후 어느 구간이 남는지 확인하고 진행할 것(원인 확정 전).
+13. **탭 직후 시각 반응 부족 — 별도 청크 대기(261022)**: 홈 카드·리스트 카드·헤더 아이콘은 `<Link>` 라 topLoader 가 자동으로 걸리지만, 이동이 prefetch·캐시로 빨리 커밋되면 막대가 보이기 전에 끝날 수 있다(코드상 추론, 실측 없음). `.headerNavBtn`·`.iconBtn`·`.cardInteractive` 에는 터치 `:active` 규칙도 없다. 후보: route-level `loading.tsx`(`pushState` 시점이 바뀌므로 #154 의 rAF 지연과 상호작용 확인 필요), `:active` 피드백(`.statRow:active`·`.fab:active` 선례). 신호가 오면 로더와 CSS 를 분리해 진행.
 
 **그 외 남은 작업**
 - **`chore/capacitor-init` → `main` 최종 머지**: PR #111~#116 모두 병합 완료 상태지만, 전체

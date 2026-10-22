@@ -1205,6 +1205,8 @@ try {
 
 옛 지침은 "API 대기 없는 즉시 이동이면 막대 없어도 무방"이었으나, 실사용에서 **즉시 이동도 체감 지연이 있어** 카드 ⋮ 메뉴 이동(복사하기/수정)·상세 복사하기·상세 삭제 확인 후 목록 전환 등 **프로그래매틱 `router.push`에는 모두 topLoader를 적용**하는 것으로 정정한다. `<Link>`가 아닌 이동은 자동 막대가 없으므로 직접 `topLoader.start()`를 호출한다.
 
+**적용 대상 체크(PR #154)**: 카드 ⋮ 메뉴 이동(`ActivityCard`·`PlaceCard` 의 공용 `navigate()` — 정보 수정·기록 수정·복사하기)과 홈 FAB 메뉴 항목(`HomeFab` 의 `navigate()`)도 아래 `start()` → `requestAnimationFrame` → `router.push` 순서를 따른다. `<DropdownMenuItem onClick>` 에서 `router.push` 만 단독 호출하거나 `start()` 직후 동기 push 하는 코드를 새로 만들지 말 것. 새 수동 이동 컴포넌트를 추가하면 이 목록에 더한다.
+
 **캐시 warm 라우트의 조기 붕괴 + `requestAnimationFrame` 해법**: `nextjs-toploader`는 `history.pushState` 시점에 `done()`한다. 이동 대상이 App Router 캐시에 **warm**하면(이미 방문한 목록 등) `router.push`가 **동기적으로 즉시 커밋**되어, `start()`→`done()`이 브라우저 페인트 한 번 사이에 붕괴한다 → 막대가 아예 안 보인다. 캐시 온도와 무관하게 노출을 보장하려면 `start()` 직후 **한 프레임 뒤에** push 한다:
 
 ```tsx

@@ -176,7 +176,7 @@ html.dark body {
     --s-success-on: #15121e;
     --s-accent-pink: #f18fb5;
     --s-accent-pink-soft-bg: #492f4d; /* --s-accent-pink(#f18fb5) 18% over 카드(#241a36) — 삭제 소프트 배경과 같은 "전경색 알파" 규칙. 카드 대비 1.41:1(종전 #3a2433 1.16:1) */
-    --s-accent-chip-tint: #402d5a;  /* --s-accent(#c084fc) 18% over 카드(#241a36). 카드 대비 1.36:1(종전 #2c2440 1.12:1), accent-soft-bg(#573f7f, 활성 선택 1.9:1)보다는 어두워 "선택"과 혼동되지 않음 */
+    --s-accent-chip-tint: #402d5a;  /* --s-accent(#e040fb) 18% over 카드(#241a36). 카드 대비 1.36:1(종전 #2c2440 1.12:1), accent-soft-bg(#573f7f, 활성 선택 1.9:1)보다는 어두워 "선택"과 혼동되지 않음 */
     --s-chip-neutral-bg: var(--s-card-border-strong, #3a2f4e); /* 라이트와 같은 매핑 — 카드(#241a36)보다 한 단계 밝아 칩 면이 보임(1.33:1) */
     --s-label-muted: #908aa0;
     --s-icon-muted: #4f4960;
@@ -242,11 +242,11 @@ html.dark body {
  */
 @media (prefers-color-scheme: dark) {
   #nprogress .bar {
-    background: #c084fc !important;
+    background: #e040fb !important;
   }
   #nprogress .peg {
     box-shadow:
-      0 0 10px #c084fc,
-      0 0 5px #c084fc !important;
+      0 0 10px #e040fb,
+      0 0 5px #e040fb !important;
   }
 }

@@ -176,7 +176,7 @@ html.dark body {
     --s-success-on: #15121e;
     --s-accent-pink: #f18fb5;
     --s-accent-pink-soft-bg: #492f4d; /* --s-accent-pink(#f18fb5) 18% over 카드(#241a36) — 삭제 소프트 배경과 같은 "전경색 알파" 규칙. 카드 대비 1.41:1(종전 #3a2433 1.16:1) */
-    --s-accent-chip-tint: #402d5a;  /* --s-accent(#c084fc) 18% over 카드(#241a36). 카드 대비 1.36:1(종전 #2c2440 1.12:1), accent-soft-bg(#573f7f, 활성 선택 1.9:1)보다는 어두워 "선택"과 혼동되지 않음 */
+    --s-accent-chip-tint: #402d5a;  /* --s-accent(#e040fb) 18% over 카드(#241a36). 카드 대비 1.36:1(종전 #2c2440 1.12:1), accent-soft-bg(#573f7f, 활성 선택 1.9:1)보다는 어두워 "선택"과 혼동되지 않음 */
     --s-chip-neutral-bg: var(--s-card-border-strong, #3a2f4e); /* 라이트와 같은 매핑 — 카드(#241a36)보다 한 단계 밝아 칩 면이 보임(1.33:1) */
     --s-label-muted: #908aa0;
     --s-icon-muted: #4f4960;
@@ -233,4 +233,27 @@ html.dark body {
 }
 #nprogress .spinner {
   top: calc(env(safe-area-inset-top, 0px) + 15px) !important;
+}
+
+/*
+ * iOS PWA(standalone)는 상태바 블러에 상단 로딩바가 묻혀 인지가 어렵다. 블러는 standalone 에만
+ * 있으므로 두 규칙 모두 display-mode: standalone 으로 한정해 브라우저 탭은 색·두께 불변.
+ * - 두께: 라이트/다크 공통 3px (조건을 다크로 걸면 모드 간 두께가 달라진다).
+ * - 색: 다크에서만 명도를 소폭 올린 보라(#c084fc). 더 밝히면 브랜드 보라가 사라지므로 이 수준으로 고정.
+ * 라이브러리가 height·background·box-shadow 를 인라인 주입하므로 !important.
+ */
+@media (display-mode: standalone) {
+  #nprogress .bar {
+    height: 3px !important;
+  }
+}
+@media (display-mode: standalone) and (prefers-color-scheme: dark) {
+  #nprogress .bar {
+    background: #c084fc !important;
+  }
+  #nprogress .peg {
+    box-shadow:
+      0 0 10px #c084fc,
+      0 0 5px #c084fc !important;
+  }
 }

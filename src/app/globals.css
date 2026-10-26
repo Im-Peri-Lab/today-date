@@ -239,8 +239,7 @@ html.dark body {
  * iOS PWA(standalone)는 상태바 블러에 상단 로딩바가 묻혀 인지가 어렵다. 블러는 standalone 에만
  * 있으므로 두 규칙 모두 display-mode: standalone 으로 한정해 브라우저 탭은 색·두께 불변.
  * - 두께: 라이트/다크 공통 3px (조건을 다크로 걸면 모드 간 두께가 달라진다).
- * - 색: 다크에서만 명도를 소폭 올린 보라(#c084fc). 더 밝히면(#e9d5ff) 회백색이 돼 브랜드 보라가 사라지고,
- *   채도만 올리면(#e040fb) 오히려 어두워져 블러에 눌린다.
+ * - 색: 다크에서만 명도를 소폭 올린 보라(#c084fc). 더 밝히면 브랜드 보라가 사라지므로 이 수준으로 고정.
  * 라이브러리가 height·background·box-shadow 를 인라인 주입하므로 !important.
  */
 @media (display-mode: standalone) {

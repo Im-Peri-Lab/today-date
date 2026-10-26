@@ -1,6 +1,6 @@
 # CHANGELOG.md
 
-> **마지막 업데이트: 2026-10-22 (PR #134~#154 반영)**
+> **마지막 업데이트: 2026-10-26 (PR #134~#155 반영)**
 
 > 260531~261022 핸드오프 전체를 날짜순으로 기록한 변경 이력입니다. 새 AI는 일반적으로 `PROJECT_CONTEXT.md`와 `CURRENT_STATE.md`만 먼저 읽고, 과거 판단 근거가 필요할 때 이 문서를 참고하세요.
 
@@ -977,3 +977,26 @@
 - `<Link>` 탭 체감: 대상이 prefetch·캐시 warm 이면 `start()`→`pushState`→`done()` 이 거의 붙어 막대가 안 보일 수 있다는 것은 **코드상 추론이며 실측하지 않았다**. 별도 작업(route-level `loading.tsx`)에서 다룰 예정 — `pushState` 시점을 바꿀 수 있어 이번 rAF 지연과의 상호작용을 그때 함께 확인할 것.
 - CSS `:active` 탭 피드백(`.headerNavBtn`·`.iconBtn`·`.cardInteractive`)은 로더와 별개의 작업으로 보류.
 - 검증: tsc·lint 통과, CI(Lint·Test·Build / E2E / Vercel) 전부 통과, squash 머지, 작업 브랜치(`fix/toploader-triggers`) 삭제.
+
+---
+
+## 2026-10-26 — PWA 상단 로딩바 가시성: standalone 한정 두께 3px + 다크 색 (PR #155)
+
+"알려진 이슈 — PWA 상단 로딩바 흐림"(iOS 27.0.1)을 **위치는 건드리지 않고** 색·두께로 완화했다. 위치(`safe-area-inset-top` 오프셋)는 기존 결정 그대로.
+
+### 실기기 비교에서 얻은 판단 (다크 PWA, 같은 화면 캡처 비교 — 실측값 아님)
+- 원래 `#7c3aed`(짙은 남보라): 블러에 거의 묻힘.
+- `#c084fc`(명도 소폭↑, 보라 유지): 가장 뚜렷하면서 브랜드 보라 톤 유지 → **채택**.
+- `#e040fb`(채도↑): 명도는 오히려 낮아 블러에 눌려 `#c084fc`보다 약해 보임. 블러는 어두운 막처럼 작용해 채도보다 **명도**가 살아남는다.
+- `#e9d5ff`(아주 밝음): 회백색으로 보여 보라 정체성이 사라짐.
+- 색만으로는 블러 아래 가시성에 한계가 있어 두께를 함께 키움.
+
+### 변경 (`src/app/globals.css` 만, PR #155 `3fdc19f`)
+- 두께: `@media (display-mode: standalone)` 에서 `#nprogress .bar { height: 3px !important }` — PWA 라이트·다크 공통. 다크 전용으로 걸면 모드 간 두께가 달라지고, 블러는 PWA 에만 있으므로 조건을 원인(standalone)에 맞춤.
+- 색: `@media (display-mode: standalone) and (prefers-color-scheme: dark)` 에서 `.bar` 배경과 `.peg` box-shadow 를 `#c084fc` 로. 브라우저 탭(다크 포함)·라이트 색·`top` 오프셋은 불변.
+- 둘 다 라이브러리가 인라인 스타일을 늦게 주입하므로 `!important` 필요(PR #111 safe-area 패턴과 동일).
+- PWA 라이트모드의 바도 2px → 3px 로 굵어지는 것은 의도.
+
+### 검증·미확인
+- tsc·lint 통과, CI(Lint·Test·Build / E2E / Vercel) 통과, squash 머지, 작업 브랜치(`fix/toploader-dark-contrast`) 삭제.
+- **3px 두께의 블러 아래 체감은 아직 실기기로 확인하지 않았다.** 머지 후 운영에서 보고, 부족하면 4px 로 조정(색·위치는 그대로).

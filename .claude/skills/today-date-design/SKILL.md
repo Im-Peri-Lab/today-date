@@ -1197,6 +1197,8 @@ try {
 }
 ```
 
+**막대 스타일(PR #155)**: 막대 색·두께 오버라이드는 `globals.css` 에서 `#nprogress .bar`/`.peg` 에 `!important` 로 건다(라이브러리가 인라인 스타일을 늦게 주입). iOS PWA 상태바 블러 대응이므로 **`display-mode: standalone` 조건 안에서만** — 두께 3px(라이트·다크 공통), 색 `#c084fc` 는 standalone+다크에서만. 브라우저 탭은 기본 `#7c3aed`/2px 유지. `top`(safe-area 오프셋)은 별도 규칙이라 건드리지 않는다. 색을 더 올릴 땐 채도가 아니라 명도 기준(과하면 보라 정체성 상실).
+
 **`<Link>` 전환**: `nextjs-toploader` 자동.
 - 앵커 클릭 → `start()` → RSC 완료 후 `pushState` 패치 → `done()`. 추가 코드 불필요.
 - `<DropdownMenuItem onClick={() => router.push(...)}>`처럼 앵커 클릭이 아닌 프로그래매틱 이동은 자동 적용 안 됨 → 아래 "프로그래매틱 이동엔 항상 topLoader" 참조.

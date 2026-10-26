@@ -1,6 +1,6 @@
 # PROJECT_CONTEXT.md
 
-> **마지막 업데이트: 2026-10-22**
+> **마지막 업데이트: 2026-10-26**
 
 > 이 문서는 Today Date 프로젝트의 장기 컨텍스트입니다. 260531~261022 전체 핸드오프를 다시 읽고, 초기 컨텍스트에서 이후 작업으로 변경·확정된 내용을 반영한 최신본입니다. 새 AI에게는 이 파일과 `CURRENT_STATE.md`를 먼저 전달하고, 과거 의사결정 확인이 필요할 때만 `CHANGELOG.md`를 참고하게 하세요.
 >
@@ -635,6 +635,7 @@ ActivityCard·PlaceCard 모두 동일한 정보 줄 우선순위(memo→location
 화면 전환 로딩 패턴(스켈레톤/서버 prefetch/프로그래매틱 전환)·액션 피드백 위계(화면전환=topLoader / 제자리=버튼상태 — 로딩 중인 **모든** 버튼은 텍스트 앞 `Loader2` 스피너 병기, 되돌릴 수 없음·소요시간과 무관)의 구체 스펙은 SKILL.md가 단일 출처. ※ 옛 "제자리 액션은 텍스트만/아이콘 숨김" 예외는 260713 v2에 폐지됨.
 
 - 로딩 패턴 선택 기준·프로그레스 바·서버 prefetch·프로그래매틱 전환(rAF 트릭·navigating 상태) → **SKILL §12**
+- 상단 로딩바 색·두께 오버라이드는 `globals.css` 의 `@media (display-mode: standalone)`(두께 3px) / `(display-mode: standalone) and (prefers-color-scheme: dark)`(색 `#c084fc`)로만 한정한다 — 브라우저 탭은 영향 없음(PR #155). `top` 오프셋은 별개 규칙.
 - 프로그래매틱 `router.push`(카드 ⋮ 메뉴 이동·홈 FAB 메뉴 포함)는 전부 `topLoader.start()` → `requestAnimationFrame` → push 순서(PR #154). `<Link>` 는 nextjs-toploader 가 자동 처리하지만 캐시 warm 이면 막대가 안 보일 수 있음 — 개선은 별도 작업
 - 액션 피드백 위계·사례(되돌리기/삭제/메일 발송)·카드 삭제 dead state → **SKILL §12-A**
 - 서버 prefetch 공용 함수(코드 위치): `src/lib/data/activities.ts`·`places.ts`·`dashboard.ts`

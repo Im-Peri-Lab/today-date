@@ -4,6 +4,8 @@ import Link from 'next/link'
 import { Sparkles, UtensilsCrossed, Check, ChevronRight, ArrowRight, UserPlus } from 'lucide-react'
 import { HomeFab } from '@/components/HomeFab'
 import { PageHeader } from '@/components/PageHeader'
+import { useQueryClient } from '@tanstack/react-query'
+import { PullToRefresh } from '@/components/PullToRefresh'
 import { useDashboardStats, type DashboardStats } from '@/hooks/useDashboardStats'
 import type { WorkspaceState } from '@/lib/auth/couple'
 import { STATUS_LABELS } from '@/lib/labels'
@@ -199,6 +201,7 @@ export function HomeDashboard({
   workspaceState?: WorkspaceState | null
 }) {
   const { data } = useDashboardStats(initialStats)
+  const queryClient = useQueryClient()
 
   return (
     <div
@@ -207,6 +210,7 @@ export function HomeDashboard({
         'mx-auto w-full max-w-xl px-5 pb-20 pt-4 lg:max-w-3xl lg:px-8 lg:pb-24 lg:pt-12'
       )}
     >
+      <PullToRefresh onRefresh={() => queryClient.refetchQueries({ queryKey: ['dashboard-stats'] })} />
       <PageHeader title="오늘, 우리 어떻게 보낼까?" subtitle="우리 둘의 데이트를 채워가는 공간" />
 
       {/* 페어링 전 상태 안내 — 기능 카드들보다 위(별도 계위) */}

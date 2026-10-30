@@ -10,6 +10,8 @@ import { EmptyState } from './EmptyState'
 import { CardGridSkeleton } from './CardGridSkeleton'
 import { HomeFab } from '@/components/HomeFab'
 import { PageHeader } from '@/components/PageHeader'
+import { useQueryClient } from '@tanstack/react-query'
+import { PullToRefresh } from '@/components/PullToRefresh'
 import { useActivities } from '@/hooks/useActivities'
 import { usePlaces } from '@/hooks/usePlaces'
 import { useActivityCategories, usePlaceCategories } from '@/hooks/useCategories'
@@ -208,6 +210,7 @@ export function ListView() {
   )
 
   const debouncedSearch = useDebounced(search, 300)
+  const queryClient = useQueryClient()
 
   const activityCats = useActivityCategories()
   const placeCatsQuery = usePlaceCategories()
@@ -283,6 +286,11 @@ export function ListView() {
 
   return (
     <div className={cn(styles.listBottom, 'mx-auto w-full max-w-4xl px-5 pt-4 lg:px-8 lg:pt-12')}>
+      <PullToRefresh
+        onRefresh={() =>
+          queryClient.refetchQueries({ queryKey: [track === 'activity' ? 'activities' : 'places'], type: 'active' })
+        }
+      />
       {/* 헤더 + 제목/서브카피 (공용 PageHeader — 홈과 동일 간격) */}
       <PageHeader title="우리의 위시리스트" homeNav />
 

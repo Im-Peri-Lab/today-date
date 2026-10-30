@@ -1252,6 +1252,12 @@ requestAnimationFrame(() => router.push(listHref))
        + 전환 후에도 원래 화면 컨트롤이 남으면 navigating 상태로 잠금
 ```
 
+### 당겨서 새로고침 (홈·`/list`)
+
+- 컴포넌트: `PullToRefresh`(`src/components/PullToRefresh.tsx`). 화면 전체가 손가락을 따라 내려가고(저항 0.5, 최대 96px) 비워진 자리(콘텐츠 바로 위)에 `RefreshCw` 원형 인디케이터 — 카드 토큰(`--s-card-bg`·`--s-card-border-strong`·`--s-card-shadow`)과 `--s-active-text`. 64px 이상 당겨 놓으면 그 자리에서 회전하고 끝나면 올라온다. 인디케이터만 떠 있는 방식은 쓰지 않는다.
+- 감싸는 콘텐츠에 `position: fixed` 요소(FAB)를 넣지 않는다 — 래퍼의 `transform` 이 fixed 의 기준을 바꾼다. 비활성일 땐 `transform` 속성을 두지 않는다.
+- 터치 기기 전용. 스크롤이 최상단이 아니거나 가로 제스처·다이얼로그/메뉴 위 터치는 무시.
+
 ---
 
 ## 12-A. 액션 피드백 위계

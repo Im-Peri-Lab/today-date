@@ -1,6 +1,6 @@
 # CHANGELOG.md
 
-> **마지막 업데이트: 2026-10-26 (PR #134~#155 반영)**
+> **마지막 업데이트: 2026-10-30 (PR #134~#156 반영)**
 
 > 260531~261022 핸드오프 전체를 날짜순으로 기록한 변경 이력입니다. 새 AI는 일반적으로 `PROJECT_CONTEXT.md`와 `CURRENT_STATE.md`만 먼저 읽고, 과거 판단 근거가 필요할 때 이 문서를 참고하세요.
 
@@ -1000,3 +1000,31 @@
 ### 검증·미확인
 - tsc·lint 통과, CI(Lint·Test·Build / E2E / Vercel) 통과, squash 머지, 작업 브랜치(`fix/toploader-dark-contrast`) 삭제.
 - **3px 두께의 블러 아래 체감은 아직 실기기로 확인하지 않았다.** 머지 후 운영에서 보고, 부족하면 4px 로 조정(색·위치는 그대로).
+
+---
+
+## 2026-10-30 — 홈 통계 갱신 누락 수정 + 홈·목록 당겨서 새로고침 (PR #156)
+
+### 증상
+FAB 등록, 등록과 동시에 "다녀온 곳" 처리, 목록에서 되돌리기·삭제 후 홈으로 돌아와도 홈 카드의 미리보기·건수가 이전 값으로 남았다.
+
+### 원인
+홈 통계 쿼리 `['dashboard-stats']`(staleTime 30초, 서버 `initialData`)를 **무효화하는 곳이 한 군데도 없었다.** 등록·수정·삭제 훅은 `['places']`·`['activities']` 만 무효화했다. 홈은 캐시가 fresh 면 재조회하지 않으므로 이전 값이 최대 30초 남는다.
+
+### 변경 (squash `6bc3cd0`)
+- `invalidateDashboardStats(qc)` 신설(`src/hooks/useDashboardStats.ts`) — `['dashboard-stats']` 를 `refetchType: 'all'` 로 무효화(홈이 미마운트여도 백그라운드 재조회). 호출 지점: `PlaceForm`·`ActivityForm` 등록 직후, `useUpdatePlace`/`useUpdateActivity` onSuccess, `useDeletePlace`/`useDeleteActivity` onSettled. 되돌리기·"다녀온 곳으로" 처리는 update 훅을 지나므로 별도 수정 없음.
+- `PullToRefresh` 신설(`src/components/PullToRefresh.tsx`) — 홈·`/list` 최상단에서 아래로 당기면 화면 전체가 손가락을 따라 내려가고(`translateY`) 비워진 자리에 `RefreshCw` 인디케이터, 64px 이상 당겨 놓으면 재조회(최소 600ms 노출) 후 올라온다. 홈은 `['dashboard-stats']`, 목록은 현재 탭의 활성 쿼리(`type: 'active'`)만 `refetchQueries`.
+
+### 설계 판단
+- **직접 구현한 이유**: 전역 `overscroll-behavior: none` 이고, iOS PWA(standalone)에는 브라우저 기본 당겨서 새로고침이 없다.
+- **첫 구현은 인디케이터만 위에 띄우고 콘텐츠는 고정**이었는데, 일반적인 앱의 감각(화면이 내려갔다 올라옴)과 달라 **콘텐츠를 translate 하는 방식으로 교체**했다.
+- **`HomeFab` 은 래퍼 밖**: transform 이 걸린 조상 안의 `position: fixed` 는 뷰포트가 아니라 그 조상 기준이 되므로 FAB 가 화면과 같이 움직인다. 그래서 `PullToRefresh` 래퍼를 `HomeFab` 형제로 두고, 비활성일 땐 `transform` 속성 자체를 빼서(`undefined`) 평상시 containing block 을 만들지 않는다.
+- **제외 조건**: 스크롤 `scrollY > 0`, 가로 제스처 우세, 위로 스와이프, 다이얼로그·메뉴·리스트박스 위 터치, 멀티터치, 갱신 중. 터치 이벤트만 쓰므로 데스크탑은 영향 없음.
+- 노치 기기는 당긴 만큼 `env(safe-area-inset-top)` 를 더해 내려가 인디케이터가 상태바에 가리지 않게 했다.
+
+### 검증
+tsc·lint·vitest 187 통과, Vercel 프리뷰에서 실기기 확인(홈 카드 갱신·당겨서 새로고침). squash 머지, 작업 브랜치(`fix/home-stats-refresh-and-pull-to-refresh`) 삭제. 래핑으로 들여쓰기가 바뀌어 diff 가 크지만 `git diff -w` 기준 실변경은 약 80줄.
+
+### 알아둘 점
+- 새 mutation 을 추가할 때 **홈 통계에 영향이 있으면 `invalidateDashboardStats` 도 호출**해야 한다(없으면 같은 증상 재발).
+- `PullToRefresh` 로 감싸는 화면에는 `position: fixed` 요소를 래퍼 안에 넣지 않는다.

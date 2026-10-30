@@ -1,6 +1,6 @@
 # CURRENT_STATE.md
 
-> **마지막 업데이트: 2026-10-26 (PR #134~#155 반영)**
+> **마지막 업데이트: 2026-10-30 (PR #134~#156 반영)**
 
 ## 현재 단계
 커플(2인) 계정 전환 완료 + 파트너 표시용 닉네임 추가 단계 — 계정 없는 단일 워크스페이스에서
@@ -64,6 +64,7 @@ PROJECT_CONTEXT §5(인증 F-01)·§20.
 - `fix/new-entry-returnto-propagation` — PR #132 머지 완료, 로컬·리모트 브랜치 삭제됨
 - `design/detail-copy-button-standalone` — PR #133 머지 완료, 로컬·리모트 브랜치 삭제됨 (CI lint/vitest/e2e/Vercel 통과, 화면 확인은 사용자가 완료)
 - `feat/header-home-button-unify`(PR #134)·`fix/restore-back-link-when-duplicate-home`(PR #136)·`design/map-action-btn-color-align`(PR #135) — 모두 squash 머지 완료, 로컬·리모트 브랜치 삭제됨 (각 PR CI lint/vitest/e2e/Vercel 통과)
+- `fix/home-stats-refresh-and-pull-to-refresh` — PR #156 squash 머지 완료, 로컬·리모트 브랜치 삭제됨 (CI·Vercel 통과, 실기기 확인은 사용자가 완료)
 
 ## 최근 구현 완료
 - 자동화 테스트·CI, dark/hover/focus 정합화, 추천위저드 History/URL 동기화 공통 훅, 폼-API
@@ -112,6 +113,7 @@ PROJECT_CONTEXT §5(인증 F-01)·§20.
 - 홈에서만 추천 배너 WebP 두 장을 `<link rel="preload">` 로 미리 받아 단색→이미지 전환 구간 단축(효과는 미세, 단색 구간은 남음). 거슬리면 폴백 그라데이션부터(PR #151) → 상세 CHANGELOG 2026-10-21
 - 전역 로딩 지연 대응 1·2차: `vercel.json` 으로 함수 리전을 `iad1` → `syd1`(Supabase ap-southeast-2 권역)로 고정(PR #152, 프로덕션 `X-Vercel-Id: icn1::syd1::…` 확인) + 미들웨어 `session_version` 검증을 `couple_id` 기준 15초 TTL 인메모리 캐시로 감쌈(PR #153, 재설정 후 다른 기기 옛 세션이 인스턴스당 최대 15초 유효 — 허용한 트레이드오프). 진단 결과·사실 목록 → 상세 CHANGELOG 2026-10-22
 - topLoader 수동 이동 정합: `HomeFab` 메뉴 항목과 카드 ⋮ 메뉴(정보 수정·기록 수정·복사하기)가 `start()` → `requestAnimationFrame` → `router.push` 순서를 따름(상세 화면 경로와 동일, PR #154). `<Link>` 탭 체감·CSS `:active` 피드백은 범위 밖 → 상세 CHANGELOG 2026-10-22 v2
+- 홈 통계 갱신 누락 수정 + 홈·목록 당겨서 새로고침: 등록·수정·삭제·되돌리기 뒤 `['dashboard-stats']` 무효화(`invalidateDashboardStats`), `PullToRefresh` 가 화면 전체를 내렸다 올림(FAB 는 래퍼 밖)(PR #156) → 상세 CHANGELOG 2026-10-30
 
 ## 배포 상태
 - 플랫폼: Vercel

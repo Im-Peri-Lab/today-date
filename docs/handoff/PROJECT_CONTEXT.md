@@ -1,6 +1,6 @@
 # PROJECT_CONTEXT.md
 
-> **마지막 업데이트: 2026-10-26**
+> **마지막 업데이트: 2026-10-30**
 
 > 이 문서는 Today Date 프로젝트의 장기 컨텍스트입니다. 260531~261022 전체 핸드오프를 다시 읽고, 초기 컨텍스트에서 이후 작업으로 변경·확정된 내용을 반영한 최신본입니다. 새 AI에게는 이 파일과 `CURRENT_STATE.md`를 먼저 전달하고, 과거 의사결정 확인이 필요할 때만 `CHANGELOG.md`를 참고하게 하세요.
 >
@@ -635,6 +635,7 @@ ActivityCard·PlaceCard 모두 동일한 정보 줄 우선순위(memo→location
 화면 전환 로딩 패턴(스켈레톤/서버 prefetch/프로그래매틱 전환)·액션 피드백 위계(화면전환=topLoader / 제자리=버튼상태 — 로딩 중인 **모든** 버튼은 텍스트 앞 `Loader2` 스피너 병기, 되돌릴 수 없음·소요시간과 무관)의 구체 스펙은 SKILL.md가 단일 출처. ※ 옛 "제자리 액션은 텍스트만/아이콘 숨김" 예외는 260713 v2에 폐지됨.
 
 - 로딩 패턴 선택 기준·프로그레스 바·서버 prefetch·프로그래매틱 전환(rAF 트릭·navigating 상태) → **SKILL §12**
+- 홈·`/list` 는 `PullToRefresh`(화면 전체가 내려갔다 올라오는 당겨서 새로고침, PR #156)로 수동 재조회할 수 있다. 홈은 통계, 목록은 현재 탭 쿼리만 재조회한다.
 - 상단 로딩바 색·두께 오버라이드는 `globals.css` 의 `@media (display-mode: standalone)`(두께 3px) / `(display-mode: standalone) and (prefers-color-scheme: dark)`(색 `#c084fc`)로만 한정한다 — 브라우저 탭은 영향 없음(PR #155). `top` 오프셋은 별개 규칙.
 - 프로그래매틱 `router.push`(카드 ⋮ 메뉴 이동·홈 FAB 메뉴 포함)는 전부 `topLoader.start()` → `requestAnimationFrame` → push 순서(PR #154). `<Link>` 는 nextjs-toploader 가 자동 처리하지만 캐시 warm 이면 막대가 안 보일 수 있음 — 개선은 별도 작업
 - 액션 피드백 위계·사례(되돌리기/삭제/메일 발송)·카드 삭제 dead state → **SKILL §12-A**
@@ -803,6 +804,8 @@ ActivityCard·PlaceCard 모두 동일한 정보 줄 우선순위(memo→location
 - **메뉴는 위험도가 아니라 사용자 사고 흐름도 함께 본다.** 작은 메뉴에서는 구분선을 과하게 늘리지 말고, 편집/생성 계열 → 상태 변경 → 삭제 순서로 읽히게 한다. 삭제만 마지막에 분리해도 충분한 경우가 많다.
 - **코드와 SKILL.md는 같은 브랜치에서 같이 움직인다.** 메뉴 순서·상호작용·디자인 패턴이 바뀌었는데 문서를 나중으로 미루면 stale 스펙이 누적된다.
 - **리스트와 상세는 캐시 처방이 다르다.** 상세는 단일 키(`['activity'|'place', id]`)라 PATCH 응답을 `setQueryData`로 즉시 덮으면 끝나지만, 리스트는 필터 변형별로 캐시가 여러 개 존재하고 정렬은 서버가 결정하므로 `setQueryData` 직접 삽입은 fragile하다. 생성·수정 후 리스트 반영 지연은 `invalidateQueries`에 `refetchType:'all'`을 적용해 미마운트 상태에서도 능동 재조회가 걸리게 하고, 삭제는 낙관적 제거(`onMutate` + `setQueriesData` 복수형)로 처리한다. 같은 "캐시 지연" 증상이라도 원인(재조회 자체가 안 걸림 vs 재조회 왕복 대기)이 다르면 처방도 다르다.
+- **한 데이터를 보여주는 캐시 키가 여러 개면 mutation 이 전부 무효화해야 한다.** 홈 통계(`['dashboard-stats']`)는 목록(`['places']`·`['activities']`)과 같은 데이터를 다른 키로 들고 있어, 목록만 무효화하면 홈이 staleTime(30초) 동안 이전 값을 보여준다(PR #156). 등록·수정·삭제·되돌리기 훅에서 `invalidateDashboardStats(qc)` 를 함께 호출한다.
+- **`transform` 이 걸린 조상 안의 `position: fixed` 는 뷰포트 기준이 아니다.** 당겨서 새로고침(`PullToRefresh`)처럼 화면을 translate 하는 래퍼는 FAB 같은 fixed 요소를 밖에 둔다(PR #156).
 - **낙관적 업데이트로 컴포넌트가 언마운트될 수 있으면 콜백은 훅 레벨에 둔다.** `.mutate(id, { onSuccess })`처럼 호출부에 넘긴 콜백은 그 시점에 카드가 이미 언마운트되면 실행되지 않는다(React Query 특성). 롤백·토스트는 `onMutate`/`onError`/`onSuccess`/`onSettled`로 훅에 결합해야 유실되지 않는다.
 - **`router.push`는 비동기이며 즉시 반환된다.** 성공 처리에서 로딩 상태(`isSubmitting`/`isPending`)를 곧바로 해제하면, 실제 화면 전환이 완료되기 전까지 버튼/다이얼로그가 재활성화된 채로 노출되는 갭이 생긴다. 별도 `navigating` 상태를 두어 push 호출 시점부터 전환 완료까지 계속 비활성 유지해야 한다.
 - **토스트는 "화면 전환 여부"가 아니라 "목적지가 결과를 자기확인해주는가"로 판단한다.** 신규 등록→상세처럼 목적지가 결과를 그대로 보여주면 토스트가 중복 신호다. 반면 삭제→목록처럼 부재(不在)만 보여주는 소극적 확인이거나, 패스코드 변경처럼 보안상 확인이 중요한 경우는 전환형이어도 토스트를 유지한다. "전환형=무조건 생략"으로 단순화하면 안 된다.

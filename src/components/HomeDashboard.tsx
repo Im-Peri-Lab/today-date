@@ -182,9 +182,7 @@ function PartnerInviteNotice() {
       </span>
       <span className="min-w-0 flex-1">
         <span className={styles.noticeTitle}>아직 혼자 쓰고 있어요</span>
-        <span className={styles.noticeDesc}>
-          파트너를 초대해 함께 위시리스트를 쌓아보세요
-        </span>
+        <span className={styles.noticeDesc}>파트너를 초대해 함께 위시리스트를 쌓아보세요</span>
       </span>
       <ChevronRight className={styles.noticeChevron} strokeWidth={1.75} aria-hidden="true" />
     </Link>
@@ -204,76 +202,86 @@ export function HomeDashboard({
   const queryClient = useQueryClient()
 
   return (
-    <div
-      className={cn(
-        styles.fill,
-        'mx-auto w-full max-w-xl px-5 pb-20 pt-4 lg:max-w-3xl lg:px-8 lg:pb-24 lg:pt-12'
-      )}
-    >
-      <PullToRefresh onRefresh={() => queryClient.refetchQueries({ queryKey: ['dashboard-stats'] })} />
-      <PageHeader title="오늘, 우리 어떻게 보낼까?" subtitle="우리 둘의 데이트를 채워가는 공간" />
-
-      {/* 페어링 전 상태 안내 — 기능 카드들보다 위(별도 계위) */}
-      {workspaceState === 'SOLO' && <PartnerInviteNotice />}
-
-      {/* 메인 CTA — 모바일 1열 배너 / 데스크탑(lg) 2열 */}
-      <div className="mt-5 grid grid-cols-1 gap-3 lg:grid-cols-2 lg:gap-4">
-        <CtaCard
-          href="/recommend/activity"
-          kind="activity"
-          eyebrow="ACTIVITY"
-          title="오늘 뭐할까?"
-          subtitle="딱 맞는 데이트 활동 추천 받기"
-        />
-        <CtaCard
-          href="/recommend/place"
-          kind="dining"
-          eyebrow="DINING"
-          title="오늘 뭐먹을까?"
-          subtitle="딱 좋은 데이트 맛집 추천 받기"
-        />
-      </div>
-
-      {/* 배너 ↔ 첫 섹션 여백(모바일 16~30, 남는 높이만큼 늘어남 — lg 는 .statSections margin-top) */}
-      <div className={styles.statSlack} aria-hidden />
-
-      {/* 통계 — 행형 리스트 2섹션 */}
-      <div className={styles.statSections}>
-        <StatSection label={STATUS_LABELS.wishlist}>
-          <StatTile
-            type="activity"
-            status="wishlist"
-            count={data?.wishlistActivities ?? 0}
-            previewTitles={data?.wishlistActivityTitles ?? []}
+    <>
+      <PullToRefresh
+        className={styles.fill}
+        onRefresh={() => queryClient.refetchQueries({ queryKey: ['dashboard-stats'] })}
+      >
+        <div
+          className={cn(
+            styles.fill,
+            'mx-auto w-full max-w-xl px-5 pb-20 pt-4 lg:max-w-3xl lg:px-8 lg:pb-24 lg:pt-12'
+          )}
+        >
+          <PageHeader
+            title="오늘, 우리 어떻게 보낼까?"
+            subtitle="우리 둘의 데이트를 채워가는 공간"
           />
-          <StatTile
-            type="place"
-            status="wishlist"
-            count={data?.wishlistPlaces ?? 0}
-            previewTitles={data?.wishlistPlaceTitles ?? []}
-          />
-        </StatSection>
 
-        {/* 섹션 사이 여백(모바일 12~15 — lg 는 .statSections gap) */}
-        <div className={styles.statGapSlack} aria-hidden />
+          {/* 페어링 전 상태 안내 — 기능 카드들보다 위(별도 계위) */}
+          {workspaceState === 'SOLO' && <PartnerInviteNotice />}
 
-        <StatSection label={STATUS_LABELS.visited}>
-          <StatTile
-            type="activity"
-            status="visited"
-            count={data?.visitedActivities ?? 0}
-            previewTitles={data?.visitedActivityTitles ?? []}
-          />
-          <StatTile
-            type="place"
-            status="visited"
-            count={data?.visitedPlaces ?? 0}
-            previewTitles={data?.visitedPlaceTitles ?? []}
-          />
-        </StatSection>
-      </div>
+          {/* 메인 CTA — 모바일 1열 배너 / 데스크탑(lg) 2열 */}
+          <div className="mt-5 grid grid-cols-1 gap-3 lg:grid-cols-2 lg:gap-4">
+            <CtaCard
+              href="/recommend/activity"
+              kind="activity"
+              eyebrow="ACTIVITY"
+              title="오늘 뭐할까?"
+              subtitle="딱 맞는 데이트 활동 추천 받기"
+            />
+            <CtaCard
+              href="/recommend/place"
+              kind="dining"
+              eyebrow="DINING"
+              title="오늘 뭐먹을까?"
+              subtitle="딱 좋은 데이트 맛집 추천 받기"
+            />
+          </div>
 
+          {/* 배너 ↔ 첫 섹션 여백(모바일 16~30, 남는 높이만큼 늘어남 — lg 는 .statSections margin-top) */}
+          <div className={styles.statSlack} aria-hidden />
+
+          {/* 통계 — 행형 리스트 2섹션 */}
+          <div className={styles.statSections}>
+            <StatSection label={STATUS_LABELS.wishlist}>
+              <StatTile
+                type="activity"
+                status="wishlist"
+                count={data?.wishlistActivities ?? 0}
+                previewTitles={data?.wishlistActivityTitles ?? []}
+              />
+              <StatTile
+                type="place"
+                status="wishlist"
+                count={data?.wishlistPlaces ?? 0}
+                previewTitles={data?.wishlistPlaceTitles ?? []}
+              />
+            </StatSection>
+
+            {/* 섹션 사이 여백(모바일 12~15 — lg 는 .statSections gap) */}
+            <div className={styles.statGapSlack} aria-hidden />
+
+            <StatSection label={STATUS_LABELS.visited}>
+              <StatTile
+                type="activity"
+                status="visited"
+                count={data?.visitedActivities ?? 0}
+                previewTitles={data?.visitedActivityTitles ?? []}
+              />
+              <StatTile
+                type="place"
+                status="visited"
+                count={data?.visitedPlaces ?? 0}
+                previewTitles={data?.visitedPlaceTitles ?? []}
+              />
+            </StatSection>
+          </div>
+        </div>
+      </PullToRefresh>
+
+      {/* position:fixed 라 화면과 함께 내려가는 래퍼 밖에 둔다 */}
       <HomeFab returnTo={HOME_RETURN_TO} />
-    </div>
+    </>
   )
 }

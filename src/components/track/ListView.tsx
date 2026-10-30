@@ -192,13 +192,13 @@ export function ListView() {
     initialTrack === 'activity' ? initialCategoryIds : []
   )
   const [actDuration, setActDuration] = useState(
-    initialTrack === 'activity' ? searchParams.get('duration_bucket') ?? '' : ''
+    initialTrack === 'activity' ? (searchParams.get('duration_bucket') ?? '') : ''
   )
   const [actTime, setActTime] = useState(
-    initialTrack === 'activity' ? searchParams.get('time_of_day') ?? '' : ''
+    initialTrack === 'activity' ? (searchParams.get('time_of_day') ?? '') : ''
   )
   const [actLocationType, setActLocationType] = useState(
-    initialTrack === 'activity' ? searchParams.get('location_type') ?? '' : ''
+    initialTrack === 'activity' ? (searchParams.get('location_type') ?? '') : ''
   )
 
   // 다이닝 필터
@@ -206,7 +206,7 @@ export function ListView() {
     initialTrack === 'place' ? initialCategoryIds : []
   )
   const [placeMeal, setPlaceMeal] = useState(
-    initialTrack === 'place' ? searchParams.get('meal_time') ?? '' : ''
+    initialTrack === 'place' ? (searchParams.get('meal_time') ?? '') : ''
   )
 
   const debouncedSearch = useDebounced(search, 300)
@@ -285,207 +285,224 @@ export function ListView() {
   }, [currentListReturnTo])
 
   return (
-    <div className={cn(styles.listBottom, 'mx-auto w-full max-w-4xl px-5 pt-4 lg:px-8 lg:pt-12')}>
+    <>
       <PullToRefresh
+        className="w-full"
         onRefresh={() =>
-          queryClient.refetchQueries({ queryKey: [track === 'activity' ? 'activities' : 'places'], type: 'active' })
+          queryClient.refetchQueries({
+            queryKey: [track === 'activity' ? 'activities' : 'places'],
+            type: 'active',
+          })
         }
-      />
-      {/* 헤더 + 제목/서브카피 (공용 PageHeader — 홈과 동일 간격) */}
-      <PageHeader title="우리의 위시리스트" homeNav />
-
-      {/* 탭 */}
-      <div className={cn(styles.tabBar, 'mt-4')} role="tablist">
-        <button
-          type="button"
-          role="tab"
-          aria-selected={track === 'activity'}
-          onClick={() => handleTrackChange('activity')}
-          className={cn(styles.tab, track === 'activity' && styles.tabActive)}
+      >
+        <div
+          className={cn(styles.listBottom, 'mx-auto w-full max-w-4xl px-5 pt-4 lg:px-8 lg:pt-12')}
         >
-          액티비티
-        </button>
-        <button
-          type="button"
-          role="tab"
-          aria-selected={track === 'place'}
-          onClick={() => handleTrackChange('place')}
-          className={cn(styles.tab, track === 'place' && styles.tabActive)}
-        >
-          다이닝
-        </button>
-      </div>
+          {/* 헤더 + 제목/서브카피 (공용 PageHeader — 홈과 동일 간격) */}
+          <PageHeader title="우리의 위시리스트" homeNav />
 
-      {/* ── 액티비티 탭 ── */}
-      {track === 'activity' && (
-        <div className="mt-4">
-          <StatusToggle value={status} onChange={handleStatusChange} />
+          {/* 탭 */}
+          <div className={cn(styles.tabBar, 'mt-4')} role="tablist">
+            <button
+              type="button"
+              role="tab"
+              aria-selected={track === 'activity'}
+              onClick={() => handleTrackChange('activity')}
+              className={cn(styles.tab, track === 'activity' && styles.tabActive)}
+            >
+              액티비티
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={track === 'place'}
+              onClick={() => handleTrackChange('place')}
+              className={cn(styles.tab, track === 'place' && styles.tabActive)}
+            >
+              다이닝
+            </button>
+          </div>
 
-          <FilterBar
-            count={activityFilterCount}
-            open={filtersOpen}
-            onToggle={() => setFiltersOpen((v) => !v)}
-            onReset={resetActivityFilters}
-            search={
-              <SearchBox value={search} onChange={setSearch} placeholder="제목·메모 검색" />
-            }
-          >
-            <div className="space-y-3">
-              <FilterGroup label="카테고리">
-                {activityCats.data?.map((c) => (
-                  <Chip
-                    key={c.id}
-                    active={actCats.includes(c.id)}
-                    onClick={() => toggleCat(actCats, c.id, setActCats)}
-                  >
-                    <CategoryIcon name={c.name} className="h-3.5 w-3.5" />
-                    {c.name}
-                  </Chip>
-                ))}
-              </FilterGroup>
-              <FilterGroup label="실내/실외">
-                {LOCATION_TYPE_OPTIONS.map((o) => (
-                  <Chip
-                    key={o.value}
-                    active={actLocationType === o.value}
-                    onClick={() =>
-                      setActLocationType(actLocationType === o.value ? '' : o.value)
+          {/* ── 액티비티 탭 ── */}
+          {track === 'activity' && (
+            <div className="mt-4">
+              <StatusToggle value={status} onChange={handleStatusChange} />
+
+              <FilterBar
+                count={activityFilterCount}
+                open={filtersOpen}
+                onToggle={() => setFiltersOpen((v) => !v)}
+                onReset={resetActivityFilters}
+                search={
+                  <SearchBox value={search} onChange={setSearch} placeholder="제목·메모 검색" />
+                }
+              >
+                <div className="space-y-3">
+                  <FilterGroup label="카테고리">
+                    {activityCats.data?.map((c) => (
+                      <Chip
+                        key={c.id}
+                        active={actCats.includes(c.id)}
+                        onClick={() => toggleCat(actCats, c.id, setActCats)}
+                      >
+                        <CategoryIcon name={c.name} className="h-3.5 w-3.5" />
+                        {c.name}
+                      </Chip>
+                    ))}
+                  </FilterGroup>
+                  <FilterGroup label="실내/실외">
+                    {LOCATION_TYPE_OPTIONS.map((o) => (
+                      <Chip
+                        key={o.value}
+                        active={actLocationType === o.value}
+                        onClick={() =>
+                          setActLocationType(actLocationType === o.value ? '' : o.value)
+                        }
+                      >
+                        {o.label}
+                      </Chip>
+                    ))}
+                  </FilterGroup>
+                  <FilterGroup label="소요시간">
+                    {DURATION_OPTIONS.map((o) => (
+                      <Chip
+                        key={o.value}
+                        active={actDuration === o.value}
+                        onClick={() => setActDuration(actDuration === o.value ? '' : o.value)}
+                      >
+                        {o.label}
+                      </Chip>
+                    ))}
+                  </FilterGroup>
+                  <FilterGroup label="시간대">
+                    {TIME_OPTIONS.map((o) => (
+                      <Chip
+                        key={o.value}
+                        active={actTime === o.value}
+                        onClick={() => setActTime(actTime === o.value ? '' : o.value)}
+                      >
+                        {o.label}
+                      </Chip>
+                    ))}
+                  </FilterGroup>
+                </div>
+              </FilterBar>
+
+              <div className="mt-4">
+                {activitiesQ.isLoading ? (
+                  <CardGridSkeleton />
+                ) : activitiesQ.data && activitiesQ.data.length > 0 ? (
+                  <div className={GRID}>
+                    {activitiesQ.data.map((a) => (
+                      <ActivityCard key={a.id} activity={a} returnTo={currentListReturnTo} />
+                    ))}
+                  </div>
+                ) : activityFiltering ? (
+                  <EmptyState
+                    noResults
+                    message="찾으시는 항목이 없어요 💜"
+                    hint="다른 검색어나 필터로 시도해보세요"
+                  />
+                ) : (
+                  <EmptyState
+                    message={
+                      status === 'wishlist'
+                        ? '아직 가보고 싶은 액티비티가 없어요'
+                        : '아직 다녀온 액티비티가 없어요'
                     }
-                  >
-                    {o.label}
-                  </Chip>
-                ))}
-              </FilterGroup>
-              <FilterGroup label="소요시간">
-                {DURATION_OPTIONS.map((o) => (
-                  <Chip
-                    key={o.value}
-                    active={actDuration === o.value}
-                    onClick={() => setActDuration(actDuration === o.value ? '' : o.value)}
-                  >
-                    {o.label}
-                  </Chip>
-                ))}
-              </FilterGroup>
-              <FilterGroup label="시간대">
-                {TIME_OPTIONS.map((o) => (
-                  <Chip
-                    key={o.value}
-                    active={actTime === o.value}
-                    onClick={() => setActTime(actTime === o.value ? '' : o.value)}
-                  >
-                    {o.label}
-                  </Chip>
-                ))}
-              </FilterGroup>
-            </div>
-          </FilterBar>
-
-          <div className="mt-4">
-            {activitiesQ.isLoading ? (
-              <CardGridSkeleton />
-            ) : activitiesQ.data && activitiesQ.data.length > 0 ? (
-              <div className={GRID}>
-                {activitiesQ.data.map((a) => (
-                  <ActivityCard key={a.id} activity={a} returnTo={currentListReturnTo} />
-                ))}
+                    hint="함께 하고 싶은 액티비티를 추가해 보세요"
+                    addHref={buildDetailHref('/activities/new', {
+                      returnTo: currentListReturnTo,
+                    })}
+                    addLabel="첫 액티비티 추가하기"
+                  />
+                )}
               </div>
-            ) : activityFiltering ? (
-              <EmptyState
-                noResults
-                message="찾으시는 항목이 없어요 💜"
-                hint="다른 검색어나 필터로 시도해보세요"
-              />
-            ) : (
-              <EmptyState
-                message={
-                  status === 'wishlist'
-                    ? '아직 가보고 싶은 액티비티가 없어요'
-                    : '아직 다녀온 액티비티가 없어요'
-                }
-                hint="함께 하고 싶은 액티비티를 추가해 보세요"
-                addHref={buildDetailHref('/activities/new', { returnTo: currentListReturnTo })}
-                addLabel="첫 액티비티 추가하기"
-              />
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* ── 다이닝 탭 ── */}
-      {track === 'place' && (
-        <div className="mt-4">
-          <StatusToggle value={status} onChange={handleStatusChange} />
-
-          <FilterBar
-            count={placeFilterCount}
-            open={filtersOpen}
-            onToggle={() => setFiltersOpen((v) => !v)}
-            onReset={resetPlaceFilters}
-            search={
-              <SearchBox value={search} onChange={setSearch} placeholder="제목·메모·지역 검색" />
-            }
-          >
-            <div className="space-y-3">
-              <FilterGroup label="카테고리">
-                {placeCatsQuery.data?.map((c) => (
-                  <Chip
-                    key={c.id}
-                    active={placeCats.includes(c.id)}
-                    onClick={() => toggleCat(placeCats, c.id, setPlaceCats)}
-                  >
-                    <CategoryIcon name={c.name} className="h-3.5 w-3.5" />
-                    {c.name}
-                  </Chip>
-                ))}
-              </FilterGroup>
-              <FilterGroup label="식사시간">
-                {MEAL_OPTIONS.map((o) => (
-                  <Chip
-                    key={o.value}
-                    active={placeMeal === o.value}
-                    onClick={() => setPlaceMeal(placeMeal === o.value ? '' : o.value)}
-                  >
-                    {o.label}
-                  </Chip>
-                ))}
-              </FilterGroup>
             </div>
-          </FilterBar>
+          )}
 
-          <div className="mt-4">
-            {placesQ.isLoading ? (
-              <CardGridSkeleton />
-            ) : placesQ.data && placesQ.data.length > 0 ? (
-              <div className={GRID}>
-                {placesQ.data.map((p) => (
-                  <PlaceCard key={p.id} place={p} returnTo={currentListReturnTo} />
-                ))}
-              </div>
-            ) : placeFiltering ? (
-              <EmptyState
-                noResults
-                message="찾으시는 항목이 없어요 💜"
-                hint="다른 검색어나 필터로 시도해보세요"
-              />
-            ) : (
-              <EmptyState
-                message={
-                  status === 'wishlist'
-                    ? '아직 가보고 싶은 다이닝이 없어요'
-                    : '아직 다녀온 다이닝이 없어요'
+          {/* ── 다이닝 탭 ── */}
+          {track === 'place' && (
+            <div className="mt-4">
+              <StatusToggle value={status} onChange={handleStatusChange} />
+
+              <FilterBar
+                count={placeFilterCount}
+                open={filtersOpen}
+                onToggle={() => setFiltersOpen((v) => !v)}
+                onReset={resetPlaceFilters}
+                search={
+                  <SearchBox
+                    value={search}
+                    onChange={setSearch}
+                    placeholder="제목·메모·지역 검색"
+                  />
                 }
-                hint="가고 싶은 다이닝을 추가해 보세요"
-                addHref={buildDetailHref('/places/new', { returnTo: currentListReturnTo })}
-                addLabel="첫 다이닝 추가하기"
-              />
-            )}
-          </div>
-        </div>
-      )}
+              >
+                <div className="space-y-3">
+                  <FilterGroup label="카테고리">
+                    {placeCatsQuery.data?.map((c) => (
+                      <Chip
+                        key={c.id}
+                        active={placeCats.includes(c.id)}
+                        onClick={() => toggleCat(placeCats, c.id, setPlaceCats)}
+                      >
+                        <CategoryIcon name={c.name} className="h-3.5 w-3.5" />
+                        {c.name}
+                      </Chip>
+                    ))}
+                  </FilterGroup>
+                  <FilterGroup label="식사시간">
+                    {MEAL_OPTIONS.map((o) => (
+                      <Chip
+                        key={o.value}
+                        active={placeMeal === o.value}
+                        onClick={() => setPlaceMeal(placeMeal === o.value ? '' : o.value)}
+                      >
+                        {o.label}
+                      </Chip>
+                    ))}
+                  </FilterGroup>
+                </div>
+              </FilterBar>
 
-      {/* FAB — 홈과 동일 (액티비티/다이닝 추가 메뉴) */}
+              <div className="mt-4">
+                {placesQ.isLoading ? (
+                  <CardGridSkeleton />
+                ) : placesQ.data && placesQ.data.length > 0 ? (
+                  <div className={GRID}>
+                    {placesQ.data.map((p) => (
+                      <PlaceCard key={p.id} place={p} returnTo={currentListReturnTo} />
+                    ))}
+                  </div>
+                ) : placeFiltering ? (
+                  <EmptyState
+                    noResults
+                    message="찾으시는 항목이 없어요 💜"
+                    hint="다른 검색어나 필터로 시도해보세요"
+                  />
+                ) : (
+                  <EmptyState
+                    message={
+                      status === 'wishlist'
+                        ? '아직 가보고 싶은 다이닝이 없어요'
+                        : '아직 다녀온 다이닝이 없어요'
+                    }
+                    hint="가고 싶은 다이닝을 추가해 보세요"
+                    addHref={buildDetailHref('/places/new', {
+                      returnTo: currentListReturnTo,
+                    })}
+                    addLabel="첫 다이닝 추가하기"
+                  />
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      </PullToRefresh>
+
+      {/* FAB — 홈과 동일 (액티비티/다이닝 추가 메뉴). position:fixed 라 래퍼 밖에 둔다 */}
       <HomeFab returnTo={currentListReturnTo} />
-    </div>
+    </>
   )
 }

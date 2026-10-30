@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import type { Place, Status } from '@/types'
 import { fetchJson } from './fetcher'
+import { invalidateDashboardStats } from './useDashboardStats'
 
 export interface PlaceFilters {
   status: Status
@@ -62,6 +63,7 @@ export function useUpdatePlace() {
       // 미마운트 상태(사용자가 상세/폼에 있을 때)에서도 즉시 백그라운드 재조회되도록
       // refetchType: 'all'. /list 복귀 시 stale 프레임 없이 최신 목록이 보인다.
       qc.invalidateQueries({ queryKey: ['places'], refetchType: 'all' })
+      invalidateDashboardStats(qc)
     },
   })
 }
@@ -93,6 +95,7 @@ export function useDeletePlace() {
     // 성공/실패 모두 서버 상태와 최종 정합
     onSettled: () => {
       qc.invalidateQueries({ queryKey: ['places'] })
+      invalidateDashboardStats(qc)
     },
   })
 }

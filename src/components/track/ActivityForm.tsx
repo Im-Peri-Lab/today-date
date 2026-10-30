@@ -14,6 +14,7 @@ import { buildDetailHref } from '@/lib/listReturn'
 import { activityFormSchema, type ActivityFormValues } from '@/lib/schemas/activitySchema'
 import { emptyToNull } from '@/lib/schemas/apiFields'
 import { fetchJson } from '@/hooks/fetcher'
+import { invalidateDashboardStats } from '@/hooks/useDashboardStats'
 import type { Activity } from '@/types'
 
 export function ActivityForm({ prefill, returnTo }: { prefill?: boolean; returnTo?: string }) {
@@ -72,6 +73,7 @@ export function ActivityForm({ prefill, returnTo }: { prefill?: boolean; returnT
     // 리스트는 미마운트 상태(사용자가 상세로 이동)라도 즉시 백그라운드 재조회되도록
     // refetchType: 'all'. 복귀 시 새 항목이 누락되지 않고 바로 보인다.
     queryClient.invalidateQueries({ queryKey: ['activities'], refetchType: 'all' })
+    invalidateDashboardStats(queryClient)
 
     if (continueAdding) {
       reset()

@@ -23,7 +23,7 @@ export function PlannedAtField({ value, onChange, error }: PlannedAtFieldProps) 
         value={value}
         onChange={onChange}
         onClear={() => onChange('')}
-        placeholder="가기로 한 날짜 (선택)"
+        placeholder="날짜 선택"
       />
     </FormField>
   )

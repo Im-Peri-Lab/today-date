@@ -80,7 +80,6 @@ export function PlannedAtDialog({ open, onOpenChange, track, id, title, value }:
             id="planned_at_dialog"
             value={date}
             onChange={setDate}
-            placeholder="가기로 한 날짜"
           />
         </div>
 

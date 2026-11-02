@@ -9,7 +9,6 @@ import {
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu'
 import { STATUS_MENU_LABELS } from '@/lib/labels'
-import { formatDotDate } from '@/lib/date'
 import type { Status } from '@/types'
 import styles from '@/components/screens.module.css'
 
@@ -26,7 +25,7 @@ interface ItemMenuProps {
   onDelete: () => void
   onMarkVisited: () => void
   onRevert: () => void
-  /** 방문 예정일 등록/수정 다이얼로그 열기 (위시리스트 전용) */
+  /** 방문 예정일 항목 — 값 없으면 등록 다이얼로그, 있으면 확인 후 지우기("날짜 미정으로"). 수정은 상세 연필에서만 */
   onEditPlanned: () => void
 }
 
@@ -66,11 +65,11 @@ export function ItemMenu({
           <Copy />
           복사하기
         </DropdownMenuItem>
-        {/* 방문 예정일 — 위시리스트 전용. 값이 없으면 등록 진입, 있으면 날짜를 보여주며 수정 진입 */}
+        {/* 방문 예정일 — 위시리스트 전용. 값이 없으면 등록 진입, 있으면 날짜 미정으로(확인 후 지움) */}
         {!isVisited && (
           <DropdownMenuItem onClick={onEditPlanned}>
             <Calendar />
-            {plannedAt ? `방문 예정 ${formatDotDate(plannedAt)}` : '언제 갈까요?'}
+            {plannedAt ? '날짜 미정으로' : '언제 갈까요?'}
           </DropdownMenuItem>
         )}
         {isVisited ? (

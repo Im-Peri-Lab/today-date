@@ -2,10 +2,8 @@
 
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { Calendar, CalendarX } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { Calendar } from 'lucide-react'
 import { DetailBlock } from './DetailBlock'
-import { PlannedAtDialog } from './PlannedAtDialog'
 import { RevertConfirmDialog } from './RevertConfirmDialog'
 import { useUpdateActivity } from '@/hooks/useActivities'
 import { useUpdatePlace } from '@/hooks/usePlaces'
@@ -16,16 +14,18 @@ import styles from '@/components/screens.module.css'
 interface PlannedAtBlockProps {
   track: 'activity' | 'place'
   id: string
-  title: string
-  plannedAt: string | null
+  /** 저장된 방문 예정일(ISO). 값이 있을 때만 이 블록을 렌더한다(호출부 책임) */
+  plannedAt: string
+  /** 연필 → 날짜 수정 다이얼로그(PlannedAtDialog)는 호출부가 소유 — 하단 "언제 갈까요?"와 공용 */
+  onEdit: () => void
 }
 
 /**
- * 방문 예정 블록 — 방문 기록 블록과 같은 계위(DetailBlock 셸). 위시리스트에서만 렌더(호출부 책임).
- * 값 없음: "언제 갈까요?" → 날짜 다이얼로그 / 값 있음: 날짜 + "날짜 미정으로"(확인 거침) + 연필(날짜 수정).
+ * 방문 예정 블록 — 방문 기록 블록과 같은 생명주기. 값이 없으면 블록 없이 하단 "언제 갈까요?" 버튼만,
+ * 저장하면 블록 등장(+버튼 사라짐), 휴지통 → 확인 후 지우면 블록 사라지고 버튼 복귀.
+ * 연필(수정)·휴지통(지우기)은 등록 정보 블록의 연필+복사하기 쌍과 같은 mapActionBtn 슬롯.
  */
-export function PlannedAtBlock({ track, id, title, plannedAt }: PlannedAtBlockProps) {
-  const [dateOpen, setDateOpen] = useState(false)
+export function PlannedAtBlock({ track, id, plannedAt, onEdit }: PlannedAtBlockProps) {
   const [clearOpen, setClearOpen] = useState(false)
   const updateActivity = useUpdateActivity()
   const updatePlace = useUpdatePlace()
@@ -49,45 +49,18 @@ export function PlannedAtBlock({ track, id, title, plannedAt }: PlannedAtBlockPr
       <DetailBlock
         title="방문 예정"
         editing={false}
-        hideEdit={!plannedAt}
-        onEdit={() => setDateOpen(true)}
+        onEdit={onEdit}
+        onClear={() => setClearOpen(true)}
         onCancel={() => {}}
         onSave={() => {}}
         saving={false}
       >
-        {plannedAt ? (
-          <div key="set" className="flex items-center justify-between gap-3">
-            <span className={cn('inline-flex items-center gap-1.5', styles.bodyText)}>
-              <Calendar className={cn('h-3.5 w-3.5 shrink-0', styles.accent)} />
-              {formatDotDate(plannedAt)}
-            </span>
-            <Button variant="outline" className="h-9 gap-1.5 px-4" onClick={() => setClearOpen(true)}>
-              <CalendarX className="h-4 w-4" />
-              날짜 미정으로
-            </Button>
-          </div>
-        ) : (
-          <div key="empty" className="flex items-center justify-between gap-3">
-            <span className={styles.faint}>아직 방문 예정일이 없어요</span>
-            <Button
-              className={cn(styles.detailPrimaryBtn, 'h-9 gap-1.5 px-4 text-white hover:brightness-105')}
-              onClick={() => setDateOpen(true)}
-            >
-              <Calendar className="h-4 w-4" />
-              언제 갈까요?
-            </Button>
-          </div>
-        )}
+        <span className={cn('inline-flex items-center gap-1.5', styles.bodyText)}>
+          <Calendar className={cn('h-3.5 w-3.5 shrink-0', styles.accent)} />
+          {formatDotDate(plannedAt)}
+        </span>
       </DetailBlock>
 
-      <PlannedAtDialog
-        open={dateOpen}
-        onOpenChange={setDateOpen}
-        track={track}
-        id={id}
-        title={title}
-        value={plannedAt}
-      />
       <RevertConfirmDialog
         open={clearOpen}
         onOpenChange={setClearOpen}

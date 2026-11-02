@@ -37,6 +37,7 @@ export function PlaceCard({ place, hideMenu, actionSlot, returnTo }: PlaceCardPr
   const [visitedOpen, setVisitedOpen] = useState(false)
   const [revertOpen, setRevertOpen] = useState(false)
   const [plannedOpen, setPlannedOpen] = useState(false)
+  const [clearPlannedOpen, setClearPlannedOpen] = useState(false)
   const del = useDeletePlace()
   const update = useUpdatePlace()
 
@@ -56,6 +57,19 @@ export function PlaceCard({ place, hideMenu, actionSlot, returnTo }: PlaceCardPr
         onSuccess: () => {
           setRevertOpen(false)
           toast.success(`${STATUS_LABELS.wishlist}으로 옮겼어요`)
+        },
+        onError: () => toast.error('변경 중 오류가 발생했습니다.'),
+      }
+    )
+  }
+
+  function handleClearPlanned() {
+    update.mutate(
+      { id: place.id, patch: { planned_at: null } },
+      {
+        onSuccess: () => {
+          setClearPlannedOpen(false)
+          toast.success('방문 예정일을 비웠어요')
         },
         onError: () => toast.error('변경 중 오류가 발생했습니다.'),
       }
@@ -92,7 +106,7 @@ export function PlaceCard({ place, hideMenu, actionSlot, returnTo }: PlaceCardPr
             onDelete={() => setDeleteOpen(true)}
             onMarkVisited={() => setVisitedOpen(true)}
             onRevert={() => setRevertOpen(true)}
-            onEditPlanned={() => setPlannedOpen(true)}
+            onEditPlanned={() => (place.planned_at ? setClearPlannedOpen(true) : setPlannedOpen(true))}
           />
         </div>
       )}
@@ -192,6 +206,15 @@ export function PlaceCard({ place, hideMenu, actionSlot, returnTo }: PlaceCardPr
           rating: place.rating,
           review_note: place.review_note,
         }}
+      />
+      <RevertConfirmDialog
+        open={clearPlannedOpen}
+        onOpenChange={setClearPlannedOpen}
+        loading={update.isPending}
+        onConfirm={handleClearPlanned}
+        title="날짜 미정으로 되돌릴까요?"
+        description="입력한 방문 예정일이 삭제됩니다."
+        confirmLabel="미정으로"
       />
       <PlannedAtDialog
         open={plannedOpen}

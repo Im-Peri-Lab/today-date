@@ -44,6 +44,7 @@ export function ActivityCard({ activity, hideMenu, actionSlot, returnTo }: Activ
   const [visitedOpen, setVisitedOpen] = useState(false)
   const [revertOpen, setRevertOpen] = useState(false)
   const [plannedOpen, setPlannedOpen] = useState(false)
+  const [clearPlannedOpen, setClearPlannedOpen] = useState(false)
   const del = useDeleteActivity()
   const update = useUpdateActivity()
 
@@ -63,6 +64,19 @@ export function ActivityCard({ activity, hideMenu, actionSlot, returnTo }: Activ
         onSuccess: () => {
           setRevertOpen(false)
           toast.success(`${STATUS_LABELS.wishlist}으로 옮겼어요`)
+        },
+        onError: () => toast.error('변경 중 오류가 발생했습니다.'),
+      }
+    )
+  }
+
+  function handleClearPlanned() {
+    update.mutate(
+      { id: activity.id, patch: { planned_at: null } },
+      {
+        onSuccess: () => {
+          setClearPlannedOpen(false)
+          toast.success('방문 예정일을 비웠어요')
         },
         onError: () => toast.error('변경 중 오류가 발생했습니다.'),
       }
@@ -101,7 +115,7 @@ export function ActivityCard({ activity, hideMenu, actionSlot, returnTo }: Activ
             onDelete={() => setDeleteOpen(true)}
             onMarkVisited={() => setVisitedOpen(true)}
             onRevert={() => setRevertOpen(true)}
-            onEditPlanned={() => setPlannedOpen(true)}
+            onEditPlanned={() => (activity.planned_at ? setClearPlannedOpen(true) : setPlannedOpen(true))}
           />
         </div>
       )}
@@ -210,6 +224,15 @@ export function ActivityCard({ activity, hideMenu, actionSlot, returnTo }: Activ
           rating: activity.rating,
           review_note: activity.review_note,
         }}
+      />
+      <RevertConfirmDialog
+        open={clearPlannedOpen}
+        onOpenChange={setClearPlannedOpen}
+        loading={update.isPending}
+        onConfirm={handleClearPlanned}
+        title="날짜 미정으로 되돌릴까요?"
+        description="입력한 방문 예정일이 삭제됩니다."
+        confirmLabel="미정으로"
       />
       <PlannedAtDialog
         open={plannedOpen}

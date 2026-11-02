@@ -1,7 +1,7 @@
 'use client'
 
 import { ReactNode } from 'react'
-import { Pencil, Copy, Loader2 } from 'lucide-react'
+import { Pencil, Copy, Trash2, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import styles from '@/components/screens.module.css'
@@ -19,6 +19,10 @@ interface DetailBlockProps {
    * 연필과 같은 absolute 패턴 — 텍스트 행 흐름에 끼우지 않아 행 높이를 늘리지 않는다.
    */
   onCopy?: () => void
+  /**
+   * 지우기 (보기 모드 전용). 제공되면 연필 바로 왼쪽에 휴지통 버튼 — 복사하기와 같은 슬롯·크기(둘은 함께 쓰지 않는다).
+   */
+  onClear?: () => void
   /** true 면 연필(수정) 버튼을 숨긴다 — 값이 없을 때 메인 버튼이 진입점인 블록용 */
   hideEdit?: boolean
   /**
@@ -55,6 +59,7 @@ export function DetailBlock({
   onSave,
   saving,
   onCopy,
+  onClear,
   hideEdit,
   blockTitle,
   blockCategory,
@@ -98,9 +103,20 @@ export function DetailBlock({
         </button>
       )}
 
+      {!editing && onClear && (
+        <button
+          type="button"
+          className={cn(styles.mapActionBtn, 'absolute top-[1.0625rem] right-[2.9375rem] lg:top-[1.3125rem] lg:right-[3.1875rem]')}
+          onClick={onClear}
+          aria-label={`${title} 지우기`}
+        >
+          <Trash2 className="h-4 w-4" />
+        </button>
+      )}
+
       {/* 블록 헤더 — showHeader 일 때만 렌더 */}
       {showHeader && (
-        <div className={cn(!editing && !hideEdit && (onCopy ? 'pr-16' : 'pr-10'))}>
+        <div className={cn(!editing && !hideEdit && (onCopy || onClear ? 'pr-16' : 'pr-10'))}>
           {/* 섹션 라벨: blockTitle이 없는 블록(방문 기록 등)에서만 표시 */}
           {!blockTitle && (
             <h2 className={cn('text-sm font-medium', styles.ink)}>

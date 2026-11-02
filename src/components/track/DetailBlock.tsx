@@ -20,7 +20,7 @@ interface DetailBlockProps {
    */
   onCopy?: () => void
   /**
-   * 지우기 (보기 모드 전용). 제공되면 연필 바로 왼쪽에 휴지통 버튼 — 복사하기와 같은 슬롯·크기(둘은 함께 쓰지 않는다).
+   * 지우기 (보기 모드 전용). 제공되면 휴지통이 모서리 앵커를 차지하고 연필이 그 바로 왼쪽으로 붙는다(연필-휴지통 순). 같은 mapActionBtn 슬롯·크기. 복사하기와 함께 쓰지 않는다.
    */
   onClear?: () => void
   /** true 면 연필(수정) 버튼을 숨긴다 — 값이 없을 때 메인 버튼이 진입점인 블록용 */
@@ -83,7 +83,7 @@ export function DetailBlock({
       {!editing && !hideEdit && (
         <button
           type="button"
-          className={cn(styles.mapActionBtn, 'absolute top-[1.0625rem] right-[1.0625rem] lg:top-[1.3125rem] lg:right-[1.3125rem]')}
+          className={cn(styles.mapActionBtn, onClear ? 'absolute top-[1.0625rem] right-[2.9375rem] lg:top-[1.3125rem] lg:right-[3.1875rem]' : 'absolute top-[1.0625rem] right-[1.0625rem] lg:top-[1.3125rem] lg:right-[1.3125rem]')}
           onClick={onEdit}
           aria-label={`${title} 수정`}
         >
@@ -106,7 +106,7 @@ export function DetailBlock({
       {!editing && onClear && (
         <button
           type="button"
-          className={cn(styles.mapActionBtn, 'absolute top-[1.0625rem] right-[2.9375rem] lg:top-[1.3125rem] lg:right-[3.1875rem]')}
+          className={cn(styles.mapActionBtn, 'absolute top-[1.0625rem] right-[1.0625rem] lg:top-[1.3125rem] lg:right-[1.3125rem]')}
           onClick={onClear}
           aria-label={`${title} 지우기`}
         >

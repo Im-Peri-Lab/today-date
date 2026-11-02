@@ -232,8 +232,7 @@ export function ActivityCard({ activity, hideMenu, actionSlot, returnTo }: Activ
         onConfirm={handleClearPlanned}
         title="날짜 미정으로 되돌릴까요?"
         description="입력한 방문 예정일이 삭제됩니다."
-        confirmLabel="미정으로"
-      />
+              />
       <PlannedAtDialog
         open={plannedOpen}
         onOpenChange={setPlannedOpen}

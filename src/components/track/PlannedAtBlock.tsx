@@ -23,7 +23,7 @@ interface PlannedAtBlockProps {
 /**
  * 방문 예정 블록 — 방문 기록 블록과 같은 생명주기. 값이 없으면 블록 없이 하단 "언제 갈까요?" 버튼만,
  * 저장하면 블록 등장(+버튼 사라짐), 휴지통 → 확인 후 지우면 블록 사라지고 버튼 복귀.
- * 연필(수정)·휴지통(지우기)은 등록 정보 블록의 연필+복사하기 쌍과 같은 mapActionBtn 슬롯.
+ * 연필(수정)-휴지통(지우기) 순, 휴지통이 모서리 앵커. 등록 정보 블록의 쌍과 같은 mapActionBtn 슬롯·간격.
  */
 export function PlannedAtBlock({ track, id, plannedAt, onEdit }: PlannedAtBlockProps) {
   const [clearOpen, setClearOpen] = useState(false)
@@ -68,8 +68,7 @@ export function PlannedAtBlock({ track, id, plannedAt, onEdit }: PlannedAtBlockP
         onConfirm={handleClear}
         title="날짜 미정으로 되돌릴까요?"
         description="입력한 방문 예정일이 삭제됩니다."
-        confirmLabel="미정으로"
-      />
+              />
     </>
   )
 }

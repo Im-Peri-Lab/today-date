@@ -55,6 +55,7 @@ export function ActivityForm({ prefill, returnTo }: { prefill?: boolean; returnT
       reference_url: emptyToNull(values.reference_url),
       location: emptyToNull(values.location),
       memo: emptyToNull(values.memo),
+      planned_at: emptyToNull(values.planned_at),
     }
 
     let created: Activity
@@ -98,7 +99,7 @@ export function ActivityForm({ prefill, returnTo }: { prefill?: boolean; returnT
       isSubmitting={isSubmitting || navigating}
       submitLabel="액티비티 등록하기"
     >
-      <ActivityFields register={register} errors={errors} watch={watch} setValue={setValue} />
+      <ActivityFields register={register} errors={errors} watch={watch} setValue={setValue} showPlannedAt />
     </FormLayout>
   )
 }

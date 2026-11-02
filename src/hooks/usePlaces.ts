@@ -11,6 +11,7 @@ export interface PlaceFilters {
   categoryIds?: string[]
   area?: string
   meal_time?: string
+  planned_only?: boolean
   q?: string
 }
 
@@ -22,6 +23,7 @@ function buildPlaceParams(filters: PlaceFilters) {
   }
   if (filters.area) params.set('area', filters.area)
   if (filters.meal_time) params.set('meal_time', filters.meal_time)
+  if (filters.planned_only) params.set('planned_only', 'true')
   if (filters.q) params.set('q', filters.q)
   return params.toString()
 }

@@ -6,6 +6,7 @@ import {
   apiMemoSchema,
   apiNicknameSchema,
   apiReferenceUrlSchema,
+  apiPlannedAtSchema,
   apiListQueryBase,
   splitCommaIds,
   emptyToNull,
@@ -140,5 +141,22 @@ describe('emptyToNull', () => {
 
   it('값이 있으면 그대로 반환한다', () => {
     expect(emptyToNull('망원동')).toBe('망원동')
+  })
+})
+
+describe('apiPlannedAtSchema', () => {
+  it('YYYY-MM-DD 는 통과, 빈 문자열은 null 로 정규화한다', () => {
+    expect(apiPlannedAtSchema.parse('2026-07-09')).toBe('2026-07-09')
+    expect(apiPlannedAtSchema.parse('')).toBeNull()
+    expect(apiPlannedAtSchema.parse(null)).toBeNull()
+  })
+
+  it('미지정은 undefined(변경 없음)로 유지한다', () => {
+    expect(apiPlannedAtSchema.parse(undefined)).toBeUndefined()
+  })
+
+  it('날짜 형식이 아니면 거부한다', () => {
+    expect(apiPlannedAtSchema.safeParse('26.07.09').success).toBe(false)
+    expect(apiPlannedAtSchema.safeParse('2026-07-09T00:00:00Z').success).toBe(false)
   })
 })

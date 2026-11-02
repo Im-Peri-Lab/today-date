@@ -8,7 +8,7 @@ import { useState, useRef, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
-import { ArrowLeft, Trash2, CheckCircle2, Undo2, Compass, ExternalLink, Utensils } from 'lucide-react'
+import { ArrowLeft, Trash2, CheckCircle2, Undo2, Compass, ExternalLink, Utensils, Calendar } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { CategoryBadge } from './CategoryBadge'
@@ -26,6 +26,7 @@ import type { Place } from '@/types'
 import { MEAL_LABELS, STATUS_LABELS, STATUS_MENU_LABELS } from '@/lib/labels'
 import { buildDetailHref, DEFAULT_LIST_RETURN_TO, getReturnLabel } from '@/lib/listReturn'
 import { stashPlaceDuplicate } from '@/lib/duplicatePrefill'
+import { formatDotDate } from '@/lib/date'
 import { cn } from '@/lib/utils'
 import { resolveHref } from '@/lib/url'
 import { MapLink } from './MapLink'
@@ -80,6 +81,7 @@ export function PlaceDetail({ id, initialData, initialEdit, returnTo }: Props) {
       meal_times: place.meal_times,
       memo: place.memo ?? '',
       reference_url: place.reference_url ?? '',
+      planned_at: place.planned_at ?? '',
     })
   }
 
@@ -147,8 +149,12 @@ export function PlaceDetail({ id, initialData, initialEdit, returnTo }: Props) {
 
   const onSaveInfo = handleSubmit(async (values) => {
     if (!place) return
+    // 방문 예정일은 위시리스트일 때만 폼에 노출되므로, 그 외 상태에선 payload 에서 빼서
+    // 보존된 값을 건드리지 않는다(상태 전환으로 값을 지우지 않는 규칙).
+    const { planned_at, ...rest } = values
     const payload = {
-      ...values,
+      ...rest,
+      ...(place.status === 'wishlist' && { planned_at: planned_at || null }),
       category_id: values.category_id || null,
       reference_url: values.reference_url || null,
       location: values.location || null,
@@ -215,6 +221,7 @@ export function PlaceDetail({ id, initialData, initialEdit, returnTo }: Props) {
                   errors={errors}
                   watch={watch}
                   setValue={setValue}
+                  showPlannedAt={place.status === 'wishlist'}
                 />
               ) : (
                 /* 짧은 값: 2열 그리드 / 긴 텍스트(메모·링크): wide로 전체폭 / 모바일: 1열 */
@@ -241,6 +248,19 @@ export function PlaceDetail({ id, initialData, initialEdit, returnTo }: Props) {
                         <Compass className={cn('h-3.5 w-3.5 shrink-0', styles.faint)} />
                         {place.area}
                       </span>
+                    </DetailRow>
+                  )}
+                  {/* 방문 예정일 — 위시리스트에서만 노출(다녀온 곳은 방문 기록 블록이 날짜를 보여준다) */}
+                  {place.status === 'wishlist' && (
+                    <DetailRow label="방문 예정일">
+                      {place.planned_at ? (
+                        <span className="inline-flex items-center gap-1.5">
+                          <Calendar className={cn('h-3.5 w-3.5 shrink-0', styles.accent)} />
+                          {formatDotDate(place.planned_at)}
+                        </span>
+                      ) : (
+                        <span className={styles.faint}>방문 예정일이 없어요</span>
+                      )}
                     </DetailRow>
                   )}
                   <DetailRow label="위치" wide>

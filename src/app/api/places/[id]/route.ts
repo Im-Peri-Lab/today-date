@@ -11,6 +11,7 @@ import {
   apiLocationSchema,
   apiMemoSchema,
   apiReferenceUrlSchema,
+  apiPlannedAtSchema,
   apiStatusSchema,
   apiVisitedAtSchema,
   apiRatingSchema,
@@ -27,6 +28,7 @@ const patchSchema = z.object({
   reference_url: apiReferenceUrlSchema,
   status: apiStatusSchema,
   visited_at: apiVisitedAtSchema,
+  planned_at: apiPlannedAtSchema,
   rating: apiRatingSchema,
   review_note: apiReviewNoteSchema,
 })

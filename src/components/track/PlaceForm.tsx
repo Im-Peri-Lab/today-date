@@ -55,6 +55,7 @@ export function PlaceForm({ prefill, returnTo }: { prefill?: boolean; returnTo?:
       reference_url: emptyToNull(values.reference_url),
       location: emptyToNull(values.location),
       memo: emptyToNull(values.memo),
+      planned_at: emptyToNull(values.planned_at),
     }
 
     let created: Place
@@ -98,7 +99,7 @@ export function PlaceForm({ prefill, returnTo }: { prefill?: boolean; returnTo?:
       isSubmitting={isSubmitting || navigating}
       submitLabel="다이닝 등록하기"
     >
-      <PlaceFields register={register} errors={errors} watch={watch} setValue={setValue} />
+      <PlaceFields register={register} errors={errors} watch={watch} setValue={setValue} showPlannedAt />
     </FormLayout>
   )
 }

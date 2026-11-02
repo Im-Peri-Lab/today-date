@@ -11,6 +11,7 @@ import {
   apiLocationSchema,
   apiMemoSchema,
   apiReferenceUrlSchema,
+  apiPlannedAtSchema,
   apiStatusSchema,
   apiVisitedAtSchema,
   apiRatingSchema,
@@ -28,6 +29,7 @@ const patchSchema = z.object({
   reference_url: apiReferenceUrlSchema,
   status: apiStatusSchema,
   visited_at: apiVisitedAtSchema,
+  planned_at: apiPlannedAtSchema,
   // 방문 종료일(기간 방문) — activities 전용, places에는 없음.
   visited_end_at: z.string().optional().nullable(),
   rating: apiRatingSchema,

@@ -47,6 +47,16 @@ export const apiReferenceUrlSchema = z
 // patch 전용 — 활동/다이닝 상세 화면의 상태·방문·평점 편집이 공통으로 쓰는 필드(둘 다 동일).
 export const apiStatusSchema = z.enum(['wishlist', 'visited', 'archived']).optional()
 export const apiVisitedAtSchema = z.string().optional().nullable()
+/**
+ * 방문 예정일(020) — 'YYYY-MM-DD' 또는 null(지움). 빈 문자열은 null 로 정규화한다.
+ * create·patch 가 같은 스키마를 쓴다(미지정=변경 없음, null=삭제).
+ */
+export const apiPlannedAtSchema = z
+  .union([z.string().regex(/^\d{4}-\d{2}-\d{2}$/, '올바른 날짜 형식이 아닙니다.'), z.literal('')])
+  .optional()
+  .nullable()
+  .transform((v) => (v === '' ? null : v))
+
 export const apiRatingSchema = z.number().int().min(1).max(5).optional().nullable()
 export const apiReviewNoteSchema = z.string().optional().nullable()
 
@@ -59,6 +69,8 @@ export const apiListQueryBase = {
   status: apiStatusSchema.default('wishlist'),
   category_id: z.string().optional(),
   q: z.string().optional(),
+  // 위시리스트 "방문예정만" 필터(020) — 'true' 일 때만 켜진다. 다녀온 곳에서는 무시된다.
+  planned_only: z.enum(['true']).optional(),
 }
 
 /** `category_id` 쿼리는 쉼표로 조인된 id 목록(예: "a,b,c") — 두 목록 GET 라우트가 동일하게 분해한다. */

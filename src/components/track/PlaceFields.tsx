@@ -11,6 +11,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { FormField } from '@/components/forms/FormField'
 import { SegmentedControl } from '@/components/forms/SegmentedControl'
 import { CategorySelect } from '@/components/CategorySelect'
+import { PlannedAtField } from '@/components/forms/PlannedAtField'
 import type { PlaceFormValues } from '@/lib/schemas/placeSchema'
 import type { MealTime } from '@/types'
 
@@ -24,10 +25,19 @@ interface PlaceFieldsProps {
   errors: FieldErrors<PlaceFormValues>
   watch: UseFormWatch<PlaceFormValues>
   setValue: UseFormSetValue<PlaceFormValues>
+  /** 방문 예정일 입력 노출 — 위시리스트 항목일 때만 true(신규 등록은 항상 위시리스트). */
+  showPlannedAt?: boolean
 }
 
-export function PlaceFields({ register, errors, watch, setValue }: PlaceFieldsProps) {
+export function PlaceFields({
+  register,
+  errors,
+  watch,
+  setValue,
+  showPlannedAt = false,
+}: PlaceFieldsProps) {
   const categoryValue = watch('category_id') ?? ''
+  const plannedAtValue = watch('planned_at') ?? ''
   const mealTimesValue = watch('meal_times') ?? []
 
   return (
@@ -75,6 +85,14 @@ export function PlaceFields({ register, errors, watch, setValue }: PlaceFieldsPr
           aria-invalid={!!errors.location}
         />
       </FormField>
+
+      {showPlannedAt && (
+        <PlannedAtField
+          value={plannedAtValue}
+          onChange={(v) => setValue('planned_at', v, { shouldValidate: true })}
+          error={errors.planned_at?.message}
+        />
+      )}
 
       <FormField label="메모" htmlFor="memo" error={errors.memo?.message}>
         <Textarea

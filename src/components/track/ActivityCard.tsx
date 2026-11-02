@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useTopLoader } from 'nextjs-toploader'
 import { useState, type ReactNode } from 'react'
 import { toast } from 'sonner'
-import { Clock, StickyNote, MapPin } from 'lucide-react'
+import { Clock, StickyNote, MapPin, Calendar } from 'lucide-react'
 import { CategoryBadge } from './CategoryBadge'
 import { ItemMenu } from './ItemMenu'
 import { RatingStars } from './RatingStars'
@@ -162,6 +162,24 @@ export function ActivityCard({ activity, hideMenu, actionSlot, returnTo }: Activ
                 min-h-4(text-xs 줄 높이 16px) 슬롯을 항상 유지해 카드 높이를 고정하고, 없으면 faint 안내 문구. */}
             <p className={cn('mt-1.5 min-h-4 line-clamp-1', !activity.review_note && styles.emptyHint)}>
               {activity.review_note || '후기가 없습니다'}
+            </p>
+          </div>
+        )}
+
+        {/* 위시리스트 footer: 다녀온 곳 footer 와 같은 구분선·간격·톤. 상태로 배타 렌더(동시 노출 없음).
+            예정일 유무와 무관하게 min-h-4 한 줄 슬롯을 유지해 카드 높이를 고정하고, 없으면 faint 안내 문구. */}
+        {activity.status === 'wishlist' && (
+          <div className={cn('mt-2.5 pt-2.5 text-xs', styles.divider, styles.sub)}>
+            <p className={cn('flex min-h-4 items-center gap-1 overflow-hidden whitespace-nowrap', !activity.planned_at && styles.emptyHint)}>
+              {activity.planned_at ? (
+                <>
+                  <Calendar className="h-3 w-3 shrink-0" />
+                  <span>방문 예정</span>
+                  <span>{formatDotDateCompact(activity.planned_at)}</span>
+                </>
+              ) : (
+                '방문 예정일이 없습니다'
+              )}
             </p>
           </div>
         )}

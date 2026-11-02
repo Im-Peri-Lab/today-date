@@ -186,6 +186,8 @@ export function ListView() {
   )
   const [search, setSearch] = useState(initialQuery)
   const [filtersOpen, setFiltersOpen] = useState(false)
+  // 위시리스트 "방문예정" 필터 — 두 탭이 공유하는 URL 상태(?planned_only=true). 다녀온 곳에선 효력 없음.
+  const [plannedOnly, setPlannedOnly] = useState(searchParams.get('planned_only') === 'true')
 
   // 액티비티 필터
   const [actCats, setActCats] = useState<string[]>(
@@ -209,6 +211,8 @@ export function ListView() {
     initialTrack === 'place' ? (searchParams.get('meal_time') ?? '') : ''
   )
 
+  // 칩은 위시리스트에서만 보이고 효력도 거기서만 — 다녀온 곳으로 갔다 와도 선택은 유지된다.
+  const plannedFilterOn = plannedOnly && status === 'wishlist'
   const debouncedSearch = useDebounced(search, 300)
   const queryClient = useQueryClient()
 
@@ -222,6 +226,7 @@ export function ListView() {
       duration_bucket: actDuration || undefined,
       time_of_day: actTime || undefined,
       location_type: actLocationType || undefined,
+      planned_only: plannedFilterOn || undefined,
       q: debouncedSearch || undefined,
     },
     track === 'activity'
@@ -232,6 +237,7 @@ export function ListView() {
       status,
       categoryIds: placeCats,
       meal_time: placeMeal || undefined,
+      planned_only: plannedFilterOn || undefined,
       q: debouncedSearch || undefined,
     },
     track === 'place'
@@ -255,24 +261,28 @@ export function ListView() {
     setActDuration('')
     setActTime('')
     setActLocationType('')
+    setPlannedOnly(false)
     setSearch('')
   }
   function resetPlaceFilters() {
     setPlaceCats([])
     setPlaceMeal('')
+    setPlannedOnly(false)
     setSearch('')
   }
 
   // 활성 필터 개수 / 검색·필터 사용 여부 (빈 상태 카피 분기용)
   const activityFilterCount =
-    actCats.length + (actDuration ? 1 : 0) + (actTime ? 1 : 0) + (actLocationType ? 1 : 0)
-  const placeFilterCount = placeCats.length + (placeMeal ? 1 : 0)
+    actCats.length + (actDuration ? 1 : 0) + (actTime ? 1 : 0) + (actLocationType ? 1 : 0) +
+    (plannedFilterOn ? 1 : 0)
+  const placeFilterCount = placeCats.length + (placeMeal ? 1 : 0) + (plannedFilterOn ? 1 : 0)
   const activityFiltering = Boolean(debouncedSearch) || activityFilterCount > 0
   const placeFiltering = Boolean(debouncedSearch) || placeFilterCount > 0
   const currentListReturnTo = buildListReturnTo({
     tab: track,
     status,
     q: search || undefined,
+    planned_only: plannedFilterOn,
     categoryIds: track === 'activity' ? actCats : placeCats,
     duration_bucket: track === 'activity' ? actDuration || undefined : undefined,
     time_of_day: track === 'activity' ? actTime || undefined : undefined,
@@ -385,6 +395,13 @@ export function ListView() {
                       </Chip>
                     ))}
                   </FilterGroup>
+                  {status === 'wishlist' && (
+                    <FilterGroup label="방문 예정">
+                      <Chip active={plannedOnly} onClick={() => setPlannedOnly(!plannedOnly)}>
+                        방문예정
+                      </Chip>
+                    </FilterGroup>
+                  )}
                 </div>
               </FilterBar>
 
@@ -463,6 +480,13 @@ export function ListView() {
                       </Chip>
                     ))}
                   </FilterGroup>
+                  {status === 'wishlist' && (
+                    <FilterGroup label="방문 예정">
+                      <Chip active={plannedOnly} onClick={() => setPlannedOnly(!plannedOnly)}>
+                        방문예정
+                      </Chip>
+                    </FilterGroup>
+                  )}
                 </div>
               </FilterBar>
 

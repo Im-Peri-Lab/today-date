@@ -794,6 +794,9 @@ description: >
 - **`area`(장소 지역)와 혼동 금지**: PlaceCard의 `area`는 정보 줄이 아니라 **배지(메타) 줄**에서 `Compass`로 별도 노출한다(위치 `MapPin`과 글리프 분리). 정보 줄 위시리스트 빈 상태·후기 미리보기는 아래 참조.
 - **위시리스트 빈 정보 줄**: 메모·위치 모두 없으면 같은 슬롯에 `styles.emptyHint` 안내 "위치 또는 메모가 없습니다"(`line-clamp-1`, 높이 `min-h-5` 그대로). 다녀온 카드는 기존대로 빈 슬롯.
 - **다녀온 카드 후기 미리보기**: 별점·날짜 줄 아래 `review_note`를 `<p className="mt-1.5 min-h-4 line-clamp-1">`(푸터 `text-xs`+`styles.sub` 상속)로 한 줄 표시. `min-h-4`(16px) 슬롯을 항상 유지해 후기 유무와 무관하게 카드 높이를 고정하고, 후기가 없으면 `styles.emptyHint`로 "후기가 없습니다"를 표시한다(`ActivityCard`·`PlaceCard` 공통). `.emptyHint`는 라이트 `--s-faint` 그대로, 다크는 faint를 카드 면과 72% 혼합(≈`#6f6682`, 카드 대비 3:1)해 sub와 구분한다. 푸터 구분선 `.divider`는 다크에서 `--s-card-border-strong`(`#3a2f4e`)을 쓴다(`--s-divider` `#2c2442`는 카드 대비 ≈1.1:1이라 안 보였음).
+- **위시리스트 카드 방문 예정일 footer**: 정보 줄 아래에 다녀온 카드와 **같은 footer 문법**(`mt-2.5 pt-2.5 text-xs` + `.divider` + `styles.sub`)을 둔다. 한 줄 슬롯 `<p className="flex min-h-4 items-center gap-1 overflow-hidden whitespace-nowrap">`. 값이 있으면 `Calendar`(`h-3 w-3`) + "방문 예정" + `formatDotDateCompact`(`26.07.09`, 요일 없음·연도 2자리 — 다녀온 카드와 같은 유틸), 없으면 `styles.emptyHint` "방문 예정일이 없습니다". `status === 'wishlist'`에서만 렌더하고 다녀온 footer와 **배타**(동시 노출 없음). 새 토큰·색 없음. `ActivityCard`·`PlaceCard` 공통.
+- **방문 예정일 입력/상세**: 폼·상세 인라인 편집은 `PlannedAtField`(기존 `DatePickerField` = 네이티브 date + 값이 있을 때 `resetBtn` "지우기"), 위시리스트일 때만 노출(`showPlannedAt`). 상세 보기 모드는 위시리스트에서만 `DetailRow "방문 예정일"`(`formatDotDate`, 없으면 faint "방문 예정일이 없어요"). 다녀온 곳으로 전환돼도 DB 값은 보존하고 화면만 숨긴다.
+- **`/list` "방문예정" 필터**: 위시리스트에서만 `FilterGroup label="방문 예정"` + 기존 `Chip` 하나(토글, 재클릭 해제). URL `planned_only=true`로 동기화(`buildListReturnTo`), API는 예정일 있는 행만 + `planned_at` 오름차순(`orderByListRule`의 `plannedOnly`). 초기화 버튼·필터 개수에 포함.
 
 #### 방문일/기간 표시 포맷 — 카드 레이어는 "요일 생략 · 연도 2자리"로 통일 (확정)
 

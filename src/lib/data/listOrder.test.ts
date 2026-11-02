@@ -28,4 +28,19 @@ describe('orderByListRule', () => {
     orderByListRule(q, 'wishlist')
     expect(calls).toEqual([['created_at', { ascending: false }]])
   })
+
+  it('방문예정만(위시리스트): 예정일 임박순 → 등록 최신순', () => {
+    const { q, calls } = recorder()
+    orderByListRule(q, 'wishlist', true)
+    expect(calls).toEqual([
+      ['planned_at', { ascending: true }],
+      ['created_at', { ascending: false }],
+    ])
+  })
+
+  it('방문예정만 플래그는 다녀온 곳 정렬을 바꾸지 않는다', () => {
+    const { q, calls } = recorder()
+    orderByListRule(q, 'visited', true)
+    expect(calls[0][0]).toBe('visited_at')
+  })
 })

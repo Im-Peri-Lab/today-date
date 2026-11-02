@@ -5,12 +5,13 @@ import { useRouter } from 'next/navigation'
 import { useTopLoader } from 'nextjs-toploader'
 import { useState, type ReactNode } from 'react'
 import { toast } from 'sonner'
-import { Clock, StickyNote, MapPin } from 'lucide-react'
+import { Clock, StickyNote, MapPin, Calendar } from 'lucide-react'
 import { CategoryBadge } from './CategoryBadge'
 import { ItemMenu } from './ItemMenu'
 import { RatingStars } from './RatingStars'
 import { DeleteConfirmDialog } from './DeleteConfirmDialog'
 import { RevertConfirmDialog } from './RevertConfirmDialog'
+import { PlannedAtDialog } from './PlannedAtDialog'
 import { VisitedDialog } from '@/components/VisitedDialog'
 import { useDeleteActivity, useUpdateActivity } from '@/hooks/useActivities'
 import {
@@ -42,6 +43,8 @@ export function ActivityCard({ activity, hideMenu, actionSlot, returnTo }: Activ
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [visitedOpen, setVisitedOpen] = useState(false)
   const [revertOpen, setRevertOpen] = useState(false)
+  const [plannedOpen, setPlannedOpen] = useState(false)
+  const [clearPlannedOpen, setClearPlannedOpen] = useState(false)
   const del = useDeleteActivity()
   const update = useUpdateActivity()
 
@@ -61,6 +64,19 @@ export function ActivityCard({ activity, hideMenu, actionSlot, returnTo }: Activ
         onSuccess: () => {
           setRevertOpen(false)
           toast.success(`${STATUS_LABELS.wishlist}으로 옮겼어요`)
+        },
+        onError: () => toast.error('변경 중 오류가 발생했습니다.'),
+      }
+    )
+  }
+
+  function handleClearPlanned() {
+    update.mutate(
+      { id: activity.id, patch: { planned_at: null } },
+      {
+        onSuccess: () => {
+          setClearPlannedOpen(false)
+          toast.success('방문 예정일을 비웠어요')
         },
         onError: () => toast.error('변경 중 오류가 발생했습니다.'),
       }
@@ -92,12 +108,14 @@ export function ActivityCard({ activity, hideMenu, actionSlot, returnTo }: Activ
         >
           <ItemMenu
             status={activity.status}
+            plannedAt={activity.planned_at}
             onEditInfo={() => navigate(buildDetailHref(detailPath, { edit: 'info', returnTo }))}
             onEditVisit={() => navigate(buildDetailHref(detailPath, { edit: 'visit', returnTo }))}
             onDuplicate={() => navigate(stashActivityDuplicate(activity, returnTo))}
             onDelete={() => setDeleteOpen(true)}
             onMarkVisited={() => setVisitedOpen(true)}
             onRevert={() => setRevertOpen(true)}
+            onEditPlanned={() => (activity.planned_at ? setClearPlannedOpen(true) : setPlannedOpen(true))}
           />
         </div>
       )}
@@ -165,6 +183,24 @@ export function ActivityCard({ activity, hideMenu, actionSlot, returnTo }: Activ
             </p>
           </div>
         )}
+
+        {/* 위시리스트 footer: 다녀온 곳 footer 와 같은 구분선·간격·톤. 상태로 배타 렌더(동시 노출 없음).
+            예정일 유무와 무관하게 min-h-4 한 줄 슬롯을 유지해 카드 높이를 고정하고, 없으면 faint 안내 문구. */}
+        {activity.status === 'wishlist' && (
+          <div className={cn('mt-2.5 pt-2.5 text-xs', styles.divider, styles.sub)}>
+            <p className={cn('flex min-h-4 items-center gap-1 overflow-hidden whitespace-nowrap', !activity.planned_at && styles.emptyHint)}>
+              {activity.planned_at ? (
+                <>
+                  <Calendar className="h-3 w-3 shrink-0" />
+                  <span>{formatDotDateCompact(activity.planned_at)}</span>
+                  <span>방문 예정</span>
+                </>
+              ) : (
+                '방문 예정일이 없습니다'
+              )}
+            </p>
+          </div>
+        )}
       </Link>
 
       {actionSlot && <div className={cn('px-4 py-3', styles.divider)}>{actionSlot}</div>}
@@ -188,6 +224,22 @@ export function ActivityCard({ activity, hideMenu, actionSlot, returnTo }: Activ
           rating: activity.rating,
           review_note: activity.review_note,
         }}
+      />
+      <RevertConfirmDialog
+        open={clearPlannedOpen}
+        onOpenChange={setClearPlannedOpen}
+        loading={update.isPending}
+        onConfirm={handleClearPlanned}
+        title="날짜 미정으로 되돌릴까요?"
+        description="입력한 방문 예정일이 삭제됩니다."
+              />
+      <PlannedAtDialog
+        open={plannedOpen}
+        onOpenChange={setPlannedOpen}
+        track="activity"
+        id={activity.id}
+        title={activity.title}
+        value={activity.planned_at ?? null}
       />
       <RevertConfirmDialog
         open={revertOpen}

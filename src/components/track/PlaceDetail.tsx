@@ -8,7 +8,7 @@ import { useState, useRef, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
-import { ArrowLeft, Trash2, CheckCircle2, Undo2, Compass, ExternalLink, Utensils } from 'lucide-react'
+import { ArrowLeft, Trash2, CheckCircle2, Undo2, Compass, ExternalLink, Utensils, Calendar } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { CategoryBadge } from './CategoryBadge'
@@ -18,6 +18,8 @@ import { DetailRow } from './DetailRow'
 import { VisitRecordBlock } from './VisitRecordBlock'
 import { DeleteConfirmDialog } from './DeleteConfirmDialog'
 import { RevertConfirmDialog } from './RevertConfirmDialog'
+import { PlannedAtBlock } from './PlannedAtBlock'
+import { PlannedAtDialog } from './PlannedAtDialog'
 import { VisitedDialog } from '@/components/VisitedDialog'
 import { usePlace, useDeletePlace, useUpdatePlace } from '@/hooks/usePlaces'
 import { placeFormSchema, type PlaceFormValues } from '@/lib/schemas/placeSchema'
@@ -55,6 +57,7 @@ export function PlaceDetail({ id, initialData, initialEdit, returnTo }: Props) {
   const [navigating, setNavigating] = useState(false)
   const [visitedOpen, setVisitedOpen] = useState(false)
   const [revertOpen, setRevertOpen] = useState(false)
+  const [plannedOpen, setPlannedOpen] = useState(false)
   const listHref = returnTo ?? DEFAULT_LIST_RETURN_TO
   const listLabel = getReturnLabel(returnTo, '목록으로')
 
@@ -147,6 +150,7 @@ export function PlaceDetail({ id, initialData, initialEdit, returnTo }: Props) {
 
   const onSaveInfo = handleSubmit(async (values) => {
     if (!place) return
+    // 방문 예정일은 이 인라인 편집 대상이 아니다("방문 예정" 블록이 전담) — payload 에 싣지 않는다.
     const payload = {
       ...values,
       category_id: values.category_id || null,
@@ -297,6 +301,11 @@ export function PlaceDetail({ id, initialData, initialEdit, returnTo }: Props) {
               )}
             </DetailBlock>
 
+            {/* ── 방문 예정 블록 (값이 있는 위시리스트에서만 — 없으면 하단 "언제 갈까요?" 버튼만, 다녀온 곳이 되면 숨기고 값은 DB 에 보존) ── */}
+            {place.status === 'wishlist' && place.planned_at && (
+              <PlannedAtBlock track="place" id={id} plannedAt={place.planned_at} onEdit={() => setPlannedOpen(true)} />
+            )}
+
             {/* ── 방문 기록 블록 (미방문이면 렌더 안 함) ── */}
             {place.status === 'visited' && (
               <VisitRecordBlock
@@ -334,13 +343,23 @@ export function PlaceDetail({ id, initialData, initialEdit, returnTo }: Props) {
                   {STATUS_MENU_LABELS.wishlist}
                 </Button>
               ) : (
-                <Button
-                  className={cn(styles.detailPrimaryBtn, 'h-9 gap-1.5 text-white hover:brightness-105')}
-                  onClick={() => setVisitedOpen(true)}
-                >
-                  <CheckCircle2 className="h-4 w-4" />
-                  다녀왔어요
-                </Button>
+                <div className="flex items-center gap-2">
+                  {/* 보조 버튼 — outline 톤. 이 화면의 단색 채움 CTA 는 "다녀왔어요" 하나.
+                      값이 생기면 방문 예정 블록이 등장하며 사라진다(방문 기록 블록 생명주기와 대칭). */}
+                  {!place.planned_at && (
+                    <Button variant="outline" className="h-9 gap-1.5" onClick={() => setPlannedOpen(true)}>
+                      <Calendar className="h-4 w-4" />
+                      언제 갈까요?
+                    </Button>
+                  )}
+                  <Button
+                    className={cn(styles.detailPrimaryBtn, 'h-9 gap-1.5 text-white hover:brightness-105')}
+                    onClick={() => setVisitedOpen(true)}
+                  >
+                    <CheckCircle2 className="h-4 w-4" />
+                    다녀왔어요
+                  </Button>
+                </div>
               )}
             </div>
           )}
@@ -363,6 +382,14 @@ export function PlaceDetail({ id, initialData, initialEdit, returnTo }: Props) {
               rating: place.rating,
               review_note: place.review_note,
             }}
+          />
+          <PlannedAtDialog
+            open={plannedOpen}
+            onOpenChange={setPlannedOpen}
+            track="place"
+            id={id}
+            title={place.title}
+            value={place.planned_at ?? null}
           />
           <RevertConfirmDialog
             open={revertOpen}

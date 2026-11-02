@@ -11,6 +11,9 @@ import { Textarea } from '@/components/ui/textarea'
 import { FormField } from '@/components/forms/FormField'
 import { SegmentedControl } from '@/components/forms/SegmentedControl'
 import { CategorySelect } from '@/components/CategorySelect'
+import { PlannedAtField } from '@/components/forms/PlannedAtField'
+import { cn } from '@/lib/utils'
+import styles from '@/components/screens.module.css'
 import type { ActivityFormValues } from '@/lib/schemas/activitySchema'
 
 const DURATION_OPTIONS = [
@@ -35,13 +38,22 @@ interface ActivityFieldsProps {
   errors: FieldErrors<ActivityFormValues>
   watch: UseFormWatch<ActivityFormValues>
   setValue: UseFormSetValue<ActivityFormValues>
+  /** 방문 예정일 입력 노출 — 위시리스트 항목일 때만 true(신규 등록은 항상 위시리스트). */
+  showPlannedAt?: boolean
 }
 
-export function ActivityFields({ register, errors, watch, setValue }: ActivityFieldsProps) {
+export function ActivityFields({
+  register,
+  errors,
+  watch,
+  setValue,
+  showPlannedAt = false,
+}: ActivityFieldsProps) {
   const durationValue = watch('duration_bucket')
   const timeValue = watch('time_of_day')
   const locationTypeValue = watch('location_type')
   const categoryValue = watch('category_id') ?? ''
+  const plannedAtValue = watch('planned_at') ?? ''
 
   return (
     <>
@@ -117,6 +129,17 @@ export function ActivityFields({ register, errors, watch, setValue }: ActivityFi
           aria-invalid={!!errors.reference_url}
         />
       </FormField>
+
+      {/* 방문 예정일 — 등록정보와 성격이 달라(가기로 한 계획) 폼 맨 아래에 구분선으로 분리 */}
+      {showPlannedAt && (
+        <div className={cn('pt-5', styles.divider)}>
+          <PlannedAtField
+            value={plannedAtValue}
+            onChange={(v) => setValue('planned_at', v, { shouldValidate: true })}
+            error={errors.planned_at?.message}
+          />
+        </div>
+      )}
     </>
   )
 }

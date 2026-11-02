@@ -13,6 +13,7 @@ export interface ListUrlState {
   time_of_day?: string
   location_type?: string
   meal_time?: string
+  planned_only?: boolean
 }
 
 export const DEFAULT_LIST_RETURN_TO = '/list'
@@ -40,6 +41,7 @@ export function buildListReturnTo(state: ListUrlState) {
   params.set('tab', state.tab)
   params.set('status', state.status)
   if (state.q) params.set('q', state.q)
+  if (state.planned_only) params.set('planned_only', 'true')
   if (state.categoryIds && state.categoryIds.length > 0) {
     params.set('category_id', state.categoryIds.join(','))
   }

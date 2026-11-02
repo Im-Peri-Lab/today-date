@@ -15,6 +15,8 @@ export const activityFormSchema = z.object({
   }),
   location: z.string().max(200, '위치는 200자 이하로 입력해 주세요.').optional(),
   memo: z.string().max(1000, '메모는 1000자 이하로 입력해 주세요.').optional(),
+  // 방문 예정일(020) — 위시리스트일 때만 폼에 노출. 'YYYY-MM-DD' 또는 빈 문자열.
+  planned_at: z.string().optional(),
   reference_url: z
     .string()
     .optional()

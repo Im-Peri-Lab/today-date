@@ -48,6 +48,8 @@ export interface Activity {
   visited_at: string | null
   /** 방문 종료일(기간 방문). NULL이면 단일 날짜 방문(visited_at만). activities 전용. */
   visited_end_at: string | null
+  /** 방문 예정일(위시리스트용, 'YYYY-MM-DD'). 상태가 바뀌어도 보존하며 노출은 status 로 정한다(020). */
+  planned_at: string | null
   rating: number | null
   review_note: string | null
   created_at: string
@@ -67,6 +69,8 @@ export interface Place {
   image_urls: string[]
   status: Status
   visited_at: string | null
+  /** 방문 예정일(위시리스트용). 활동과 동일 규칙(020). */
+  planned_at: string | null
   rating: number | null
   review_note: string | null
   created_at: string

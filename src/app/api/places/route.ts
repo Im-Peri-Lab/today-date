@@ -10,6 +10,7 @@ import {
   apiLocationSchema,
   apiMemoSchema,
   apiReferenceUrlSchema,
+  apiPlannedAtSchema,
   apiListQueryBase,
   splitCommaIds,
 } from '@/lib/schemas/apiFields'
@@ -25,6 +26,7 @@ const createSchema = z.object({
     .max(2),
   memo: apiMemoSchema,
   reference_url: apiReferenceUrlSchema,
+  planned_at: apiPlannedAtSchema,
 })
 
 const listQuerySchema = z.object({
@@ -48,7 +50,7 @@ export async function GET(req: NextRequest) {
       Object.fromEntries(req.nextUrl.searchParams)
     )
     if (!parsedQuery.success) return zodErrorResponse(parsedQuery.error)
-    const { status, category_id, area, meal_time, q } = parsedQuery.data
+    const { status, category_id, area, meal_time, q, planned_only } = parsedQuery.data
 
     const scope = await requireCoupleScope()
     if (!scope.ok) return scope.response
@@ -62,7 +64,10 @@ export async function GET(req: NextRequest) {
 
     // 다녀온 곳: 다녀온 날짜 최신순, 같으면 마지막 수정 최신순 / 그 외: 등록 최신순.
     // 규칙은 홈 대시보드 미리보기와 공유한다(§ lib/data/listOrder.ts).
-    query = orderByListRule(query, status)
+    // 방문예정만(위시리스트 전용): 예정일 있는 행만 + 임박순.
+    const plannedOnly = status === 'wishlist' && planned_only === 'true'
+    query = orderByListRule(query, status, plannedOnly)
+    if (plannedOnly) query = query.not('planned_at', 'is', null)
 
     const ids = splitCommaIds(category_id)
     if (ids.length > 1) query = query.in('category_id', ids)

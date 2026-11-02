@@ -11,6 +11,7 @@ import { ItemMenu } from './ItemMenu'
 import { RatingStars } from './RatingStars'
 import { DeleteConfirmDialog } from './DeleteConfirmDialog'
 import { RevertConfirmDialog } from './RevertConfirmDialog'
+import { PlannedAtDialog } from './PlannedAtDialog'
 import { VisitedDialog } from '@/components/VisitedDialog'
 import { useDeleteActivity, useUpdateActivity } from '@/hooks/useActivities'
 import {
@@ -42,6 +43,7 @@ export function ActivityCard({ activity, hideMenu, actionSlot, returnTo }: Activ
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [visitedOpen, setVisitedOpen] = useState(false)
   const [revertOpen, setRevertOpen] = useState(false)
+  const [plannedOpen, setPlannedOpen] = useState(false)
   const del = useDeleteActivity()
   const update = useUpdateActivity()
 
@@ -92,12 +94,14 @@ export function ActivityCard({ activity, hideMenu, actionSlot, returnTo }: Activ
         >
           <ItemMenu
             status={activity.status}
+            plannedAt={activity.planned_at}
             onEditInfo={() => navigate(buildDetailHref(detailPath, { edit: 'info', returnTo }))}
             onEditVisit={() => navigate(buildDetailHref(detailPath, { edit: 'visit', returnTo }))}
             onDuplicate={() => navigate(stashActivityDuplicate(activity, returnTo))}
             onDelete={() => setDeleteOpen(true)}
             onMarkVisited={() => setVisitedOpen(true)}
             onRevert={() => setRevertOpen(true)}
+            onEditPlanned={() => setPlannedOpen(true)}
           />
         </div>
       )}
@@ -174,8 +178,8 @@ export function ActivityCard({ activity, hideMenu, actionSlot, returnTo }: Activ
               {activity.planned_at ? (
                 <>
                   <Calendar className="h-3 w-3 shrink-0" />
-                  <span>방문 예정</span>
                   <span>{formatDotDateCompact(activity.planned_at)}</span>
+                  <span>방문 예정</span>
                 </>
               ) : (
                 '방문 예정일이 없습니다'
@@ -206,6 +210,14 @@ export function ActivityCard({ activity, hideMenu, actionSlot, returnTo }: Activ
           rating: activity.rating,
           review_note: activity.review_note,
         }}
+      />
+      <PlannedAtDialog
+        open={plannedOpen}
+        onOpenChange={setPlannedOpen}
+        track="activity"
+        id={activity.id}
+        title={activity.title}
+        value={activity.planned_at ?? null}
       />
       <RevertConfirmDialog
         open={revertOpen}

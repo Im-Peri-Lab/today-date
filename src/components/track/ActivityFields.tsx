@@ -12,6 +12,8 @@ import { FormField } from '@/components/forms/FormField'
 import { SegmentedControl } from '@/components/forms/SegmentedControl'
 import { CategorySelect } from '@/components/CategorySelect'
 import { PlannedAtField } from '@/components/forms/PlannedAtField'
+import { cn } from '@/lib/utils'
+import styles from '@/components/screens.module.css'
 import type { ActivityFormValues } from '@/lib/schemas/activitySchema'
 
 const DURATION_OPTIONS = [
@@ -108,14 +110,6 @@ export function ActivityFields({
         />
       </FormField>
 
-      {showPlannedAt && (
-        <PlannedAtField
-          value={plannedAtValue}
-          onChange={(v) => setValue('planned_at', v, { shouldValidate: true })}
-          error={errors.planned_at?.message}
-        />
-      )}
-
       <FormField label="메모" htmlFor="memo" error={errors.memo?.message}>
         <Textarea
           id="memo"
@@ -135,6 +129,17 @@ export function ActivityFields({
           aria-invalid={!!errors.reference_url}
         />
       </FormField>
+
+      {/* 방문 예정일 — 등록정보와 성격이 달라(가기로 한 계획) 폼 맨 아래에 구분선으로 분리 */}
+      {showPlannedAt && (
+        <div className={cn('pt-5', styles.divider)}>
+          <PlannedAtField
+            value={plannedAtValue}
+            onChange={(v) => setValue('planned_at', v, { shouldValidate: true })}
+            error={errors.planned_at?.message}
+          />
+        </div>
+      )}
     </>
   )
 }

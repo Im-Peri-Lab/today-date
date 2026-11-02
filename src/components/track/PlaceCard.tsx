@@ -11,6 +11,7 @@ import { ItemMenu } from './ItemMenu'
 import { RatingStars } from './RatingStars'
 import { DeleteConfirmDialog } from './DeleteConfirmDialog'
 import { RevertConfirmDialog } from './RevertConfirmDialog'
+import { PlannedAtDialog } from './PlannedAtDialog'
 import { VisitedDialog } from '@/components/VisitedDialog'
 import { useDeletePlace, useUpdatePlace } from '@/hooks/usePlaces'
 import { MEAL_LABELS, STATUS_LABELS } from '@/lib/labels'
@@ -35,6 +36,7 @@ export function PlaceCard({ place, hideMenu, actionSlot, returnTo }: PlaceCardPr
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [visitedOpen, setVisitedOpen] = useState(false)
   const [revertOpen, setRevertOpen] = useState(false)
+  const [plannedOpen, setPlannedOpen] = useState(false)
   const del = useDeletePlace()
   const update = useUpdatePlace()
 
@@ -83,12 +85,14 @@ export function PlaceCard({ place, hideMenu, actionSlot, returnTo }: PlaceCardPr
         >
           <ItemMenu
             status={place.status}
+            plannedAt={place.planned_at}
             onEditInfo={() => navigate(buildDetailHref(detailPath, { edit: 'info', returnTo }))}
             onEditVisit={() => navigate(buildDetailHref(detailPath, { edit: 'visit', returnTo }))}
             onDuplicate={() => navigate(stashPlaceDuplicate(place, returnTo))}
             onDelete={() => setDeleteOpen(true)}
             onMarkVisited={() => setVisitedOpen(true)}
             onRevert={() => setRevertOpen(true)}
+            onEditPlanned={() => setPlannedOpen(true)}
           />
         </div>
       )}
@@ -157,8 +161,8 @@ export function PlaceCard({ place, hideMenu, actionSlot, returnTo }: PlaceCardPr
               {place.planned_at ? (
                 <>
                   <Calendar className="h-3 w-3 shrink-0" />
-                  <span>방문 예정</span>
                   <span>{formatDotDateCompact(place.planned_at)}</span>
+                  <span>방문 예정</span>
                 </>
               ) : (
                 '방문 예정일이 없습니다'
@@ -188,6 +192,14 @@ export function PlaceCard({ place, hideMenu, actionSlot, returnTo }: PlaceCardPr
           rating: place.rating,
           review_note: place.review_note,
         }}
+      />
+      <PlannedAtDialog
+        open={plannedOpen}
+        onOpenChange={setPlannedOpen}
+        track="place"
+        id={place.id}
+        title={place.title}
+        value={place.planned_at ?? null}
       />
       <RevertConfirmDialog
         open={revertOpen}

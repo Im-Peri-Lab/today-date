@@ -1,6 +1,6 @@
 'use client'
 
-import { MoreVertical, Pencil, CalendarCheck, Copy, Trash2, CheckCircle2, Undo2 } from 'lucide-react'
+import { MoreVertical, Pencil, CalendarCheck, Copy, Trash2, CheckCircle2, Undo2, Calendar } from 'lucide-react'
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -9,11 +9,14 @@ import {
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu'
 import { STATUS_MENU_LABELS } from '@/lib/labels'
+import { formatDotDate } from '@/lib/date'
 import type { Status } from '@/types'
 import styles from '@/components/screens.module.css'
 
 interface ItemMenuProps {
   status: Status
+  /** 방문 예정일(ISO). 위시리스트 항목에서만 의미 있음 */
+  plannedAt?: string | null
   /** 정보 수정 → 상세의 등록 정보 블록을 편집모드로 연다 */
   onEditInfo: () => void
   /** 기록 수정 → 상세의 방문 기록 블록을 편집모드로 연다 (다녀온 곳 전용) */
@@ -23,16 +26,20 @@ interface ItemMenuProps {
   onDelete: () => void
   onMarkVisited: () => void
   onRevert: () => void
+  /** 방문 예정일 등록/수정 다이얼로그 열기 (위시리스트 전용) */
+  onEditPlanned: () => void
 }
 
 export function ItemMenu({
   status,
+  plannedAt,
   onEditInfo,
   onEditVisit,
   onDuplicate,
   onDelete,
   onMarkVisited,
   onRevert,
+  onEditPlanned,
 }: ItemMenuProps) {
   const isVisited = status === 'visited'
   return (
@@ -59,6 +66,13 @@ export function ItemMenu({
           <Copy />
           복사하기
         </DropdownMenuItem>
+        {/* 방문 예정일 — 위시리스트 전용. 값이 없으면 등록 진입, 있으면 날짜를 보여주며 수정 진입 */}
+        {!isVisited && (
+          <DropdownMenuItem onClick={onEditPlanned}>
+            <Calendar />
+            {plannedAt ? `방문 예정 ${formatDotDate(plannedAt)}` : '언제 갈까요?'}
+          </DropdownMenuItem>
+        )}
         {isVisited ? (
           <DropdownMenuItem onClick={onRevert}>
             <Undo2 />

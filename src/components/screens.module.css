@@ -1057,6 +1057,31 @@
   border-color: var(--s-active-line, #7c3aed);
   box-shadow: var(--s-focus-ring, 0 0 0 2px rgba(124, 58, 237, 0.5));
 }
+/* 비우기 X — 박스 우측 끝 절대 배치. 네이티브 입력(.dateInput, 박스 전체 덮개)보다 위에 둔다 */
+.dateClear {
+  position: absolute;
+  top: 50%;
+  right: 0.5rem;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  transform: translateY(-50%);
+  border: 0;
+  border-radius: 9999px;
+  background: transparent;
+  color: var(--s-faint, #9ca3af);
+  cursor: pointer;
+}
+.dateClear:hover {
+  color: var(--s-sub, #6b7280);
+}
+.dateClear:focus-visible {
+  outline: none;
+  box-shadow: var(--s-focus-ring, 0 0 0 2px rgba(124, 58, 237, 0.5));
+}
 /* 박스 전체를 덮는 네이티브 date 입력 — 보이지 않지만 클릭/포커스를 받아 OS 달력을 연다 */
 .dateInput {
   position: absolute;

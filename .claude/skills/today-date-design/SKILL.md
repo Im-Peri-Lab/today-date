@@ -598,10 +598,10 @@ description: >
 
 `ActivityCard`/`PlaceCard`의 ⋮ 메뉴(`ItemMenu`) 항목 구성. 문구는 `STATUS_MENU_LABELS`(`src/lib/labels.ts`) 참조.
 
-- **미방문(wishlist)**: 정보 수정 → 복사하기 → 다녀온 곳으로 → (구분선) 삭제
+- **미방문(wishlist)**: 정보 수정 → 복사하기 → **언제 갈까요?**(값 있으면 `방문 예정 2026.12.25 (금)`, 같은 `PlannedAtDialog`로 수정 진입, `Calendar` 아이콘) → 다녀온 곳으로 → (구분선) 삭제
 - **방문완료(visited)**: 정보 수정 → 기록 수정 → 복사하기 → 가보고 싶은 곳으로 → (구분선) 삭제
 
-**순서 근거**: 정보 수정·기록 수정·복사하기는 편집·생성 계열 일반 액션(상태 변경보다 위), 상태 변경(다녀온 곳으로/가보고 싶은 곳으로)은 그 아래, 삭제는 파괴적 액션이라 맨 끝. **구분선은 삭제 앞 하나만** 둔다(중간 구분선 없음). 복사하기는 상세 등록 정보 블록의 단독 복사 버튼(§10-B, `DetailBlock` `onCopy`)과 동일 액션이며 `stashActivityDuplicate`/`stashPlaceDuplicate`(`src/lib/duplicatePrefill.ts`) 공용 헬퍼로 DB 즉시 생성 없이 신규 폼 prefill 로 이동한다.
+**순서 근거**: 정보 수정·기록 수정·복사하기·방문 예정일 등록/수정은 편집·생성 계열 일반 액션(상태 변경보다 위), 상태 변경(다녀온 곳으로/가보고 싶은 곳으로)은 그 아래, 삭제는 파괴적 액션이라 맨 끝. **구분선은 삭제 앞 하나만** 둔다(중간 구분선 없음). 복사하기는 상세 등록 정보 블록의 단독 복사 버튼(§10-B, `DetailBlock` `onCopy`)과 동일 액션이며 `stashActivityDuplicate`/`stashPlaceDuplicate`(`src/lib/duplicatePrefill.ts`) 공용 헬퍼로 DB 즉시 생성 없이 신규 폼 prefill 로 이동한다.
 
 ### 토큰 공유 주의
 - `--s-active-fill`/`--s-active-line`은 `/list` 필터 칩·세그먼트·상태 토글과 **공유**된다. 상태 색을 바꿀 땐 토큰 정의값을 건드리지 말고 **사용처 클래스**(`.chipActive` 등)에서만 조정한다 — 토큰값을 바꾸면 StepDots·CTA까지 휩쓸려 회귀한다.
@@ -794,8 +794,12 @@ description: >
 - **`area`(장소 지역)와 혼동 금지**: PlaceCard의 `area`는 정보 줄이 아니라 **배지(메타) 줄**에서 `Compass`로 별도 노출한다(위치 `MapPin`과 글리프 분리). 정보 줄 위시리스트 빈 상태·후기 미리보기는 아래 참조.
 - **위시리스트 빈 정보 줄**: 메모·위치 모두 없으면 같은 슬롯에 `styles.emptyHint` 안내 "위치 또는 메모가 없습니다"(`line-clamp-1`, 높이 `min-h-5` 그대로). 다녀온 카드는 기존대로 빈 슬롯.
 - **다녀온 카드 후기 미리보기**: 별점·날짜 줄 아래 `review_note`를 `<p className="mt-1.5 min-h-4 line-clamp-1">`(푸터 `text-xs`+`styles.sub` 상속)로 한 줄 표시. `min-h-4`(16px) 슬롯을 항상 유지해 후기 유무와 무관하게 카드 높이를 고정하고, 후기가 없으면 `styles.emptyHint`로 "후기가 없습니다"를 표시한다(`ActivityCard`·`PlaceCard` 공통). `.emptyHint`는 라이트 `--s-faint` 그대로, 다크는 faint를 카드 면과 72% 혼합(≈`#6f6682`, 카드 대비 3:1)해 sub와 구분한다. 푸터 구분선 `.divider`는 다크에서 `--s-card-border-strong`(`#3a2f4e`)을 쓴다(`--s-divider` `#2c2442`는 카드 대비 ≈1.1:1이라 안 보였음).
-- **위시리스트 카드 방문 예정일 footer**: 정보 줄 아래에 다녀온 카드와 **같은 footer 문법**(`mt-2.5 pt-2.5 text-xs` + `.divider` + `styles.sub`)을 둔다. 한 줄 슬롯 `<p className="flex min-h-4 items-center gap-1 overflow-hidden whitespace-nowrap">`. 값이 있으면 `Calendar`(`h-3 w-3`) + "방문 예정" + `formatDotDateCompact`(`26.07.09`, 요일 없음·연도 2자리 — 다녀온 카드와 같은 유틸), 없으면 `styles.emptyHint` "방문 예정일이 없습니다". `status === 'wishlist'`에서만 렌더하고 다녀온 footer와 **배타**(동시 노출 없음). 새 토큰·색 없음. `ActivityCard`·`PlaceCard` 공통.
-- **방문 예정일 입력/상세**: 폼·상세 인라인 편집은 `PlannedAtField`(기존 `DatePickerField` = 네이티브 date + 값이 있을 때 `resetBtn` "지우기"), 위시리스트일 때만 노출(`showPlannedAt`). 상세 보기 모드는 위시리스트에서만 `DetailRow "방문 예정일"`(`formatDotDate`, 없으면 faint "방문 예정일이 없어요"). 다녀온 곳으로 전환돼도 DB 값은 보존하고 화면만 숨긴다.
+- **위시리스트 카드 방문 예정일 footer**: 정보 줄 아래에 다녀온 카드와 **같은 footer 문법**(`mt-2.5 pt-2.5 text-xs` + `.divider` + `styles.sub`)을 둔다. 한 줄 슬롯 `<p className="flex min-h-4 items-center gap-1 overflow-hidden whitespace-nowrap">`. 값이 있으면 `Calendar`(`h-3 w-3`) + `formatDotDateCompact`(`26.07.09`, 요일 없음·연도 2자리) + "방문 예정" — **날짜가 먼저, 레이블이 뒤**(상세 하단 "2026년 10월 25일에 등록"과 같은 관례), 없으면 `styles.emptyHint` "방문 예정일이 없습니다". `status === 'wishlist'`에서만 렌더하고 다녀온 footer와 **배타**. 새 토큰·색 없음. `ActivityCard`·`PlaceCard` 공통.
+- **상세 "방문 예정" 블록 (`PlannedAtBlock`)**: 방문 기록 블록과 **같은 계위**의 `DetailBlock`(title "방문 예정"). 등록 정보 블록 인라인 편집(연필)에서는 `planned_at`을 **제외**한다(그 경로로 수정 안 됨). `status === 'wishlist'`일 때만 렌더하고 등록 정보 블록 바로 아래·방문 기록 블록 자리에 놓인다(다녀온 곳이 되면 숨김, DB 값은 보존 → 되돌리면 같은 값으로 다시 노출).
+  - 값 없음: faint "아직 방문 예정일이 없어요" + 메인 버튼(Tier B 36px, `detailPrimaryBtn`) **"언제 갈까요?"** → `PlannedAtDialog`. 연필 숨김(`DetailBlock hideEdit`).
+  - 값 있음: `Calendar`(accent) + `formatDotDate` + `variant="outline"` 버튼 **"날짜 미정으로"** → `RevertConfirmDialog`(title/description/confirmLabel 오버라이드: "날짜 미정으로 되돌릴까요?" / "미정으로")를 거쳐서만 실행(즉시 실행 금지). 날짜 수정 진입점은 블록 우상단 연필(`PlannedAtDialog` 재오픈). 두 상태의 래퍼 div에 서로 다른 `key`를 줘 버튼이 재사용되며 `transition-all`로 색이 번지는 깜빡임을 막는다.
+- **`PlannedAtDialog`** (상세 블록·카드 ⋮ 메뉴 공용): `VisitedDialog`와 같은 박스 호흡(`px-5 pt-6 pb-5`)·헤더 위계, 제목 "언제 갈까요?". 날짜 입력(`DatePickerField`) + 풀폭 Primary 40px **"저장하기"**만. 닫기는 상단 X뿐(취소 버튼 없음). **지우기/비우기 기능 없음** — 값 전체 삭제는 블록의 "날짜 미정으로"가 전담하며, 값이 비면 저장 버튼 비활성.
+- **`/new` 폼 방문 예정일 필드 (`PlannedAtField`, `showPlannedAt` 전용 — 등록 폼에서만 true)**: 폼 **맨 아래, 참고 URL 다음·저장 버튼 바로 위**에 둔다(필드 순서: …위치 → 메모 → 참고 URL → 방문 예정일). 등록정보와 성격이 다르다는 걸 위치로 전달하도록 `pt-5` + `styles.divider` 구분선으로 분리. 입력은 네이티브 date(`DatePickerField`). 지우기는 별도 버튼이 아니라 **박스 내부 우측 끝 X 아이콘**(`DatePickerField onClear`, `.dateClear`, 값 있을 때만, `aria-label="날짜 지우기"`) — 네이티브 input(박스 전체 덮개)보다 위 `z-index`에 두고 `stopPropagation`으로 박스 `onClick(showPicker)`이 함께 실행돼 달력이 열리지 않게 한다. 이 X는 `/new` 전용이며 상세 다이얼로그에는 없다.
 - **`/list` "방문예정" 필터**: 위시리스트에서만 `FilterGroup label="방문 예정"` + 기존 `Chip` 하나(토글, 재클릭 해제). URL `planned_only=true`로 동기화(`buildListReturnTo`), API는 예정일 있는 행만 + `planned_at` 오름차순(`orderByListRule`의 `plannedOnly`). 초기화 버튼·필터 개수에 포함.
 
 #### 방문일/기간 표시 포맷 — 카드 레이어는 "요일 생략 · 연도 2자리"로 통일 (확정)

@@ -19,6 +19,8 @@ interface DetailBlockProps {
    * 연필과 같은 absolute 패턴 — 텍스트 행 흐름에 끼우지 않아 행 높이를 늘리지 않는다.
    */
   onCopy?: () => void
+  /** true 면 연필(수정) 버튼을 숨긴다 — 값이 없을 때 메인 버튼이 진입점인 블록용 */
+  hideEdit?: boolean
   /**
    * 블록 헤더에 표시할 아이템 제목 (보기 모드 전용).
    * 제공되면 섹션 라벨(title)을 숨기고 이 제목을 h1으로 표시한다.
@@ -53,6 +55,7 @@ export function DetailBlock({
   onSave,
   saving,
   onCopy,
+  hideEdit,
   blockTitle,
   blockCategory,
   headerExtra,
@@ -72,7 +75,7 @@ export function DetailBlock({
     >
       {/* 연필 버튼 — absolute. 박스 top/right = 카드 패딩 − 3px(17/21px): 위·오른쪽 글리프 간격이 같고
           (23/27px), 뱃지 줄(약 22px) 세로 중심에 놓인다. MapLink 쌍도 -mr-[3px]로 같은 열. */}
-      {!editing && (
+      {!editing && !hideEdit && (
         <button
           type="button"
           className={cn(styles.mapActionBtn, 'absolute top-[1.0625rem] right-[1.0625rem] lg:top-[1.3125rem] lg:right-[1.3125rem]')}
@@ -97,7 +100,7 @@ export function DetailBlock({
 
       {/* 블록 헤더 — showHeader 일 때만 렌더 */}
       {showHeader && (
-        <div className={cn(!editing && (onCopy ? 'pr-16' : 'pr-10'))}>
+        <div className={cn(!editing && !hideEdit && (onCopy ? 'pr-16' : 'pr-10'))}>
           {/* 섹션 라벨: blockTitle이 없는 블록(방문 기록 등)에서만 표시 */}
           {!blockTitle && (
             <h2 className={cn('text-sm font-medium', styles.ink)}>

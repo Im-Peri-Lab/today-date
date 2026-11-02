@@ -1,7 +1,7 @@
 'use client'
 
 import { useRef } from 'react'
-import { Calendar } from 'lucide-react'
+import { Calendar, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { formatDotDate } from '@/lib/date'
 import styles from '@/components/screens.module.css'
@@ -12,6 +12,8 @@ interface DatePickerFieldProps {
   value: string
   onChange: (iso: string) => void
   placeholder?: string
+  /** 주어지면 값이 있을 때 박스 우측 끝에 X(비우기) 아이콘을 노출 — clearable input 패턴 */
+  onClear?: () => void
 }
 
 /**
@@ -20,7 +22,7 @@ interface DatePickerFieldProps {
  * 덮어 클릭을 받고(데스크탑은 showPicker로 보강), 보이는 표시는 그 아래 우리 텍스트가 담당한다.
  * input[type=date]의 value/onChange는 ISO('YYYY-MM-DD') 그대로 → 저장값 불변, 타임존 가공 없음.
  */
-export function DatePickerField({ id, value, onChange, placeholder = '날짜 선택' }: DatePickerFieldProps) {
+export function DatePickerField({ id, value, onChange, placeholder = '날짜 선택', onClear }: DatePickerFieldProps) {
   const inputRef = useRef<HTMLInputElement>(null)
 
   // 데스크탑에서 클릭 시 OS 달력을 확실히 띄운다(모바일은 포커스만으로 열림).
@@ -50,6 +52,21 @@ export function DatePickerField({ id, value, onChange, placeholder = '날짜 선
         className={styles.dateInput}
         aria-label={placeholder}
       />
+      {/* 비우기 X — 네이티브 input(opacity 0, 박스 전체)보다 위(z-index)에 두어 클릭을 직접 받고,
+          stopPropagation 으로 박스 onClick(showPicker)이 함께 실행돼 달력이 열리는 걸 막는다. */}
+      {onClear && value && (
+        <button
+          type="button"
+          className={styles.dateClear}
+          aria-label="날짜 지우기"
+          onClick={(e) => {
+            e.stopPropagation()
+            onClear()
+          }}
+        >
+          <X className="h-3.5 w-3.5" />
+        </button>
+      )}
     </div>
   )
 }

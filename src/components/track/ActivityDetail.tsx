@@ -15,7 +15,6 @@ import {
   ExternalLink,
   Undo2,
   Clock,
-  Calendar,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -26,6 +25,7 @@ import { DetailRow } from './DetailRow'
 import { VisitRecordBlock } from './VisitRecordBlock'
 import { DeleteConfirmDialog } from './DeleteConfirmDialog'
 import { RevertConfirmDialog } from './RevertConfirmDialog'
+import { PlannedAtBlock } from './PlannedAtBlock'
 import { VisitedDialog } from '@/components/VisitedDialog'
 import { useActivity, useDeleteActivity, useUpdateActivity } from '@/hooks/useActivities'
 import { activityFormSchema, type ActivityFormValues } from '@/lib/schemas/activitySchema'
@@ -42,7 +42,6 @@ import {
 } from '@/lib/labels'
 import { buildDetailHref, DEFAULT_LIST_RETURN_TO, getReturnLabel } from '@/lib/listReturn'
 import { stashActivityDuplicate } from '@/lib/duplicatePrefill'
-import { formatDotDate } from '@/lib/date'
 import { cn } from '@/lib/utils'
 import { resolveHref } from '@/lib/url'
 import { MapLink } from './MapLink'
@@ -98,7 +97,6 @@ export function ActivityDetail({ id, initialData, initialEdit, returnTo }: Props
       location: activity.location ?? '',
       memo: activity.memo ?? '',
       reference_url: activity.reference_url ?? '',
-      planned_at: activity.planned_at ?? '',
     })
   }
 
@@ -168,12 +166,9 @@ export function ActivityDetail({ id, initialData, initialEdit, returnTo }: Props
 
   const onSaveInfo = handleSubmit(async (values) => {
     if (!activity) return
-    // 방문 예정일은 위시리스트일 때만 폼에 노출되므로, 그 외 상태에선 payload 에서 빼서
-    // 보존된 값을 건드리지 않는다(상태 전환으로 값을 지우지 않는 규칙).
-    const { planned_at, ...rest } = values
+    // 방문 예정일은 이 인라인 편집 대상이 아니다("방문 예정" 블록이 전담) — payload 에 싣지 않는다.
     const payload = {
-      ...rest,
-      ...(activity.status === 'wishlist' && { planned_at: planned_at || null }),
+      ...values,
       category_id: values.category_id || null,
       reference_url: values.reference_url || null,
       location: values.location || null,
@@ -244,7 +239,6 @@ export function ActivityDetail({ id, initialData, initialEdit, returnTo }: Props
                   errors={errors}
                   watch={watch}
                   setValue={setValue}
-                  showPlannedAt={activity.status === 'wishlist'}
                 />
               ) : (
                 /* 짧은 값: 2열 그리드 / 긴 텍스트(메모·링크): wide로 전체폭 / 모바일: 1열 */
@@ -277,19 +271,6 @@ export function ActivityDetail({ id, initialData, initialEdit, returnTo }: Props
                       {TIME_OF_DAY_LABELS[activity.time_of_day]}
                     </span>
                   </DetailRow>
-                  {/* 방문 예정일 — 위시리스트에서만 노출(다녀온 곳은 방문 기록 블록이 날짜를 보여준다) */}
-                  {activity.status === 'wishlist' && (
-                    <DetailRow label="방문 예정일">
-                      {activity.planned_at ? (
-                        <span className="inline-flex items-center gap-1.5">
-                          <Calendar className={cn('h-3.5 w-3.5 shrink-0', styles.accent)} />
-                          {formatDotDate(activity.planned_at)}
-                        </span>
-                      ) : (
-                        <span className={styles.faint}>방문 예정일이 없어요</span>
-                      )}
-                    </DetailRow>
-                  )}
                   <DetailRow label="위치" wide>
                     {activity.location ? (
                       <MapLink query={activity.location} />
@@ -343,6 +324,11 @@ export function ActivityDetail({ id, initialData, initialEdit, returnTo }: Props
                 </div>
               )}
             </DetailBlock>
+
+            {/* ── 방문 예정 블록 (위시리스트 전용 — 다녀온 곳이 되면 숨기고 값은 DB 에 보존) ── */}
+            {activity.status === 'wishlist' && (
+              <PlannedAtBlock track="activity" id={id} title={activity.title} plannedAt={activity.planned_at ?? null} />
+            )}
 
             {/* ── 방문 기록 블록 (미방문이면 렌더 안 함) ── */}
             {activity.status === 'visited' && (

@@ -1,5 +1,6 @@
 import type { Activity, Place } from '@/types'
 import { resolveHref } from '@/lib/url'
+import { toHHmm } from '@/lib/date'
 
 /**
  * 항목(activity/place) → 캘린더 이벤트 데이터. .ics 와 구글 캘린더 URL 이 이 한 모양을 공유한다.
@@ -17,6 +18,11 @@ export interface CalendarEvent {
   startDate: string
   /** 종일 일정 마지막 날(ISO, 포함). 배타 종료일(+1일) 변환은 .ics·구글 URL 빌더가 한다. */
   endDate: string
+  /**
+   * 시작 시간('HH:mm', Asia/Seoul). 있으면 시간 지정 일정(시작 + PLANNED_EVENT_DURATION_MINUTES),
+   * 없으면(키 자체가 없음) 종일 일정. 방문 예정(planned_time)에만 붙고 다녀온 곳은 항상 종일(021).
+   */
+  startTime?: string
   /** 비어 있으면 빈 문자열 */
   location: string
   description: string
@@ -81,11 +87,15 @@ export function buildCalendarEvent(
     .filter(Boolean)
     .join('\n')
 
+  // 시작 시간은 위시리스트(방문 예정)에만 — 다녀온 곳은 planned_time 이 남아 있어도 종일 그대로.
+  const startTime = item.status === 'wishlist' ? toHHmm(item.planned_time) : ''
+
   return {
     uid: `${track}-${item.id}@todaydate`,
     title: `${prefix}${item.title}`,
     startDate: dates.start,
     endDate: dates.end,
+    ...(startTime ? { startTime } : {}),
     location,
     description,
   }

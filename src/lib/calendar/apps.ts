@@ -8,6 +8,7 @@ import { nextDayIso } from '@/lib/date'
 import { downloadIcsFile, openInNewTab, toIcsFilename } from './download'
 import type { CalendarEvent } from './event'
 import { buildIcs } from './ics'
+import { timedEventStamps } from './time'
 
 /** 캘린더 앱 식별자. MAP_APPS 와 같이 문자열 열림 타입. */
 export type CalendarAppId = string
@@ -25,17 +26,26 @@ function nowStamp(): string {
 }
 
 /**
+ * 구글 dates 값. 시간 지정 일정은 `YYYYMMDDTHHmmssZ/YYYYMMDDTHHmmssZ`(UTC), 종일은 `YYYYMMDD/YYYYMMDD`.
+ */
+function googleDates(event: CalendarEvent): string {
+  if (event.startTime) {
+    const { start, end } = timedEventStamps(event.startDate, event.startTime)
+    return `${start}/${end}`
+  }
+  return `${event.startDate.replace(/-/g, '')}/${nextDayIso(event.endDate).replace(/-/g, '')}`
+}
+
+/**
  * 구글 캘린더 이벤트 작성 URL. 종일 일정은 `YYYYMMDD/YYYYMMDD` 이고 종료일은 배타(+1일).
  * dates 의 `/` 는 구분자라 인코딩하지 않는다.
  */
 export function buildGoogleCalendarUrl(event: CalendarEvent): string {
   const enc = encodeURIComponent
-  const start = event.startDate.replace(/-/g, '')
-  const end = nextDayIso(event.endDate).replace(/-/g, '')
   const params = [
     'action=TEMPLATE',
     `text=${enc(event.title)}`,
-    `dates=${start}/${end}`,
+    `dates=${googleDates(event)}`,
     ...(event.description ? [`details=${enc(event.description)}`] : []),
     ...(event.location ? [`location=${enc(event.location)}`] : []),
   ]

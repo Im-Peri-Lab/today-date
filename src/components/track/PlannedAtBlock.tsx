@@ -8,7 +8,7 @@ import { CalendarAddButton } from './CalendarAddButton'
 import { PlannedAtClearDialog } from './PlannedAtClearDialog'
 import { useUpdateActivity } from '@/hooks/useActivities'
 import { useUpdatePlace } from '@/hooks/usePlaces'
-import { formatDotDate } from '@/lib/date'
+import { formatDotDateTime } from '@/lib/date'
 import type { CalendarItem } from '@/lib/calendar/event'
 import { cn } from '@/lib/utils'
 import styles from '@/components/screens.module.css'
@@ -37,7 +37,7 @@ export function PlannedAtBlock({ track, id, item, plannedAt, onEdit }: PlannedAt
 
   function handleClear() {
     mutation.mutate(
-      { id, patch: { planned_at: null } },
+      { id, patch: { planned_at: null, planned_time: null } },
       {
         onSuccess: () => {
           setClearOpen(false)
@@ -62,7 +62,8 @@ export function PlannedAtBlock({ track, id, item, plannedAt, onEdit }: PlannedAt
         <div className="flex items-center gap-1">
           <span className={cn('inline-flex items-center gap-1.5', styles.bodyText)}>
             <Calendar className={cn('h-3.5 w-3.5 shrink-0', styles.accent)} />
-            {formatDotDate(plannedAt)}
+            {/* 시간이 있으면 "2026.12.19 (토) 오후 7:00", 없으면 날짜만(021) */}
+            {formatDotDateTime(plannedAt, item.planned_time)}
           </span>
           <CalendarAddButton track={track} item={item} />
         </div>

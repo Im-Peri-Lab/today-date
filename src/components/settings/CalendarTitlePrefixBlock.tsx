@@ -88,6 +88,10 @@ export function CalendarTitlePrefixBlock() {
           </button>
         </div>
       )}
+      {/* 내보내기는 1회성 사본이라 동기화되지 않는다는 안내(021) — 편집/보기 모드 공통 */}
+      <p className={cn('mt-3 text-xs', styles.sub)}>
+        앱에서 날짜·시간을 바꿔도 이미 추가한 캘린더 일정은 바뀌지 않아요
+      </p>
     </section>
   )
 }

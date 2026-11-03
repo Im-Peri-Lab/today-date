@@ -35,4 +35,14 @@ describe('PATCH /api/places/[id] — 요청 본문 검증', () => {
     const res = await PATCH(req, { params })
     expect(res.status).toBe(400)
   })
+
+  it('planned_time 만 값으로 오면(같은 요청에 planned_at 없음) 400', async () => {
+    const req = new NextRequest('http://localhost/api/places/x', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ planned_time: '19:00' }),
+    })
+    const res = await PATCH(req, { params })
+    expect(res.status).toBe(400)
+  })
 })

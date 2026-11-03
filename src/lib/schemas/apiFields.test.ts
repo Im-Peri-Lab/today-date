@@ -7,6 +7,8 @@ import {
   apiNicknameSchema,
   apiReferenceUrlSchema,
   apiPlannedAtSchema,
+  apiPlannedTimeSchema,
+  applyPlannedTimeRule,
   apiListQueryBase,
   splitCommaIds,
   emptyToNull,
@@ -158,5 +160,58 @@ describe('apiPlannedAtSchema', () => {
   it('날짜 형식이 아니면 거부한다', () => {
     expect(apiPlannedAtSchema.safeParse('26.07.09').success).toBe(false)
     expect(apiPlannedAtSchema.safeParse('2026-07-09T00:00:00Z').success).toBe(false)
+  })
+})
+
+describe('apiPlannedTimeSchema', () => {
+  it('HH:mm 을 받고 HH:mm:ss 는 HH:mm 으로 정규화한다', () => {
+    expect(apiPlannedTimeSchema.parse('19:00')).toBe('19:00')
+    expect(apiPlannedTimeSchema.parse('00:00')).toBe('00:00')
+    expect(apiPlannedTimeSchema.parse('23:59')).toBe('23:59')
+    expect(apiPlannedTimeSchema.parse('19:00:00')).toBe('19:00')
+  })
+
+  it('빈 문자열은 null, null·undefined 는 그대로', () => {
+    expect(apiPlannedTimeSchema.parse('')).toBeNull()
+    expect(apiPlannedTimeSchema.parse(null)).toBeNull()
+    expect(apiPlannedTimeSchema.parse(undefined)).toBeUndefined()
+  })
+
+  it('24:00 · 9:00 · 19:7 · 19:60 은 거부한다', () => {
+    for (const v of ['24:00', '9:00', '19:7', '19:60', '7pm']) {
+      expect(apiPlannedTimeSchema.safeParse(v).success).toBe(false)
+    }
+  })
+})
+
+describe('applyPlannedTimeRule', () => {
+  it('planned_time 키가 없으면 건드리지 않는다(undefined = 변경 없음)', () => {
+    const r = applyPlannedTimeRule({ planned_at: '2026-12-19' })
+    expect(r).toEqual({ ok: true, data: { planned_at: '2026-12-19' } })
+    expect(r.ok && 'planned_time' in r.data).toBe(false)
+
+    const other = applyPlannedTimeRule({ title: 'x' } as { title: string; planned_at?: string | null })
+    expect(other.ok && 'planned_time' in other.data).toBe(false)
+  })
+
+  it('planned_at: null 이면 planned_time 도 null 로 강제한다', () => {
+    expect(applyPlannedTimeRule({ planned_at: null })).toEqual({
+      ok: true,
+      data: { planned_at: null, planned_time: null },
+    })
+    expect(applyPlannedTimeRule({ planned_at: null, planned_time: null })).toEqual({
+      ok: true,
+      data: { planned_at: null, planned_time: null },
+    })
+  })
+
+  it('시간이 값인데 같은 요청에 날짜가 없거나 null 이면 거부한다', () => {
+    expect(applyPlannedTimeRule({ planned_time: '19:00' }).ok).toBe(false)
+    expect(applyPlannedTimeRule({ planned_at: null, planned_time: '19:00' }).ok).toBe(false)
+  })
+
+  it('날짜와 함께 오면 통과, 시간 null(종일로)도 통과', () => {
+    expect(applyPlannedTimeRule({ planned_at: '2026-12-19', planned_time: '19:00' }).ok).toBe(true)
+    expect(applyPlannedTimeRule({ planned_time: null }).ok).toBe(true)
   })
 })

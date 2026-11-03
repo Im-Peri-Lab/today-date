@@ -56,6 +56,8 @@ export function ActivityForm({ prefill, returnTo }: { prefill?: boolean; returnT
       location: emptyToNull(values.location),
       memo: emptyToNull(values.memo),
       planned_at: emptyToNull(values.planned_at),
+      // 날짜 없이 시간만 보내지 않는다(API 짝 규칙, 021)
+      planned_time: values.planned_at ? emptyToNull(values.planned_time) : null,
     }
 
     let created: Activity

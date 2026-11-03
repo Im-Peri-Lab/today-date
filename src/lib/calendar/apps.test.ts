@@ -37,6 +37,18 @@ describe('buildGoogleCalendarUrl', () => {
     expect(parsed.searchParams.get('location')).toBe(base.location)
   })
 
+  it('시간 지정 일정은 dates=YYYYMMDDTHHmmssZ/…(UTC, +120분)', () => {
+    const url = buildGoogleCalendarUrl({ ...base, startDate: '2026-12-19', endDate: '2026-12-19', startTime: '19:00' })
+    expect(url).toContain('dates=20261219T100000Z/20261219T120000Z')
+    expect(new URL(url).searchParams.get('dates')).toBe('20261219T100000Z/20261219T120000Z')
+  })
+
+  it('시간이 없으면 기존 종일 URL 과 같다', () => {
+    expect(buildGoogleCalendarUrl(base)).toBe(
+      buildGoogleCalendarUrl({ ...base, startTime: undefined }),
+    )
+  })
+
   it('비어 있는 장소·설명은 파라미터를 생략한다', () => {
     const url = buildGoogleCalendarUrl({ ...base, location: '', description: '' })
     expect(url).not.toContain('location=')

@@ -121,4 +121,42 @@ describe('buildIcs', () => {
     expect(uids).toEqual(['UID:activity-7@todaydate', 'UID:place-7@todaydate'])
     expect(new Set(uids).size).toBe(2)
   })
+
+  it('시작 시간이 있으면 UTC Z 시간 지정 일정(VALUE=DATE 없음, VTIMEZONE 없음)', () => {
+    const ics = buildIcs([event({ startDate: '2026-12-19', endDate: '2026-12-19', startTime: '19:00' })], STAMP)
+    expect(ics).toContain('DTSTART:20261219T100000Z\r\n')
+    expect(ics).toContain('DTEND:20261219T120000Z\r\n')
+    expect(ics).not.toContain('VALUE=DATE')
+    expect(ics).not.toContain('VTIMEZONE')
+  })
+
+  it('12/31 23:30 시작은 종료가 해를 넘겨도 UTC 로 정확하다', () => {
+    const ics = buildIcs([event({ startDate: '2026-12-31', endDate: '2026-12-31', startTime: '23:30' })], STAMP)
+    expect(ics).toContain('DTSTART:20261231T143000Z\r\n')
+    expect(ics).toContain('DTEND:20261231T163000Z\r\n')
+  })
+
+  it('시작 시간이 없으면 시간 기능 이전 출력과 바이트까지 같다', () => {
+    const base = event({ title: '성수, 브런치', location: '성수', description: '메모\n상세 보기: x' })
+    const ics = buildIcs([base], STAMP)
+    // 고정 스냅샷 — 기존 종일 출력 형식(줄 순서·CRLF·VALUE=DATE)
+    expect(ics).toBe(
+      [
+        'BEGIN:VCALENDAR',
+        'VERSION:2.0',
+        'PRODID:-//today-date//calendar-export//KO',
+        'CALSCALE:GREGORIAN',
+        'BEGIN:VEVENT',
+        `UID:${base.uid}`,
+        `DTSTAMP:${STAMP}`,
+        'DTSTART;VALUE=DATE:20261107',
+        'DTEND;VALUE=DATE:20261108',
+        'SUMMARY:성수\\, 브런치',
+        'LOCATION:성수',
+        'DESCRIPTION:메모\\n상세 보기: x',
+        'END:VEVENT',
+        'END:VCALENDAR',
+      ].join('\r\n') + '\r\n',
+    )
+  })
 })

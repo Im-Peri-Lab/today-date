@@ -50,6 +50,8 @@ export interface Activity {
   visited_end_at: string | null
   /** 방문 예정일(위시리스트용, 'YYYY-MM-DD'). 상태가 바뀌어도 보존하며 노출은 status 로 정한다(020). */
   planned_at: string | null
+  /** 방문 예정 시작 시간('HH:mm' — DB 는 'HH:mm:ss' 로 돌려줄 수 있음). NULL 이면 종일. planned_at 없이 두지 않는다(021). */
+  planned_time: string | null
   rating: number | null
   review_note: string | null
   created_at: string
@@ -71,6 +73,8 @@ export interface Place {
   visited_at: string | null
   /** 방문 예정일(위시리스트용). 활동과 동일 규칙(020). */
   planned_at: string | null
+  /** 방문 예정 시작 시간('HH:mm' — DB 는 'HH:mm:ss' 로 돌려줄 수 있음). NULL 이면 종일. planned_at 없이 두지 않는다(021). */
+  planned_time: string | null
   rating: number | null
   review_note: string | null
   created_at: string

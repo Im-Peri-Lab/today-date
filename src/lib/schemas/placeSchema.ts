@@ -13,6 +13,8 @@ export const placeFormSchema = z.object({
   memo: z.string().max(1000, '메모는 1000자 이하로 입력해 주세요.').optional(),
   // 방문 예정일(020) — 위시리스트일 때만 폼에 노출. 'YYYY-MM-DD' 또는 빈 문자열.
   planned_at: z.string().optional(),
+  // 방문 예정 시작 시간(021) — 'HH:mm' 또는 빈 문자열(종일). 날짜가 있을 때만 입력 가능.
+  planned_time: z.string().optional(),
   reference_url: z
     .string()
     .optional()

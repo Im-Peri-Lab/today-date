@@ -1,5 +1,6 @@
 import { nextDayIso } from '@/lib/date'
 import type { CalendarEvent } from './event'
+import { timedEventStamps } from './time'
 
 /**
  * .ics(iCalendar, RFC 5545) 텍스트 생성 — 전부 순수 함수.
@@ -51,7 +52,22 @@ function toIcsDate(iso: string): string {
 }
 
 /**
- * 종일 일정 VEVENT 한 건. DTEND 는 배타 종료일이라 마지막 날 +1일.
+ * DTSTART/DTEND 두 줄. 시작 시간이 있으면 UTC 'Z' 시간 지정 일정(VTIMEZONE 없음, §time.ts),
+ * 없으면 종일 일정(VALUE=DATE, 배타 종료일) — 종일 출력은 시간 기능 이전과 바이트까지 같다.
+ */
+function dateLines(event: CalendarEvent): string[] {
+  if (event.startTime) {
+    const { start, end } = timedEventStamps(event.startDate, event.startTime)
+    return [`DTSTART:${start}`, `DTEND:${end}`]
+  }
+  return [
+    `DTSTART;VALUE=DATE:${toIcsDate(event.startDate)}`,
+    `DTEND;VALUE=DATE:${toIcsDate(nextDayIso(event.endDate))}`,
+  ]
+}
+
+/**
+ * VEVENT 한 건. DTEND 는 배타 종료일이라 마지막 날 +1일.
  * 빈 location/description 줄은 내보내지 않는다.
  */
 function buildVEvent(event: CalendarEvent, stamp: string): string[] {
@@ -59,8 +75,7 @@ function buildVEvent(event: CalendarEvent, stamp: string): string[] {
     'BEGIN:VEVENT',
     `UID:${event.uid}`,
     `DTSTAMP:${stamp}`,
-    `DTSTART;VALUE=DATE:${toIcsDate(event.startDate)}`,
-    `DTEND;VALUE=DATE:${toIcsDate(nextDayIso(event.endDate))}`,
+    ...dateLines(event),
     `SUMMARY:${escapeIcsText(event.title)}`,
     ...(event.location ? [`LOCATION:${escapeIcsText(event.location)}`] : []),
     ...(event.description ? [`DESCRIPTION:${escapeIcsText(event.description)}`] : []),

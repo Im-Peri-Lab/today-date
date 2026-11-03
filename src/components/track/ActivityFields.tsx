@@ -54,6 +54,7 @@ export function ActivityFields({
   const locationTypeValue = watch('location_type')
   const categoryValue = watch('category_id') ?? ''
   const plannedAtValue = watch('planned_at') ?? ''
+  const plannedTimeValue = watch('planned_time') ?? ''
 
   return (
     <>
@@ -136,6 +137,9 @@ export function ActivityFields({
           <PlannedAtField
             value={plannedAtValue}
             onChange={(v) => setValue('planned_at', v, { shouldValidate: true })}
+            timeValue={plannedTimeValue}
+            onTimeChange={(v) => setValue('planned_time', v)}
+            timePrefill={''}
             error={errors.planned_at?.message}
           />
         </div>

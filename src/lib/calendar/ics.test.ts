@@ -22,7 +22,7 @@ const byteLength = (s: string) => new TextEncoder().encode(s).length
 
 describe('escapeIcsText', () => {
   it('쉼표·세미콜론을 이스케이프한다', () => {
-    expect(escapeIcsText('a,b;c')).toBe('a\\,b\;c')
+    expect(escapeIcsText('a,b;c')).toBe(String.raw`a\,b\;c`)
   })
 
   it('역슬래시를 먼저 이스케이프해 중복 이스케이프하지 않는다', () => {
@@ -32,6 +32,30 @@ describe('escapeIcsText', () => {
 
   it('LF·CRLF·CR 줄바꿈을 모두 리터럴 \\n 으로 바꾼다', () => {
     expect(escapeIcsText('a\nb\r\nc\rd')).toBe('a\\nb\\nc\\nd')
+  })
+
+  // 기대값은 String.raw 로 쓴다 — 일반 문자열 '\;' 는 JS 에서 ';' 라 이스케이프 누락을 정답으로 고정해 버린다.
+  it(String.raw`세미콜론: "스시;조" → "스시\;조"`, () => {
+    expect(escapeIcsText('스시;조')).toBe(String.raw`스시\;조`)
+  })
+
+  it(String.raw`쉼표: "강남, 역삼" → "강남\, 역삼"`, () => {
+    expect(escapeIcsText('강남, 역삼')).toBe(String.raw`강남\, 역삼`)
+  })
+
+  it(String.raw`역슬래시: "a\b" → "a\\b"`, () => {
+    expect(escapeIcsText(String.raw`a\b`)).toBe(String.raw`a\\b`)
+  })
+
+  it(String.raw`줄바꿈 포함 메모 → 리터럴 "\n"`, () => {
+    expect(escapeIcsText('예약 확인\n창가 자리')).toBe(String.raw`예약 확인\n창가 자리`)
+  })
+
+  it('네 가지가 섞여도 순서대로 한 번씩만 이스케이프한다(백슬래시 이중 이스케이프 없음)', () => {
+    const input = String.raw`메뉴:스시;우동, 경로C:\date` + '\n끝'
+    expect(escapeIcsText(input)).toBe(String.raw`메뉴:스시\;우동\, 경로C:\\date\n끝`)
+    // 이미 이스케이프된 듯한 입력도 원문으로 보고 한 번 더 감싼다(ics 값은 언제나 원문 → 이스케이프 1회)
+    expect(escapeIcsText(String.raw`\;`)).toBe(String.raw`\\\;`)
   })
 
   it('이스케이프할 것이 없으면 그대로 둔다', () => {
@@ -96,7 +120,7 @@ describe('buildIcs', () => {
       STAMP,
     )
     const flat = unfold(ics)
-    expect(flat).toContain('SUMMARY:강남\\, 맛집\; 탐방\r\n')
+    expect(flat).toContain(String.raw`SUMMARY:강남\, 맛집\; 탐방` + '\r\n')
     expect(flat).toContain('LOCATION:서울\\\\강남\r\n')
     expect(flat).toContain('DESCRIPTION:1줄\\n2줄\r\n')
   })
@@ -158,5 +182,31 @@ describe('buildIcs', () => {
         'END:VCALENDAR',
       ].join('\r\n') + '\r\n',
     )
+  })
+})
+
+describe('이스케이프 + 75옥텟 줄 접기', () => {
+  it('접기는 이스케이프 다음에 적용되고, 이스케이프 시퀀스가 경계에 걸려도 unfold 하면 이스케이프 값 그대로다', () => {
+    // 'SUMMARY:'(8) + x*66 = 74바이트 → 이스케이프로 생긴 \ 가 75번째 바이트, ; 는 다음 물리 줄로 넘어간다
+    const title = 'x'.repeat(66) + ';끝'
+    const ics = buildIcs([event({ title })], STAMP)
+    const physical = ics.split('\r\n')
+    const i = physical.findIndex((l) => l.startsWith('SUMMARY:'))
+    expect(physical[i]).toBe('SUMMARY:' + 'x'.repeat(66) + '\\')  // 백슬래시 1개
+    expect(byteLength(physical[i])).toBe(75)
+    expect(physical[i + 1]).toBe(' ;끝')
+    expect(unfold(ics)).toContain(String.raw`SUMMARY:${'x'.repeat(66)}\;끝` + '\r\n')
+  })
+})
+
+describe('회귀 방지 — 특수문자가 없으면 수정 전후 출력이 같다', () => {
+  it('특수문자 없는 제목·장소·메모는 원문 그대로 실린다', () => {
+    const ics = buildIcs(
+      [event({ title: '성수 브런치 데이트', location: '서울 성동구', description: '창가 자리 예약' })],
+      STAMP,
+    )
+    expect(ics).toContain('SUMMARY:성수 브런치 데이트\r\n')
+    expect(ics).toContain('LOCATION:서울 성동구\r\n')
+    expect(ics).toContain('DESCRIPTION:창가 자리 예약\r\n')
   })
 })

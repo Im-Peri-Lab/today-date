@@ -55,4 +55,24 @@ describe('POST /api/places — 요청 본문 검증', () => {
     const res = await POST(req)
     expect(res.status).toBe(400)
   })
+
+  it('날짜 없이 시간만 오거나 시간 형식이 틀리면 400 (DB 에 닿기 전)', async () => {
+    const body = { title: '망원동 파스타집', area: '망원동', meal_times: ['dinner'] }
+    const cases = [
+      { planned_time: '19:00' },
+      { planned_at: '', planned_time: '19:00' },
+      { planned_at: '2026-12-19', planned_time: '24:00' },
+      { planned_at: '2026-12-19', planned_time: '9:00' },
+      { planned_at: '2026-12-19', planned_time: '19:7' },
+    ]
+    for (const extra of cases) {
+      const req = new NextRequest('http://localhost/api/places', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...body, ...extra }),
+      })
+      const res = await POST(req)
+      expect(res.status, JSON.stringify(extra)).toBe(400)
+    }
+  })
 })

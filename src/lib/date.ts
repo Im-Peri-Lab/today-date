@@ -105,3 +105,45 @@ export function nextDayIso(iso: string): string {
     d < daysInMonth(y, m) ? [y, m, d + 1] : m < 12 ? [y, m + 1, 1] : [y + 1, 1, 1]
   return `${ny}-${String(nm).padStart(2, '0')}-${String(nd).padStart(2, '0')}`
 }
+
+/**
+ * 이전 날짜(ISO) — "2026-03-01" → "2026-02-28". nextDayIso 의 역방향(시간 지정 일정의 UTC 변환용).
+ * Date 객체 없이 연/월/일을 직접 내린다. 해석할 수 없는 값은 그대로 돌려준다.
+ */
+export function prevDayIso(iso: string): string {
+  const [y, m, d] = iso.split('-').map(Number)
+  if (!y || !m || !d) return iso
+  const [py, pm, pd] =
+    d > 1 ? [y, m, d - 1] : m > 1 ? [y, m - 1, daysInMonth(y, m - 1)] : [y - 1, 12, 31]
+  return `${py}-${String(pm).padStart(2, '0')}-${String(pd).padStart(2, '0')}`
+}
+
+/**
+ * 시간 값 정규화 — DB(time)는 'HH:mm:ss' 로 돌려줄 수 있어 화면·입력·캘린더는 'HH:mm' 으로 맞춘다.
+ * 값이 없으면 빈 문자열.
+ */
+export function toHHmm(time?: string | null): string {
+  return time ? time.slice(0, 5) : ''
+}
+
+/**
+ * 오전/오후 시간 표시 — "19:05" → "오후 7:05", "00:00" → "오전 12:00", "12:30" → "오후 12:30".
+ * 방문 예정 시간 표시의 단일 출처(상세 블록·카드 footer 공용). 시는 앞자리 0 없이, 분은 2자리.
+ */
+export function formatKoreanTime(time?: string | null): string {
+  const hhmm = toHHmm(time)
+  const [h, m] = hhmm.split(':').map(Number)
+  if (!hhmm || Number.isNaN(h) || Number.isNaN(m)) return ''
+  const period = h < 12 ? '오전' : '오후'
+  const h12 = h % 12 === 0 ? 12 : h % 12
+  return `${period} ${h12}:${String(m).padStart(2, '0')}`
+}
+
+/**
+ * 방문 예정 일시 표시(상세용) — "2026.12.19 (토) 오후 7:00". 시간이 없으면 formatDotDate 그대로(종일).
+ */
+export function formatDotDateTime(iso?: string | null, time?: string | null): string {
+  const date = formatDotDate(iso)
+  const t = formatKoreanTime(time)
+  return date && t ? `${date} ${t}` : date
+}

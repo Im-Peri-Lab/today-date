@@ -12,6 +12,8 @@ import {
   apiMemoSchema,
   apiReferenceUrlSchema,
   apiPlannedAtSchema,
+  apiPlannedTimeSchema,
+  applyPlannedTimeRule,
   apiStatusSchema,
   apiVisitedAtSchema,
   apiRatingSchema,
@@ -29,6 +31,7 @@ const patchSchema = z.object({
   status: apiStatusSchema,
   visited_at: apiVisitedAtSchema,
   planned_at: apiPlannedAtSchema,
+  planned_time: apiPlannedTimeSchema,
   rating: apiRatingSchema,
   review_note: apiReviewNoteSchema,
 })
@@ -61,8 +64,11 @@ export async function PATCH(req: NextRequest, { params }: RouteContext) {
     if (!bodyResult.ok) return bodyResult.response
     const result = patchSchema.safeParse(bodyResult.body)
     if (!result.success) return zodErrorResponse(result.error)
+    // 날짜·시간 짝 규칙(021) — 날짜 지우기면 시간도 지우고, 날짜 없이 시간만 오면 거부.
+    const paired = applyPlannedTimeRule(result.data)
+    if (!paired.ok) return NextResponse.json({ error: paired.error }, { status: 400 })
 
-    const payload = { ...result.data }
+    const payload = { ...paired.data }
     if (payload.reference_url === '') payload.reference_url = null
 
     const scope = await requireCoupleScope()

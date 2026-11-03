@@ -1147,13 +1147,21 @@ export const STATUS_LABELS: Record<Status, string> = {
 
 ---
 
-### 10-L. 캘린더 추가 버튼 · 설정 화면 (PR #159)
+### 10-L. 캘린더 추가 버튼 · 설정 화면 · 방문 예정 시간 (PR #159, 021)
 
 **`CalendarAddButton`** (`src/components/track/CalendarAddButton.tsx`): 상세 "방문 예정"·"방문 기록" 블록의 **날짜 값 바로 옆**(보기 모드)에 두는 아이콘 버튼 하나. `ExternalLink`(`h-4 w-4`) + `.mapActionBtn`(28px, §7), `aria-label="캘린더에 추가"`. **캘린더 모양 아이콘은 쓰지 않는다** — 날짜 앞 고정 `Calendar`(`h-3.5 w-3.5`, accent) 와 겹쳐 보인다. 날짜 행은 `flex items-center gap-1`(날짜 span + 버튼), 버튼 래퍼에 **`-my-1`** 로 28px 가 날짜 줄(~21px) 높이를 키우지 않게 상쇄(`MapLink` 의 `-mt-1` 과 같은 이유). 연필·휴지통(모서리 absolute 앵커)과는 별개 위치. `▾` 없음 — 앱 선택 UI 를 두지 않는다(기기 감지로 바로 실행).
 - 날짜가 없으면(`getCalendarDates` null) 렌더하지 않는다. 같은 판정을 카드 ⋮ 메뉴 항목(§카드 ⋮ 메뉴)·저장 직후 토스트도 쓴다.
 - 캘린더 선택: iOS 계열 UA(iPhone·iPad·iPod·Macintosh)=애플 `.ics` 다운로드, 그 외=구글 캘린더 새 탭(`detectDefaultCalendarAppId`). 새 캘린더는 `CALENDAR_APPS`(`lib/calendar/apps.ts`)에 항목 추가 + 감지 규칙 확장.
 
-**저장 직후 토스트**(`PlannedAtDialog`): `toast.success("방문 예정일을 저장했어요", { description: "캘린더에도 추가할까요?", action: { label: "추가" }, duration: 8000 })`. 날짜가 바뀐 저장에만, 같은 날짜 재저장은 일반 토스트.
+**저장 직후 토스트**(`PlannedAtDialog`): `toast.success("방문 예정일을 저장했어요", { description: "캘린더에도 추가할까요?", action: { label: "추가" }, duration: 8000 })`. **날짜 또는 시간이 바뀐 저장에만**(021), 둘 다 그대로인 재저장은 일반 토스트. 액션은 저장한 날짜·시간으로 이벤트를 만든다.
+
+**방문 예정 시간(021)** — 방문예정(위시리스트)에만. 다녀온 곳(방문 기록)은 시간 없이 종일 그대로.
+- **입력 `PlannedTimeField`**(`components/forms/PlannedTimeField.tsx`): `PlannedAtDialog`·`/new` 방문 예정일 필드(`PlannedAtField`) **바로 아래**. 날짜가 없으면 렌더하지 않는다. 접힘 = `+ 시간 추가` 텍스트 버튼(`.textLink` `text-sm`, `Plus h-3.5`), 펼침 = 날짜 박스와 같은 `.dateTrigger`(40px) + leading `Clock`(`h-4 w-4` accent) + 표시 텍스트(`formatKoreanTime`, 비면 faint "시간 선택") + 네이티브 `<input type="time" step="600">` 덮개(`.dateInput`) + 우측 `×`(`.dateClear`, `aria-label="시간 지우기"`) — ×를 누르면 값을 비우고 다시 접힌다(=종일). 기존 값이 있으면 펼친 채로 시작, 날짜를 지우면 시간도 지우고 접힌다. **토글 스위치·타입별 별도 UI 없음.** 새 CSS 없음.
+- **미리 채우기**: "+ 시간 추가" 탭 시 다이닝은 식사 시간 기준(`defaultPlannedTime` — 점심만 `12:00`, 저녁 포함 `18:30`), 식사 정보 없음·액티비티는 빈 값. 저장은 "저장하기"를 눌러야 한다(그대로 저장하면 그 값이 들어가는 건 의도). iOS 는 `step` 을 무시해 1분 단위 휠 — 수용.
+- **표시**: 상세 "방문 예정" 블록 `2026.12.19 (토) 오후 7:00`(`formatDotDateTime`), 카드 footer `26.12.19 오후 7:00 방문 예정`(`PlannedFooterLabel`, `formatDotDateCompact` + `formatKoreanTime`). 시간 포맷은 `formatKoreanTime` 단일 출처(오전/오후 12시간제, 시 앞자리 0 없음, `00:00`=오전 12:00, `12:00`=오후 12:00). 카드 footer 는 기존 한 줄 슬롯(`min-h-4` nowrap) 그대로 — 카드 높이 불변, 폭이 모자라면 **시간 조각만** `min-w-0 truncate`(날짜·"방문 예정"은 `shrink-0`).
+- **정렬**(`/list` 방문예정 필터): `planned_at` ASC → 같은 날 종일(`planned_time` NULL) 먼저 → `planned_time` ASC → `created_at` DESC(`orderByListRule`).
+- **캘린더**: 시간이 있으면 시간 지정 일정(Asia/Seoul→UTC `Z`, 종료 = 시작 + 120분, VTIMEZONE 없음), 없으면 기존 종일 출력과 바이트까지 동일.
+- `/settings` "캘린더 제목 문구" 카드 맨 아래 안내 한 줄(`text-xs sub`, `mt-3`, 편집/보기 공통): "앱에서 날짜·시간을 바꿔도 이미 추가한 캘린더 일정은 바뀌지 않아요".
 
 **`/settings` 설정 화면**: 홈 삼선 메뉴(`HomeMenu` `items` 배열) 이동형(`kind: 'link'`) 항목 "설정"(`Settings` 아이콘) — 내 정보·파트너 정보 다음, 로그아웃 앞. 레이아웃은 `/account` 와 동일(`TopBar` 홈으로, `pageTitle` h1, `pageSubtitle`, `max-w-lg`). **설정은 카드 한 장씩 `space-y-4` 로 쌓는다** — 새 설정은 `components/settings/` 에 카드 블록을 만들어 `page.tsx` 에 한 줄 추가.
 - 첫 카드 `CalendarTitlePrefixBlock`: `AccountInfoBlock` 닉네임 행과 같은 인라인 편집 — 라벨(`fieldLabel`) + 값(`bodyText`, 없으면 faint "설정 안 함") + absolute 연필(`mapActionBtn`), 편집 시 `Input` + 도움말(`text-xs sub`) + **우측 정렬 취소 → 저장**(§인라인 편집 폼 액션 규칙 그대로). 값이 `localStorage` 동기 저장이라 "저장 중..." 상태는 없다. 저장 토스트 "수정되었습니다!".

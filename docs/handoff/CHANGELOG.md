@@ -1111,3 +1111,33 @@ tsc·lint·vitest 187 통과, Vercel 프리뷰에서 실기기 확인(홈 카드
 
 ### 검증
 lint·vitest 232·build 통과. Playwright 로 모바일/데스크탑×라이트/다크에서 카드 메뉴·상세 휴지통 두 경로의 문구 동일, 되돌리기 다이얼로그 4곳 불변 확인.
+
+---
+
+## 2026-11-03 — 방문예정 시간 입력 + 캘린더 시간 지정 일정 (021, `feat/planned-visit-time`)
+
+### 배경
+"캘린더는 시간 없이 종일"이라는 PR #159 결정은 다녀온 곳(과거 기록) 기준이었다. 방문예정은 미래 일정이고 다이닝은 예약 시간이 있는 경우가 많아, **방문예정에만** 시작 시간을 선택 입력으로 추가했다. 다녀온 곳은 변경 없음.
+
+### 변경
+- **데이터(021_planned_time.sql, additive·멱등·검증 블록)**: `activities`·`places.planned_time time null` + CHECK `planned_time is null or planned_at is not null`. `planned_at` 타입은 그대로. 생명주기는 `planned_at` 과 같다(다녀온 곳 전환 시 보존·화면만 숨김, 되돌리면 복원, 날짜 지우기 시 시간도 null).
+- **API**: `apiPlannedTimeSchema` — `'HH:mm'`(시 00~23·분 00~59 2자리)만, `'HH:mm:ss'` 는 `'HH:mm'` 으로 정규화, 빈 문자열은 null. `applyPlannedTimeRule`(POST·PATCH 4개 라우트 공통): ① `planned_time` 키 없음 = 변경 없음 ② `planned_at: null` 이면 `planned_time` 도 null 강제 ③ 시간이 값인데 같은 요청에 날짜가 없거나 null 이면 400(③을 먼저 판정).
+- **입력**: `PlannedTimeField` — `PlannedAtDialog`·`/new` 방문 예정일 필드 아래 "+ 시간 추가"(날짜 없으면 숨김) → 네이티브 `type="time" step="600"` + ×(종일 복귀). 기존 값이 있으면 펼친 채 시작. 다이닝은 탭 시 미리 채움(점심만 12:00, 저녁 포함 18:30), 식사 정보 없음·액티비티는 빈 값.
+- **표시**: 상세 "방문 예정" 블록 `2026.12.19 (토) 오후 7:00`, 카드 footer `26.12.19 오후 7:00 방문 예정`(`PlannedFooterLabel`). 시간 포맷 `formatKoreanTime` 단일 출처. 카드 높이 불변(Playwright 실측 170px 동일), 폭 부족 시 시간 조각만 말줄임.
+- **정렬**: `/list` 방문예정 — `planned_at` ASC → 같은 날 종일 먼저 → `planned_time` ASC → 등록 최신순.
+- **캘린더**: 시간이 있으면 시간 지정 일정. `.ics` `DTSTART:…Z`/`DTEND:…Z`, 구글 `dates=YYYYMMDDTHHmmssZ/…`. Asia/Seoul 고정→UTC 변환(VTIMEZONE 없음, `lib/calendar/time.ts`), 종료 = 시작 + `PLANNED_EVENT_DURATION_MINUTES`(120). Date 객체 없이 문자열·정수 연산(`prevDayIso` 신규). 시간이 없으면 기존 종일 출력과 바이트까지 동일. 다녀온 곳 내보내기는 보존된 `planned_time` 이 있어도 종일 그대로.
+- **토스트**: `PlannedAtDialog` 저장 직후 "캘린더에도 추가할까요? [추가]" 조건을 "날짜 **또는 시간**이 바뀐 저장"으로 확장. 지우기 경로 3곳(상세 휴지통·카드 ⋮ 두 곳)은 `planned_time: null` 을 명시해 보낸다.
+- **`/settings`**: 캘린더 제목 문구 카드에 "앱에서 날짜·시간을 바꿔도 이미 추가한 캘린더 일정은 바뀌지 않아요" 한 줄.
+- **e2e 스텁**: PostgREST `not` 연산자(`not.is.null`) 지원 추가 — `planned_only` 필터를 스텁으로 렌더할 수 없던 문제.
+
+### 설계 판단
+- 착수 전 보고로 확정: 마이그레이션 번호 020 → **021**(020 은 `planned_at` 이 사용 중), "지났어요" 판정은 코드에 없어 범위에서 제외(나중에 도입하면 날짜 기준), `.ics` 세미콜론 미이스케이프 버그는 바이트 동일 요구 때문에 이 PR 에서 손대지 않고 별도 fix PR(CURRENT_STATE 보류 목록).
+- 규칙 ②·③이 `{ planned_at: null, planned_time: '19:00' }` 에서 겹친다 — 사용자 규칙 ③("없거나 null 이면 400")을 문자 그대로 따라 ③을 먼저 본다(모순 요청을 조용히 고치지 않음).
+- iOS 는 빈 `type="time"` 의 휠 위치만 정할 수 없어 미리 채우기는 값 자체를 채우는 방식(a)으로 확정. `step` 무시(1분 휠)는 수용.
+- "종료 시간 입력", `visited_at` 시간, VALARM, 캘린더 동기화는 범위 밖.
+
+### 검증·미확인
+- lint·vitest(신규: UTC 변환 12/19 19:00·08:00(전날)·23:00·12/31 23:30·2028-02-29, 종일 바이트 동일 스냅샷, 구글 dates, 오전/오후 포맷, 같은 날 정렬, zod 거부 24:00·9:00·19:7·날짜 없이 시간만, 짝 규칙 3종, 라우트 400)·build 통과. 종일 출력은 `main` 의 `ics.ts`·`apps.ts` 빌더와 직접 비교해 바이트 동일 확인(임시 테스트, 커밋 안 함).
+- Playwright 임시 스펙(커밋 안 함, 스텁 DB)으로 라이트/다크 × 390/1280px: 목록 정렬(종일→09:00→19:00)·카드 높이 동일·footer 말줄임(시간만 truncate)·상세 블록·다이얼로그(펼침/×/18:30 미리 채움)·`/new`(날짜 전 숨김, 점심 12:00)·`/settings` 렌더, 08:00 저장 → 토스트 "추가" → 구글 URL `dates=20261218T230000Z/20261219T010000Z`, 휴지통 지우기 → 날짜·시간 모두 null.
+- e2e 전체: 실행마다 `chromium-db` 잠금 화면 테스트 1건이 번갈아 실패(패스코드 6자리 중 첫 자리가 입력 누락 — 하이드레이션 전 `keyboard.type`). 단독 재실행은 통과, 캘린더·시간 코드와 무관한 `/lock` 경로. CI 결과는 PR 참고.
+- **미확인**: iOS `.ics` 시간 지정 일정 실기기 확인(사용자 담당), 구글 캘린더/Android 실기기.

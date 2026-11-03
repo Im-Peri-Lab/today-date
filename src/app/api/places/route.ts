@@ -11,6 +11,8 @@ import {
   apiMemoSchema,
   apiReferenceUrlSchema,
   apiPlannedAtSchema,
+  apiPlannedTimeSchema,
+  applyPlannedTimeRule,
   apiListQueryBase,
   splitCommaIds,
 } from '@/lib/schemas/apiFields'
@@ -27,6 +29,7 @@ const createSchema = z.object({
   memo: apiMemoSchema,
   reference_url: apiReferenceUrlSchema,
   planned_at: apiPlannedAtSchema,
+  planned_time: apiPlannedTimeSchema,
 })
 
 const listQuerySchema = z.object({
@@ -95,13 +98,16 @@ export async function POST(req: NextRequest) {
     if (!bodyResult.ok) return bodyResult.response
     const result = createSchema.safeParse(bodyResult.body)
     if (!result.success) return zodErrorResponse(result.error)
+    // 날짜·시간 짝 규칙(021) — 날짜 지우기면 시간도 지우고, 날짜 없이 시간만 오면 거부.
+    const paired = applyPlannedTimeRule(result.data)
+    if (!paired.ok) return NextResponse.json({ error: paired.error }, { status: 400 })
 
     const scope = await requireCoupleScope()
     if (!scope.ok) return scope.response
 
     const supabase = getSupabaseClient()
     // 소유자는 세션값으로만 정한다 — 사유는 POST /api/activities 주석 참고.
-    const payload = { ...result.data, couple_id: scope.coupleId }
+    const payload = { ...paired.data, couple_id: scope.coupleId }
 
     if (!payload.category_id) {
       payload.category_id = await getDefaultCategoryId(supabase)

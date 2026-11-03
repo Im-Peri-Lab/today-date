@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useTopLoader } from 'nextjs-toploader'
 import { useState, type ReactNode } from 'react'
 import { toast } from 'sonner'
-import { Compass, MapPin, Utensils, StickyNote, Calendar } from 'lucide-react'
+import { Compass, MapPin, Utensils, StickyNote } from 'lucide-react'
 import { CategoryBadge } from './CategoryBadge'
 import { ItemMenu } from './ItemMenu'
 import { CalendarTitlePrefixDialog } from '@/components/CalendarTitlePrefixDialog'
@@ -14,6 +14,7 @@ import { DeleteConfirmDialog } from './DeleteConfirmDialog'
 import { RevertConfirmDialog } from './RevertConfirmDialog'
 import { PlannedAtClearDialog } from './PlannedAtClearDialog'
 import { PlannedAtDialog } from './PlannedAtDialog'
+import { PlannedFooterLabel } from './PlannedFooterLabel'
 import { VisitedDialog } from '@/components/VisitedDialog'
 import { useDeletePlace, useUpdatePlace } from '@/hooks/usePlaces'
 import { MEAL_LABELS, STATUS_LABELS } from '@/lib/labels'
@@ -70,7 +71,7 @@ export function PlaceCard({ place, hideMenu, actionSlot, returnTo }: PlaceCardPr
 
   function handleClearPlanned() {
     update.mutate(
-      { id: place.id, patch: { planned_at: null } },
+      { id: place.id, patch: { planned_at: null, planned_time: null } },
       {
         onSuccess: () => {
           setClearPlannedOpen(false)
@@ -179,11 +180,7 @@ export function PlaceCard({ place, hideMenu, actionSlot, returnTo }: PlaceCardPr
           <div className={cn('mt-2.5 pt-2.5 text-xs', styles.divider, styles.sub)}>
             <p className={cn('flex min-h-4 items-center gap-1 overflow-hidden whitespace-nowrap', !place.planned_at && styles.emptyHint)}>
               {place.planned_at ? (
-                <>
-                  <Calendar className="h-3 w-3 shrink-0" />
-                  <span>{formatDotDateCompact(place.planned_at)}</span>
-                  <span>방문 예정</span>
-                </>
+                <PlannedFooterLabel plannedAt={place.planned_at} plannedTime={place.planned_time} />
               ) : (
                 '방문 예정일이 없습니다'
               )}

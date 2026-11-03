@@ -172,6 +172,12 @@ function matchOp(value, op, raw) {
       const wanted = raw.replace(/^\{/, '').replace(/\}$/, '').split(',').filter(Boolean)
       return Array.isArray(value) && wanted.every((w) => value.includes(w))
     }
+    case 'not': {
+      // 부정: `not.is.null`(방문예정만 필터 — planned_at 이 있는 행). 시드에 키가 없는 행은 NULL 컬럼으로 본다.
+      const dot = raw.indexOf('.')
+      if (dot < 0) throw new Error(`스텁: not 절 파싱 실패 — ${raw}`)
+      return !matchOp(value ?? null, raw.slice(0, dot), raw.slice(dot + 1))
+    }
     default:
       throw new Error(`스텁 미지원 연산자: ${op}`)
   }

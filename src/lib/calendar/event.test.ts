@@ -20,6 +20,7 @@ function activity(overrides: Partial<Activity> = {}): Activity {
     visited_at: null,
     visited_end_at: null,
     planned_at: '2026-11-07',
+    planned_time: null,
     rating: null,
     review_note: null,
     created_at: '2026-11-01T00:00:00Z',
@@ -46,6 +47,7 @@ function place(overrides: Partial<Place> = {}): Place {
     status: 'wishlist',
     visited_at: null,
     planned_at: '2026-11-08',
+    planned_time: null,
     rating: null,
     review_note: null,
     created_at: '2026-11-01T00:00:00Z',
@@ -148,5 +150,24 @@ describe('buildCalendarEvent', () => {
   it('메모·카테고리·링크가 없어도 상세 링크는 항상 들어간다', () => {
     const ev = buildCalendarEvent('place', place(), { origin: ORIGIN })
     expect(ev?.description).toBe(`상세 보기: ${ORIGIN}/places/p1`)
+  })
+
+  it('방문 예정 시간이 있으면 startTime(HH:mm) 을 싣고, DB 의 HH:mm:ss 도 HH:mm 으로 맞춘다', () => {
+    expect(buildCalendarEvent('place', place({ planned_time: '19:00' }), { origin: ORIGIN })?.startTime).toBe('19:00')
+    expect(buildCalendarEvent('place', place({ planned_time: '19:00:00' }), { origin: ORIGIN })?.startTime).toBe('19:00')
+  })
+
+  it('시간이 없으면 startTime 키 자체가 없다(종일 — 기존 이벤트 모양 그대로)', () => {
+    const ev = buildCalendarEvent('place', place(), { origin: ORIGIN })
+    expect(ev && 'startTime' in ev).toBe(false)
+  })
+
+  it('다녀온 곳은 보존된 planned_time 이 있어도 종일', () => {
+    const ev = buildCalendarEvent(
+      'place',
+      place({ status: 'visited', visited_at: '2026-10-01', planned_time: '19:00' }),
+      { origin: ORIGIN },
+    )
+    expect(ev && 'startTime' in ev).toBe(false)
   })
 })

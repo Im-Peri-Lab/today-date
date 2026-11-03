@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useTopLoader } from 'nextjs-toploader'
 import { useState, type ReactNode } from 'react'
 import { toast } from 'sonner'
-import { Clock, StickyNote, MapPin, Calendar } from 'lucide-react'
+import { Clock, StickyNote, MapPin } from 'lucide-react'
 import { CategoryBadge } from './CategoryBadge'
 import { ItemMenu } from './ItemMenu'
 import { CalendarTitlePrefixDialog } from '@/components/CalendarTitlePrefixDialog'
@@ -14,6 +14,7 @@ import { DeleteConfirmDialog } from './DeleteConfirmDialog'
 import { RevertConfirmDialog } from './RevertConfirmDialog'
 import { PlannedAtClearDialog } from './PlannedAtClearDialog'
 import { PlannedAtDialog } from './PlannedAtDialog'
+import { PlannedFooterLabel } from './PlannedFooterLabel'
 import { VisitedDialog } from '@/components/VisitedDialog'
 import { useDeleteActivity, useUpdateActivity } from '@/hooks/useActivities'
 import {
@@ -77,7 +78,7 @@ export function ActivityCard({ activity, hideMenu, actionSlot, returnTo }: Activ
 
   function handleClearPlanned() {
     update.mutate(
-      { id: activity.id, patch: { planned_at: null } },
+      { id: activity.id, patch: { planned_at: null, planned_time: null } },
       {
         onSuccess: () => {
           setClearPlannedOpen(false)
@@ -196,11 +197,7 @@ export function ActivityCard({ activity, hideMenu, actionSlot, returnTo }: Activ
           <div className={cn('mt-2.5 pt-2.5 text-xs', styles.divider, styles.sub)}>
             <p className={cn('flex min-h-4 items-center gap-1 overflow-hidden whitespace-nowrap', !activity.planned_at && styles.emptyHint)}>
               {activity.planned_at ? (
-                <>
-                  <Calendar className="h-3 w-3 shrink-0" />
-                  <span>{formatDotDateCompact(activity.planned_at)}</span>
-                  <span>방문 예정</span>
-                </>
+                <PlannedFooterLabel plannedAt={activity.planned_at} plannedTime={activity.planned_time} />
               ) : (
                 '방문 예정일이 없습니다'
               )}

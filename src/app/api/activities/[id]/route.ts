@@ -12,6 +12,8 @@ import {
   apiMemoSchema,
   apiReferenceUrlSchema,
   apiPlannedAtSchema,
+  apiPlannedTimeSchema,
+  applyPlannedTimeRule,
   apiStatusSchema,
   apiVisitedAtSchema,
   apiRatingSchema,
@@ -30,6 +32,7 @@ const patchSchema = z.object({
   status: apiStatusSchema,
   visited_at: apiVisitedAtSchema,
   planned_at: apiPlannedAtSchema,
+  planned_time: apiPlannedTimeSchema,
   // 방문 종료일(기간 방문) — activities 전용, places에는 없음.
   visited_end_at: z.string().optional().nullable(),
   rating: apiRatingSchema,
@@ -67,8 +70,11 @@ export async function PATCH(req: NextRequest, { params }: RouteContext) {
     if (!bodyResult.ok) return bodyResult.response
     const result = patchSchema.safeParse(bodyResult.body)
     if (!result.success) return zodErrorResponse(result.error)
+    // 날짜·시간 짝 규칙(021) — 날짜 지우기면 시간도 지우고, 날짜 없이 시간만 오면 거부.
+    const paired = applyPlannedTimeRule(result.data)
+    if (!paired.ok) return NextResponse.json({ error: paired.error }, { status: 400 })
 
-    const payload = { ...result.data }
+    const payload = { ...paired.data }
     if (payload.reference_url === '') payload.reference_url = null
     // 방문 기간: 종료일은 시작일 이상이어야 한다(클라·DB CHECK와 3단 방어의 서버 단).
     if (payload.visited_end_at && payload.visited_at && payload.visited_end_at < payload.visited_at) {

@@ -1658,7 +1658,9 @@ test.describe('방문 예정 시간 입력', () => {
     const dialog = page.getByRole('dialog')
     await expect(dialog.locator('#planned_at_dialog')).toHaveValue('2026-12-19')
     await expect(dialog.locator('#planned_time_dialog')).toHaveValue('19:00')
-    await expect(dialog.getByText('시간 (선택)')).toBeVisible()
+    // 화면 라벨은 없고 접근성 이름으로 찾는다
+    await expect(dialog.getByLabel('시간 (선택)')).toHaveValue('19:00')
+    await expect(dialog.getByText('시간 (선택)')).toHaveCount(0)
     await expect(dialog.getByText('비워두면 종일 일정으로 추가돼요')).toBeVisible()
 
     await dialog.getByRole('button', { name: '시간 지우기' }).click()

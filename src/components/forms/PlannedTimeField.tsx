@@ -2,7 +2,6 @@
 
 import { useRef } from 'react'
 import { Clock, X } from 'lucide-react'
-import { Label } from '@/components/ui/label'
 import { formatKoreanTime } from '@/lib/date'
 import { cn } from '@/lib/utils'
 import styles from '@/components/screens.module.css'
@@ -18,7 +17,7 @@ interface PlannedTimeFieldProps {
 
 /**
  * 방문 예정 시작 시간(021) — 방문 예정일 필드 바로 아래, 날짜가 있으면 항상 노출(PlannedAtDialog·`/new` 공용).
- * 라벨 "시간 (선택)" + DatePickerField 와 같은 박스(.dateTrigger, 높이 고정 40px — 빈 time 입력이 iOS 에서
+ * 화면 라벨 없이("방문 예정일" 라벨 아래 날짜 박스와 8px 간격 한 묶음, 입력의 aria-label="시간 (선택)") DatePickerField 와 같은 박스(.dateTrigger, 높이 고정 40px — 빈 time 입력이 iOS 에서
  * 납작해져도 박스 높이는 그대로) + 네이티브 `<input type="time" step="600">` 덮개 + 보조 문구.
  * 비어 있으면 종일, × 는 값이 있을 때만 보이고 누르면 빈 값(=종일)으로 되돌린다. 미리 채우기 없음.
  * step 은 iOS 휠에서 무시된다(1분 단위).
@@ -37,9 +36,9 @@ export function PlannedTimeField({ id, value, onChange, hasDate }: PlannedTimeFi
   }
 
   return (
-    // 부모(FormField·다이얼로그)가 space-y-1.5 라 margin-top 은 덮인다 → padding 으로 필드 간격(6+14=20px)
-    <div className="space-y-1.5 pt-3.5">
-      <Label htmlFor={id}>시간 (선택)</Label>
+    // 날짜 박스와 한 묶음(간격 8px): 부모(FormField·다이얼로그)의 space-y-1.5 가 margin-top 6px 을 주고
+    // padding 2px 을 더한다(margin 은 부모가 덮어써서 padding 으로). 화면 라벨은 없고 접근성 이름만 둔다.
+    <div className="space-y-1.5 pt-0.5">
       <div className={styles.dateTrigger} onClick={openPicker}>
         <Clock className={cn('h-4 w-4 shrink-0', styles.accent)} />
         <span className={cn(!value && styles.faint)}>{value ? formatKoreanTime(value) : '시간 선택'}</span>
@@ -51,7 +50,7 @@ export function PlannedTimeField({ id, value, onChange, hasDate }: PlannedTimeFi
           value={value}
           onChange={(e) => onChange(e.target.value)}
           className={styles.dateInput}
-          aria-label="방문 예정 시간"
+          aria-label="시간 (선택)"
         />
         {value && (
           <button

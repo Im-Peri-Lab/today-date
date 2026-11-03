@@ -4,7 +4,7 @@ import { Fragment, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useTopLoader } from 'nextjs-toploader'
-import { Menu, LogOut, Loader2, Tag, Trash2, UserPen, Users, type LucideIcon } from 'lucide-react'
+import { Menu, LogOut, Loader2, Settings, Trash2, UserPen, Users, type LucideIcon } from 'lucide-react'
 import { toast } from 'sonner'
 import {
   DropdownMenu,
@@ -14,7 +14,6 @@ import {
   DropdownMenuLinkItem,
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu'
-import { CalendarTitlePrefixDialog } from '@/components/CalendarTitlePrefixDialog'
 import { usePartner } from '@/hooks/usePartner'
 import styles from '@/components/screens.module.css'
 
@@ -57,7 +56,6 @@ export function HomeMenu() {
   const router = useRouter()
   const topLoader = useTopLoader()
   const [isLoading, setIsLoading] = useState(false)
-  const [prefixOpen, setPrefixOpen] = useState(false)
   const { data: partnerData } = usePartner()
 
   async function handleLogout() {
@@ -120,15 +118,15 @@ export function HomeMenu() {
         ]
       : []),
     /*
-     * 캘린더 제목 문구 — 설정 다이얼로그를 그 자리에서 연다(action). 일정 제목 앞에 붙는
-     * 머리말은 가끔만 바꾸는 설정이라 카드·상세에 두지 않고 여기에 모았다.
+     * 설정 — 앱 설정이 쌓이는 화면(/settings)으로 이동한다(link). 캘린더 제목 문구가 첫 항목이고,
+     * 설정이 늘어도 메뉴 항목은 이 하나로 둔다.
      */
     {
-      kind: 'action',
-      key: 'calendar-prefix',
-      label: '캘린더 제목 문구',
-      icon: Tag,
-      onSelect: () => setPrefixOpen(true),
+      kind: 'link' as const,
+      key: 'settings',
+      label: '설정',
+      icon: Settings,
+      href: '/settings',
     },
     /*
      * 로그아웃은 중성이다(destructive 아니다) — 되돌릴 수 있는 일이기 때문이다.
@@ -175,53 +173,50 @@ export function HomeMenu() {
   const firstDestructiveIndex = items.findIndex((item) => item.variant === 'destructive')
 
   return (
-    <>
-      <DropdownMenu>
-        <DropdownMenuTrigger
-          render={<button type="button" className={styles.headerNavBtn} aria-label="메뉴" />}
-        >
-          <Menu className="h-[22px] w-[22px]" />
-        </DropdownMenuTrigger>
-        <DropdownMenuContent>
-          {items.map((item, index) => {
-            const Icon = item.icon
-            // 되돌릴 수 없는 항목만 위의 평범한 항목들과 갈라 둔다(첫 파괴적 항목 앞 한 번).
-            const separator = index === firstDestructiveIndex && index > 0
+    <DropdownMenu>
+      <DropdownMenuTrigger
+        render={<button type="button" className={styles.headerNavBtn} aria-label="메뉴" />}
+      >
+        <Menu className="h-[22px] w-[22px]" />
+      </DropdownMenuTrigger>
+      <DropdownMenuContent>
+        {items.map((item, index) => {
+          const Icon = item.icon
+          // 되돌릴 수 없는 항목만 위의 평범한 항목들과 갈라 둔다(첫 파괴적 항목 앞 한 번).
+          const separator = index === firstDestructiveIndex && index > 0
 
-            if (item.kind === 'link') {
-              return (
-                <Fragment key={item.key}>
-                  {separator && <DropdownMenuSeparator />}
-                  <DropdownMenuLinkItem
-                    variant={item.variant}
-                    render={<Link href={item.href} />}
-                  >
-                    <Icon />
-                    {item.label}
-                  </DropdownMenuLinkItem>
-                </Fragment>
-              )
-            }
-
-            const pending = !!item.pending
-
+          if (item.kind === 'link') {
             return (
               <Fragment key={item.key}>
                 {separator && <DropdownMenuSeparator />}
-                <DropdownMenuItem
+                <DropdownMenuLinkItem
                   variant={item.variant}
-                  disabled={pending}
-                  onClick={item.onSelect}
+                  render={<Link href={item.href} />}
                 >
-                  {pending ? <Loader2 className="animate-spin" /> : <Icon />}
-                  {pending ? (item.pendingLabel ?? item.label) : item.label}
-                </DropdownMenuItem>
+                  <Icon />
+                  {item.label}
+                </DropdownMenuLinkItem>
               </Fragment>
             )
-          })}
-        </DropdownMenuContent>
-      </DropdownMenu>
-      <CalendarTitlePrefixDialog open={prefixOpen} onOpenChange={setPrefixOpen} />
-    </>
+          }
+
+          const pending = !!item.pending
+
+          return (
+            <Fragment key={item.key}>
+              {separator && <DropdownMenuSeparator />}
+              <DropdownMenuItem
+                variant={item.variant}
+                disabled={pending}
+                onClick={item.onSelect}
+              >
+                {pending ? <Loader2 className="animate-spin" /> : <Icon />}
+                {pending ? (item.pendingLabel ?? item.label) : item.label}
+              </DropdownMenuItem>
+            </Fragment>
+          )
+        })}
+      </DropdownMenuContent>
+    </DropdownMenu>
   )
 }

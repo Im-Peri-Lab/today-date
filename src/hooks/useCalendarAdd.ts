@@ -48,7 +48,6 @@ export function useCalendarAdd(track: CalendarTrack) {
         setPendingItem(null)
         if (item) run(item)
       },
-      continuing: true,
     },
   }
 }

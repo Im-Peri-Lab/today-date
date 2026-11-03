@@ -1153,7 +1153,7 @@ export const STATUS_LABELS: Record<Status, string> = {
 - 날짜가 없으면(`getCalendarDates` null) 렌더하지 않는다. 같은 판정을 카드 ⋮ 메뉴 항목(§카드 ⋮ 메뉴)·저장 직후 토스트도 쓴다.
 - 캘린더 선택: iOS 계열 UA(iPhone·iPad·iPod·Macintosh)=애플 `.ics` 다운로드, 그 외=구글 캘린더 새 탭(`detectDefaultCalendarAppId`). 새 캘린더는 `CALENDAR_APPS`(`lib/calendar/apps.ts`)에 항목 추가 + 감지 규칙 확장.
 
-**저장 직후 토스트**(`PlannedAtDialog`): `toast.success("방문 예정일을 저장했어요", { description: "캘린더에도 추가할까요?", action: { label: "추가" }, duration: 8000 })`. **날짜 또는 시간이 바뀐 저장에만**(021), 둘 다 그대로인 재저장은 일반 토스트. 액션은 저장한 날짜·시간으로 이벤트를 만든다.
+**저장 직후 토스트**(`PlannedAtDialog`·`VisitRecordBlock` 공용 `showScheduleSavedToast`, 판정 `classifyScheduleSave` — `lib/calendar/scheduleToast.ts`·`scheduleChange.ts`): ① **처음 등록**(이전 날짜 없음) — 방문 예정은 기존 그대로 `"방문 예정일을 저장했어요"` + description `"캘린더에도 추가할까요?"` + 액션 **"추가"**(8초), 방문 기록은 기존 `"방문 기록을 수정했어요"`(액션 없음). ② **수정**(이전 날짜가 있었고 날짜·종료일·시간 중 하나라도 실제로 바뀜) — `"일정이 바뀌었어요. 이미 추가한 캘린더 일정은 직접 수정해 주세요"` + 액션 **"다시 추가"**(8초, 저장한 값으로 추가). ③ 그대로 재저장·별점/후기만 수정 — 기존 문구만(액션 없음). 캘린더 일정이 따라 바뀌지 않는다는 안내는 이 수정 토스트가 전담한다(설정 화면 안내 줄은 없음).
 
 **방문 예정 시간(021)** — 방문예정(위시리스트)에만. 다녀온 곳(방문 기록)은 시간 없이 종일 그대로.
 - **입력 `PlannedTimeField`**(`components/forms/PlannedTimeField.tsx`, PR #163 에서 단순화): `PlannedAtDialog`·`/new` 방문 예정일 필드 **바로 아래**. **날짜가 있으면 항상 보이고**(별도 "+ 시간 추가" 버튼 없음), 날짜가 없으면 렌더하지 않는다. 날짜를 지우면 시간 값도 함께 지운다(`PlannedAtField` 의 `changeDate`). 구성: **화면 라벨 없음** — "방문 예정일" 라벨 아래 날짜 박스와 **8px 간격 한 묶음**(래퍼 `pt-0.5` + 부모 `space-y-1.5` 6px), 네이티브 입력에 `aria-label="시간 (선택)"`(박스 div 는 역할이 없어 aria-label 이 읽히지 않으므로 포커스를 받는 입력에 둔다) + 날짜 박스와 같은 `.dateTrigger`(높이 40px 고정 — 빈 `type="time"` 이 iOS 에서 납작해져도 박스는 그대로, 네이티브 입력은 `.dateInput` 으로 박스 전체를 덮음) + leading `Clock`(`h-4 w-4` accent) + 표시 텍스트(`formatKoreanTime`, 비면 faint "시간 선택") + 네이티브 `<input type="time" step="600">` + 우측 `×`(`.dateClear`, `aria-label="시간 지우기"`, **값이 있을 때만**) + 보조 문구 `비워두면 종일 일정으로 추가돼요`(`text-xs` + `styles.sub`, 설정 카드 보조 문구와 같은 스타일). **비어 있으면 종일, 값이 있으면 시간 지정 일정** — 저장값은 `plannedTimePayload(date, time)`(`lib/plannedTime.ts`) 단일 규칙(빈 값·날짜 없음 → null). 토글 스위치·타입별 별도 UI 없음, 새 CSS 없음.
@@ -1161,11 +1161,10 @@ export const STATUS_LABELS: Record<Status, string> = {
 - **표시**: 상세 "방문 예정" 블록 `2026.12.19 (토) 오후 7:00`(`formatDotDateTime`), 카드 footer `26.12.19 오후 7:00 방문 예정`(`PlannedFooterLabel`, `formatDotDateCompact` + `formatKoreanTime`). 시간 포맷은 `formatKoreanTime` 단일 출처(오전/오후 12시간제, 시 앞자리 0 없음, `00:00`=오전 12:00, `12:00`=오후 12:00). 카드 footer 는 기존 한 줄 슬롯(`min-h-4` nowrap) 그대로 — 카드 높이 불변, 폭이 모자라면 **시간 조각만** `min-w-0 truncate`(날짜·"방문 예정"은 `shrink-0`).
 - **정렬**(`/list` 방문예정 필터): `planned_at` ASC → 같은 날 종일(`planned_time` NULL) 먼저 → `planned_time` ASC → `created_at` DESC(`orderByListRule`).
 - **캘린더**: 시간이 있으면 시간 지정 일정(Asia/Seoul→UTC `Z`, 종료 = 시작 + 120분, VTIMEZONE 없음), 없으면 기존 종일 출력과 바이트까지 동일.
-- `/settings` "캘린더 제목 문구" 카드 맨 아래 안내 한 줄(`text-xs sub`, `mt-3`, 편집/보기 공통): "앱에서 날짜·시간을 바꿔도 이미 추가한 캘린더 일정은 바뀌지 않아요".
 
 **`/settings` 설정 화면**: 홈 삼선 메뉴(`HomeMenu` `items` 배열) 이동형(`kind: 'link'`) 항목 "설정"(`Settings` 아이콘) — 내 정보·파트너 정보 다음, 로그아웃 앞. 레이아웃은 `/account` 와 동일(`TopBar` 홈으로, `pageTitle` h1, `pageSubtitle`, `max-w-lg`). **설정은 카드 한 장씩 `space-y-4` 로 쌓는다** — 새 설정은 `components/settings/` 에 카드 블록을 만들어 `page.tsx` 에 한 줄 추가.
 - 첫 카드 `CalendarTitlePrefixBlock`: `AccountInfoBlock` 닉네임 행과 같은 인라인 편집 — 라벨(`fieldLabel`) + 값(`bodyText`, 없으면 faint "설정 안 함") + absolute 연필(`mapActionBtn`), 편집 시 `Input` + 도움말(`text-xs sub`) + **우측 정렬 취소 → 저장**(§인라인 편집 폼 액션 규칙 그대로). 값이 `localStorage` 동기 저장이라 "저장 중..." 상태는 없다. 저장 토스트 "수정되었습니다!".
-- **첫 캘린더 추가 직전 안내**(`CalendarTitlePrefixDialog`, §11 입력 폼 다이얼로그): 입력 하나, **자동 저장**, 닫기는 상단 X 하나, 풋터 버튼 없음. 닫으면(어떻게든) 보류한 캘린더 추가가 이어진다. 설정 화면 저장과 달리 "취소/저장" 규칙을 적용하지 않는 이유 — 설정이 아니라 "추가 직전 한 번" 흐름이기 때문.
+- **첫 캘린더 추가 직전 안내**(`CalendarTitlePrefixDialog`, §11 입력 폼 다이얼로그): 입력 하나(`제목 앞에 붙일 문구 (선택)`, 최대 20자) + 하단 **우측 정렬 "취소 → 저장"**(`/settings` 인라인 편집과 같은 버튼·높이 `h-9`, 기기 저장이라 **"저장 중..." 없음**). 입력 중인 값은 다이얼로그가 따로 들고 있다가 **저장할 때만** 반영한다(자동 저장 없음). 버튼은 **문구에만** 적용되고 캘린더 추가는 항상 이어서 진행한다 — 저장: 문구 저장 → 그 문구로 추가 / 취소: 문구 미저장 → 문구 없이 추가 / **X·Esc·바깥 탭 = 취소**. 어느 경우든 "봤음"을 남겨 1회만 뜬다. 방금 저장한 문구는 훅 상태에 반영되기 전이라 `onResolve(titlePrefix)` 로 추가 함수에 직접 넘긴다(`useCalendarAdd`). 문구 저장은 `/settings` 와 같은 `useCalendarTitlePrefix` 훅.
 
 ---
 
@@ -1176,6 +1175,7 @@ export const STATUS_LABELS: Record<Status, string> = {
 - **입력 폼 다이얼로그** (`VisitedDialog`(저장)·`HomeSearchButton`(검색 후 이동) 등 — 값을 입력해 하나의 주행동을 실행): **상단 `X`만** 유지(`DialogContent`의 기본 `showCloseButton={true}`). 하단엔 "취소" 버튼을 두지 않고 **CTA(저장하기/검색) 하나만** 남겨 유일한 주행동으로 또렷하게 한다. → 닫기는 도구(`X`)로, 풋터는 주행동 전용. CTA는 데이터 생성이 아니어도(예: 검색→이동) 이 "입력 다이얼로그의 단 하나의 주행동" 자리이므로 `styles.detailPrimaryBtn` 풀폭 48px(`VisitedDialog` 패턴)을 공유한다.
 - **결정 다이얼로그** (`DeleteConfirmDialog` 등 — 확인/취소 두 결정 중 택1): **하단 "취소" 버튼만** 유지. 상단 `X`는 제거(`DialogContent`에 `showCloseButton={false}`). iOS Action Sheet 표준대로 **확인(삭제 등)·취소 두 결정을 풋터에 나란히 명시**해 동등한 선택지로 읽히게 한다.
 - 판단 기준: **"이 다이얼로그가 입력을 받는가, 결정을 묻는가?"** 입력 폼 → `X`만(CTA 명시) / 결정 다이얼로그 → 취소 버튼만(확인/취소 두 결정 명시).
+- **의도된 예외 — 머리말 안내 다이얼로그(`CalendarTitlePrefixDialog`)**: 상단 `X` + 하단 **"취소 · 저장"**(우측 정렬, `/settings` 인라인 편집과 같은 버튼). 이 다이얼로그는 "추가"를 이미 누른 흐름 사이에 끼어드는 **문구 저장 여부 결정**이라, 입력 폼처럼 CTA 하나로 두면 "저장 안 함"을 고를 길이 X 뿐이고 X 의 의미(저장? 취소?)가 모호했다. 그래서 두 결정(저장/취소)을 버튼으로 명시하고 **X·Esc·바깥 탭은 취소와 같게** 맞췄다. 닫기 수단이 둘(X·취소)이지만 둘의 결과가 같아 혼동은 없다(`fix/calendar-ux-polish`).
 
 ### 11-A. 제목 스케일 (다이얼로그 전용 위계)
 

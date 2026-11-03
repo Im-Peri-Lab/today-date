@@ -10,6 +10,10 @@ import { VisitPeriodToggle } from '@/components/forms/VisitPeriodToggle'
 import { RatingStars } from './RatingStars'
 import { DetailBlock } from './DetailBlock'
 import { CalendarAddButton } from './CalendarAddButton'
+import { CalendarTitlePrefixDialog } from '@/components/CalendarTitlePrefixDialog'
+import { useCalendarAdd } from '@/hooks/useCalendarAdd'
+import { classifyScheduleSave } from '@/lib/calendar/scheduleChange'
+import { showScheduleSavedToast } from '@/lib/calendar/scheduleToast'
 import { useUpdateActivity } from '@/hooks/useActivities'
 import { useUpdatePlace } from '@/hooks/usePlaces'
 import { formatDotDateRange } from '@/lib/date'
@@ -60,6 +64,8 @@ export function VisitRecordBlock({
   const [noteValue, setNoteValue] = useState(reviewNote ?? '')
 
   const updateActivity = useUpdateActivity()
+  // 수정 토스트의 "다시 추가" 용 — 상세 블록 버튼(CalendarAddButton)과 같은 훅
+  const calendar = useCalendarAdd(track)
   const updatePlace = useUpdatePlace()
   const saving = updateActivity.isPending || updatePlace.isPending
 
@@ -102,7 +108,23 @@ export function VisitRecordBlock({
       {
         onSuccess: () => {
           exitEdit()
-          toast.success('방문 기록을 수정했어요')
+          // 이전 방문일이 있었고 시작일·종료일이 실제로 바뀌었을 때만 "일정이 바뀌었어요 … [다시 추가]".
+          // 처음 날짜를 넣었거나 별점·후기만 바꾼 경우는 기존 토스트 그대로(방문 기록은 처음 등록에 추가 제안 없음).
+          showScheduleSavedToast({
+            kind: classifyScheduleSave(
+              { date: visitedAt, end: isActivity ? visitedEndAt : null },
+              { date: start, end },
+            ),
+            savedMessage: '방문 기록을 수정했어요',
+            offerAddOnCreate: false,
+            onAdd: () =>
+              calendar.add({
+                ...item,
+                status: 'visited',
+                visited_at: start,
+                ...(isActivity ? { visited_end_at: end } : {}),
+              } as CalendarItem),
+          })
         },
         onError: (err: unknown) =>
           toast.error(err instanceof Error ? err.message : '저장 중 오류가 발생했습니다.'),
@@ -111,76 +133,79 @@ export function VisitRecordBlock({
   }
 
   return (
-    <DetailBlock
-      title="방문 기록"
-      editing={editing}
-      onEdit={startEdit}
-      onCancel={exitEdit}
-      onSave={handleSave}
-      saving={saving}
-    >
-      {editing ? (
-        <div className="space-y-5">
-          <div className="space-y-1.5">
-            <div className="flex items-center justify-between">
-              {/* activity 기간 방문(토글 on)이면 '시작' 라벨로, 아니면 기존 '방문 날짜' */}
-              <Label htmlFor="visit_date">{isActivity && showEnd ? '방문 시작일' : '방문 날짜'}</Label>
+    <>
+      <DetailBlock
+        title="방문 기록"
+        editing={editing}
+        onEdit={startEdit}
+        onCancel={exitEdit}
+        onSave={handleSave}
+        saving={saving}
+      >
+        {editing ? (
+          <div className="space-y-5">
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between">
+                {/* activity 기간 방문(토글 on)이면 '시작' 라벨로, 아니면 기존 '방문 날짜' */}
+                <Label htmlFor="visit_date">{isActivity && showEnd ? '방문 시작일' : '방문 날짜'}</Label>
+                {isActivity && (
+                  <VisitPeriodToggle checked={showEnd} onChange={setShowEnd} controls="visit_end_date" />
+                )}
+              </div>
+              <DatePickerField id="visit_date" value={dateValue} onChange={setDateValue} />
+              {/* 종료일 필드: 토글 on 시 아래로 부드럽게 펼쳐짐(grid-rows 0fr→1fr). activity 한정. */}
               {isActivity && (
-                <VisitPeriodToggle checked={showEnd} onChange={setShowEnd} controls="visit_end_date" />
-              )}
-            </div>
-            <DatePickerField id="visit_date" value={dateValue} onChange={setDateValue} />
-            {/* 종료일 필드: 토글 on 시 아래로 부드럽게 펼쳐짐(grid-rows 0fr→1fr). activity 한정. */}
-            {isActivity && (
-              <div className={cn(styles.periodEnd, showEnd && styles.periodEndOpen)}>
-                <div className={styles.periodEndInner}>
-                  <div className="space-y-1.5 pt-1.5">
-                    <Label htmlFor="visit_end_date">방문 종료일</Label>
-                    <DatePickerField id="visit_end_date" value={endValue} onChange={setEndValue} />
+                <div className={cn(styles.periodEnd, showEnd && styles.periodEndOpen)}>
+                  <div className={styles.periodEndInner}>
+                    <div className="space-y-1.5 pt-1.5">
+                      <Label htmlFor="visit_end_date">방문 종료일</Label>
+                      <DatePickerField id="visit_end_date" value={endValue} onChange={setEndValue} />
+                    </div>
                   </div>
                 </div>
+              )}
+            </div>
+            <div className="space-y-1.5">
+              <Label>별점</Label>
+              <RatingStars value={ratingValue} onChange={setRatingValue} size="lg" />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="visit_note">후기</Label>
+              <Textarea
+                id="visit_note"
+                rows={3}
+                placeholder="어땠는지 기록해보세요 (선택)"
+                value={noteValue}
+                onChange={(e) => setNoteValue(e.target.value)}
+              />
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {/* 방문일과 별점을 두 줄로 분리 — 날짜 위, 별점 아래 */}
+            {visitedAt && (
+              <div className="flex items-center gap-1">
+                <div className={cn('inline-flex items-center gap-1.5', styles.bodyText)}>
+                  <Calendar className={cn('h-3.5 w-3.5 shrink-0', styles.accent)} />
+                  {formatDotDateRange(visitedAt, isActivity ? visitedEndAt : null)}
+                </div>
+                <CalendarAddButton track={track} item={item} />
               </div>
             )}
+            {rating ? <RatingStars value={rating} size="sm" /> : null}
+            {/* 한줄평: italic 인용구 느낌 + ink 톤(sub보다 따뜻하게) — 새 색상 없음 */}
+            {reviewNote && (
+              <p className={cn('whitespace-pre-wrap leading-relaxed italic', styles.bodyText)}>
+                {reviewNote}
+              </p>
+            )}
+            {!visitedAt && !rating && !reviewNote && (
+              <p className={cn('text-sm', styles.faint)}>아직 방문 기록이 없어요</p>
+            )}
           </div>
-          <div className="space-y-1.5">
-            <Label>별점</Label>
-            <RatingStars value={ratingValue} onChange={setRatingValue} size="lg" />
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="visit_note">후기</Label>
-            <Textarea
-              id="visit_note"
-              rows={3}
-              placeholder="어땠는지 기록해보세요 (선택)"
-              value={noteValue}
-              onChange={(e) => setNoteValue(e.target.value)}
-            />
-          </div>
-        </div>
-      ) : (
-        <div className="space-y-2">
-          {/* 방문일과 별점을 두 줄로 분리 — 날짜 위, 별점 아래 */}
-          {visitedAt && (
-            <div className="flex items-center gap-1">
-              <div className={cn('inline-flex items-center gap-1.5', styles.bodyText)}>
-                <Calendar className={cn('h-3.5 w-3.5 shrink-0', styles.accent)} />
-                {formatDotDateRange(visitedAt, isActivity ? visitedEndAt : null)}
-              </div>
-              <CalendarAddButton track={track} item={item} />
-            </div>
-          )}
-          {rating ? <RatingStars value={rating} size="sm" /> : null}
-          {/* 한줄평: italic 인용구 느낌 + ink 톤(sub보다 따뜻하게) — 새 색상 없음 */}
-          {reviewNote && (
-            <p className={cn('whitespace-pre-wrap leading-relaxed italic', styles.bodyText)}>
-              {reviewNote}
-            </p>
-          )}
-          {!visitedAt && !rating && !reviewNote && (
-            <p className={cn('text-sm', styles.faint)}>아직 방문 기록이 없어요</p>
-          )}
-        </div>
-      )}
-    </DetailBlock>
+        )}
+      </DetailBlock>
+      <CalendarTitlePrefixDialog {...calendar.prefixDialogProps} />
+    </>
   )
 }

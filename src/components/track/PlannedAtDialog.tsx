@@ -22,6 +22,8 @@ import { useCalendarAdd } from '@/hooks/useCalendarAdd'
 import type { CalendarItem } from '@/lib/calendar/event'
 import { toHHmm } from '@/lib/date'
 import { plannedTimePayload } from '@/lib/plannedTime'
+import { classifyScheduleSave } from '@/lib/calendar/scheduleChange'
+import { showScheduleSavedToast } from '@/lib/calendar/scheduleToast'
 import { cn } from '@/lib/utils'
 import styles from '@/components/screens.module.css'
 
@@ -71,21 +73,13 @@ export function PlannedAtDialog({ open, onOpenChange, track, id, item, title, va
       { id, patch: { planned_at: date, planned_time: plannedTimePayload(date, time) } },
       {
         onSuccess: () => {
-          if (date === value && time === savedTime) {
-            // 날짜·시간이 그대로면 이미 알린 일정과 같아 캘린더 제안을 반복하지 않는다.
-            toast.success('방문 예정일을 저장했어요')
-          } else {
-            // 1회성 제안 — 이 토스트가 사라지면 상세 블록·카드 ⋮ 메뉴가 같은 진입점을 이어 받는다.
-            toast.success('방문 예정일을 저장했어요', {
-              description: '캘린더에도 추가할까요?',
-              duration: 8000,
-              action: {
-                label: '추가',
-                onClick: () =>
-                  calendar.add({ ...item, status: 'wishlist', planned_at: date, planned_time: plannedTimePayload(date, time) }),
-              },
-            })
-          }
+          const nextTime = plannedTimePayload(date, time)
+          showScheduleSavedToast({
+            kind: classifyScheduleSave({ date: value, time: savedTime }, { date, time: nextTime }),
+            savedMessage: '방문 예정일을 저장했어요',
+            offerAddOnCreate: true,
+            onAdd: () => calendar.add({ ...item, status: 'wishlist', planned_at: date, planned_time: nextTime }),
+          })
           onOpenChange(false)
         },
         onError: (err: unknown) => {

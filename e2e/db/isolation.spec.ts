@@ -1717,3 +1717,174 @@ test.describe('방문 예정 시간 입력', () => {
     expect(created?.planned_time).toBeNull()
   })
 })
+
+// ──────────────────────────────────────────────
+// 캘린더 머리말 안내 다이얼로그(취소·저장) + 일정 수정 토스트
+// 데스크톱 Chrome UA 라 구글 캘린더 새 탭 경로 — URL 의 text 로 실제 제목을 확인한다.
+// ──────────────────────────────────────────────
+test.describe('캘린더 머리말 안내 · 일정 수정 토스트', () => {
+  const ACT_ID = 'b1111111-1111-4111-8111-1111111111c1'
+  const ACT_NEW_ID = 'b1111111-1111-4111-8111-1111111111c3'
+  const PLC_ID = 'b2222222-2222-4222-8222-2222222222c2'
+  const PREFIX_KEY = 'today-date:calendar-title-prefix'
+  const SEEN_KEY = 'today-date:calendar-prefix-intro-seen'
+
+  async function seed() {
+    await stubInsert('activities', {
+      id: ACT_ID, couple_id: refs.coupleA, category_id: refs.actCategory, title: 'E2E 한강 피크닉',
+      duration_bucket: 'half', time_of_day: 'any', location_type: 'outdoor', location: null, memo: null,
+      reference_url: null, image_urls: [], status: 'wishlist', visited_at: null, visited_end_at: null,
+      planned_at: '2026-12-19', planned_time: null, rating: null, review_note: null,
+      created_at: '2026-03-01T00:00:00.000Z', updated_at: '2026-03-01T00:00:00.000Z',
+    })
+    await stubInsert('activities', {
+      id: ACT_NEW_ID, couple_id: refs.coupleA, category_id: refs.actCategory, title: 'E2E 날짜 없는 액티비티',
+      duration_bucket: 'half', time_of_day: 'any', location_type: 'outdoor', location: null, memo: null,
+      reference_url: null, image_urls: [], status: 'wishlist', visited_at: null, visited_end_at: null,
+      planned_at: null, planned_time: null, rating: null, review_note: null,
+      created_at: '2026-03-01T00:00:00.000Z', updated_at: '2026-03-01T00:00:00.000Z',
+    })
+    await stubInsert('places', {
+      id: PLC_ID, couple_id: refs.coupleA, category_id: refs.plcCategory, title: 'E2E 다녀온 다이닝', area: '성수',
+      location: null, meal_times: ['dinner'], memo: null, reference_url: null, image_urls: [], status: 'visited',
+      visited_at: '2026-10-01', planned_at: null, planned_time: null, rating: 4, review_note: '좋았다',
+      created_at: '2026-03-01T00:00:00.000Z', updated_at: '2026-03-01T00:00:00.000Z',
+    })
+  }
+
+  /** 구글 캘린더로 나가는 요청을 가로채 text 파라미터(일정 제목)를 모은다 */
+  async function captureCalendarTitles(page: Page) {
+    const titles: string[] & { dates?: string[] } = []
+    titles.dates = []
+    await page.context().route('https://calendar.google.com/**', (route) => {
+      const url = new URL(route.request().url())
+      titles.push(url.searchParams.get('text') ?? '')
+      titles.dates!.push(url.searchParams.get('dates') ?? '')
+      return route.fulfill({ body: 'ok' })
+    })
+    return titles
+  }
+
+  const stored = (page: Page, key: string) => page.evaluate((k) => localStorage.getItem(k), key)
+
+  test('저장: 문구를 저장하고 그 문구로 추가 → 두 번째 추가 때는 안내 없이 바로', async ({ page }) => {
+    await seed()
+    await loginAsA(page)
+    const titles = await captureCalendarTitles(page)
+    await page.goto(`/activities/${ACT_ID}`)
+
+    await page.getByRole('button', { name: '캘린더에 추가' }).click()
+    const dialog = page.getByRole('dialog')
+    await expect(dialog.getByText('제목 앞에 붙일 문구 (선택)')).toBeVisible()
+    await dialog.getByLabel('제목 앞에 붙일 문구 (선택)').fill('[데이트] ')
+    // 입력만으로는 저장되지 않는다(자동 저장 없음)
+    expect(await stored(page, PREFIX_KEY)).toBeNull()
+    await dialog.getByRole('button', { name: '저장', exact: true }).click()
+
+    await expect.poll(() => titles.length).toBe(1)
+    expect(titles[0]).toBe('[데이트] E2E 한강 피크닉')
+    expect(await stored(page, PREFIX_KEY)).toBe('[데이트] ')
+    expect(await stored(page, SEEN_KEY)).toBe('1')
+
+    await page.getByRole('button', { name: '캘린더에 추가' }).click()
+    await expect.poll(() => titles.length).toBe(2)
+    await expect(page.getByRole('dialog')).toHaveCount(0)
+    expect(titles[1]).toBe('[데이트] E2E 한강 피크닉')
+  })
+
+  test('취소: 문구를 저장하지 않고 문구 없이 추가 → 두 번째 추가 때 안내 없음', async ({ page }) => {
+    await seed()
+    await loginAsA(page)
+    const titles = await captureCalendarTitles(page)
+    await page.goto(`/activities/${ACT_ID}`)
+
+    await page.getByRole('button', { name: '캘린더에 추가' }).click()
+    const dialog = page.getByRole('dialog')
+    await dialog.getByLabel('제목 앞에 붙일 문구 (선택)').fill('[버릴 문구] ')
+    await dialog.getByRole('button', { name: '취소' }).click()
+
+    await expect.poll(() => titles.length).toBe(1)
+    expect(titles[0]).toBe('E2E 한강 피크닉')
+    expect(await stored(page, PREFIX_KEY)).toBeNull()
+    expect(await stored(page, SEEN_KEY)).toBe('1')
+
+    await page.getByRole('button', { name: '캘린더에 추가' }).click()
+    await expect.poll(() => titles.length).toBe(2)
+    await expect(page.getByRole('dialog')).toHaveCount(0)
+    expect(titles[1]).toBe('E2E 한강 피크닉')
+  })
+
+  test('X(Esc 포함)는 취소와 같다: 문구 미저장, 문구 없이 추가', async ({ page }) => {
+    await seed()
+    await loginAsA(page)
+    const titles = await captureCalendarTitles(page)
+    await page.goto(`/activities/${ACT_ID}`)
+
+    await page.getByRole('button', { name: '캘린더에 추가' }).click()
+    const dialog = page.getByRole('dialog')
+    await dialog.getByLabel('제목 앞에 붙일 문구 (선택)').fill('[X로 닫음] ')
+    await dialog.getByRole('button', { name: '닫기' }).click()
+
+    await expect.poll(() => titles.length).toBe(1)
+    expect(titles[0]).toBe('E2E 한강 피크닉')
+    expect(await stored(page, PREFIX_KEY)).toBeNull()
+    expect(await stored(page, SEEN_KEY)).toBe('1')
+
+    // Esc 도 같다 — 안내 상태를 처음으로 되돌려 다시 확인
+    await page.evaluate(() => localStorage.clear())
+    await page.reload()
+    await page.getByRole('button', { name: '캘린더에 추가' }).click()
+    await page.getByRole('dialog').getByLabel('제목 앞에 붙일 문구 (선택)').fill('[Esc로 닫음] ')
+    await page.keyboard.press('Escape')
+    await expect.poll(() => titles.length).toBe(2)
+    expect(titles[1]).toBe('E2E 한강 피크닉')
+    expect(await stored(page, PREFIX_KEY)).toBeNull()
+    expect(await stored(page, SEEN_KEY)).toBe('1')
+  })
+
+  test('방문 예정: 처음 등록은 "추가", 기존 날짜를 바꾸면 "일정이 바뀌었어요" + "다시 추가"', async ({ page }) => {
+    await seed()
+    await loginAsA(page)
+    const titles = await captureCalendarTitles(page)
+    await page.goto(`/activities/${ACT_ID}`)
+    await page.getByRole('button', { name: '방문 예정 수정' }).click()
+    await page.getByRole('dialog').locator('#planned_at_dialog').fill('2026-12-20')
+    await page.getByRole('dialog').getByRole('button', { name: '저장하기' }).click()
+    const toastEl = page.locator('[data-sonner-toast]').filter({ hasText: '일정이 바뀌었어요' })
+    await expect(toastEl).toContainText('이미 추가한 캘린더 일정은 직접 수정해 주세요')
+    await expect(toastEl.getByRole('button', { name: '다시 추가' })).toBeVisible()
+    // "다시 추가" 는 바뀐 날짜로 추가한다(첫 추가라 머리말 안내가 먼저 뜨고, 취소해도 추가는 진행)
+    await toastEl.getByRole('button', { name: '다시 추가' }).click()
+    await page.getByRole('dialog').getByRole('button', { name: '취소' }).click()
+    await expect.poll(() => titles.length).toBe(1)
+    expect(titles.dates![0]).toBe('20261220/20261221')
+
+    // 처음 등록(이전 날짜 없음)은 기존 토스트 그대로 — "캘린더에도 추가할까요?" + "추가"
+    await page.goto(`/activities/${ACT_NEW_ID}`)
+    await page.getByRole('button', { name: '언제 갈까요?' }).click()
+    await page.getByRole('dialog').locator('#planned_at_dialog').fill('2026-12-24')
+    await page.getByRole('dialog').getByRole('button', { name: '저장하기' }).click()
+    const created = page.locator('[data-sonner-toast]').filter({ hasText: '캘린더에도 추가할까요?' })
+    await expect(created).toContainText('방문 예정일을 저장했어요')
+    await expect(created.getByRole('button', { name: '추가', exact: true })).toBeVisible()
+  })
+
+  test('방문 기록: 날짜를 바꾸면 수정 토스트 + "다시 추가", 후기만 바꾸면 기존 토스트', async ({ page }) => {
+    await seed()
+    await loginAsA(page)
+    await page.goto(`/places/${PLC_ID}`)
+
+    await page.getByRole('button', { name: '방문 기록 수정' }).click()
+    await page.locator('#visit_date').fill('2026-10-02')
+    await page.getByRole('button', { name: '저장', exact: true }).click()
+    const changed = page.locator('[data-sonner-toast]').filter({ hasText: '일정이 바뀌었어요' })
+    await expect(changed.getByRole('button', { name: '다시 추가' })).toBeVisible()
+
+    await page.getByRole('button', { name: '방문 기록 수정' }).click()
+    await page.getByLabel('후기').fill('또 가고 싶다')
+    await page.getByRole('button', { name: '저장', exact: true }).click()
+    const plain = page.locator('[data-sonner-toast]').filter({ hasText: '방문 기록을 수정했어요' })
+    await expect(plain).toBeVisible()
+    await expect(plain.getByRole('button')).toHaveCount(0)
+  })
+})

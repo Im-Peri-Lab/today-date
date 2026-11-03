@@ -12,6 +12,7 @@ import { CalendarTitlePrefixDialog } from '@/components/CalendarTitlePrefixDialo
 import { RatingStars } from './RatingStars'
 import { DeleteConfirmDialog } from './DeleteConfirmDialog'
 import { RevertConfirmDialog } from './RevertConfirmDialog'
+import { PlannedAtClearDialog } from './PlannedAtClearDialog'
 import { PlannedAtDialog } from './PlannedAtDialog'
 import { VisitedDialog } from '@/components/VisitedDialog'
 import { useDeletePlace, useUpdatePlace } from '@/hooks/usePlaces'
@@ -212,14 +213,12 @@ export function PlaceCard({ place, hideMenu, actionSlot, returnTo }: PlaceCardPr
           review_note: place.review_note,
         }}
       />
-      <RevertConfirmDialog
+      <PlannedAtClearDialog
         open={clearPlannedOpen}
         onOpenChange={setClearPlannedOpen}
         loading={update.isPending}
         onConfirm={handleClearPlanned}
-        title="날짜 미정으로 되돌릴까요?"
-        description="입력한 방문 예정일이 삭제됩니다."
-              />
+      />
       <CalendarTitlePrefixDialog {...calendar.prefixDialogProps} />
       <PlannedAtDialog
         open={plannedOpen}

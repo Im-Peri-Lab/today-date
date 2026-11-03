@@ -36,7 +36,7 @@ interface PlannedAtDialogProps {
 
 /**
  * 방문 예정일 등록/수정 다이얼로그 — 상세 "방문 예정" 블록과 카드 ⋮ 메뉴가 공용.
- * 날짜 입력 + 저장하기만 둔다. 값을 통째로 비우는 건 블록의 "날짜 미정으로"가 전담하므로
+ * 날짜 입력 + 저장하기만 둔다. 값을 통째로 비우는 건 블록 휴지통·카드 메뉴의 "방문예정일 지우기"가 전담하므로
  * 여기엔 지우기 수단이 없다(저장 버튼은 값이 있어야 활성).
  */
 export function PlannedAtDialog({ open, onOpenChange, track, id, item, title, value }: PlannedAtDialogProps) {

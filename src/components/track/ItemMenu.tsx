@@ -27,7 +27,7 @@ interface ItemMenuProps {
   onDelete: () => void
   onMarkVisited: () => void
   onRevert: () => void
-  /** 방문 예정일 항목 — 값 없으면 등록 다이얼로그, 있으면 확인 후 지우기("날짜 미정으로"). 수정은 상세 연필에서만 */
+  /** 방문 예정일 항목 — 값 없으면 등록 다이얼로그, 있으면 확인 후 지우기("방문예정일 지우기"). 수정은 상세 연필에서만 */
   onEditPlanned: () => void
 }
 
@@ -74,11 +74,11 @@ export function ItemMenu({
             캘린더에 추가
           </DropdownMenuItem>
         )}
-        {/* 방문 예정일 — 위시리스트 전용. 값이 없으면 등록 진입, 있으면 날짜 미정으로(확인 후 지움) */}
+        {/* 방문 예정일 — 위시리스트 전용. 값이 없으면 등록 진입, 있으면 방문예정일 지우기(확인 후 지움) */}
         {!isVisited && (
           <DropdownMenuItem onClick={onEditPlanned}>
             <Calendar />
-            {plannedAt ? '날짜 미정으로' : '언제 갈까요?'}
+            {plannedAt ? '방문예정일 지우기' : '언제 갈까요?'}
           </DropdownMenuItem>
         )}
         {isVisited ? (

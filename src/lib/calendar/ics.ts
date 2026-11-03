@@ -10,13 +10,17 @@ import { timedEventStamps } from './time'
 
 const encoder = new TextEncoder()
 
-/** TEXT 값 이스케이프: 역슬래시를 먼저 처리해야 뒤에서 붙인 역슬래시가 중복 이스케이프되지 않는다. */
+/**
+ * TEXT 값 이스케이프(RFC 5545 §3.3.11) — SUMMARY·LOCATION·DESCRIPTION 같은 TEXT 속성 값에만 쓴다
+ * (DTSTART·DTEND·UID 등은 대상 아님). 역슬래시를 먼저 처리해야 뒤에서 붙인 역슬래시가 중복 이스케이프되지 않는다.
+ * 치환 문자열은 String.raw 로 쓴다 — 일반 문자열 '\;' 는 JS 에서 그냥 ';' 라 백슬래시가 사라진다(실제 버그였음).
+ */
 export function escapeIcsText(value: string): string {
   return value
-    .replace(/\\/g, '\\\\')
-    .replace(/;/g, '\;')
-    .replace(/,/g, '\\,')
-    .replace(/\r\n|\r|\n/g, '\\n')
+    .replace(/\\/g, String.raw`\\`)
+    .replace(/;/g, String.raw`\;`)
+    .replace(/,/g, String.raw`\,`)
+    .replace(/\r\n|\r|\n/g, String.raw`\n`)
 }
 
 /**

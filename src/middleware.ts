@@ -32,6 +32,8 @@ export async function middleware(req: NextRequest) {
   if (
     pathname.startsWith('/_next') ||
     pathname.startsWith('/favicon') ||
+    // [diag/android-calendar-check 전용 — 머지 금지] 로그인 없이 여는 실기기 진단 페이지
+    pathname.startsWith('/diag') ||
     pathname.includes('.')
   ) {
     return NextResponse.next()

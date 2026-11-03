@@ -1,5 +1,11 @@
-import { describe, it, expect } from 'vitest'
-import { buildGoogleCalendarUrl, CALENDAR_APPS, findCalendarApp } from './apps'
+import { describe, it, expect, vi } from 'vitest'
+import {
+  buildGoogleCalendarUrl,
+  CALENDAR_APPS,
+  detectDefaultCalendarAppId,
+  findCalendarApp,
+  resolveCalendarApp,
+} from './apps'
 import type { CalendarEvent } from './event'
 
 const base: CalendarEvent = {
@@ -45,5 +51,32 @@ describe('CALENDAR_APPS', () => {
     expect(findCalendarApp('google')?.label).toBe('구글 캘린더')
     expect(findCalendarApp('nope')).toBeUndefined()
     expect(findCalendarApp(null)).toBeUndefined()
+  })
+})
+
+describe('detectDefaultCalendarAppId / resolveCalendarApp', () => {
+  const withUa = (ua: string, fn: () => void) => {
+    vi.stubGlobal('navigator', { userAgent: ua })
+    try {
+      fn()
+    } finally {
+      vi.unstubAllGlobals()
+    }
+  }
+  const IPHONE = 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 Mobile/15E148'
+  const MAC = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 Safari/605.1.15'
+  const ANDROID = 'Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 Chrome/120 Mobile Safari/537.36'
+  const WINDOWS = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120 Safari/537.36'
+
+  it('애플 기기는 apple-ics, 그 외는 google', () => {
+    withUa(IPHONE, () => expect(detectDefaultCalendarAppId()).toBe('apple-ics'))
+    withUa(MAC, () => expect(detectDefaultCalendarAppId()).toBe('apple-ics'))
+    withUa(ANDROID, () => expect(detectDefaultCalendarAppId()).toBe('google'))
+    withUa(WINDOWS, () => expect(detectDefaultCalendarAppId()).toBe('google'))
+  })
+
+  it('resolveCalendarApp 은 감지 결과의 앱을 돌려준다', () => {
+    withUa(IPHONE, () => expect(resolveCalendarApp().id).toBe('apple-ics'))
+    withUa(ANDROID, () => expect(resolveCalendarApp().id).toBe('google'))
   })
 })

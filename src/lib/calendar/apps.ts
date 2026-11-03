@@ -1,6 +1,7 @@
 /**
- * 캘린더 앱 config — MAP_APPS(lib/map.ts)와 같은 구조: 새 캘린더를 추가할 때는 이 배열에
- * 항목만 넣으면 선택 시트가 자동으로 반영한다.
+ * 캘린더 앱 config — MAP_APPS(lib/map.ts)와 비슷한 구조. 사용자가 고르는 UI는 없고
+ * 기기 감지(detectDefaultCalendarAppId)로 하나가 정해진다. 새 캘린더를 지원할 때는 이 배열에
+ * 항목을 넣고 감지 규칙을 확장한다.
  * 지도 앱은 URL 하나로 모두 열리지만 애플(.ics)은 다운로드라 `build` 대신 `open` 으로 실행한다.
  */
 import { nextDayIso } from '@/lib/date'
@@ -60,10 +61,15 @@ export function findCalendarApp(id: string | null | undefined): CalendarApp | un
 }
 
 /**
- * 선택 기록이 없을 때 시트에서 미리 골라 둘 앱. 애플 기기(iOS·iPadOS·Mac)면 애플, 그 외는 구글.
- * 브라우저 전용 — 시트가 열릴 때만 호출한다.
+ * 이 기기의 기본 캘린더. 애플 기기(iOS·iPadOS·Mac)면 애플, 그 외는 구글.
+ * 브라우저 전용 — 클릭 핸들러 안에서만 호출한다.
  */
 export function detectDefaultCalendarAppId(): CalendarAppId {
   const ua = navigator.userAgent
   return /iphone|ipad|ipod|Macintosh/i.test(ua) ? 'apple-ics' : 'google'
+}
+
+/** 지금 기기에서 실행할 캘린더 앱(감지 결과가 목록에 없으면 첫 항목). */
+export function resolveCalendarApp(): CalendarApp {
+  return findCalendarApp(detectDefaultCalendarAppId()) ?? CALENDAR_APPS[0]
 }

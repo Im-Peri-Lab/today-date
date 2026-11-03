@@ -14,7 +14,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { DatePickerField } from '@/components/forms/DatePickerField'
-import { CalendarAppSheet } from './CalendarAppSheet'
+import { CalendarTitlePrefixDialog } from '@/components/CalendarTitlePrefixDialog'
 import { useUpdateActivity } from '@/hooks/useActivities'
 import { useUpdatePlace } from '@/hooks/usePlaces'
 import { useCalendarAdd } from '@/hooks/useCalendarAdd'
@@ -115,7 +115,7 @@ export function PlannedAtDialog({ open, onOpenChange, track, id, item, title, va
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      <CalendarAppSheet {...calendar.sheetProps} />
+      <CalendarTitlePrefixDialog {...calendar.prefixDialogProps} />
     </>
   )
 }

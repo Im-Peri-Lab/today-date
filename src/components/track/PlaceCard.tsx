@@ -8,7 +8,7 @@ import { toast } from 'sonner'
 import { Compass, MapPin, Utensils, StickyNote, Calendar } from 'lucide-react'
 import { CategoryBadge } from './CategoryBadge'
 import { ItemMenu } from './ItemMenu'
-import { CalendarAppSheet } from './CalendarAppSheet'
+import { CalendarTitlePrefixDialog } from '@/components/CalendarTitlePrefixDialog'
 import { RatingStars } from './RatingStars'
 import { DeleteConfirmDialog } from './DeleteConfirmDialog'
 import { RevertConfirmDialog } from './RevertConfirmDialog'
@@ -220,7 +220,7 @@ export function PlaceCard({ place, hideMenu, actionSlot, returnTo }: PlaceCardPr
         title="날짜 미정으로 되돌릴까요?"
         description="입력한 방문 예정일이 삭제됩니다."
               />
-      <CalendarAppSheet {...calendar.sheetProps} />
+      <CalendarTitlePrefixDialog {...calendar.prefixDialogProps} />
       <PlannedAtDialog
         open={plannedOpen}
         onOpenChange={setPlannedOpen}

@@ -68,7 +68,7 @@ PROJECT_CONTEXT §5(인증 F-01)·§20.
 - `feat/planned-visit-date` — PR #157 squash 머지 완료, 로컬·리모트 브랜치 삭제됨 (lint·vitest·build·Playwright 스텁 렌더 확인)
 - `fix/planned-at-clear-wording` — PR #160 squash 머지 완료, 로컬·리모트 브랜치 삭제됨 (방문예정일 지우기 문구 통일)
 - `design/detail-date-typography-unify` — PR #158 squash 머지 완료, 브랜치 삭제됨 (CI 통과, 시각 확인은 사용자 몫)
-- `design/planned-time-inline-field` — PR #163: 방문예정 시간 입력 UI 단순화("+ 시간 추가" 제거·상시 노출·미리 채우기 제거, 화면 라벨 없이 날짜 박스와 8px 한 묶음). **머지 전**(CI·Vercel 재통과 후 squash 머지 예정)
+- `design/planned-time-inline-field` — PR #163 squash 머지 완료(머지 커밋 `3a2ce97`), 로컬·리모트 브랜치 삭제됨. 방문예정 시간 입력 UI 단순화("+ 시간 추가" 제거·상시 노출·미리 채우기 제거, 화면 라벨 없이 날짜 박스와 8px 한 묶음). CI(E2E 82 통과)·Vercel 통과. **남은 확인: iOS Safari 빈 시간 칸 높이·휠(사용자)**
 - `fix/ics-escape-text` — PR #162 squash 머지 완료(머지 커밋 `aa7aad0`), 로컬·리모트 브랜치 삭제됨. `.ics` TEXT 이스케이프(`;`) 수정, 보류 14번 해소. **남은 확인: iOS 실기기(제목에 `;`·`,`)**
 - `feat/planned-visit-time` — PR #161 squash 머지 완료(머지 커밋 `bbb8c5f`), 로컬·리모트 브랜치 삭제됨. 방문예정 시간 입력 + 캘린더 시간 지정 일정(021). Supabase `021_planned_time.sql` 은 머지 전 사용자가 실행·두 테이블 CHECK 제약 확인 완료. CI(Lint·Unit Test·Build, E2E 79 통과·재시도 없음)·Vercel 통과. **남은 확인: iOS `.ics` 시간 지정 일정 실기기(사용자), 구글/Android 실기기**
 - `feat/calendar-export` — PR #159 squash 머지 완료, 로컬·리모트 브랜치 삭제됨 (CI·Vercel 통과, 상세 블록·설정 화면·토스트·iOS 실기기 캘린더 추가는 사용자가 직접 확인 완료. **미확인: 구글 캘린더/Android 실기기.** 남은 확인: 시크릿 모드로 머리말 최초 미설정 안내 다이얼로그 1회 — 나중에 가볍게). 사전 스파이크 `diag/ics-blob-standalone-check` 는 폐기·삭제
@@ -130,7 +130,7 @@ PROJECT_CONTEXT §5(인증 F-01)·§20.
 - 플랫폼: Vercel
 - URL: `https://today-date-seven.vercel.app`
 - 함수 리전: `syd1`(`vercel.json`, PR #152). 미들웨어는 엣지 실행이라 이 설정과 무관
-- 현재 브랜치: `main` (PR #161 반영 기준, 머지 커밋 `bbb8c5f`. PR #128 머지 커밋 `238d3de`만 예외적으로 squash가 아닌 일반 머지)
+- 현재 브랜치: `main` (PR #163 반영 기준, 머지 커밋 `3a2ce97`. PR #128 머지 커밋 `238d3de`만 예외적으로 squash가 아닌 일반 머지)
 
 ## 진행 중 / 남은 작업
 

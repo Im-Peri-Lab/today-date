@@ -12,6 +12,7 @@ import { PlaceFields } from './PlaceFields'
 import { takePlacePrefill } from '@/lib/duplicatePrefill'
 import { buildDetailHref } from '@/lib/listReturn'
 import { placeFormSchema, type PlaceFormValues } from '@/lib/schemas/placeSchema'
+import { plannedTimePayload } from '@/lib/plannedTime'
 import { emptyToNull } from '@/lib/schemas/apiFields'
 import { fetchJson } from '@/hooks/fetcher'
 import { invalidateDashboardStats } from '@/hooks/useDashboardStats'
@@ -57,7 +58,7 @@ export function PlaceForm({ prefill, returnTo }: { prefill?: boolean; returnTo?:
       memo: emptyToNull(values.memo),
       planned_at: emptyToNull(values.planned_at),
       // 날짜 없이 시간만 보내지 않는다(API 짝 규칙, 021)
-      planned_time: values.planned_at ? emptyToNull(values.planned_time) : null,
+      planned_time: plannedTimePayload(values.planned_at, values.planned_time),
     }
 
     let created: Place

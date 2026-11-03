@@ -1615,3 +1615,105 @@ test.describe('상단 줄 · 좌측 "홈으로" + 우측 홈 아이콘', () => {
     })
   }
 })
+
+// ──────────────────────────────────────────────
+// 방문 예정 시간 입력 — 날짜가 있으면 "시간 (선택)" 칸이 바로 보이고, 비우면 종일(null)
+// ──────────────────────────────────────────────
+test.describe('방문 예정 시간 입력', () => {
+  const PLACE_ID = 'a2222222-2222-4222-8222-2222222222c1'
+
+  async function seedPlace(planned_at: string | null, planned_time: string | null) {
+    await stubInsert('places', {
+      id: PLACE_ID,
+      couple_id: refs.coupleA,
+      category_id: refs.plcCategory,
+      title: 'E2E 시간 입력 다이닝',
+      area: '성수',
+      location: null,
+      meal_times: ['dinner'],
+      memo: null,
+      reference_url: null,
+      image_urls: [],
+      status: 'wishlist',
+      visited_at: null,
+      rating: null,
+      review_note: null,
+      planned_at,
+      planned_time,
+      created_at: '2026-03-01T00:00:00.000Z',
+      updated_at: '2026-03-01T00:00:00.000Z',
+    })
+  }
+
+  async function plannedRow() {
+    return stubRowById<{ planned_at: string | null; planned_time: string | null }>('places', PLACE_ID)
+  }
+
+  test('기존 값이 있으면 날짜·시간이 채워진 채 열리고, × 로 지운 뒤 저장하면 null', async ({ page }) => {
+    await seedPlace('2026-12-19', '19:00:00')
+    await loginAsA(page)
+    await page.goto(`/places/${PLACE_ID}`)
+    await page.getByRole('button', { name: '방문 예정 수정' }).click()
+
+    const dialog = page.getByRole('dialog')
+    await expect(dialog.locator('#planned_at_dialog')).toHaveValue('2026-12-19')
+    await expect(dialog.locator('#planned_time_dialog')).toHaveValue('19:00')
+    // 화면 라벨은 없고 접근성 이름으로 찾는다
+    await expect(dialog.getByLabel('시간 (선택)')).toHaveValue('19:00')
+    await expect(dialog.getByText('시간 (선택)')).toHaveCount(0)
+    await expect(dialog.getByText('비워두면 종일 일정으로 추가돼요')).toBeVisible()
+
+    await dialog.getByRole('button', { name: '시간 지우기' }).click()
+    await expect(dialog.locator('#planned_time_dialog')).toHaveValue('')
+    // 값이 없으면 × 는 숨는다
+    await expect(dialog.getByRole('button', { name: '시간 지우기' })).toHaveCount(0)
+    await dialog.getByRole('button', { name: '저장하기' }).click()
+    await expect(dialog).toBeHidden()
+
+    await expect.poll(async () => (await plannedRow())?.planned_time).toBeNull()
+    expect((await plannedRow())?.planned_at).toBe('2026-12-19')
+  })
+
+  test('시간 칸을 비운 채 저장하면 planned_time 은 null(종일), 미리 채우기 없음', async ({ page }) => {
+    await seedPlace(null, null)
+    await loginAsA(page)
+    await page.goto(`/places/${PLACE_ID}`)
+    await page.getByRole('button', { name: '언제 갈까요?' }).click()
+
+    const dialog = page.getByRole('dialog')
+    // 날짜가 없으면 시간 칸은 숨김
+    await expect(dialog.locator('#planned_time_dialog')).toHaveCount(0)
+    await dialog.locator('#planned_at_dialog').fill('2026-12-24')
+    // 날짜를 고르면 바로 보이고, 저녁 다이닝이어도 비어 있다
+    await expect(dialog.locator('#planned_time_dialog')).toHaveValue('')
+    await dialog.getByRole('button', { name: '저장하기' }).click()
+    await expect(dialog).toBeHidden()
+
+    await expect.poll(async () => (await plannedRow())?.planned_at).toBe('2026-12-24')
+    expect((await plannedRow())?.planned_time).toBeNull()
+  })
+
+  test('/new: 날짜를 고르면 시간 칸이 보이고, 날짜를 지우면 시간도 지워진다 — 비운 채 등록하면 null', async ({ page }) => {
+    await loginAsA(page)
+    await page.goto('/places/new')
+    await page.getByLabel('제목').fill('E2E 시간 비운 다이닝')
+    await page.getByLabel('지역').fill('망원동')
+    await page.getByRole('button', { name: '저녁', exact: true }).click()
+
+    await expect(page.locator('#planned_time')).toHaveCount(0)
+    await page.locator('#planned_at').fill('2026-12-24')
+    await expect(page.locator('#planned_time')).toHaveValue('')
+    await page.locator('#planned_time').fill('19:30')
+    await page.getByRole('button', { name: '날짜 지우기' }).click()
+    await expect(page.locator('#planned_time')).toHaveCount(0)
+    await page.locator('#planned_at').fill('2026-12-25')
+    await expect(page.locator('#planned_time')).toHaveValue('')
+
+    await page.getByRole('button', { name: '다이닝 등록하기' }).click()
+    await page.waitForURL(/\/places\/[0-9a-f-]+/, { timeout: 15_000 })
+    const created = (await stubRows<{ title: string; planned_at: string | null; planned_time: string | null }>('places'))
+      .find((r) => r.title === 'E2E 시간 비운 다이닝')
+    expect(created?.planned_at).toBe('2026-12-25')
+    expect(created?.planned_time).toBeNull()
+  })
+})

@@ -1,6 +1,6 @@
 # CURRENT_STATE.md
 
-> **마지막 업데이트: 2026-11-03 (PR #134~#162 반영)**
+> **마지막 업데이트: 2026-11-03 (PR #134~#163 반영)**
 
 ## 현재 단계
 커플(2인) 계정 전환 완료 + 파트너 표시용 닉네임 추가 단계 — 계정 없는 단일 워크스페이스에서
@@ -68,7 +68,8 @@ PROJECT_CONTEXT §5(인증 F-01)·§20.
 - `feat/planned-visit-date` — PR #157 squash 머지 완료, 로컬·리모트 브랜치 삭제됨 (lint·vitest·build·Playwright 스텁 렌더 확인)
 - `fix/planned-at-clear-wording` — PR #160 squash 머지 완료, 로컬·리모트 브랜치 삭제됨 (방문예정일 지우기 문구 통일)
 - `design/detail-date-typography-unify` — PR #158 squash 머지 완료, 브랜치 삭제됨 (CI 통과, 시각 확인은 사용자 몫)
-- `fix/ics-escape-text` — `.ics` TEXT 이스케이프(`;`) 수정, 보류 14번 해소. PR #162 **머지 전**(사용자 iOS 실기기 확인 후 머지 지시 예정)
+- `design/planned-time-inline-field` — PR #163: 방문예정 시간 입력 UI 단순화("+ 시간 추가" 제거·상시 노출·미리 채우기 제거, 화면 라벨 없이 날짜 박스와 8px 한 묶음). **머지 전**(CI·Vercel 재통과 후 squash 머지 예정)
+- `fix/ics-escape-text` — PR #162 squash 머지 완료(머지 커밋 `aa7aad0`), 로컬·리모트 브랜치 삭제됨. `.ics` TEXT 이스케이프(`;`) 수정, 보류 14번 해소. **남은 확인: iOS 실기기(제목에 `;`·`,`)**
 - `feat/planned-visit-time` — PR #161 squash 머지 완료(머지 커밋 `bbb8c5f`), 로컬·리모트 브랜치 삭제됨. 방문예정 시간 입력 + 캘린더 시간 지정 일정(021). Supabase `021_planned_time.sql` 은 머지 전 사용자가 실행·두 테이블 CHECK 제약 확인 완료. CI(Lint·Unit Test·Build, E2E 79 통과·재시도 없음)·Vercel 통과. **남은 확인: iOS `.ics` 시간 지정 일정 실기기(사용자), 구글/Android 실기기**
 - `feat/calendar-export` — PR #159 squash 머지 완료, 로컬·리모트 브랜치 삭제됨 (CI·Vercel 통과, 상세 블록·설정 화면·토스트·iOS 실기기 캘린더 추가는 사용자가 직접 확인 완료. **미확인: 구글 캘린더/Android 실기기.** 남은 확인: 시크릿 모드로 머리말 최초 미설정 안내 다이얼로그 1회 — 나중에 가볍게). 사전 스파이크 `diag/ics-blob-standalone-check` 는 폐기·삭제
 
@@ -122,7 +123,7 @@ PROJECT_CONTEXT §5(인증 F-01)·§20.
 - 홈 통계 갱신 누락 수정 + 홈·목록 당겨서 새로고침: 등록·수정·삭제·되돌리기 뒤 `['dashboard-stats']` 무효화(`invalidateDashboardStats`), `PullToRefresh` 가 화면 전체를 내렸다 올림(FAB 는 래퍼 밖)(PR #156) → 상세 CHANGELOG 2026-10-30
 - 위시리스트 방문 예정일(`planned_at`): 카드 footer·`/list` 방문예정 필터·상세 "방문 예정" 블록(방문 기록과 같은 생명주기, 값 없으면 하단 outline "언제 갈까요?")·카드 ⋮ "방문예정일 지우기"(확인 다이얼로그 "지우기", `PlannedAtClearDialog` 공용, PR #160)·`/new` 맨 아래 필드(PR #157) → 상세 CHANGELOG 2026-11-02. **열린 이슈**: outline Button 테두리 대비가 전역적으로 낮음(미결정)
 - 상세 블록 타이포 정리: 방문 기록 날짜 16px/500 → 표준 `.bodyText` 14px/400, `DetailBlock` 블록 제목 500→600(PR #158) → 상세 CHANGELOG 2026-11-03
-- 방문예정 시간(PR #161, 021): 방문예정에만 선택 시작 시간 `planned_time`(API `'HH:mm'`, 날짜·시간 짝 규칙 같은 요청 안에서 판정). 입력 "+ 시간 추가"(다이닝은 점심 12:00/저녁 18:30 미리 채움), 표시 "2026.12.19 (토) 오후 7:00"·카드 footer 시간 말줄임, `/list` 같은 날 종일→시간순, 캘린더 시간 지정 일정(Asia/Seoul→UTC `Z`, +120분, 시간 없으면 종일 바이트 동일). 다녀온 곳 변경 없음 → 상세 CHANGELOG 2026-11-03 (021)
+- 방문예정 시간(PR #161, 021): 방문예정에만 선택 시작 시간 `planned_time`(API `'HH:mm'`, 날짜·시간 짝 규칙 같은 요청 안에서 판정). 입력 "시간 (선택)" 칸(날짜가 있으면 바로 노출, 비우면 종일 — PR #163 에서 "+ 시간 추가" 버튼·다이닝 미리 채우기 제거), 표시 "2026.12.19 (토) 오후 7:00"·카드 footer 시간 말줄임, `/list` 같은 날 종일→시간순, 캘린더 시간 지정 일정(Asia/Seoul→UTC `Z`, +120분, 시간 없으면 종일 바이트 동일). 다녀온 곳 변경 없음 → 상세 CHANGELOG 2026-11-03 (021)
 - 캘린더 추가(PR #159): 방문 예정·방문 기록 → 기기 기준(iOS 계열=Blob `.ics` 다운로드, 그 외=구글 캘린더 URL) 종일 일정. 진입점 3곳(상세 블록 날짜 옆 아이콘·카드 ⋮ "캘린더에 추가"·예정일 저장 직후 토스트), 앱 선택 UI 없음. 홈 삼선 메뉴 "설정" → `/settings`(첫 항목 캘린더 제목 문구, 인라인 취소/저장), 머리말 미설정 상태의 첫 추가 직전 안내 다이얼로그 1회 → 상세 CHANGELOG 2026-11-03
 
 ## 배포 상태
@@ -151,7 +152,7 @@ PROJECT_CONTEXT §5(인증 F-01)·§20.
 12. **전역 로딩 지연 — 효과 미측정, 후속 판단 대기(261022)**: PR #152(리전)·#153(캐시) 반영 뒤 로그인 후 홈·`/list`·상세의 Network 탭 Waiting 값을 이전과 비교한 기록이 없다(캐시만 있던 프리뷰에서 사용자 체감은 "아주 약간 개선"). 아직 손대지 않은 구간(CHANGELOG 2026-10-22 "효과" 절): 홈 서버 렌더의 10쿼리 왕복과 미들웨어·페이지의 `getCoupleById` 중복 호출, `/list` 의 렌더 후 클라이언트 API 3건 왕복, `unlock` 의 bcrypt + 순차 DB 3~4회, `app-ready` 쿠키가 없는 기기에서 `/lock` 마다 붙는 미들웨어 DB 조회, `GET /api/activities` 의 `select *`·무페이지네이션. 측정 후 어느 구간이 남는지 확인하고 진행할 것(원인 확정 전).
 13. **탭 직후 시각 반응 부족 — 별도 청크 대기(261022)**: 홈 카드·리스트 카드·헤더 아이콘은 `<Link>` 라 topLoader 가 자동으로 걸리지만, 이동이 prefetch·캐시로 빨리 커밋되면 막대가 보이기 전에 끝날 수 있다(코드상 추론, 실측 없음). `.headerNavBtn`·`.iconBtn`·`.cardInteractive` 에는 터치 `:active` 규칙도 없다. 후보: route-level `loading.tsx`(`pushState` 시점이 바뀌므로 #154 의 rAF 지연과 상호작용 확인 필요), `:active` 피드백(`.statRow:active`·`.fab:active` 선례). 신호가 오면 로더와 CSS 를 분리해 진행.
 
-14. ~~`.ics` 세미콜론 미이스케이프~~ → **해소(261103, PR #162, 머지 전)**: `escapeIcsText` 치환 문자열을 `String.raw` 로 바꿔 `;` → `\;` 가 실제로 나간다. 점검 결과 `,`·`\`·줄바꿈은 원래 정상이었고 `;` 만 누락. 잘못된 값을 고정하던 테스트(`ics.test.ts:25·99`)를 `String.raw` 기대값으로 바로잡고 케이스 추가. 저장소 전체 `no-useless-escape` 스캔에서 같은 패턴은 이 3곳뿐(규칙은 `next/core-web-vitals`·`next/typescript` 에 포함돼 있지 않아 꺼진 상태). **iOS 실기기 확인(제목에 `;`·`,`) 대기**
+14. ~~`.ics` 세미콜론 미이스케이프~~ → **해소(261103, PR #162, 머지 커밋 `aa7aad0`)**: `escapeIcsText` 치환 문자열을 `String.raw` 로 바꿔 `;` → `\;` 가 실제로 나간다. 점검 결과 `,`·`\`·줄바꿈은 원래 정상이었고 `;` 만 누락. 잘못된 값을 고정하던 테스트(`ics.test.ts:25·99`)를 `String.raw` 기대값으로 바로잡고 케이스 추가. 저장소 전체 `no-useless-escape` 스캔에서 같은 패턴은 이 3곳뿐(규칙은 `next/core-web-vitals`·`next/typescript` 에 포함돼 있지 않아 꺼진 상태). **iOS 실기기 확인(제목에 `;`·`,`) 대기**
 15. **e2e `chromium-db` 잠금 화면 테스트 간헐 실패 — 기존 flaky, main 에서도 재현됨(261103 확인)**: `page.goto('/lock')` 직후 `page.keyboard.type(passcode)` 가 페이지 준비(하이드레이션) 전에 시작되면 입력이 누락돼(스냅샷 "패스코드 5/6자리 입력됨") 잠금해제 다음 단계(`waitForURL('/')`·"내 이메일 주소" 입력)에서 타임아웃난다. `main`(fc52b27) 전체 E2E 3회 중 1회에서 2건 실패(`:854` 평소 잠금해제 회귀, `:1039` 로그아웃 기기 기억), `feat/planned-visit-time` 로컬에서도 실행마다 1건씩 번갈아 실패. 단독 재실행·CI(PR #161, 재시도 없이 79 통과)는 통과. **입력 전 페이지 준비 대기(키패드 활성 확인 등)로 별도 수정 필요.**
 
 **그 외 남은 작업**

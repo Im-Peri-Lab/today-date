@@ -504,6 +504,11 @@ Claude Code가 PR 생성 → squash 머지 → 원격·로컬 정리를 한 번�
 - 지도 앱 연동(`lib/map.ts` `MAP_APPS`·`requiresApp`·`useMapAppPreference` 훅·`MapLink` 컴포넌트·위치 미입력 빈 상태·앱 설치 안내 문구) → **SKILL §10-I**
 - 장소·활동 폼/상세 필드 순서(장소: 식사시간→지역→위치 / 활동: 시간대→위치) → **SKILL §10-J**
 
+### 캘린더 추가 · 설정 화면 (신규, 261103, PR #159)
+
+- 캘린더 추가(`lib/calendar/` `event.ts`·`ics.ts`·`apps.ts`·`download.ts`, 훅 `useCalendarAdd`·`useCalendarTitlePrefix`·`useStoredString`, `CalendarAddButton`·`CalendarTitlePrefixDialog`) — 위시리스트 `planned_at`·다녀온 곳 `visited_at`~`visited_end_at`을 종일 일정으로. iOS 계열은 클라이언트 `Blob` `.ics`, 그 외는 구글 캘린더 URL. **서버 라우트·서명 토큰·DB 변경 없음**, 앱 선택 UI 없음 → **SKILL §10-L**
+- 설정 화면(`/settings`) — 홈 삼선 메뉴 이동형 항목 "설정". 설정은 카드 한 장씩 쌓는다. 지금은 이 기기 `localStorage` 값(캘린더 제목 문구)뿐이라 서버 조회 없이 세션만 확인 → **SKILL §10-L**
+
 ### 방문 기간(시작~종료) — activity 전용 (신규, 260710)
 
 - places는 식음료 단일 방문 컨셉이라 기간 기능 대상에서 제외 — 두 폼 "거울 구조 대칭" 원칙에 대한 의도된 예외.
@@ -808,6 +813,11 @@ ActivityCard·PlaceCard 모두 동일한 정보 줄 우선순위(memo→location
 - **`planned_at` 은 위시리스트 전용 값이지만 상태 전환으로 지우지 않는다.** 다녀온 곳이 되면 화면에서만 숨기고 DB 값은 보존, 되돌리면 복원(PR #157). 날짜 수정 진입점은 상세 연필 하나이며 카드 ⋮ 메뉴는 등록/미정으로만 한다.
 - **한 데이터를 보여주는 캐시 키가 여러 개면 mutation 이 전부 무효화해야 한다.** 홈 통계(`['dashboard-stats']`)는 목록(`['places']`·`['activities']`)과 같은 데이터를 다른 키로 들고 있어, 목록만 무효화하면 홈이 staleTime(30초) 동안 이전 값을 보여준다(PR #156). 등록·수정·삭제·되돌리기 훅에서 `invalidateDashboardStats(qc)` 를 함께 호출한다.
 - **`transform` 이 걸린 조상 안의 `position: fixed` 는 뷰포트 기준이 아니다.** 당겨서 새로고침(`PullToRefresh`)처럼 화면을 translate 하는 래퍼는 FAB 같은 fixed 요소를 밖에 둔다(PR #156).
+- **캘린더 이벤트의 "종일 일정 종료일"은 배타(마지막 날 +1일)이고 그 계산은 Date 객체 없이 문자열로 한다.** `.ics` `DTEND;VALUE=DATE` 와 구글 `dates=START/END` 모두 배타 종료일이라 `nextDayIso`(`lib/date.ts`)로 올린다(월말·연말·윤년 단위 테스트 고정). `new Date()` 는 `DTSTAMP`(현재 시각) 한 곳뿐이며 `buildIcs` 는 `stamp` 를 인자로 받아 시계를 읽지 않는 순수 함수로 둔다(PR #159).
+- **`.ics` 줄 접기는 바이트가 아니라 코드포인트로 끊되 한도는 바이트로 센다.** 75옥텟 한도에 이어지는 줄의 선행 공백도 포함돼(내용 74바이트) 한글(3바이트)·이모지(4바이트)가 한가운데서 잘리지 않게 코드포인트 단위로 자른다. 사용자 입력(제목·메모·후기)의 `\`·`;`·`,`·줄바꿈은 반드시 이스케이프(역슬래시 먼저)(PR #159).
+- **선택지를 고르게 할 이유가 없으면 선택 UI를 두지 않는다 — 기기별 기본값으로 바로 실행.** 캘린더는 지도 앱과 달리 iOS=애플 `.ics`, 그 외=구글로 정답이 있어 선택 시트·선택 기억을 제거했다(처음엔 만들었다가 번복). 지도 앱(`MapLink`)은 사용자마다 선호가 갈려 선택 UI가 맞다 — 둘을 같은 구조로 억지로 맞추지 않는다(PR #159).
+- **여러 컴포넌트가 같은 `localStorage` 값을 읽으면 저장 시 같은 창의 다른 인스턴스에 알려야 한다.** `useMapAppPreference` 식 "마운트 때 한 번 읽기"는 한 화면에 인스턴스가 하나일 때만 안전하다. 캘린더는 블록·카드·다이얼로그가 각자 훅을 가져 `useStoredString` 이 커스텀 이벤트(같은 창)+`storage`(다른 탭)로 동기화한다. 초기 렌더는 항상 기본값 → 마운트 후 저장값(hydration mismatch 방지)(PR #159).
+- **"닫을 때 이어서 실행"하는 다이얼로그에서 어떤 방식으로 닫든 "봤음" 표시는 다이얼로그 자신이 남긴다.** 표시를 호출부(훅)에 두면 다른 진입점(설정 등)에서 열고 닫을 때 빠져 안내가 다시 뜬다. 다운로드·새 탭은 닫기 클릭과 같은 틱에서 실행해야 사용자 제스처로 인정된다(PR #159).
 - **상세 블록의 날짜 텍스트는 표준 `.bodyText`(14px/400) + 아이콘 `h-3.5 w-3.5`, 블록 제목 `<h2>` 는 14px/600.** 방문 기록·방문 예정·등록 정보 값이 같은 크기이고, 제목은 굵기로만 구분한다(홈 `.statSectionHeader` 와 같은 패턴). 날짜만 `text-base font-medium` 으로 키우는 식의 개별 오버라이드는 두지 않는다(PR #158).
 - **낙관적 업데이트로 컴포넌트가 언마운트될 수 있으면 콜백은 훅 레벨에 둔다.** `.mutate(id, { onSuccess })`처럼 호출부에 넘긴 콜백은 그 시점에 카드가 이미 언마운트되면 실행되지 않는다(React Query 특성). 롤백·토스트는 `onMutate`/`onError`/`onSuccess`/`onSettled`로 훅에 결합해야 유실되지 않는다.
 - **`router.push`는 비동기이며 즉시 반환된다.** 성공 처리에서 로딩 상태(`isSubmitting`/`isPending`)를 곧바로 해제하면, 실제 화면 전환이 완료되기 전까지 버튼/다이얼로그가 재활성화된 채로 노출되는 갭이 생긴다. 별도 `navigating` 상태를 두어 push 호출 시점부터 전환 완료까지 계속 비활성 유지해야 한다.

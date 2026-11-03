@@ -600,6 +600,7 @@ description: >
 
 - **미방문(wishlist)**: 정보 수정 → 복사하기 → **언제 갈까요?**(값 없을 때, `PlannedAtDialog` 오픈) / **날짜 미정으로**(값 있을 때, `RevertConfirmDialog` 확인 후 바로 지움(확인 버튼 "되돌리기") — 날짜 수정은 카드 메뉴에서 제외, 상세 연필로만; `Calendar` 아이콘) → 다녀온 곳으로 → (구분선) 삭제
 - **방문완료(visited)**: 정보 수정 → 기록 수정 → 복사하기 → 가보고 싶은 곳으로 → (구분선) 삭제
+- **캘린더에 추가**(`CalendarPlus` 아이콘, §10-L): **복사하기 바로 아래**, 날짜가 있을 때만 노출(`onAddToCalendar` prop 이 있을 때만 그린다 — 위시리스트는 예정일, 다녀온 곳은 방문일 기준)
 
 **순서 근거**: 정보 수정·기록 수정·복사하기·방문 예정일 등록/미정으로는 편집·생성 계열 일반 액션(상태 변경보다 위), 상태 변경(다녀온 곳으로/가보고 싶은 곳으로)은 그 아래, 삭제는 파괴적 액션이라 맨 끝. **구분선은 삭제 앞 하나만** 둔다(중간 구분선 없음). 복사하기는 상세 등록 정보 블록의 단독 복사 버튼(§10-B, `DetailBlock` `onCopy`)과 동일 액션이며 `stashActivityDuplicate`/`stashPlaceDuplicate`(`src/lib/duplicatePrefill.ts`) 공용 헬퍼로 DB 즉시 생성 없이 신규 폼 prefill 로 이동한다.
 
@@ -1143,6 +1144,20 @@ export const STATUS_LABELS: Record<Status, string> = {
 - **추천 위저드**(`ActivityRecommendWizard.tsx`): Step 3(시간대 다음, 카테고리 앞)에 독립 단계로 배치 — 카테고리("무엇을 하는가")와 실내/실외("조건")는 서로 다른 축이라 한 화면에 섞지 않는다(카테고리 개편 때 확립한 "축 분리" 원칙과 일관, §10-J 폼 순서와는 별개로 위저드는 자체 단계 순서를 가짐: 소요시간→시간대→실내/실외→카테고리). UI는 `optionCard` 카드 2개(Step1/2와 동일하게 **선택 시 자동 다음 단계 진행**) + "다음" 버튼(`detailPrimaryBtn` 보라색 CTA, 명시적 스킵 — 장소 위저드의 지역(area) 스킵 버튼과 동일 스타일·문구로 통일, `LOCATION_TYPE_ICONS`/`LOCATION_TYPE_OPTIONS` 재사용). `duration==='overnight'` 시 시간대 단계를 건너뛰는 기존 로직은 유지되며 건너뛴 뒤 도착지가 실내/실외 단계(Step 3)로 바뀐다. **필터는 area와 동일하게 선택적**(`recommendActivities`의 `location_type` truthy 체크 — 미선택 시 필터 미적용) — 저장값(NOT NULL)과 무관한 별개 관심사라는 원칙은 `/list` 필터와 동일.
 - **카드 배지**: `ActivityCard`의 기존 메타 줄(소요시간·시간대 표시 줄)에 인라인 항목으로 추가, **줄 맨 앞**에 배치(`소요시간` 앞). 필수 필드라 조건부 렌더 없이 항상 표시, 아이콘 크기는 카드 메타 줄 관례대로 `h-3 w-3`(상세의 `h-3.5`보다 한 단계 작음).
 - ~~알려진 제약: SegmentedControl 선택 해제 불가~~ — 필수 필드로 확정되며 해소됨. 애초에 "미선택 상태로 되돌릴 UI"가 필요 없어졌으므로(값이 항상 있어야 함) 별도 해제 기능은 구현하지 않는다.
+
+---
+
+### 10-L. 캘린더 추가 버튼 · 설정 화면 (PR #159)
+
+**`CalendarAddButton`** (`src/components/track/CalendarAddButton.tsx`): 상세 "방문 예정"·"방문 기록" 블록의 **날짜 값 바로 옆**(보기 모드)에 두는 아이콘 버튼 하나. `ExternalLink`(`h-4 w-4`) + `.mapActionBtn`(28px, §7), `aria-label="캘린더에 추가"`. **캘린더 모양 아이콘은 쓰지 않는다** — 날짜 앞 고정 `Calendar`(`h-3.5 w-3.5`, accent) 와 겹쳐 보인다. 날짜 행은 `flex items-center gap-1`(날짜 span + 버튼), 버튼 래퍼에 **`-my-1`** 로 28px 가 날짜 줄(~21px) 높이를 키우지 않게 상쇄(`MapLink` 의 `-mt-1` 과 같은 이유). 연필·휴지통(모서리 absolute 앵커)과는 별개 위치. `▾` 없음 — 앱 선택 UI 를 두지 않는다(기기 감지로 바로 실행).
+- 날짜가 없으면(`getCalendarDates` null) 렌더하지 않는다. 같은 판정을 카드 ⋮ 메뉴 항목(§카드 ⋮ 메뉴)·저장 직후 토스트도 쓴다.
+- 캘린더 선택: iOS 계열 UA(iPhone·iPad·iPod·Macintosh)=애플 `.ics` 다운로드, 그 외=구글 캘린더 새 탭(`detectDefaultCalendarAppId`). 새 캘린더는 `CALENDAR_APPS`(`lib/calendar/apps.ts`)에 항목 추가 + 감지 규칙 확장.
+
+**저장 직후 토스트**(`PlannedAtDialog`): `toast.success("방문 예정일을 저장했어요", { description: "캘린더에도 추가할까요?", action: { label: "추가" }, duration: 8000 })`. 날짜가 바뀐 저장에만, 같은 날짜 재저장은 일반 토스트.
+
+**`/settings` 설정 화면**: 홈 삼선 메뉴(`HomeMenu` `items` 배열) 이동형(`kind: 'link'`) 항목 "설정"(`Settings` 아이콘) — 내 정보·파트너 정보 다음, 로그아웃 앞. 레이아웃은 `/account` 와 동일(`TopBar` 홈으로, `pageTitle` h1, `pageSubtitle`, `max-w-lg`). **설정은 카드 한 장씩 `space-y-4` 로 쌓는다** — 새 설정은 `components/settings/` 에 카드 블록을 만들어 `page.tsx` 에 한 줄 추가.
+- 첫 카드 `CalendarTitlePrefixBlock`: `AccountInfoBlock` 닉네임 행과 같은 인라인 편집 — 라벨(`fieldLabel`) + 값(`bodyText`, 없으면 faint "설정 안 함") + absolute 연필(`mapActionBtn`), 편집 시 `Input` + 도움말(`text-xs sub`) + **우측 정렬 취소 → 저장**(§인라인 편집 폼 액션 규칙 그대로). 값이 `localStorage` 동기 저장이라 "저장 중..." 상태는 없다. 저장 토스트 "수정되었습니다!".
+- **첫 캘린더 추가 직전 안내**(`CalendarTitlePrefixDialog`, §11 입력 폼 다이얼로그): 입력 하나, **자동 저장**, 닫기는 상단 X 하나, 풋터 버튼 없음. 닫으면(어떻게든) 보류한 캘린더 추가가 이어진다. 설정 화면 저장과 달리 "취소/저장" 규칙을 적용하지 않는 이유 — 설정이 아니라 "추가 직전 한 번" 흐름이기 때문.
 
 ---
 

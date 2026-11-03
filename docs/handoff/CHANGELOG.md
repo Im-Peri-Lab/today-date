@@ -1,6 +1,6 @@
 # CHANGELOG.md
 
-> **마지막 업데이트: 2026-11-02 (PR #134~#158 반영)**
+> **마지막 업데이트: 2026-11-03 (PR #134~#159 반영)**
 
 > 260531~261022 핸드오프 전체를 날짜순으로 기록한 변경 이력입니다. 새 AI는 일반적으로 `PROJECT_CONTEXT.md`와 `CURRENT_STATE.md`만 먼저 읽고, 과거 판단 근거가 필요할 때 이 문서를 참고하세요.
 
@@ -1065,3 +1065,28 @@ tsc·lint·vitest 187 통과, Vercel 프리뷰에서 실기기 확인(홈 카드
 
 ### 검증·미확인
 - build·lint·CI(Lint·Unit Test·Build, E2E) 통과. 로그인·데이터가 필요한 상세 화면의 라이트/다크·모바일/데스크탑 시각 확인은 에이전트 세션에서 하지 못했다(사용자 확인 필요).
+
+---
+
+## 2026-11-03 — 방문 예정·방문 기록 캘린더 추가 + 설정 화면 (PR #159)
+
+### 변경
+- **캘린더 추가**: 위시리스트 `planned_at` 하루, 다녀온 곳 `visited_at`~`visited_end_at`(기간은 activity 만)을 종일 일정으로 내보낸다. DB 마이그레이션·서버 라우트·서명 토큰 없음.
+  - iOS 계열(iPhone·iPad·Mac UA): 클라이언트에서 `Blob` 으로 `.ics` 를 즉석 생성해 `<a download>`(standalone PWA 실기기 확인됨 — 별도 스파이크 브랜치로 먼저 검증 후 폐기). 그 외: 구글 캘린더 `render?action=TEMPLATE` URL 을 새 탭으로.
+  - 진입점 3곳, 모두 `useCalendarAdd` 한 훅 공유: 상세 "방문 예정"·"방문 기록" 블록 날짜 옆 `ExternalLink` 아이콘(`CalendarAddButton`, `mapActionBtn` 28/16) · 카드 ⋮ 메뉴 "캘린더에 추가"(복사하기 아래) · 예정일 저장 직후 토스트 "캘린더에도 추가할까요? [추가]"(날짜가 바뀐 저장에만, 8초). 셋 다 `getCalendarDates` 로 날짜 있을 때만 노출.
+  - 이벤트 매핑(`lib/calendar/event.ts`): 제목 = 머리말 + `title` / 장소 = `location`, 없으면 다이닝 `area` / 메모 = `memo`·카테고리·참고 링크(`resolveHref`)·상세 링크, 다녀온 곳만 별점(★개수)·후기 / UID = `{track}-{id}@todaydate`.
+  - `.ics` 텍스트는 순수 함수(`lib/calendar/ics.ts`: 쉼표·세미콜론·역슬래시·줄바꿈 이스케이프, 75옥텟 줄 접기(코드포인트 단위라 한글·이모지 안 잘림), CRLF) + 단위 테스트. 종료일 +1일은 `lib/date.ts` `nextDayIso`(Date 객체 없는 문자열 연산).
+- **캘린더 앱 선택 UI 없음**: 처음엔 `CALENDAR_APPS`(`apple-ics`/`google`) 선택 시트(`▾`)와 선택 기억 훅을 만들었으나, 기기별 명확한 기본값이 있어 선택지를 고르게 할 이유가 없다고 판단해 제거. `detectDefaultCalendarAppId`/`resolveCalendarApp` 로 바로 실행하고 `CALENDAR_APPS` 구조만 확장용으로 남김.
+- **설정 화면(`/settings`) 신설**: 홈 삼선 메뉴에 이동형 항목 "설정"(`Settings` 아이콘, 내 정보·파트너 정보 다음·로그아웃 앞). 앞으로 설정이 카드 한 장씩 쌓이는 자리. 첫 항목 "캘린더 제목 문구"(`CalendarTitlePrefixBlock`) — 닉네임 편집(`AccountInfoBlock`)과 같은 인라인 편집(연필 → 입력 + 우측 정렬 취소 → 저장, 토스트 "수정되었습니다!", 최대 20자). 값이 `localStorage` 동기 저장이라 "저장 중..." 상태는 없다.
+- **첫 캘린더 추가 직전 머리말 안내 1회**(`CalendarTitlePrefixDialog`): 머리말이 비어 있고 "봤음" 플래그가 없으면 다이얼로그를 먼저 띄운다. 입력은 자동 저장·닫기는 X 하나(입력 폼 다이얼로그 규칙)이며, 닫는 순간 보류한 캘린더 추가를 이어서 실행한다(사용자는 이미 "추가"를 눌렀으므로 한 번 더 누르게 하지 않음). 설정 화면에서 저장해도 플래그가 남는다.
+- localStorage 키: `today-date:calendar-title-prefix`, `today-date:calendar-prefix-intro-seen`. 여러 훅 인스턴스(블록·다이얼로그·카드)가 한 화면에 있어 `useStoredString` 이 커스텀 이벤트로 같은 창의 인스턴스를 동기화한다. (중간에 쓰던 `today-date:calendar-app` 키는 미배포라 마이그레이션 없이 폐기.)
+
+### 설계 판단
+- "홈 메뉴 실행형 항목 + 다이얼로그"(자동 저장)로 한 번 옮겼다가 설정 화면으로 다시 옮겼다 — 설정이 늘어날 것을 감안하고, 앱에 통일된 인라인 편집 규칙을 따르기 위해서. 첫 실행 안내 다이얼로그는 설정이 아니라 "추가 직전 한 번" 흐름이라 자동 저장 방식을 그대로 둠.
+- `new Date()` 는 `.ics` DTSTAMP(현재 시각) 한 곳에서만 쓴다. 날짜 값은 모두 ISO 문자열 처리.
+- 새 CSS 토큰 없음(`mapActionBtn`·`SegmentedControl` 재사용 → 선택 UI 제거 후엔 `mapActionBtn` 만).
+
+### 검증·미확인
+- lint·vitest 232·build·CI(Lint·Unit Test·Build, E2E) 통과. 임시 Playwright 하네스(커밋 안 함)로 첫 실행·재실행·머리말 반영·취소/저장·라이트/다크·모바일을 확인.
+- **미확인**: 로그인·데이터가 필요한 실화면(상세 블록·카드 ⋮ 메뉴·저장 직후 토스트)과 `/settings` 라우트의 시각 확인, 실기기 iOS standalone·Android 의 캘린더 추가는 에이전트 세션에서 하지 못했다(사용자 확인 필요). 구글 캘린더 화면 자체는 로그인 단계에서 멈춰 URL 전달까지만 확인.
+- Android Intent/네이티브 플러그인은 범위 밖(3단계, Capacitor 머지 이후).

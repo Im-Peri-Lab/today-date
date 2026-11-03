@@ -68,6 +68,8 @@ PROJECT_CONTEXT §5(인증 F-01)·§20.
 - `feat/planned-visit-date` — PR #157 squash 머지 완료, 로컬·리모트 브랜치 삭제됨 (lint·vitest·build·Playwright 스텁 렌더 확인)
 - `fix/planned-at-clear-wording` — PR #160 squash 머지 완료, 로컬·리모트 브랜치 삭제됨 (방문예정일 지우기 문구 통일)
 - `design/detail-date-typography-unify` — PR #158 squash 머지 완료, 브랜치 삭제됨 (CI 통과, 시각 확인은 사용자 몫)
+- `chore/eslint-no-useless-escape` — PR #164 squash 머지 완료(머지 커밋 `db4225c`), 브랜치 삭제됨. `no-useless-escape: error`, 켤 당시 새 위반 0건
+- `fix/calendar-ux-polish` — PR #165: 머리말 안내 다이얼로그 취소·저장(문구에만 적용, 추가는 항상 진행) + 일정 수정 토스트("일정이 바뀌었어요…" + "다시 추가", 방문 예정·방문 기록) + `/settings` 안내 줄 삭제. PR 생성·**머지 전**(사용자 프리뷰 확인 후 머지 지시 예정)
 - `design/planned-time-inline-field` — PR #163 squash 머지 완료(머지 커밋 `3a2ce97`), 로컬·리모트 브랜치 삭제됨. 방문예정 시간 입력 UI 단순화("+ 시간 추가" 제거·상시 노출·미리 채우기 제거, 화면 라벨 없이 날짜 박스와 8px 한 묶음). CI(E2E 82 통과)·Vercel 통과. **남은 확인: iOS Safari 빈 시간 칸 높이·휠(사용자)**
 - `fix/ics-escape-text` — PR #162 squash 머지 완료(머지 커밋 `aa7aad0`), 로컬·리모트 브랜치 삭제됨. `.ics` TEXT 이스케이프(`;`) 수정, 보류 14번 해소. **남은 확인: iOS 실기기(제목에 `;`·`,`)**
 - `feat/planned-visit-time` — PR #161 squash 머지 완료(머지 커밋 `bbb8c5f`), 로컬·리모트 브랜치 삭제됨. 방문예정 시간 입력 + 캘린더 시간 지정 일정(021). Supabase `021_planned_time.sql` 은 머지 전 사용자가 실행·두 테이블 CHECK 제약 확인 완료. CI(Lint·Unit Test·Build, E2E 79 통과·재시도 없음)·Vercel 통과. **남은 확인: iOS `.ics` 시간 지정 일정 실기기(사용자), 구글/Android 실기기**

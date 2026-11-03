@@ -1754,12 +1754,14 @@ test.describe('캘린더 머리말 안내 · 일정 수정 토스트', () => {
 
   /** 구글 캘린더로 나가는 요청을 가로채 text 파라미터(일정 제목)를 모은다 */
   async function captureCalendarTitles(page: Page) {
-    const titles: string[] & { dates?: string[] } = []
+    const titles: string[] & { dates?: string[]; details?: string[] } = []
     titles.dates = []
+    titles.details = []
     await page.context().route('https://calendar.google.com/**', (route) => {
       const url = new URL(route.request().url())
       titles.push(url.searchParams.get('text') ?? '')
       titles.dates!.push(url.searchParams.get('dates') ?? '')
+      titles.details!.push(url.searchParams.get('details') ?? '')
       return route.fulfill({ body: 'ok' })
     })
     return titles
@@ -1872,13 +1874,22 @@ test.describe('캘린더 머리말 안내 · 일정 수정 토스트', () => {
   test('방문 기록: 날짜를 바꾸면 수정 토스트 + "다시 추가", 후기만 바꾸면 기존 토스트', async ({ page }) => {
     await seed()
     await loginAsA(page)
+    const titles = await captureCalendarTitles(page)
     await page.goto(`/places/${PLC_ID}`)
 
     await page.getByRole('button', { name: '방문 기록 수정' }).click()
     await page.locator('#visit_date').fill('2026-10-02')
+    await page.getByLabel('후기').fill('날짜와 함께 바꾼 후기')
     await page.getByRole('button', { name: '저장', exact: true }).click()
     const changed = page.locator('[data-sonner-toast]').filter({ hasText: '일정이 바뀌었어요' })
     await expect(changed.getByRole('button', { name: '다시 추가' })).toBeVisible()
+    // "다시 추가" 는 저장한 값 전체로 — 바뀐 날짜와 함께 바꾼 후기가 메모에 실린다(옛 후기 아님)
+    await changed.getByRole('button', { name: '다시 추가' }).click()
+    await page.getByRole('dialog').getByRole('button', { name: '취소' }).click()
+    await expect.poll(() => titles.length).toBe(1)
+    expect(titles.dates![0]).toBe('20261002/20261003')
+    expect(titles.details![0]).toContain('후기: 날짜와 함께 바꾼 후기')
+    expect(titles.details![0]).not.toContain('좋았다')
 
     await page.getByRole('button', { name: '방문 기록 수정' }).click()
     await page.getByLabel('후기').fill('또 가고 싶다')

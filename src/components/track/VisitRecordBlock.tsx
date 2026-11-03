@@ -117,13 +117,8 @@ export function VisitRecordBlock({
             ),
             savedMessage: '방문 기록을 수정했어요',
             offerAddOnCreate: false,
-            onAdd: () =>
-              calendar.add({
-                ...item,
-                status: 'visited',
-                visited_at: start,
-                ...(isActivity ? { visited_end_at: end } : {}),
-              } as CalendarItem),
+            // 저장한 값 전체(날짜·종료일·별점·후기)로 덮는다 — 이벤트 메모에 별점·후기가 실리므로 저장 전 item 을 쓰면 옛 후기가 나간다.
+            onAdd: () => calendar.add({ ...item, status: 'visited', ...patch } as CalendarItem),
           })
         },
         onError: (err: unknown) =>

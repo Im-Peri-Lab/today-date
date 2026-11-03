@@ -9,9 +9,11 @@ import { DatePickerField } from '@/components/forms/DatePickerField'
 import { VisitPeriodToggle } from '@/components/forms/VisitPeriodToggle'
 import { RatingStars } from './RatingStars'
 import { DetailBlock } from './DetailBlock'
+import { CalendarAddButton } from './CalendarAddButton'
 import { useUpdateActivity } from '@/hooks/useActivities'
 import { useUpdatePlace } from '@/hooks/usePlaces'
 import { formatDotDateRange } from '@/lib/date'
+import type { CalendarItem } from '@/lib/calendar/event'
 import { buildDetailHref } from '@/lib/listReturn'
 import { cn } from '@/lib/utils'
 import styles from '@/components/screens.module.css'
@@ -19,6 +21,8 @@ import styles from '@/components/screens.module.css'
 interface VisitRecordBlockProps {
   track: 'activity' | 'place'
   id: string
+  /** 캘린더 이벤트(제목·장소·메모·후기 등)를 만들 항목 */
+  item: CalendarItem
   visitedAt: string | null
   /** 방문 종료일(기간 방문). activities 전용 — place 에서는 넘기지 않는다. */
   visitedEndAt?: string | null
@@ -37,6 +41,7 @@ interface VisitRecordBlockProps {
 export function VisitRecordBlock({
   track,
   id,
+  item,
   visitedAt,
   visitedEndAt,
   rating,
@@ -156,9 +161,12 @@ export function VisitRecordBlock({
         <div className="space-y-2">
           {/* 방문일과 별점을 두 줄로 분리 — 날짜 위, 별점 아래 */}
           {visitedAt && (
-            <div className={cn('inline-flex items-center gap-1.5', styles.bodyText)}>
-              <Calendar className={cn('h-3.5 w-3.5 shrink-0', styles.accent)} />
-              {formatDotDateRange(visitedAt, isActivity ? visitedEndAt : null)}
+            <div className="flex items-center gap-1">
+              <div className={cn('inline-flex items-center gap-1.5', styles.bodyText)}>
+                <Calendar className={cn('h-3.5 w-3.5 shrink-0', styles.accent)} />
+                {formatDotDateRange(visitedAt, isActivity ? visitedEndAt : null)}
+              </div>
+              <CalendarAddButton track={track} item={item} />
             </div>
           )}
           {rating ? <RatingStars value={rating} size="sm" /> : null}

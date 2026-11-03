@@ -8,6 +8,7 @@ import { toast } from 'sonner'
 import { Clock, StickyNote, MapPin, Calendar } from 'lucide-react'
 import { CategoryBadge } from './CategoryBadge'
 import { ItemMenu } from './ItemMenu'
+import { CalendarAppSheet } from './CalendarAppSheet'
 import { RatingStars } from './RatingStars'
 import { DeleteConfirmDialog } from './DeleteConfirmDialog'
 import { RevertConfirmDialog } from './RevertConfirmDialog'
@@ -26,6 +27,8 @@ import { buildDetailHref } from '@/lib/listReturn'
 import { stashActivityDuplicate } from '@/lib/duplicatePrefill'
 import { formatDotDateCompact, formatDotDateRangeCompact } from '@/lib/date'
 import { REVERT_TO_WISHLIST_PATCH } from '@/lib/revertPatch'
+import { getCalendarDates } from '@/lib/calendar/event'
+import { useCalendarAdd } from '@/hooks/useCalendarAdd'
 import { cn } from '@/lib/utils'
 import type { Activity } from '@/types'
 import styles from '@/components/screens.module.css'
@@ -45,6 +48,7 @@ export function ActivityCard({ activity, hideMenu, actionSlot, returnTo }: Activ
   const [revertOpen, setRevertOpen] = useState(false)
   const [plannedOpen, setPlannedOpen] = useState(false)
   const [clearPlannedOpen, setClearPlannedOpen] = useState(false)
+  const calendar = useCalendarAdd('activity')
   const del = useDeleteActivity()
   const update = useUpdateActivity()
 
@@ -111,6 +115,7 @@ export function ActivityCard({ activity, hideMenu, actionSlot, returnTo }: Activ
             plannedAt={activity.planned_at}
             onEditInfo={() => navigate(buildDetailHref(detailPath, { edit: 'info', returnTo }))}
             onEditVisit={() => navigate(buildDetailHref(detailPath, { edit: 'visit', returnTo }))}
+            onAddToCalendar={getCalendarDates('activity', activity) ? () => calendar.add(activity) : undefined}
             onDuplicate={() => navigate(stashActivityDuplicate(activity, returnTo))}
             onDelete={() => setDeleteOpen(true)}
             onMarkVisited={() => setVisitedOpen(true)}
@@ -233,11 +238,13 @@ export function ActivityCard({ activity, hideMenu, actionSlot, returnTo }: Activ
         title="날짜 미정으로 되돌릴까요?"
         description="입력한 방문 예정일이 삭제됩니다."
               />
+      <CalendarAppSheet {...calendar.sheetProps} />
       <PlannedAtDialog
         open={plannedOpen}
         onOpenChange={setPlannedOpen}
         track="activity"
         id={activity.id}
+        item={activity}
         title={activity.title}
         value={activity.planned_at ?? null}
       />

@@ -4,7 +4,7 @@ import { Fragment, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useTopLoader } from 'nextjs-toploader'
-import { Menu, LogOut, Loader2, Trash2, UserPen, Users, type LucideIcon } from 'lucide-react'
+import { Menu, LogOut, Loader2, Settings, Trash2, UserPen, Users, type LucideIcon } from 'lucide-react'
 import { toast } from 'sonner'
 import {
   DropdownMenu,
@@ -117,6 +117,17 @@ export function HomeMenu() {
           },
         ]
       : []),
+    /*
+     * 설정 — 앱 설정이 쌓이는 화면(/settings)으로 이동한다(link). 캘린더 제목 문구가 첫 항목이고,
+     * 설정이 늘어도 메뉴 항목은 이 하나로 둔다.
+     */
+    {
+      kind: 'link' as const,
+      key: 'settings',
+      label: '설정',
+      icon: Settings,
+      href: '/settings',
+    },
     /*
      * 로그아웃은 중성이다(destructive 아니다) — 되돌릴 수 있는 일이기 때문이다.
      * 패스코드를 다시 넣으면 같은 자리로 돌아오고 잃는 것이 없다. 빨강은 "계정 삭제"

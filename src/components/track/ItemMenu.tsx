@@ -1,6 +1,6 @@
 'use client'
 
-import { MoreVertical, Pencil, CalendarCheck, Copy, Trash2, CheckCircle2, Undo2, Calendar } from 'lucide-react'
+import { MoreVertical, Pencil, CalendarCheck, CalendarPlus, Copy, Trash2, CheckCircle2, Undo2, Calendar } from 'lucide-react'
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -22,6 +22,8 @@ interface ItemMenuProps {
   onEditVisit: () => void
   /** 복사하기 → 등록 정보만 prefill 한 신규 폼으로 이동 (DB 즉시 생성 없음) */
   onDuplicate: () => void
+  /** 캘린더에 추가 — 날짜(예정일·방문일)가 있는 항목에서만 넘긴다. 없으면 항목을 그리지 않는다. */
+  onAddToCalendar?: () => void
   onDelete: () => void
   onMarkVisited: () => void
   onRevert: () => void
@@ -35,6 +37,7 @@ export function ItemMenu({
   onEditInfo,
   onEditVisit,
   onDuplicate,
+  onAddToCalendar,
   onDelete,
   onMarkVisited,
   onRevert,
@@ -65,6 +68,12 @@ export function ItemMenu({
           <Copy />
           복사하기
         </DropdownMenuItem>
+        {onAddToCalendar && (
+          <DropdownMenuItem onClick={onAddToCalendar}>
+            <CalendarPlus />
+            캘린더에 추가
+          </DropdownMenuItem>
+        )}
         {/* 방문 예정일 — 위시리스트 전용. 값이 없으면 등록 진입, 있으면 날짜 미정으로(확인 후 지움) */}
         {!isVisited && (
           <DropdownMenuItem onClick={onEditPlanned}>

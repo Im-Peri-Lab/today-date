@@ -87,3 +87,21 @@ export function formatKoreanTimestamp(iso?: string | null): string {
   if (Number.isNaN(at.getTime())) return iso
   return KOREAN_DATE_FORMAT.format(at)
 }
+
+function daysInMonth(y: number, m: number): number {
+  if (m === 2) return (y % 4 === 0 && y % 100 !== 0) || y % 400 === 0 ? 29 : 28
+  return [4, 6, 9, 11].includes(m) ? 30 : 31
+}
+
+/**
+ * 다음 날짜(ISO) — "2026-02-28" → "2026-03-01". 종일 일정의 배타 종료일(+1일) 계산용.
+ * Date 객체를 쓰지 않고 연/월/일을 직접 올린다(타임존·DST 영향 없음).
+ * 해석할 수 없는 값은 그대로 돌려준다.
+ */
+export function nextDayIso(iso: string): string {
+  const [y, m, d] = iso.split('-').map(Number)
+  if (!y || !m || !d) return iso
+  const [ny, nm, nd] =
+    d < daysInMonth(y, m) ? [y, m, d + 1] : m < 12 ? [y, m + 1, 1] : [y + 1, 1, 1]
+  return `${ny}-${String(nm).padStart(2, '0')}-${String(nd).padStart(2, '0')}`
+}

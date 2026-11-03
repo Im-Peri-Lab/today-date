@@ -8,6 +8,7 @@ import { toast } from 'sonner'
 import { Compass, MapPin, Utensils, StickyNote, Calendar } from 'lucide-react'
 import { CategoryBadge } from './CategoryBadge'
 import { ItemMenu } from './ItemMenu'
+import { CalendarTitlePrefixDialog } from '@/components/CalendarTitlePrefixDialog'
 import { RatingStars } from './RatingStars'
 import { DeleteConfirmDialog } from './DeleteConfirmDialog'
 import { RevertConfirmDialog } from './RevertConfirmDialog'
@@ -19,6 +20,8 @@ import { buildDetailHref } from '@/lib/listReturn'
 import { stashPlaceDuplicate } from '@/lib/duplicatePrefill'
 import { formatDotDateCompact } from '@/lib/date'
 import { REVERT_TO_WISHLIST_PATCH } from '@/lib/revertPatch'
+import { getCalendarDates } from '@/lib/calendar/event'
+import { useCalendarAdd } from '@/hooks/useCalendarAdd'
 import { cn } from '@/lib/utils'
 import type { Place } from '@/types'
 import styles from '@/components/screens.module.css'
@@ -38,6 +41,7 @@ export function PlaceCard({ place, hideMenu, actionSlot, returnTo }: PlaceCardPr
   const [revertOpen, setRevertOpen] = useState(false)
   const [plannedOpen, setPlannedOpen] = useState(false)
   const [clearPlannedOpen, setClearPlannedOpen] = useState(false)
+  const calendar = useCalendarAdd('place')
   const del = useDeletePlace()
   const update = useUpdatePlace()
 
@@ -102,6 +106,7 @@ export function PlaceCard({ place, hideMenu, actionSlot, returnTo }: PlaceCardPr
             plannedAt={place.planned_at}
             onEditInfo={() => navigate(buildDetailHref(detailPath, { edit: 'info', returnTo }))}
             onEditVisit={() => navigate(buildDetailHref(detailPath, { edit: 'visit', returnTo }))}
+            onAddToCalendar={getCalendarDates('place', place) ? () => calendar.add(place) : undefined}
             onDuplicate={() => navigate(stashPlaceDuplicate(place, returnTo))}
             onDelete={() => setDeleteOpen(true)}
             onMarkVisited={() => setVisitedOpen(true)}
@@ -215,11 +220,13 @@ export function PlaceCard({ place, hideMenu, actionSlot, returnTo }: PlaceCardPr
         title="날짜 미정으로 되돌릴까요?"
         description="입력한 방문 예정일이 삭제됩니다."
               />
+      <CalendarTitlePrefixDialog {...calendar.prefixDialogProps} />
       <PlannedAtDialog
         open={plannedOpen}
         onOpenChange={setPlannedOpen}
         track="place"
         id={place.id}
+        item={place}
         title={place.title}
         value={place.planned_at ?? null}
       />

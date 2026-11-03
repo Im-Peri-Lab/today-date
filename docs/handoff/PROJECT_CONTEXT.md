@@ -507,7 +507,7 @@ Claude Code가 PR 생성 → squash 머지 → 원격·로컬 정리를 한 번�
 ### 캘린더 추가 · 설정 화면 (신규, 261103, PR #159)
 
 - 캘린더 추가(`lib/calendar/` `event.ts`·`ics.ts`·`apps.ts`·`download.ts`·`time.ts`, 훅 `useCalendarAdd`·`useCalendarTitlePrefix`·`useStoredString`, `CalendarAddButton`·`CalendarTitlePrefixDialog`) — **다녀온 곳**(`visited_at`~`visited_end_at`)과 **시간 없는 방문예정**(`planned_at`)은 종일 일정으로. 방문예정에 시작 시간(`planned_time`, 021)이 있으면 시간 지정 일정(Asia/Seoul→UTC `Z`, 시작+120분, 아래 "방문 예정 시간")으로. iOS 계열은 클라이언트 `Blob` `.ics`, 그 외는 구글 캘린더 URL. **서버 라우트·서명 토큰 없음**(PR #159 시점 DB 변경 없음, 이후 021 `planned_time` 한 컬럼만 추가), 앱 선택 UI 없음 → **SKILL §10-L**
-- **방문 예정 시간(신규, 261103, 021, `feat/planned-visit-time`)** — `activities`·`places.planned_time time null`(+CHECK `planned_time is null or planned_at is not null`). API 는 `'HH:mm'` 또는 null(`'HH:mm:ss'` 는 `'HH:mm'` 으로 정규화, `apiPlannedTimeSchema`), 날짜와의 짝 규칙은 `applyPlannedTimeRule`(같은 요청 안에서만 판정). 입력은 `PlannedTimeField`(방문 예정일 필드 아래 "+ 시간 추가" → 네이티브 `type="time"`), 표시는 `formatKoreanTime`/`formatDotDateTime`(`lib/date.ts`) 단일 출처, `/list` 방문예정 정렬은 같은 날 종일 먼저 → 시간 오름차순 → **SKILL §10-L**
+- **방문 예정 시간(신규, 261103, PR #161, 021)** — `activities`·`places.planned_time time null`(+CHECK `planned_time is null or planned_at is not null`). API 는 `'HH:mm'` 또는 null(`'HH:mm:ss'` 는 `'HH:mm'` 으로 정규화, `apiPlannedTimeSchema`), 날짜와의 짝 규칙은 `applyPlannedTimeRule`(같은 요청 안에서만 판정). 입력은 `PlannedTimeField`(방문 예정일 필드 아래 "+ 시간 추가" → 네이티브 `type="time"`), 표시는 `formatKoreanTime`/`formatDotDateTime`(`lib/date.ts`) 단일 출처, `/list` 방문예정 정렬은 같은 날 종일 먼저 → 시간 오름차순 → **SKILL §10-L**
 - 설정 화면(`/settings`) — 홈 삼선 메뉴 이동형 항목 "설정". 설정은 카드 한 장씩 쌓는다. 지금은 이 기기 `localStorage` 값(캘린더 제목 문구)뿐이라 서버 조회 없이 세션만 확인 → **SKILL §10-L**
 
 ### 방문 기간(시작~종료) — activity 전용 (신규, 260710)

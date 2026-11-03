@@ -1,6 +1,6 @@
 # CURRENT_STATE.md
 
-> **마지막 업데이트: 2026-11-03 (PR #134~#159 반영)**
+> **마지막 업데이트: 2026-11-03 (PR #134~#160 반영)**
 
 ## 현재 단계
 커플(2인) 계정 전환 완료 + 파트너 표시용 닉네임 추가 단계 — 계정 없는 단일 워크스페이스에서
@@ -66,6 +66,7 @@ PROJECT_CONTEXT §5(인증 F-01)·§20.
 - `feat/header-home-button-unify`(PR #134)·`fix/restore-back-link-when-duplicate-home`(PR #136)·`design/map-action-btn-color-align`(PR #135) — 모두 squash 머지 완료, 로컬·리모트 브랜치 삭제됨 (각 PR CI lint/vitest/e2e/Vercel 통과)
 - `fix/home-stats-refresh-and-pull-to-refresh` — PR #156 squash 머지 완료, 로컬·리모트 브랜치 삭제됨 (CI·Vercel 통과, 실기기 확인은 사용자가 완료)
 - `feat/planned-visit-date` — PR #157 squash 머지 완료, 로컬·리모트 브랜치 삭제됨 (lint·vitest·build·Playwright 스텁 렌더 확인)
+- `fix/planned-at-clear-wording` — PR #160 squash 머지 완료, 로컬·리모트 브랜치 삭제됨 (방문예정일 지우기 문구 통일)
 - `design/detail-date-typography-unify` — PR #158 squash 머지 완료, 브랜치 삭제됨 (CI 통과, 시각 확인은 사용자 몫)
 - `feat/calendar-export` — PR #159 squash 머지 완료, 로컬·리모트 브랜치 삭제됨 (CI·Vercel 통과, 상세 블록·설정 화면·토스트·iOS 실기기 캘린더 추가는 사용자가 직접 확인 완료. **미확인: 구글 캘린더/Android 실기기.** 남은 확인: 시크릿 모드로 머리말 최초 미설정 안내 다이얼로그 1회 — 나중에 가볍게). 사전 스파이크 `diag/ics-blob-standalone-check` 는 폐기·삭제
 
@@ -117,7 +118,7 @@ PROJECT_CONTEXT §5(인증 F-01)·§20.
 - 전역 로딩 지연 대응 1·2차: `vercel.json` 으로 함수 리전을 `iad1` → `syd1`(Supabase ap-southeast-2 권역)로 고정(PR #152, 프로덕션 `X-Vercel-Id: icn1::syd1::…` 확인) + 미들웨어 `session_version` 검증을 `couple_id` 기준 15초 TTL 인메모리 캐시로 감쌈(PR #153, 재설정 후 다른 기기 옛 세션이 인스턴스당 최대 15초 유효 — 허용한 트레이드오프). 진단 결과·사실 목록 → 상세 CHANGELOG 2026-10-22
 - topLoader 수동 이동 정합: `HomeFab` 메뉴 항목과 카드 ⋮ 메뉴(정보 수정·기록 수정·복사하기)가 `start()` → `requestAnimationFrame` → `router.push` 순서를 따름(상세 화면 경로와 동일, PR #154). `<Link>` 탭 체감·CSS `:active` 피드백은 범위 밖 → 상세 CHANGELOG 2026-10-22 v2
 - 홈 통계 갱신 누락 수정 + 홈·목록 당겨서 새로고침: 등록·수정·삭제·되돌리기 뒤 `['dashboard-stats']` 무효화(`invalidateDashboardStats`), `PullToRefresh` 가 화면 전체를 내렸다 올림(FAB 는 래퍼 밖)(PR #156) → 상세 CHANGELOG 2026-10-30
-- 위시리스트 방문 예정일(`planned_at`): 카드 footer·`/list` 방문예정 필터·상세 "방문 예정" 블록(방문 기록과 같은 생명주기, 값 없으면 하단 outline "언제 갈까요?")·카드 ⋮ "날짜 미정으로"·`/new` 맨 아래 필드(PR #157) → 상세 CHANGELOG 2026-11-02. **열린 이슈**: outline Button 테두리 대비가 전역적으로 낮음(미결정)
+- 위시리스트 방문 예정일(`planned_at`): 카드 footer·`/list` 방문예정 필터·상세 "방문 예정" 블록(방문 기록과 같은 생명주기, 값 없으면 하단 outline "언제 갈까요?")·카드 ⋮ "방문예정일 지우기"(확인 다이얼로그 "지우기", `PlannedAtClearDialog` 공용, PR #160)·`/new` 맨 아래 필드(PR #157) → 상세 CHANGELOG 2026-11-02. **열린 이슈**: outline Button 테두리 대비가 전역적으로 낮음(미결정)
 - 상세 블록 타이포 정리: 방문 기록 날짜 16px/500 → 표준 `.bodyText` 14px/400, `DetailBlock` 블록 제목 500→600(PR #158) → 상세 CHANGELOG 2026-11-03
 - 캘린더 추가(PR #159): 방문 예정·방문 기록 → 기기 기준(iOS 계열=Blob `.ics` 다운로드, 그 외=구글 캘린더 URL) 종일 일정. 진입점 3곳(상세 블록 날짜 옆 아이콘·카드 ⋮ "캘린더에 추가"·예정일 저장 직후 토스트), 앱 선택 UI 없음. 홈 삼선 메뉴 "설정" → `/settings`(첫 항목 캘린더 제목 문구, 인라인 취소/저장), 머리말 미설정 상태의 첫 추가 직전 안내 다이얼로그 1회 → 상세 CHANGELOG 2026-11-03
 

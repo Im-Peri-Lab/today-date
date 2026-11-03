@@ -5,7 +5,7 @@ import { toast } from 'sonner'
 import { Calendar } from 'lucide-react'
 import { DetailBlock } from './DetailBlock'
 import { CalendarAddButton } from './CalendarAddButton'
-import { RevertConfirmDialog } from './RevertConfirmDialog'
+import { PlannedAtClearDialog } from './PlannedAtClearDialog'
 import { useUpdateActivity } from '@/hooks/useActivities'
 import { useUpdatePlace } from '@/hooks/usePlaces'
 import { formatDotDate } from '@/lib/date'
@@ -68,14 +68,12 @@ export function PlannedAtBlock({ track, id, item, plannedAt, onEdit }: PlannedAt
         </div>
       </DetailBlock>
 
-      <RevertConfirmDialog
+      <PlannedAtClearDialog
         open={clearOpen}
         onOpenChange={setClearOpen}
         loading={mutation.isPending}
         onConfirm={handleClear}
-        title="날짜 미정으로 되돌릴까요?"
-        description="입력한 방문 예정일이 삭제됩니다."
-              />
+        />
     </>
   )
 }

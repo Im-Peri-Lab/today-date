@@ -67,7 +67,7 @@ PROJECT_CONTEXT §5(인증 F-01)·§20.
 - `fix/home-stats-refresh-and-pull-to-refresh` — PR #156 squash 머지 완료, 로컬·리모트 브랜치 삭제됨 (CI·Vercel 통과, 실기기 확인은 사용자가 완료)
 - `feat/planned-visit-date` — PR #157 squash 머지 완료, 로컬·리모트 브랜치 삭제됨 (lint·vitest·build·Playwright 스텁 렌더 확인)
 - `design/detail-date-typography-unify` — PR #158 squash 머지 완료, 브랜치 삭제됨 (CI 통과, 시각 확인은 사용자 몫)
-- `feat/calendar-export` — PR #159 squash 머지 완료, 로컬·리모트 브랜치 삭제됨 (CI·Vercel 통과, 실화면·실기기 확인은 사용자 몫). 사전 스파이크 `diag/ics-blob-standalone-check` 는 폐기·삭제
+- `feat/calendar-export` — PR #159 squash 머지 완료, 로컬·리모트 브랜치 삭제됨 (CI·Vercel 통과, 상세 블록·설정 화면·토스트는 사용자가 직접 확인 완료. 남은 확인: 시크릿 모드로 머리말 최초 미설정 안내 다이얼로그 1회 — 나중에 가볍게). 사전 스파이크 `diag/ics-blob-standalone-check` 는 폐기·삭제
 
 ## 최근 구현 완료
 - 자동화 테스트·CI, dark/hover/focus 정합화, 추천위저드 History/URL 동기화 공통 훅, 폼-API

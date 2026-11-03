@@ -55,8 +55,8 @@ export function PlannedAtBlock({ track, id, plannedAt, onEdit }: PlannedAtBlockP
         onSave={() => {}}
         saving={false}
       >
-        <span className={cn('inline-flex items-center gap-1.5 text-base font-medium', styles.ink)}>
-          <Calendar className={cn('h-4 w-4 shrink-0', styles.accent)} />
+        <span className={cn('inline-flex items-center gap-1.5', styles.bodyText)}>
+          <Calendar className={cn('h-3.5 w-3.5 shrink-0', styles.accent)} />
           {formatDotDate(plannedAt)}
         </span>
       </DetailBlock>

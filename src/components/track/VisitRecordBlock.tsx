@@ -156,8 +156,8 @@ export function VisitRecordBlock({
         <div className="space-y-2">
           {/* 방문일과 별점을 두 줄로 분리 — 날짜 위, 별점 아래 */}
           {visitedAt && (
-            <div className={cn('inline-flex items-center gap-1.5 text-base font-medium', styles.ink)}>
-              <Calendar className={cn('h-4 w-4 shrink-0', styles.accent)} />
+            <div className={cn('inline-flex items-center gap-1.5', styles.bodyText)}>
+              <Calendar className={cn('h-3.5 w-3.5 shrink-0', styles.accent)} />
               {formatDotDateRange(visitedAt, isActivity ? visitedEndAt : null)}
             </div>
           )}

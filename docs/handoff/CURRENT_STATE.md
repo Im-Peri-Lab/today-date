@@ -1,6 +1,6 @@
 # CURRENT_STATE.md
 
-> **마지막 업데이트: 2026-11-03 (PR #134~#163 반영)**
+> **마지막 업데이트: 2026-11-03 (PR #134~#166 반영)**
 
 ## 현재 단계
 커플(2인) 계정 전환 완료 + 파트너 표시용 닉네임 추가 단계 — 계정 없는 단일 워크스페이스에서
@@ -69,7 +69,8 @@ PROJECT_CONTEXT §5(인증 F-01)·§20.
 - `fix/planned-at-clear-wording` — PR #160 squash 머지 완료, 로컬·리모트 브랜치 삭제됨 (방문예정일 지우기 문구 통일)
 - `design/detail-date-typography-unify` — PR #158 squash 머지 완료, 브랜치 삭제됨 (CI 통과, 시각 확인은 사용자 몫)
 - `chore/eslint-no-useless-escape` — PR #164 squash 머지 완료(머지 커밋 `db4225c`), 브랜치 삭제됨. `no-useless-escape: error`, 켤 당시 새 위반 0건
-- `fix/calendar-ux-polish` — PR #165: 머리말 안내 다이얼로그 취소·저장(문구에만 적용, 추가는 항상 진행) + 일정 수정 토스트("일정이 바뀌었어요…" + "다시 추가", 방문 예정·방문 기록) + `/settings` 안내 줄 삭제. PR 생성·**머지 전**(사용자 프리뷰 확인 후 머지 지시 예정)
+- `chore/lint-scope-e2e` — PR #166 squash 머지 완료(머지 커밋 `d2080ee`), 브랜치 삭제됨. `npm run lint` 범위를 `src`+`e2e`+루트 설정 파일 5개로 확장(PR #164 Codex 지적), 새 위반 0건
+- `fix/calendar-ux-polish` — PR #165 squash 머지 완료(머지 커밋 `d518941`), 로컬·리모트 브랜치 삭제됨. 머리말 안내 다이얼로그 취소·저장(문구에만 적용, 추가는 항상 진행, SKILL §11 의도된 예외) + 일정 수정 토스트("일정이 바뀌었어요…" + "다시 추가", 방문 예정·방문 기록) + `/settings` 안내 줄 삭제. CI·Vercel 통과, 프리뷰는 사용자 확인 완료
 - `design/planned-time-inline-field` — PR #163 squash 머지 완료(머지 커밋 `3a2ce97`), 로컬·리모트 브랜치 삭제됨. 방문예정 시간 입력 UI 단순화("+ 시간 추가" 제거·상시 노출·미리 채우기 제거, 화면 라벨 없이 날짜 박스와 8px 한 묶음). CI(E2E 82 통과)·Vercel 통과. **남은 확인: iOS Safari 빈 시간 칸 높이·휠(사용자)**
 - `fix/ics-escape-text` — PR #162 squash 머지 완료(머지 커밋 `aa7aad0`), 로컬·리모트 브랜치 삭제됨. `.ics` TEXT 이스케이프(`;`) 수정, 보류 14번 해소. **남은 확인: iOS 실기기(제목에 `;`·`,`)**
 - `feat/planned-visit-time` — PR #161 squash 머지 완료(머지 커밋 `bbb8c5f`), 로컬·리모트 브랜치 삭제됨. 방문예정 시간 입력 + 캘린더 시간 지정 일정(021). Supabase `021_planned_time.sql` 은 머지 전 사용자가 실행·두 테이블 CHECK 제약 확인 완료. CI(Lint·Unit Test·Build, E2E 79 통과·재시도 없음)·Vercel 통과. **남은 확인: iOS `.ics` 시간 지정 일정 실기기(사용자), 구글/Android 실기기**
@@ -132,7 +133,7 @@ PROJECT_CONTEXT §5(인증 F-01)·§20.
 - 플랫폼: Vercel
 - URL: `https://today-date-seven.vercel.app`
 - 함수 리전: `syd1`(`vercel.json`, PR #152). 미들웨어는 엣지 실행이라 이 설정과 무관
-- 현재 브랜치: `main` (PR #163 반영 기준, 머지 커밋 `3a2ce97`. PR #128 머지 커밋 `238d3de`만 예외적으로 squash가 아닌 일반 머지)
+- 현재 브랜치: `main` (PR #166 반영 기준, 머지 커밋 `d2080ee`. PR #128 머지 커밋 `238d3de`만 예외적으로 squash가 아닌 일반 머지)
 
 ## 진행 중 / 남은 작업
 
@@ -156,6 +157,11 @@ PROJECT_CONTEXT §5(인증 F-01)·§20.
 
 14. ~~`.ics` 세미콜론 미이스케이프~~ → **해소(261103, PR #162, 머지 커밋 `aa7aad0`)**: `escapeIcsText` 치환 문자열을 `String.raw` 로 바꿔 `;` → `\;` 가 실제로 나간다. 점검 결과 `,`·`\`·줄바꿈은 원래 정상이었고 `;` 만 누락. 잘못된 값을 고정하던 테스트(`ics.test.ts:25·99`)를 `String.raw` 기대값으로 바로잡고 케이스 추가. 저장소 전체 `no-useless-escape` 스캔에서 같은 패턴은 이 3곳뿐(규칙은 `next/core-web-vitals`·`next/typescript` 에 포함돼 있지 않아 꺼진 상태). **iOS 실기기 확인(제목에 `;`·`,`) 대기**
 15. **e2e `chromium-db` 잠금 화면 테스트 간헐 실패 — 기존 flaky, main 에서도 재현됨(261103 확인)**: `page.goto('/lock')` 직후 `page.keyboard.type(passcode)` 가 페이지 준비(하이드레이션) 전에 시작되면 입력이 누락돼(스냅샷 "패스코드 5/6자리 입력됨") 잠금해제 다음 단계(`waitForURL('/')`·"내 이메일 주소" 입력)에서 타임아웃난다. `main`(fc52b27) 전체 E2E 3회 중 1회에서 2건 실패(`:854` 평소 잠금해제 회귀, `:1039` 로그아웃 기기 기억), `feat/planned-visit-time` 로컬에서도 실행마다 1건씩 번갈아 실패. 단독 재실행·CI(PR #161, 재시도 없이 79 통과)는 통과. **입력 전 페이지 준비 대기(키패드 활성 확인 등)로 별도 수정 필요.**
+
+16. **필드 라벨 계위 기준 통일(`design/field-label-hierarchy`, 미착수, 261103 등록)** — 상세 화면과 편집 화면의 라벨 크기가 달라 기준부터 확정하기로 함. 상세 → PROJECT_CONTEXT §19 그룹 8.
+    - 잠정 기준: 보는 화면 = 표시 라벨(`.fieldLabel` 12/500/sub/0.3px) / 입력하는 화면 = 폼 라벨(`Label` 14/500/ink). 인라인 편집은 필드 1개면 표시 라벨 유지(`/account`·`/settings`), 여러 필드 블록이면 폼 라벨(상세 등록 정보·방문 기록 편집). 섹션 헤더 12/600/sub/자간 0. 위저드 질문 문장은 제외.
+    - 할 일: `/account/delete` 섹션 라벨 `tracking-wide` 제거, 표시 라벨 `uppercase` 제거(한글 무효), `mb-1.5`·`tracking-wide` 를 `.fieldLabel` 로 흡수(4개 파일 복붙 정리), 표시·폼 라벨 토큰화, SKILL §2-C·§10 문서와 실제 코드 불일치 수정(§2-C "`.fieldLabel` 은 DetailRow 만" → 실제 4곳, 자간 미기재, §10 블록 제목 "폼 라벨과 같은 결" 이지만 굵기 600 vs 500).
+    - 조사 결과(computed 실측표)는 261103 세션 보고 기준 — 착수할 때 재측정할 것.
 
 **그 외 남은 작업**
 - **`chore/capacitor-init` → `main` 최종 머지**: PR #111~#116 모두 병합 완료 상태지만, 전체

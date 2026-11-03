@@ -1,7 +1,8 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
-import { Clock, Plus, X } from 'lucide-react'
+import { useRef } from 'react'
+import { Clock, X } from 'lucide-react'
+import { Label } from '@/components/ui/label'
 import { formatKoreanTime } from '@/lib/date'
 import { cn } from '@/lib/utils'
 import styles from '@/components/screens.module.css'
@@ -13,47 +14,19 @@ interface PlannedTimeFieldProps {
   onChange: (hhmm: string) => void
   /** 방문 예정일이 있어야 시간을 붙일 수 있다 — 없으면 아무것도 렌더하지 않는다 */
   hasDate: boolean
-  /** "+ 시간 추가" 탭 시 미리 채울 값(defaultPlannedTime). 빈 값이면 비운 채로 펼친다 */
-  prefill?: string
 }
 
 /**
- * 방문 예정 시작 시간(021) — 방문 예정일 필드 바로 아래에 둔다(PlannedAtDialog·`/new` 폼 공용).
- * 접힘: "+ 시간 추가" 텍스트 버튼(.textLink). 펼침: DatePickerField 와 같은 박스(.dateTrigger) +
- * 네이티브 `<input type="time" step="600">` 덮개 + × (지우면 종일로 돌아가며 다시 접힌다).
- * 기존 값이 있으면 펼친 상태로 시작. 토글 스위치·타입별 별도 UI 없음. step 은 iOS 휠에서 무시된다(1분 단위).
+ * 방문 예정 시작 시간(021) — 방문 예정일 필드 바로 아래, 날짜가 있으면 항상 노출(PlannedAtDialog·`/new` 공용).
+ * 라벨 "시간 (선택)" + DatePickerField 와 같은 박스(.dateTrigger, 높이 고정 40px — 빈 time 입력이 iOS 에서
+ * 납작해져도 박스 높이는 그대로) + 네이티브 `<input type="time" step="600">` 덮개 + 보조 문구.
+ * 비어 있으면 종일, × 는 값이 있을 때만 보이고 누르면 빈 값(=종일)으로 되돌린다. 미리 채우기 없음.
+ * step 은 iOS 휠에서 무시된다(1분 단위).
  */
-export function PlannedTimeField({ id, value, onChange, hasDate, prefill = '' }: PlannedTimeFieldProps) {
-  const [expanded, setExpanded] = useState(Boolean(value))
+export function PlannedTimeField({ id, value, onChange, hasDate }: PlannedTimeFieldProps) {
   const inputRef = useRef<HTMLInputElement>(null)
 
-  // 바깥에서 값이 채워지면(다이얼로그 재오픈·복사 prefill) 펼친 상태를 따라간다.
-  useEffect(() => {
-    if (value) setExpanded(true)
-  }, [value])
-
-  // 날짜가 지워지면(폼 reset·날짜 X) 다시 접는다 — 다음에 날짜를 고르면 "+ 시간 추가"부터.
-  useEffect(() => {
-    if (!hasDate) setExpanded(false)
-  }, [hasDate])
-
   if (!hasDate) return null
-
-  if (!expanded) {
-    return (
-      <button
-        type="button"
-        className={cn('mt-2 inline-flex items-center gap-1 text-sm', styles.textLink)}
-        onClick={() => {
-          setExpanded(true)
-          onChange(prefill)
-        }}
-      >
-        <Plus className="h-3.5 w-3.5" />
-        시간 추가
-      </button>
-    )
-  }
 
   function openPicker() {
     try {
@@ -64,31 +37,37 @@ export function PlannedTimeField({ id, value, onChange, hasDate, prefill = '' }:
   }
 
   return (
-    <div className={cn('mt-2', styles.dateTrigger)} onClick={openPicker}>
-      <Clock className={cn('h-4 w-4 shrink-0', styles.accent)} />
-      <span className={cn(!value && styles.faint)}>{value ? formatKoreanTime(value) : '시간 선택'}</span>
-      <input
-        ref={inputRef}
-        id={id}
-        type="time"
-        step={600}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className={styles.dateInput}
-        aria-label="방문 예정 시간"
-      />
-      <button
-        type="button"
-        className={styles.dateClear}
-        aria-label="시간 지우기"
-        onClick={(e) => {
-          e.stopPropagation()
-          onChange('')
-          setExpanded(false)
-        }}
-      >
-        <X className="h-3.5 w-3.5" />
-      </button>
+    // 부모(FormField·다이얼로그)가 space-y-1.5 라 margin-top 은 덮인다 → padding 으로 필드 간격(6+14=20px)
+    <div className="space-y-1.5 pt-3.5">
+      <Label htmlFor={id}>시간 (선택)</Label>
+      <div className={styles.dateTrigger} onClick={openPicker}>
+        <Clock className={cn('h-4 w-4 shrink-0', styles.accent)} />
+        <span className={cn(!value && styles.faint)}>{value ? formatKoreanTime(value) : '시간 선택'}</span>
+        <input
+          ref={inputRef}
+          id={id}
+          type="time"
+          step={600}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className={styles.dateInput}
+          aria-label="방문 예정 시간"
+        />
+        {value && (
+          <button
+            type="button"
+            className={styles.dateClear}
+            aria-label="시간 지우기"
+            onClick={(e) => {
+              e.stopPropagation()
+              onChange('')
+            }}
+          >
+            <X className="h-3.5 w-3.5" />
+          </button>
+        )}
+      </div>
+      <p className={cn('text-xs', styles.sub)}>비워두면 종일 일정으로 추가돼요</p>
     </div>
   )
 }

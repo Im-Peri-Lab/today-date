@@ -139,7 +139,6 @@ export function ActivityFields({
             onChange={(v) => setValue('planned_at', v, { shouldValidate: true })}
             timeValue={plannedTimeValue}
             onTimeChange={(v) => setValue('planned_time', v)}
-            timePrefill={''}
             error={errors.planned_at?.message}
           />
         </div>

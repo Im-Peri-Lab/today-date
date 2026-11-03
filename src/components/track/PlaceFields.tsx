@@ -12,7 +12,6 @@ import { FormField } from '@/components/forms/FormField'
 import { SegmentedControl } from '@/components/forms/SegmentedControl'
 import { CategorySelect } from '@/components/CategorySelect'
 import { PlannedAtField } from '@/components/forms/PlannedAtField'
-import { defaultPlannedTime } from '@/lib/plannedTime'
 import { cn } from '@/lib/utils'
 import styles from '@/components/screens.module.css'
 import type { PlaceFormValues } from '@/lib/schemas/placeSchema'
@@ -118,7 +117,6 @@ export function PlaceFields({
             onChange={(v) => setValue('planned_at', v, { shouldValidate: true })}
             timeValue={plannedTimeValue}
             onTimeChange={(v) => setValue('planned_time', v)}
-            timePrefill={defaultPlannedTime('place', mealTimesValue as MealTime[])}
             error={errors.planned_at?.message}
           />
         </div>

@@ -11,8 +11,6 @@ interface PlannedAtFieldProps {
   /** 방문 예정 시작 시간 'HH:mm' 또는 빈 문자열(종일, 021) */
   timeValue: string
   onTimeChange: (hhmm: string) => void
-  /** "+ 시간 추가" 탭 시 미리 채울 값(defaultPlannedTime) */
-  timePrefill?: string
   error?: string
 }
 
@@ -20,14 +18,13 @@ interface PlannedAtFieldProps {
  * 방문 예정일 입력 — 위시리스트 전용 선택 필드(`/new` 등록 폼 전용).
  * 입력은 방문일과 같은 DatePickerField(네이티브 date). iOS 네이티브 달력엔 값을 비우는 수단이
  * 없어 값이 있을 때 박스 우측 끝에 X 아이콘(onClear)을 둔다.
- * 날짜가 있으면 아래에 "+ 시간 추가"(PlannedTimeField)가 붙고, 날짜를 지우면 시간도 함께 지운다(021).
+ * 날짜가 있으면 아래에 "시간 (선택)" 칸(PlannedTimeField)이 바로 보이고, 날짜를 지우면 시간도 함께 지운다(021).
  */
 export function PlannedAtField({
   value,
   onChange,
   timeValue,
   onTimeChange,
-  timePrefill,
   error,
 }: PlannedAtFieldProps) {
   function changeDate(iso: string) {
@@ -49,7 +46,6 @@ export function PlannedAtField({
         value={timeValue}
         onChange={onTimeChange}
         hasDate={Boolean(value)}
-        prefill={timePrefill}
       />
     </FormField>
   )

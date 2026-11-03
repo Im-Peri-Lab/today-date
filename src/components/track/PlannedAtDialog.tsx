@@ -21,8 +21,7 @@ import { useUpdatePlace } from '@/hooks/usePlaces'
 import { useCalendarAdd } from '@/hooks/useCalendarAdd'
 import type { CalendarItem } from '@/lib/calendar/event'
 import { toHHmm } from '@/lib/date'
-import { defaultPlannedTime } from '@/lib/plannedTime'
-import type { Place } from '@/types'
+import { plannedTimePayload } from '@/lib/plannedTime'
 import { cn } from '@/lib/utils'
 import styles from '@/components/screens.module.css'
 
@@ -33,7 +32,7 @@ interface PlannedAtDialogProps {
   id: string
   /**
    * 저장 직후 "캘린더에도 추가할까요?"에서 이벤트를 만들 항목(저장 전 값 — 예정일·시간은 저장한 값으로 덮는다).
-   * 현재 저장된 방문 예정 시간(planned_time)과 다이닝 식사 시간(prefill 기준)도 여기서 읽는다.
+   * 현재 저장된 방문 예정 시간(planned_time)도 여기서 읽는다.
    */
   item: CalendarItem
   title: string
@@ -69,7 +68,7 @@ export function PlannedAtDialog({ open, onOpenChange, track, id, item, title, va
     const mutation = track === 'activity' ? updateActivity : updatePlace
     mutation.mutate(
       // 날짜·시간을 항상 함께 보낸다(API 짝 규칙 — 같은 요청 안에서 판정, 021). 빈 시간 = 종일.
-      { id, patch: { planned_at: date, planned_time: time || null } },
+      { id, patch: { planned_at: date, planned_time: plannedTimePayload(date, time) } },
       {
         onSuccess: () => {
           if (date === value && time === savedTime) {
@@ -83,7 +82,7 @@ export function PlannedAtDialog({ open, onOpenChange, track, id, item, title, va
               action: {
                 label: '추가',
                 onClick: () =>
-                  calendar.add({ ...item, status: 'wishlist', planned_at: date, planned_time: time || null }),
+                  calendar.add({ ...item, status: 'wishlist', planned_at: date, planned_time: plannedTimePayload(date, time) }),
               },
             })
           }
@@ -120,7 +119,6 @@ export function PlannedAtDialog({ open, onOpenChange, track, id, item, title, va
               value={time}
               onChange={setTime}
               hasDate={Boolean(date)}
-              prefill={defaultPlannedTime(track, track === 'place' ? (item as Place).meal_times : null)}
             />
           </div>
 

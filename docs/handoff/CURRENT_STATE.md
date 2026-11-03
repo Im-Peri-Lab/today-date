@@ -68,6 +68,7 @@ PROJECT_CONTEXT §5(인증 F-01)·§20.
 - `feat/planned-visit-date` — PR #157 squash 머지 완료, 로컬·리모트 브랜치 삭제됨 (lint·vitest·build·Playwright 스텁 렌더 확인)
 - `fix/planned-at-clear-wording` — PR #160 squash 머지 완료, 로컬·리모트 브랜치 삭제됨 (방문예정일 지우기 문구 통일)
 - `design/detail-date-typography-unify` — PR #158 squash 머지 완료, 브랜치 삭제됨 (CI 통과, 시각 확인은 사용자 몫)
+- `design/planned-time-inline-field` — 방문예정 시간 입력 UI 단순화("+ 시간 추가" 제거·상시 노출·미리 채우기 제거). PR 생성·**머지 전**(사용자 실기기 확인 후 머지 지시 예정)
 - `fix/ics-escape-text` — `.ics` TEXT 이스케이프(`;`) 수정, 보류 14번 해소. PR #162 **머지 전**(사용자 iOS 실기기 확인 후 머지 지시 예정)
 - `feat/planned-visit-time` — PR #161 squash 머지 완료(머지 커밋 `bbb8c5f`), 로컬·리모트 브랜치 삭제됨. 방문예정 시간 입력 + 캘린더 시간 지정 일정(021). Supabase `021_planned_time.sql` 은 머지 전 사용자가 실행·두 테이블 CHECK 제약 확인 완료. CI(Lint·Unit Test·Build, E2E 79 통과·재시도 없음)·Vercel 통과. **남은 확인: iOS `.ics` 시간 지정 일정 실기기(사용자), 구글/Android 실기기**
 - `feat/calendar-export` — PR #159 squash 머지 완료, 로컬·리모트 브랜치 삭제됨 (CI·Vercel 통과, 상세 블록·설정 화면·토스트·iOS 실기기 캘린더 추가는 사용자가 직접 확인 완료. **미확인: 구글 캘린더/Android 실기기.** 남은 확인: 시크릿 모드로 머리말 최초 미설정 안내 다이얼로그 1회 — 나중에 가볍게). 사전 스파이크 `diag/ics-blob-standalone-check` 는 폐기·삭제
@@ -122,7 +123,7 @@ PROJECT_CONTEXT §5(인증 F-01)·§20.
 - 홈 통계 갱신 누락 수정 + 홈·목록 당겨서 새로고침: 등록·수정·삭제·되돌리기 뒤 `['dashboard-stats']` 무효화(`invalidateDashboardStats`), `PullToRefresh` 가 화면 전체를 내렸다 올림(FAB 는 래퍼 밖)(PR #156) → 상세 CHANGELOG 2026-10-30
 - 위시리스트 방문 예정일(`planned_at`): 카드 footer·`/list` 방문예정 필터·상세 "방문 예정" 블록(방문 기록과 같은 생명주기, 값 없으면 하단 outline "언제 갈까요?")·카드 ⋮ "방문예정일 지우기"(확인 다이얼로그 "지우기", `PlannedAtClearDialog` 공용, PR #160)·`/new` 맨 아래 필드(PR #157) → 상세 CHANGELOG 2026-11-02. **열린 이슈**: outline Button 테두리 대비가 전역적으로 낮음(미결정)
 - 상세 블록 타이포 정리: 방문 기록 날짜 16px/500 → 표준 `.bodyText` 14px/400, `DetailBlock` 블록 제목 500→600(PR #158) → 상세 CHANGELOG 2026-11-03
-- 방문예정 시간(PR #161, 021): 방문예정에만 선택 시작 시간 `planned_time`(API `'HH:mm'`, 날짜·시간 짝 규칙 같은 요청 안에서 판정). 입력 "+ 시간 추가"(다이닝은 점심 12:00/저녁 18:30 미리 채움), 표시 "2026.12.19 (토) 오후 7:00"·카드 footer 시간 말줄임, `/list` 같은 날 종일→시간순, 캘린더 시간 지정 일정(Asia/Seoul→UTC `Z`, +120분, 시간 없으면 종일 바이트 동일). 다녀온 곳 변경 없음 → 상세 CHANGELOG 2026-11-03 (021)
+- 방문예정 시간(PR #161, 021): 방문예정에만 선택 시작 시간 `planned_time`(API `'HH:mm'`, 날짜·시간 짝 규칙 같은 요청 안에서 판정). 입력 "시간 (선택)" 칸(날짜가 있으면 바로 노출, 비우면 종일 — `design/planned-time-inline-field` 에서 "+ 시간 추가" 버튼·다이닝 미리 채우기 제거), 표시 "2026.12.19 (토) 오후 7:00"·카드 footer 시간 말줄임, `/list` 같은 날 종일→시간순, 캘린더 시간 지정 일정(Asia/Seoul→UTC `Z`, +120분, 시간 없으면 종일 바이트 동일). 다녀온 곳 변경 없음 → 상세 CHANGELOG 2026-11-03 (021)
 - 캘린더 추가(PR #159): 방문 예정·방문 기록 → 기기 기준(iOS 계열=Blob `.ics` 다운로드, 그 외=구글 캘린더 URL) 종일 일정. 진입점 3곳(상세 블록 날짜 옆 아이콘·카드 ⋮ "캘린더에 추가"·예정일 저장 직후 토스트), 앱 선택 UI 없음. 홈 삼선 메뉴 "설정" → `/settings`(첫 항목 캘린더 제목 문구, 인라인 취소/저장), 머리말 미설정 상태의 첫 추가 직전 안내 다이얼로그 1회 → 상세 CHANGELOG 2026-11-03
 
 ## 배포 상태

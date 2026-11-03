@@ -2,15 +2,21 @@
 
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { findCalendarApp, type CalendarApp, type CalendarAppId } from '@/lib/calendar/apps'
+import {
+  detectDefaultCalendarAppId,
+  findCalendarApp,
+  type CalendarApp,
+  type CalendarAppId,
+} from '@/lib/calendar/apps'
 import { buildCalendarEvent, type CalendarItem, type CalendarTrack } from '@/lib/calendar/event'
 import { useCalendarAppPreference } from './useCalendarAppPreference'
 import { useCalendarTitlePrefix } from './useCalendarTitlePrefix'
 
 /**
  * "캘린더에 추가" 동작 한 벌 — 상세 블록 버튼·카드 ⋮ 메뉴·예정일 저장 직후 토스트가 공유한다.
- * - add(item): 기억된 캘린더로 바로 실행. 기억된 게 없으면(최초) 선택 시트를 연다.
- * - openSheet(item): ▾ — 항상 선택 시트를 연다.
+ * - add(item): 기억된 캘린더로 바로 실행. 기억된 게 없으면(최초) 기기 기준 기본 캘린더(iOS=애플,
+ *   그 외=구글)로 바로 실행하고 그 선택을 기록한다 — 시트를 강제로 띄우지 않는다.
+ * - openSheet(item): ▾ — 재선택 전용 시트. 시트는 이 경로로만 열린다.
  * - sheetProps: <CalendarAppSheet {...sheetProps} /> 에 그대로 펼친다.
  * 이벤트는 실행 시점에 만들어 항상 최신 머리말·origin 이 반영된다.
  */
@@ -33,8 +39,15 @@ export function useCalendarAdd(track: CalendarTrack) {
   }
 
   function add(item: CalendarItem) {
-    if (app) run(item, app, prefix)
-    else setSheetItem(item)
+    if (app) {
+      run(item, app, prefix)
+      return
+    }
+    // 최초: 기기 판별 결과를 기록해 두 번째부터는 "기억된 선택"과 똑같이 동작시킨다(재판별 없음).
+    const detected = findCalendarApp(detectDefaultCalendarAppId())
+    if (!detected) return
+    setApp(detected.id)
+    run(item, detected, prefix)
   }
 
   function openSheet(item: CalendarItem) {

@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "next lint --dir src --dir e2e --file next.config.mjs --file playwright.config.ts --file postcss.config.mjs --file tailwind.config.ts --file vitest.config.ts",
     "test": "vitest run",
     "test:e2e": "playwright test",
     "ci": "npm run lint && npm run test && npm run build"

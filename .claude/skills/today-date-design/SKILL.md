@@ -156,7 +156,7 @@ description: >
 - 추천 위저드 h1 20px: 위저드 전용 사이즈(키우면 레이아웃 흔들림).
 - 다이얼로그 제목 20px: 페이지 h1과 분리된 전용 사이즈 (§11-A).
 - 빈 상태 14px/`--s-faint` (VisitRecordBlock "아직 방문 기록이 없어요" 등): body도 caption도 아닌 의도된 조합. (리스트 카드 정보 줄은 예전엔 이 조합이었으나, 배지 줄과 톤을 통일해 `text-xs`+`styles.sub`로 이전 — §8-A. 상세 화면 빈값은 §2-C 위계 참조.)
-- DetailBlock h2 블록 제목 14px/500: 필드 라벨 톤, 별도 위계.
+- DetailBlock h2 블록 제목 14px/600: 크기는 본문과 동일, 굵기로만 구분(홈 `.statSectionHeader`와 같은 패턴). 날짜 텍스트(방문 기록·방문 예정)는 예외 없이 표준 `.bodyText` 14px/400 + 아이콘 `h-3.5 w-3.5`.
 
 ### 2-C. 라벨 위계 — 섹션 헤더 vs 필드명 (중요)
 
@@ -875,7 +875,7 @@ description: >
 | 등록 정보 | 숨김(`blockTitle` 있으면 렌더 안 함) | 제목·카테고리·상태 태그가 자체 식별. 우상단에 복사하기(`onCopy`)+연필 버튼 (§10-B) |
 | 방문 기록 | `<h2>` 유지 ("방문 기록"), 톤은 필드 라벨과 동일 | 스크린리더 섹션 탐색 보장 |
 
-블록 헤더 라벨 톤: 시멘틱은 `<h2>` 유지하되 스타일은 폼 필드 라벨("제목"·"메모" 등)과 같은 결 — `text-sm font-medium` + `styles.ink`(`--s-ink`). 예전 `text-xs uppercase` + `sub`는 쓰지 않는다(`DetailBlock` showHeader 경로에 반영).
+블록 헤더 라벨 톤: 시멘틱은 `<h2>` 유지하되 스타일은 폼 필드 라벨("제목"·"메모" 등)과 같은 결 — `text-sm font-semibold` + `styles.ink`(`--s-ink`). 예전 `text-xs uppercase` + `sub`는 쓰지 않는다(`DetailBlock` showHeader 경로에 반영).
 
 카드 클래스: `styles.card` + `styles.detailCard`
 - `styles.card`: `border-radius: 1rem`, 보더, 그림자 (공용)

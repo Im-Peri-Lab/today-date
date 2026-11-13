@@ -16,6 +16,7 @@ import { plannedTimePayload } from '@/lib/plannedTime'
 import { emptyToNull } from '@/lib/schemas/apiFields'
 import { fetchJson } from '@/hooks/fetcher'
 import { invalidateDashboardStats } from '@/hooks/useDashboardStats'
+import { stashCalendarOffer } from '@/lib/calendar/createOffer'
 import type { Place } from '@/types'
 
 export function PlaceForm({ prefill, returnTo }: { prefill?: boolean; returnTo?: string }) {
@@ -86,6 +87,9 @@ export function PlaceForm({ prefill, returnTo }: { prefill?: boolean; returnTo?:
       return
     }
 
+    // 예정일과 함께 등록해 상세로 가는 경우에만 캘린더 제안을 예약한다(상세 도착 시 1회 표시).
+    // 연속 등록 뒤 목록으로 가는 경우는 상세에 도착하지 않으므로 예약하지 않는다.
+    if (!hasContinuedRegistration && created.planned_at) stashCalendarOffer('place', created.id)
     setNavigating(true)
     topLoader.start()
     router.push(

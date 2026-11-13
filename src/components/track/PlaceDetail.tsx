@@ -20,6 +20,8 @@ import { DeleteConfirmDialog } from './DeleteConfirmDialog'
 import { RevertConfirmDialog } from './RevertConfirmDialog'
 import { PlannedAtBlock } from './PlannedAtBlock'
 import { PlannedAtDialog } from './PlannedAtDialog'
+import { CalendarTitlePrefixDialog } from '@/components/CalendarTitlePrefixDialog'
+import { useCalendarOfferOnArrival } from '@/hooks/useCalendarOfferOnArrival'
 import { VisitedDialog } from '@/components/VisitedDialog'
 import { usePlace, useDeletePlace, useUpdatePlace } from '@/hooks/usePlaces'
 import { placeFormSchema, type PlaceFormValues } from '@/lib/schemas/placeSchema'
@@ -58,6 +60,8 @@ export function PlaceDetail({ id, initialData, initialEdit, returnTo }: Props) {
   const [visitedOpen, setVisitedOpen] = useState(false)
   const [revertOpen, setRevertOpen] = useState(false)
   const [plannedOpen, setPlannedOpen] = useState(false)
+  // 등록 직후 도착이면 "캘린더에도 추가할까요?" 제안을 1회 띄운다(머리말 다이얼로그는 아래에 마운트)
+  const calendarOffer = useCalendarOfferOnArrival('place', id, place)
   const listHref = returnTo ?? DEFAULT_LIST_RETURN_TO
   const listLabel = getReturnLabel(returnTo, '목록으로')
 
@@ -393,6 +397,7 @@ export function PlaceDetail({ id, initialData, initialEdit, returnTo }: Props) {
             title={place.title}
             value={place.planned_at ?? null}
           />
+          <CalendarTitlePrefixDialog {...calendarOffer} />
           <RevertConfirmDialog
             open={revertOpen}
             onOpenChange={setRevertOpen}

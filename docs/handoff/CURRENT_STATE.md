@@ -75,7 +75,7 @@ PROJECT_CONTEXT §5(인증 F-01)·§20.
 - `fix/ics-escape-text` — PR #162 squash 머지 완료(머지 커밋 `aa7aad0`), 로컬·리모트 브랜치 삭제됨. `.ics` TEXT 이스케이프(`;`) 수정, 보류 14번 해소. **남은 확인: iOS 실기기(제목에 `;`·`,`)**
 - `feat/planned-visit-time` — PR #161 squash 머지 완료(머지 커밋 `bbb8c5f`), 로컬·리모트 브랜치 삭제됨. 방문예정 시간 입력 + 캘린더 시간 지정 일정(021). Supabase `021_planned_time.sql` 은 머지 전 사용자가 실행·두 테이블 CHECK 제약 확인 완료. CI(Lint·Unit Test·Build, E2E 79 통과·재시도 없음)·Vercel 통과. **남은 확인: iOS `.ics` 시간 지정 일정 실기기(사용자), 구글/Android 실기기**
 - `feat/calendar-export` — PR #159 squash 머지 완료, 로컬·리모트 브랜치 삭제됨 (CI·Vercel 통과, 상세 블록·설정 화면·토스트·iOS 실기기 캘린더 추가는 사용자가 직접 확인 완료. **미확인: 구글 캘린더/Android 실기기.** 남은 확인: 시크릿 모드로 머리말 최초 미설정 안내 다이얼로그 1회 — 나중에 가볍게). 사전 스파이크 `diag/ics-blob-standalone-check` 는 폐기·삭제
-- `feat/calendar-offer-on-create` — PR #167 squash 머지 완료(머지 커밋 `e364c47`), 로컬·리모트 브랜치 삭제됨 (CI·Vercel 통과, 토스트 가독성·[추가]·미표시 조건은 사용자가 실기기 확인 완료. **미결정: 연속 등록 후 목록 경로에서도 제안할지**)
+- `feat/calendar-offer-on-create` — PR #167 squash 머지 완료(머지 커밋 `e364c47`), 로컬·리모트 브랜치 삭제됨 (CI·Vercel 통과, 토스트 가독성·[추가]·미표시 조건은 사용자가 실기기 확인 완료. **확정: 연속 등록 후 목록에서는 캘린더 제안을 표시하지 않음 — 연속 등록 중 미표시 판단과 같은 흐름. 목록에서는 대상 항목이 모호하므로, 필요하면 카드 ⋮ 메뉴로 추가**)
 
 ## 최근 구현 완료
 - 자동화 테스트·CI, dark/hover/focus 정합화, 추천위저드 History/URL 동기화 공통 훅, 폼-API

@@ -102,3 +102,19 @@ test('계속 등록으로 저장한 항목에는 제안이 뜨지 않고, 최종
   await expect(page.getByText(OFFER)).toHaveCount(0)
   await ctx.close()
 })
+
+for (const scheme of ['light', 'dark'] as const) {
+  test(`일반 토스트 배경은 불투명하다(${scheme}) — 상단 바 위에서 글자가 비치지 않음`, async ({ browser }) => {
+    await resetStub('twoCouples')
+    const ctx = await browser.newContext({ colorScheme: scheme })
+    await ctx.addCookies(await coupleSessionCookies({ coupleId: refs.coupleA, userId: refs.userA }))
+    const page = await ctx.newPage()
+    await fillActivity(page, '토스트 배경', '2026-12-25')
+    await page.getByRole('button', { name: '액티비티 등록하기' }).click()
+    await expect(page.getByText(OFFER)).toBeVisible()
+    const bg = await page.locator('[data-sonner-toast]').evaluate((el) => getComputedStyle(el).backgroundColor)
+    // rgba(0, 0, 0, 0) 같은 투명값이 아니고 알파가 1인 불투명 색이어야 한다
+    expect(bg).toMatch(/^rgb\(/)
+    await ctx.close()
+  })
+}

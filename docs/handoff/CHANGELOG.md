@@ -1,6 +1,6 @@
 # CHANGELOG.md
 
-> **마지막 업데이트: 2026-11-13 (PR #134~#167 반영)**
+> **마지막 업데이트: 2026-11-18 (PR #134~#168 반영)**
 
 > 260531~261022 핸드오프 전체를 날짜순으로 기록한 변경 이력입니다. 새 AI는 일반적으로 `PROJECT_CONTEXT.md`와 `CURRENT_STATE.md`만 먼저 읽고, 과거 판단 근거가 필요할 때 이 문서를 참고하세요.
 
@@ -1234,3 +1234,21 @@ PR #161 의 "+ 시간 추가" 버튼 → 탭하면 칸 펼침 → 다이닝 미�
 - 토스트 실측(수정 전 → 후): 일반 투명 → 라이트 `#ffffff`·다크 `#241a36`, success·error 변화 없음.
 - 실기기 확인(사용자): 토스트 가독성(라이트·다크), [추가] 동작, 예정일 없을 때 미표시, 상세 재진입 시 미표시.
 - **미확인**: 연속 등록 후 목록 경로의 제안(의도적으로 미구현, 위 설계 판단 참고).
+
+---
+
+## 2026-11-18 — E2E DB 스펙 파일 단일화: CI #217 실패 수정 (PR #168)
+
+### 변경
+- **원인**: PR #167 이 DB 스펙 파일 `e2e/db/calendar-offer.spec.ts` 를 추가해, 스텁 상태를 공유하는 `isolation.spec.ts` 와 파일이 둘이 됐다. Playwright 의 `workers` 는 전역 설정이라 프로젝트별로 줄일 수 없고, `fullyParallel: false` 는 "한 파일 안"의 순서만 지킨다. 그래서 두 파일이 다른 워커에서 동시에 돌며 `resetStub` 이 상대 스펙의 행을 갈아엎었다. 그 결과 "캘린더에도 추가할까요?" 토스트가 5초 안에 뜨지 않아 1건 실패(CI #217, run 43404010794, 93 passed / 1 failed).
+- **수정**: `calendar-offer.spec.ts` 의 테스트 6개를 `isolation.spec.ts` 의 새 `describe('캘린더 제안 · 등록 직후 상세')` 로 본문 그대로 옮기고 원본 파일을 삭제했다. 헬퍼(`signedIn`·`fillActivity`·`fillPlace`·`OFFER`)도 함께 옮겼다.
+- `playwright.config.ts` 의 `chromium-db` 주석에 이 실패 사례와 파일을 꼭 나눠야 할 때의 대안(`--project=chromium-db --workers=1` 별도 실행, 스텁에 워커별 데이터셋 분리)을 적었다.
+- 앱 코드·스텁 코드·CI 워크플로는 바꾸지 않았다.
+- **규칙**: DB(스텁) 스펙은 `e2e/db/isolation.spec.ts` 하나에만 추가한다.
+
+### 검증
+- `playwright test --list` → 94 tests in 5 files (수정 전 94 tests in 6 files). 테스트 수는 그대로다.
+- `eslint` 오류 없음, `tsc --noEmit` 은 `e2e/`·`playwright.config.ts` 기준 오류 없음.
+- PR #168 CI 통과 확인 후 squash 머지(머지 커밋 `29b2cb2`), 브랜치 `fix/e2e-db-spec-single-file` 삭제.
+  - Lint · Unit Test · Build 통과, E2E(Playwright) 통과, Vercel 통과.
+- **후속**: `e2e/db` 스펙 파일이 2개 이상이면 lint/CI에서 실패시키는 가드는 아직 없다 (CURRENT_STATE 보류 17번).

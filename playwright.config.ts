@@ -84,8 +84,14 @@ export default defineConfig({
     },
     {
       // DB(스텁)를 쓰는 스펙 — 스텁 상태가 프로세스 하나에 공유되므로 병렬 실행을 끈다.
-      // 스펙을 추가할 때는 기존 파일에 넣는다: 파일이 늘면 워커가 갈라져 상태가 섞인다
-      // (파일을 나눠야 한다면 스텁에 워커별 데이터셋 분리를 먼저 넣어야 한다).
+      // 스펙을 추가할 때는 기존 파일(e2e/db/isolation.spec.ts)에 넣는다: 파일이 늘면 워커가
+      // 갈라져 상태가 섞인다. fullyParallel: false 는 "한 파일 안"의 순서만 지키고, workers 는
+      // 전역 설정이라 프로젝트별로 워커를 줄일 수 없다 — 그래서 파일이 둘이 되는 순간 두 파일이
+      // 다른 워커에서 동시에 돌며 beforeEach 의 resetStub 이 상대 스펙의 상태를 갈아엎는다
+      // (2026-11-13 CI run 43404010794: calendar-offer.spec.ts 가 isolation.spec.ts 와 겹쳐
+      // "캘린더에도 추가할까요?" 제안을 못 찾고 실패).
+      // 파일을 나눠야 한다면 스텁에 워커별 데이터셋 분리를 먼저 넣거나, CI·스크립트에서
+      // `npx playwright test --project=chromium-db --workers=1` 로 따로 실행해야 한다.
       name: 'chromium-db',
       testMatch: /db\/.*\.spec\.ts/,
       fullyParallel: false,

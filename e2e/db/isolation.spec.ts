@@ -1,6 +1,7 @@
 import { test, expect, type Page } from '@playwright/test'
 import bcrypt from 'bcryptjs'
 import { coupleSessionCookies, legacySessionCookies, readSessionCookie } from '../helpers/auth'
+import { typePasscode } from '../helpers/passcode'
 import {
   refs,
   resetStub,
@@ -461,9 +462,9 @@ test.describe('인증 회귀', () => {
 
     // PasscodeInput 은 물리 키보드 입력을 받는다(§ src/components/PasscodeInput.tsx).
     // 6자리를 채우면 확인 단계로 넘어가고, 같은 값을 다시 넣어야 API 가 호출된다.
-    await page.keyboard.type('135791')
+    await typePasscode(page, '135791')
     await expect(page.getByText('패스코드 확인')).toBeVisible()
-    await page.keyboard.type('135791')
+    await typePasscode(page, '135791')
 
     // 설정 완료 → 홈으로 이동(§ onConfirmPasscodeComplete 의 router.push('/')).
     await page.waitForURL((url) => url.pathname === '/', { timeout: 15_000 })
@@ -705,7 +706,7 @@ test.describe('파트너 초대 · 수락', () => {
 
     // 패스코드는 새로 설정하지 않는다 — 커플의 기존 패스코드를 그대로 입력한다.
     // (PasscodeInput 은 window keydown 을 받는다 — § src/components/PasscodeInput.tsx)
-    await page.keyboard.type(refs.soloPasscode)
+    await typePasscode(page, refs.soloPasscode)
     await page.waitForURL((url) => url.pathname === '/', { timeout: 15_000 })
 
     // 세션이 "먼저 만들어진 사용자"가 아니라 방금 합류한 파트너로 발급됐는지.
@@ -734,7 +735,7 @@ test.describe('파트너 초대 · 수락', () => {
     })
 
     await page.goto(`/invite?token=${RAW_INVITE}`)
-    await page.keyboard.type(refs.soloPasscode)
+    await typePasscode(page, refs.soloPasscode)
     await page.waitForURL((url) => url.pathname === '/', { timeout: 15_000 })
 
     const joined = (await readSessionCookie(page))?.user_id
@@ -749,7 +750,7 @@ test.describe('파트너 초대 · 수락', () => {
      */
     await page.context().clearCookies({ name: 'today-date-session' })
     await page.goto('/lock')
-    await page.keyboard.type(refs.soloPasscode)
+    await typePasscode(page, refs.soloPasscode)
     await page.waitForURL((url) => url.pathname === '/', { timeout: 15_000 })
 
     expect((await readSessionCookie(page))?.user_id).toBe(joined)
@@ -857,7 +858,7 @@ test.describe('파트너 초대 · 수락', () => {
     await resetStub('solo')
     await page.goto('/lock')
 
-    await page.keyboard.type(refs.soloPasscode)
+    await typePasscode(page, refs.soloPasscode)
     await page.waitForURL((url) => url.pathname === '/', { timeout: 15_000 })
 
     // pending-user 쿠키가 없으면 pickSessionUser 경로 — 커플의 인증된 첫 사용자.
@@ -971,7 +972,7 @@ test.describe('세션 주체 · 기기 기억', () => {
 
     // ── 기기 1: 나중에 합류한 파트너로 로그인 ──
     await page.goto('/lock')
-    await page.keyboard.type(refs.soloPasscode)
+    await typePasscode(page, refs.soloPasscode)
 
     // 패스코드는 맞았지만 단서가 없다 → 홈으로 가지 않고 이메일을 묻는다.
     await expect(page.getByText('누구로 로그인하시나요?')).toBeVisible({ timeout: 15_000 })
@@ -999,7 +1000,7 @@ test.describe('세션 주체 · 기기 기억', () => {
     const context2 = await browser.newContext()
     const page2 = await context2.newPage()
     await page2.goto('/lock')
-    await page2.keyboard.type(refs.soloPasscode)
+    await typePasscode(page2, refs.soloPasscode)
     await expect(page2.getByText('누구로 로그인하시나요?')).toBeVisible({ timeout: 15_000 })
     await page2.getByLabel('내 이메일 주소').fill(refs.soloEmail)
     await page2.getByRole('button', { name: '로그인' }).click()
@@ -1022,14 +1023,14 @@ test.describe('세션 주체 · 기기 기억', () => {
   test('한 번 확인한 기기는 세션이 만료돼도 다시 묻지 않는다 (패스코드만)', async ({ page }) => {
     await resetStub('paired')
     await page.goto('/lock')
-    await page.keyboard.type(refs.soloPasscode)
+    await typePasscode(page, refs.soloPasscode)
     await page.getByLabel('내 이메일 주소').fill(refs.partnerEmail)
     await page.getByRole('button', { name: '로그인' }).click()
     await page.waitForURL((url) => url.pathname === '/', { timeout: 15_000 })
 
     await expireSessionOnly(page)
     await page.goto('/lock')
-    await page.keyboard.type(refs.soloPasscode)
+    await typePasscode(page, refs.soloPasscode)
 
     // 이메일 단계 없이 바로 홈 — 그리고 같은 사람으로 돌아온다.
     await page.waitForURL((url) => url.pathname === '/', { timeout: 15_000 })
@@ -1039,7 +1040,7 @@ test.describe('세션 주체 · 기기 기억', () => {
   test('로그아웃은 기기 기억까지 끊는다 — 다음 로그인 때 다시 묻는다', async ({ page }) => {
     await resetStub('paired')
     await page.goto('/lock')
-    await page.keyboard.type(refs.soloPasscode)
+    await typePasscode(page, refs.soloPasscode)
     await page.getByLabel('내 이메일 주소').fill(refs.partnerEmail)
     await page.getByRole('button', { name: '로그인' }).click()
     await page.waitForURL((url) => url.pathname === '/', { timeout: 15_000 })
@@ -1049,7 +1050,7 @@ test.describe('세션 주체 · 기기 기억', () => {
     await page.waitForURL(/\/lock$/, { timeout: 15_000 })
 
     // 기억이 끊겼으므로 다시 묻는다 — 한 기기를 둘이 번갈아 쓸 때의 전환 수단이다.
-    await page.keyboard.type(refs.soloPasscode)
+    await typePasscode(page, refs.soloPasscode)
     await expect(page.getByText('누구로 로그인하시나요?')).toBeVisible({ timeout: 15_000 })
 
     // 이번에는 반대쪽 사람으로 들어간다.
@@ -1062,7 +1063,7 @@ test.describe('세션 주체 · 기기 기억', () => {
   test('그 커플의 이메일이 아니면 로그인되지 않는다', async ({ page }) => {
     await resetStub('paired')
     await page.goto('/lock')
-    await page.keyboard.type(refs.soloPasscode)
+    await typePasscode(page, refs.soloPasscode)
     await page.getByLabel('내 이메일 주소').fill(refs.outsiderEmail)
     await page.getByRole('button', { name: '로그인' }).click()
 
@@ -1076,7 +1077,7 @@ test.describe('세션 주체 · 기기 기억', () => {
   test('SOLO 는 후보가 한 명이라 묻지 않는다 (회귀)', async ({ page }) => {
     await resetStub('solo')
     await page.goto('/lock')
-    await page.keyboard.type(refs.soloPasscode)
+    await typePasscode(page, refs.soloPasscode)
 
     await page.waitForURL((url) => url.pathname === '/', { timeout: 15_000 })
     expect((await readSessionCookie(page))?.user_id).toBe(refs.soloUser)
@@ -1459,9 +1460,9 @@ test.describe('계정 삭제 · SOLO 전체 삭제와 재가입', () => {
 
     await expect(page).toHaveURL(/\/setup\?verified=true/)
     await expect(page.getByText('패스코드 설정')).toBeVisible()
-    await page.keyboard.type('864202')
+    await typePasscode(page, '864202')
     await expect(page.getByText('패스코드 확인')).toBeVisible()
-    await page.keyboard.type('864202')
+    await typePasscode(page, '864202')
 
     await page.waitForURL((url) => url.pathname === '/', { timeout: 15_000 })
 

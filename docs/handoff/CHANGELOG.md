@@ -1252,3 +1252,16 @@ PR #161 의 "+ 시간 추가" 버튼 → 탭하면 칸 펼침 → 다이닝 미�
 - PR #168 CI 통과 확인 후 squash 머지(머지 커밋 `29b2cb2`), 브랜치 `fix/e2e-db-spec-single-file` 삭제.
   - Lint · Unit Test · Build 통과, E2E(Playwright) 통과, Vercel 통과.
 - **후속**: `e2e/db` 스펙 파일이 2개 이상이면 lint/CI에서 실패시키는 가드는 아직 없다 (CURRENT_STATE 보류 17번).
+
+## 2026-11-18 — E2E 안정화 + 핸드오프 정합성 (보류 15·17번, 보류 1번 상태 정정)
+
+### 변경
+- **e2e/db 스펙 파일 수 가드(보류 17번)**: `src/test/e2eDbSpecGuard.test.ts` 가 `e2e/db/*.spec.ts` 를 세어 2개 이상이면 실패한다. `npm test`(CI Unit Test 단계)에서 돌아 두 번째 파일이 추가되는 PR 을 막는다. 설정 로드 시점 체크 대신 단위 테스트를 고른 이유: Playwright 설정은 E2E 실행 때만 읽혀 CI 의 Unit Test 단계에서는 잡히지 않는다.
+- **잠금 화면 간헐 실패 수정(보류 15번)**: 원인은 `page.goto('/lock')` 직후 SSR 키패드는 보이지만 키보드 리스너가 하이드레이션 뒤에야 붙어, 그 사이에 보낸 키 입력이 유실되는 것. `PasscodeInput` 이 리스너 등록 뒤 `data-passcode-ready="true"` 표지를 달고, `e2e/helpers/passcode.ts` 의 `typePasscode` 가 그 표지를 기다린 뒤 입력한다. `isolation.spec.ts` 의 패스코드 입력 전부를 이 헬퍼로 바꿨다. 화면 동작은 바뀌지 않는다.
+- **핸드오프 정합성**: 보류 1번의 `android/`·`ios/` 빌드 캐시 `.gitignore` 패턴은 PR #140(머지 커밋 `7635617`)으로 이미 `main` 에 있어 "PR/머지 전" 기록을 정정했다. 소스 디렉터리 커밋 여부는 여전히 미정. 리모트에만 남은 `diag/android-calendar-check`(`a231ecd`, 머지 금지)를 브랜치 상태에 기록했다. 삭제하지 않았다.
+
+### 검증
+- 가드: 스펙 1개일 때 통과, 임시로 2번째 스펙을 만들었을 때 실패하는 것을 확인 후 임시 파일 삭제.
+- `npm run lint` 오류 없음, `npx tsc --noEmit` 오류 없음.
+- 전체 E2E(`npx playwright test`) 4회 연속 실행: 매회 94 passed, 실패 0.
+- 한계: 수정 전 재현율이 약 1/3 실행이었으므로 4회 통과만으로 재현 소멸을 증명하지는 못한다. CI 에서 재발 여부를 계속 본다.

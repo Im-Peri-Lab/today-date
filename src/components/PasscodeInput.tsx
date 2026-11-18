@@ -105,6 +105,14 @@ export function PasscodeInput({
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [disabled, handleKey])
 
+  // 하이드레이션 완료 표지. 위 키보드 리스너 effect 가 등록된 뒤에야 true 가 된다.
+  // 자동화 테스트는 이 값을 보고 나서 키를 보내야 입력이 유실되지 않는다
+  // (e2e/helpers/passcode.ts). 화면 동작에는 영향이 없다.
+  const [ready, setReady] = useState(false)
+  useEffect(() => {
+    setReady(true)
+  }, [])
+
   // ── 모바일: 백스페이스 길게 누르기 → 전체 삭제 ───────
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const longPressFired = useRef(false)
@@ -140,7 +148,7 @@ export function PasscodeInput({
   }, [disabled, handleKey])
 
   return (
-    <div className={styles.wrap}>
+    <div className={styles.wrap} data-passcode-ready={ready ? 'true' : undefined}>
       {/* 라벨 + 도트 그룹 */}
       <div className={styles.head}>
         {label && <p className={styles.label}>{label}</p>}

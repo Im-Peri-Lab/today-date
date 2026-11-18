@@ -1,6 +1,6 @@
 # CHANGELOG.md
 
-> **마지막 업데이트: 2026-11-18 (PR #134~#168 반영)**
+> **마지막 업데이트: 2026-11-18 (PR #134~#169 반영)**
 
 > 260531~261022 핸드오프 전체를 날짜순으로 기록한 변경 이력입니다. 새 AI는 일반적으로 `PROJECT_CONTEXT.md`와 `CURRENT_STATE.md`만 먼저 읽고, 과거 판단 근거가 필요할 때 이 문서를 참고하세요.
 
@@ -1253,7 +1253,7 @@ PR #161 의 "+ 시간 추가" 버튼 → 탭하면 칸 펼침 → 다이닝 미�
   - Lint · Unit Test · Build 통과, E2E(Playwright) 통과, Vercel 통과.
 - **후속**: `e2e/db` 스펙 파일이 2개 이상이면 lint/CI에서 실패시키는 가드는 아직 없다 (CURRENT_STATE 보류 17번).
 
-## 2026-11-18 — E2E 안정화 + 핸드오프 정합성 (보류 15·17번, 보류 1번 상태 정정)
+## 2026-11-18 — E2E 안정화 + 핸드오프 정합성 (보류 15·17번, 보류 1번 상태 정정) (PR #169)
 
 ### 변경
 - **e2e/db 스펙 파일 수 가드(보류 17번)**: `src/test/e2eDbSpecGuard.test.ts` 가 `e2e/db/*.spec.ts` 를 세어 2개 이상이면 실패한다. `npm test`(CI Unit Test 단계)에서 돌아 두 번째 파일이 추가되는 PR 을 막는다. 설정 로드 시점 체크 대신 단위 테스트를 고른 이유: Playwright 설정은 E2E 실행 때만 읽혀 CI 의 Unit Test 단계에서는 잡히지 않는다.
@@ -1266,3 +1266,4 @@ PR #161 의 "+ 시간 추가" 버튼 → 탭하면 칸 펼침 → 다이닝 미�
 - 전체 E2E(`npx playwright test`) 4회 연속 실행: 매회 94 passed, 실패 0.
 - 수정 효과 비교: 잠금·로그인 관련 chromium-db 테스트 29개를 `--workers=1 --repeat-each=15`(435회)로 main 과 이 브랜치에서 각각 실행 → 둘 다 435 passed, 실패 0. main 에서도 재현되지 않아 로컬에서는 수정 효과를 입증하지 못했다. 보류 15번은 "수정 반영, CI 관찰 중"으로 둔다.
 - `keyboard.type` 사용처 점검: `isolation.spec.ts` 밖에는 없다(헬퍼 `passcode.ts` 내부 1곳뿐).
+- PR #169 CI 통과(Lint·Unit·Build, E2E, Vercel) 후 squash 머지(머지 커밋 `5bb580b`), 브랜치 `chore/e2e-stabilization-handoff` 삭제.

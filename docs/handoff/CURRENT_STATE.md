@@ -1,6 +1,6 @@
 # CURRENT_STATE.md
 
-> **마지막 업데이트: 2026-11-18 (PR #134~#168 반영, 261118 E2E 안정화·핸드오프 정합성 작업 중)**
+> **마지막 업데이트: 2026-11-18 (PR #134~#169 반영)**
 
 ## 현재 단계
 커플(2인) 계정 전환 완료 + 파트너 표시용 닉네임 추가 단계 — 계정 없는 단일 워크스페이스에서
@@ -56,7 +56,7 @@ PROJECT_CONTEXT §5(인증 F-01)·§20.
 
 ## 브랜치 상태
 - `diag/android-calendar-check` — **리모트에만 남은 진단 브랜치(261118 확인, 삭제하지 않음)**. 커밋 `a231ecd` "안드로이드 캘린더 추가 방식 비교 진단 페이지 (`/diag/calendar`, 머지 금지)". `main` 에 머지되지 않았고 로컬 브랜치는 없다. 안드로이드 실기기 캘린더 방식 비교용 스파이크이며, 결과를 반영할 때 별도로 판단한다. 정리(삭제)는 사용자 결정.
-- `chore/e2e-stabilization-handoff` — 261118 작업 중(보류 15·17번 처리, 핸드오프 정합성). PR 생성은 사용자 승인 후.
+- `chore/e2e-stabilization-handoff` — PR #169 squash 머지 완료(머지 커밋 `5bb580b`), 로컬·리모트 브랜치 삭제됨. 패스코드 입력 하이드레이션 대기(보류 15번) + e2e/db 스펙 파일 수 가드(보류 17번) + 핸드오프 정합성. CI(Lint·Unit·Build, E2E, Vercel) 통과
 - `chore/capacitor-init` — PR #111~#116 모두 병합 완료 상태 그대로 `main` 미머지 유지. 그 사이
   `main`이 커플 계정 전환(PR #118~127) + 닉네임 설정(PR #128)으로 크게 앞서 나가 이 브랜치의
   diverge 폭이 더 커짐 — 최종 머지 시 충돌 범위 재점검 필요. 머지 시점·방식은 여전히 사용자
@@ -140,7 +140,7 @@ PROJECT_CONTEXT §5(인증 F-01)·§20.
 - 플랫폼: Vercel
 - URL: `https://today-date-seven.vercel.app`
 - 함수 리전: `syd1`(`vercel.json`, PR #152). 미들웨어는 엣지 실행이라 이 설정과 무관
-- 현재 브랜치: `main` (PR #168 반영 기준, 머지 커밋 `29b2cb2`. PR #128 머지 커밋 `238d3de`만 예외적으로 squash가 아닌 일반 머지)
+- 현재 브랜치: `main` (PR #169 반영 기준, 머지 커밋 `5bb580b`. PR #128 머지 커밋 `238d3de`만 예외적으로 squash가 아닌 일반 머지)
 
 ## 진행 중 / 남은 작업
 
@@ -163,12 +163,12 @@ PROJECT_CONTEXT §5(인증 F-01)·§20.
 13. **탭 직후 시각 반응 부족 — 별도 청크 대기(261022)**: 홈 카드·리스트 카드·헤더 아이콘은 `<Link>` 라 topLoader 가 자동으로 걸리지만, 이동이 prefetch·캐시로 빨리 커밋되면 막대가 보이기 전에 끝날 수 있다(코드상 추론, 실측 없음). `.headerNavBtn`·`.iconBtn`·`.cardInteractive` 에는 터치 `:active` 규칙도 없다. 후보: route-level `loading.tsx`(`pushState` 시점이 바뀌므로 #154 의 rAF 지연과 상호작용 확인 필요), `:active` 피드백(`.statRow:active`·`.fab:active` 선례). 신호가 오면 로더와 CSS 를 분리해 진행.
 
 14. ~~`.ics` 세미콜론 미이스케이프~~ → **해소(261103, PR #162, 머지 커밋 `aa7aad0`)**: `escapeIcsText` 치환 문자열을 `String.raw` 로 바꿔 `;` → `\;` 가 실제로 나간다. 점검 결과 `,`·`\`·줄바꿈은 원래 정상이었고 `;` 만 누락. 잘못된 값을 고정하던 테스트(`ics.test.ts:25·99`)를 `String.raw` 기대값으로 바로잡고 케이스 추가. 저장소 전체 `no-useless-escape` 스캔에서 같은 패턴은 이 3곳뿐(규칙은 `next/core-web-vitals`·`next/typescript` 에 포함돼 있지 않아 꺼진 상태). **iOS 실기기 확인(제목에 `;`·`,`) 대기**
-15. e2e `chromium-db` 잠금 화면 테스트 간헐 실패 → **수정 반영, CI 관찰 중(브랜치 `chore/e2e-stabilization-handoff`, 261118, PR 전)**. 로컬 `--workers=1 --repeat-each=15`(잠금·로그인 관련 29개 ×15 = 435회) 비교: main 0건 실패, 이 브랜치 0건 실패 — main 에서도 재현되지 않아 수정 효과는 로컬에서 입증하지 못했다(원인 분석은 하이드레이션 전 입력 유실이며 수정은 그 경로를 막는다). CI 에서 재발하면 다시 연다. 수정 내용: 패스코드 입력 전에 `PasscodeInput` 의 키보드 리스너 등록(하이드레이션) 완료를 `data-passcode-ready` 표지로 기다린다(`e2e/helpers/passcode.ts` `typePasscode`, `isolation.spec.ts` 의 모든 패스코드 입력이 사용). 로컬 전체 E2E 4회 연속 94/94 통과(재현 0회). 재현 기록(수정 전): `page.goto('/lock')` 직후 `page.keyboard.type(passcode)` 가 페이지 준비(하이드레이션) 전에 시작되면 입력이 누락돼(스냅샷 "패스코드 5/6자리 입력됨") 잠금해제 다음 단계(`waitForURL('/')`·"내 이메일 주소" 입력)에서 타임아웃난다. `main`(fc52b27) 전체 E2E 3회 중 1회에서 2건 실패(`:854` 평소 잠금해제 회귀, `:1039` 로그아웃 기기 기억), `feat/planned-visit-time` 로컬에서도 실행마다 1건씩 번갈아 실패. 단독 재실행·CI(PR #161, 재시도 없이 79 통과)는 통과.
+15. e2e `chromium-db` 잠금 화면 테스트 간헐 실패 → **수정 반영, CI 관찰 중(PR #169, 머지 커밋 `5bb580b`, 261118)**. 로컬 `--workers=1 --repeat-each=15`(잠금·로그인 관련 29개 ×15 = 435회) 비교: main 0건 실패, 이 브랜치 0건 실패 — main 에서도 재현되지 않아 수정 효과는 로컬에서 입증하지 못했다(원인 분석은 하이드레이션 전 입력 유실이며 수정은 그 경로를 막는다). CI 에서 재발하면 다시 연다. 수정 내용: 패스코드 입력 전에 `PasscodeInput` 의 키보드 리스너 등록(하이드레이션) 완료를 `data-passcode-ready` 표지로 기다린다(`e2e/helpers/passcode.ts` `typePasscode`, `isolation.spec.ts` 의 모든 패스코드 입력이 사용). 로컬 전체 E2E 4회 연속 94/94 통과(재현 0회). 재현 기록(수정 전): `page.goto('/lock')` 직후 `page.keyboard.type(passcode)` 가 페이지 준비(하이드레이션) 전에 시작되면 입력이 누락돼(스냅샷 "패스코드 5/6자리 입력됨") 잠금해제 다음 단계(`waitForURL('/')`·"내 이메일 주소" 입력)에서 타임아웃난다. `main`(fc52b27) 전체 E2E 3회 중 1회에서 2건 실패(`:854` 평소 잠금해제 회귀, `:1039` 로그아웃 기기 기억), `feat/planned-visit-time` 로컬에서도 실행마다 1건씩 번갈아 실패. 단독 재실행·CI(PR #161, 재시도 없이 79 통과)는 통과.
 16. **필드 라벨 계위 기준 통일(`design/field-label-hierarchy`, 미착수, 261103 등록)** — 상세 화면과 편집 화면의 라벨 크기가 달라 기준부터 확정하기로 함. 상세 → PROJECT_CONTEXT §19 그룹 8.
     - 잠정 기준: 보는 화면 = 표시 라벨(`.fieldLabel` 12/500/sub/0.3px) / 입력하는 화면 = 폼 라벨(`Label` 14/500/ink). 인라인 편집은 필드 1개면 표시 라벨 유지(`/account`·`/settings`), 여러 필드 블록이면 폼 라벨(상세 등록 정보·방문 기록 편집). 섹션 헤더 12/600/sub/자간 0. 위저드 질문 문장은 제외.
     - 할 일: `/account/delete` 섹션 라벨 `tracking-wide` 제거, 표시 라벨 `uppercase` 제거(한글 무효), `mb-1.5`·`tracking-wide` 를 `.fieldLabel` 로 흡수(4개 파일 복붙 정리), 표시·폼 라벨 토큰화, SKILL §2-C·§10 문서와 실제 코드 불일치 수정(§2-C "`.fieldLabel` 은 DetailRow 만" → 실제 4곳, 자간 미기재, §10 블록 제목 "폼 라벨과 같은 결" 이지만 굵기 600 vs 500).
     - 조사 결과(computed 실측표)는 261103 세션 보고 기준 — 착수할 때 재측정할 것.
-17. ~~e2e/db 스펙 파일 수 가드 — 미착수(261118 등록, PR #168 후속)~~ → **해소(브랜치 `chore/e2e-stabilization-handoff`, 261118, PR 전)**: `src/test/e2eDbSpecGuard.test.ts` 단위 테스트가 `e2e/db/*.spec.ts` 가 2개 이상이면 실패한다. `npm test`(CI Unit Test 단계)에서 돌아간다. 설정 로드 시점 체크 대신 단위 테스트를 고른 이유: 설정 로드는 E2E 실행 때만 일어나 CI 의 Unit Test 단계에서는 잡히지 않는다. 배경 → CHANGELOG 2026-11-18.
+17. ~~e2e/db 스펙 파일 수 가드 — 미착수(261118 등록, PR #168 후속)~~ → **해소(PR #169, 머지 커밋 `5bb580b`, 261118)**: `src/test/e2eDbSpecGuard.test.ts` 단위 테스트가 `e2e/db/*.spec.ts` 가 2개 이상이면 실패한다. `npm test`(CI Unit Test 단계)에서 돌아간다. 설정 로드 시점 체크 대신 단위 테스트를 고른 이유: 설정 로드는 E2E 실행 때만 일어나 CI 의 Unit Test 단계에서는 잡히지 않는다. 배경 → CHANGELOG 2026-11-18.
 18. **Sentry/관측성 연동 — 미착수(261118 등록)**
 19. **getDashboardStats 에러 경계 개선 — 미착수(261118 등록)**
 

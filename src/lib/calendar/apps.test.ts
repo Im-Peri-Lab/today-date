@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from 'vitest'
 import {
+  buildAndroidCalendarIntentUrl,
   buildGoogleCalendarUrl,
   CALENDAR_APPS,
   detectDefaultCalendarAppId,
@@ -57,9 +58,9 @@ describe('buildGoogleCalendarUrl', () => {
 })
 
 describe('CALENDAR_APPS', () => {
-  it('apple-ics 와 google 두 앱이 있고 id 가 유일하다', () => {
+  it('apple-ics·google·android-intent 세 앱이 있고 id 가 유일하다', () => {
     const ids = CALENDAR_APPS.map((a) => a.id)
-    expect(ids).toEqual(['apple-ics', 'google'])
+    expect(ids).toEqual(['apple-ics', 'google', 'android-intent'])
     expect(findCalendarApp('google')?.label).toBe('구글 캘린더')
     expect(findCalendarApp('nope')).toBeUndefined()
     expect(findCalendarApp(null)).toBeUndefined()
@@ -80,15 +81,71 @@ describe('detectDefaultCalendarAppId / resolveCalendarApp', () => {
   const ANDROID = 'Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 Chrome/120 Mobile Safari/537.36'
   const WINDOWS = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120 Safari/537.36'
 
-  it('애플 기기는 apple-ics, 그 외는 google', () => {
+  it('애플 기기는 apple-ics, Android 는 android-intent, 그 외는 google', () => {
     withUa(IPHONE, () => expect(detectDefaultCalendarAppId()).toBe('apple-ics'))
     withUa(MAC, () => expect(detectDefaultCalendarAppId()).toBe('apple-ics'))
-    withUa(ANDROID, () => expect(detectDefaultCalendarAppId()).toBe('google'))
+    withUa(ANDROID, () => expect(detectDefaultCalendarAppId()).toBe('android-intent'))
     withUa(WINDOWS, () => expect(detectDefaultCalendarAppId()).toBe('google'))
   })
 
   it('resolveCalendarApp 은 감지 결과의 앱을 돌려준다', () => {
     withUa(IPHONE, () => expect(resolveCalendarApp().id).toBe('apple-ics'))
-    withUa(ANDROID, () => expect(resolveCalendarApp().id).toBe('google'))
+    withUa(ANDROID, () => expect(resolveCalendarApp().id).toBe('android-intent'))
+  })
+})
+
+describe('buildAndroidCalendarIntentUrl', () => {
+  const extras = (url: string) =>
+    Object.fromEntries(
+      url
+        .replace(/^intent:\/\/#Intent;/, '')
+        .replace(/;end$/, '')
+        .split(';')
+        .map((p) => {
+          const i = p.indexOf('=')
+          return [p.slice(0, i), decodeURIComponent(p.slice(i + 1))]
+        }),
+    )
+
+  it('ACTION_INSERT + Events MIME intent 이고 끝이 ;end 다', () => {
+    const url = buildAndroidCalendarIntentUrl(base)
+    expect(url.startsWith('intent://#Intent;')).toBe(true)
+    expect(url.endsWith(';end')).toBe(true)
+    const e = extras(url)
+    expect(e.action).toBe('android.intent.action.INSERT')
+    expect(e.type).toBe('vnd.android.cursor.item/event')
+  })
+
+  it('종일 일정은 UTC 자정 시작·배타 종료(+1일), allDay=true', () => {
+    const e = extras(buildAndroidCalendarIntentUrl({ ...base, startDate: '2026-12-30', endDate: '2026-12-31' }))
+    expect(e['l.beginTime']).toBe(String(Date.UTC(2026, 11, 30)))
+    expect(e['l.endTime']).toBe(String(Date.UTC(2027, 0, 1)))
+    expect(e['B.allDay']).toBe('true')
+  })
+
+  it('시간 지정 일정은 KST→UTC epoch, +120분, allDay=false', () => {
+    const e = extras(buildAndroidCalendarIntentUrl({ ...base, startDate: '2026-12-19', endDate: '2026-12-19', startTime: '19:00' }))
+    expect(e['l.beginTime']).toBe(String(Date.UTC(2026, 11, 19, 10, 0)))
+    expect(e['l.endTime']).toBe(String(Date.UTC(2026, 11, 19, 12, 0)))
+    expect(e['B.allDay']).toBe('false')
+  })
+
+  it('제목·장소·설명은 인코딩되어 구분자(;)와 충돌하지 않는다', () => {
+    const url = buildAndroidCalendarIntentUrl({ ...base, title: 'A;B#C', description: '줄1\n줄2;끝' })
+    const e = extras(url)
+    expect(e['S.title']).toBe('A;B#C')
+    expect(e['S.description']).toBe('줄1\n줄2;끝')
+    expect(e['S.eventLocation']).toBe(base.location)
+  })
+
+  it('앱이 없을 때를 위해 구글 웹 작성 URL 을 fallback 으로 싣는다', () => {
+    const e = extras(buildAndroidCalendarIntentUrl(base))
+    expect(e['S.browser_fallback_url']).toBe(buildGoogleCalendarUrl(base))
+  })
+
+  it('빈 장소·설명은 extra 를 생략한다', () => {
+    const url = buildAndroidCalendarIntentUrl({ ...base, location: '', description: '' })
+    expect(url).not.toContain('S.eventLocation=')
+    expect(url).not.toContain('S.description=')
   })
 })

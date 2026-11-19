@@ -52,6 +52,51 @@ export function buildGoogleCalendarUrl(event: CalendarEvent): string {
   return `https://calendar.google.com/calendar/render?${params.join('&')}`
 }
 
+/** 'YYYYMMDDTHHmmssZ' → epoch ms (Android intent 의 beginTime/endTime 용) */
+function stampToMs(stamp: string): number {
+  const m = stamp.match(/^(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})Z$/)
+  if (!m) throw new Error(`stamp 해석 실패: ${stamp}`)
+  const [y, mo, d, h, mi, s] = m.slice(1).map(Number)
+  return Date.UTC(y, mo - 1, d, h, mi, s)
+}
+
+/** 종일 일정은 Android CalendarContract 규칙대로 UTC 자정, 종료는 배타(+1일) */
+function utcMidnightMs(iso: string): number {
+  const [y, m, d] = iso.split('-').map(Number)
+  return Date.UTC(y, m - 1, d)
+}
+
+/**
+ * Android intent URL — ACTION_INSERT + Events MIME 으로 기기 기본 캘린더 앱(삼성·구글 캘린더 등)의
+ * "새 일정" 화면을 연다. 처리할 앱이 없으면 Chrome 이 S.browser_fallback_url(구글 웹 작성 화면)로 보낸다.
+ * extra 값은 URL 인코딩한다(`;`·`#` 등 intent 구분자 충돌 방지).
+ */
+export function buildAndroidCalendarIntentUrl(event: CalendarEvent): string {
+  let begin: number
+  let end: number
+  if (event.startTime) {
+    const { start, end: endStamp } = timedEventStamps(event.startDate, event.startTime)
+    begin = stampToMs(start)
+    end = stampToMs(endStamp)
+  } else {
+    begin = utcMidnightMs(event.startDate)
+    end = utcMidnightMs(nextDayIso(event.endDate))
+  }
+  const enc = encodeURIComponent
+  const parts = [
+    'action=android.intent.action.INSERT',
+    'type=vnd.android.cursor.item/event',
+    `S.title=${enc(event.title)}`,
+    ...(event.location ? [`S.eventLocation=${enc(event.location)}`] : []),
+    ...(event.description ? [`S.description=${enc(event.description)}`] : []),
+    `l.beginTime=${begin}`,
+    `l.endTime=${end}`,
+    `B.allDay=${event.startTime ? 'false' : 'true'}`,
+    `S.browser_fallback_url=${enc(buildGoogleCalendarUrl(event))}`,
+  ]
+  return `intent://#Intent;${parts.join(';')};end`
+}
+
 export const CALENDAR_APPS: CalendarApp[] = [
   {
     id: 'apple-ics',
@@ -63,6 +108,14 @@ export const CALENDAR_APPS: CalendarApp[] = [
     label: '구글 캘린더',
     open: (event) => openInNewTab(buildGoogleCalendarUrl(event)),
   },
+  {
+    id: 'android-intent',
+    label: '기기 캘린더(Android)',
+    // 같은 창 이동이어야 Chrome·PWA(standalone)가 intent 로 앱을 띄운다(새 탭이면 웹 화면이 남는다)
+    open: (event) => {
+      window.location.href = buildAndroidCalendarIntentUrl(event)
+    },
+  },
 ]
 
 /** id로 앱을 찾는다. 모르는 값이면 undefined(저장값 검증용). */
@@ -71,12 +124,15 @@ export function findCalendarApp(id: string | null | undefined): CalendarApp | un
 }
 
 /**
- * 이 기기의 기본 캘린더. 애플 기기(iOS·iPadOS·Mac)면 애플, 그 외는 구글.
+ * 이 기기의 기본 캘린더. 애플 기기(iOS·iPadOS·Mac)면 애플, Android 면 기기 캘린더 앱(intent),
+ * 그 외(PC 등)는 구글 웹.
  * 브라우저 전용 — 클릭 핸들러 안에서만 호출한다.
  */
 export function detectDefaultCalendarAppId(): CalendarAppId {
   const ua = navigator.userAgent
-  return /iphone|ipad|ipod|Macintosh/i.test(ua) ? 'apple-ics' : 'google'
+  if (/iphone|ipad|ipod|Macintosh/i.test(ua)) return 'apple-ics'
+  if (/android/i.test(ua)) return 'android-intent'
+  return 'google'
 }
 
 /** 지금 기기에서 실행할 캘린더 앱(감지 결과가 목록에 없으면 첫 항목). */

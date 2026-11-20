@@ -61,14 +61,15 @@ PROJECT_CONTEXT §5(인증 F-01)·§20.
 - `feat/visited-date-default-planned` — PR #175 squash 머지, 로컬·리모트 브랜치·worktree 삭제. '다녀왔어요' 방문 날짜 기본값 = 방문예정일(오늘/지난 날짜일 때), 없거나 미래면 오늘(기기 로컬). Preview 화면 확인은 사용자가 완료
 - `docs/concurrent-session-worktree-rule` — PR #172 squash 머지, 로컬·리모트 브랜치·worktree 삭제. 리포 루트 `CLAUDE.md` 신설(동시 세션 안전 규칙: 전용 worktree·커밋 전 브랜치 확인·포트/`.env.local`·자기 worktree 만 제거)
 - `wip/capacitor-app-id-change`(`9c56088`) — **보류 작업 보존용(머지 대상 아님)**. `e159d31`(`chore/capacitor-init` 포함) 위에 worktree 에 커밋 안 돼 있던 `project.pbxproj` `DEVELOPMENT_TEAM` 2줄을 커밋. worktree 는 제거됨
-- `backup/undo-dialog-diagnosis`(`a715202`) — **보존용**. 어느 브랜치에도 없던 커밋("docs: backfill PR #108 into handoff docs")에 붙인 브랜치. worktree 는 제거됨. 정리(삭제)는 사용자 결정
+- `backup/undo-dialog-diagnosis` — 삭제(261121, 로컬·리모트) — 복구용 SHA `a715202`, 반영 PR #109
 - `feat/list-sort-planned-first` — PR #171 squash 머지, 로컬·리모트 브랜치 삭제. `/list` 위시리스트 3그룹 정렬(다가오는 예정 → 지난 예정 → 예정 없음, KST 기준). Preview 화면 확인은 사용자가 완료
 - `fix/android-calendar-intent-pwa-splash` — PR #170 squash 머지 완료(머지 커밋 `c5de098`), 로컬·리모트 브랜치 삭제됨. Android 캘린더 추가 분기(애플=`.ics` / Android 카카오톡 인앱=intent / 그 외 Android=`.ics` + 안내 토스트 / PC=구글 웹, 앱 id `apple-ics`→`ics`). 갤럭시 실기기(크롬 `.ics` → 앱 등록 화면·카카오 intent·안내 토스트)는 사용자가 확인 완료. 스플래시 아이콘 확대(`e767316`)는 같은 PR 안에서 revert(`ff19f4f`) — 프로덕션 아이콘 변경 없음. CI(Lint·Unit·Build, E2E, Vercel) 통과
 - `fix/ios-apple-touch-icon` — PR #174 squash 머지 완료(머지 커밋 `2a80cb8`), 로컬·리모트 브랜치·worktree 삭제됨. iOS 홈 화면 아이콘 "T" → `apple-touch-icon.png`(180px, 기존 모양) 복원 + `metadata.icons.apple`. CI 통과. **남은 확인: iPhone 기존 아이콘 삭제 후 "홈 화면에 추가" 아이콘이 하트인지**
 - `fix/pwa-splash-hide-title` — PR #173 squash 머지 완료(머지 커밋 `e8d84fe`), 로컬·리모트 브랜치·worktree 삭제됨. manifest `name` → `"\u200B"`(Android 로딩 화면 문구 숨김) + `appleWebApp.title`. CI(Lint·Unit·Build, E2E, Vercel) 통과
-- `diag/pwa-splash-no-title` — **진단 브랜치(261120, 머지 금지·유지)**. V1(name 삭제)·V2(`" "`)·V3(`"\u200B"`) + 하트 60% 아이콘. V3 만 문구가 사라짐 → PR #173 근거. ⚠️ 브랜치 충돌 사고(동시 세션 사고, CLAUDE.md 규칙 신설 계기)로 정렬 작업 세션의 커밋 `8c6b263`(위시리스트 정렬, PR #171 과 같은 내용 — main 에는 #171 로 별도 머지)이 V1~V3 사이에 섞여 있다. 사용자 지시로 수정하지 않음 → 상세 CHANGELOG 2026-11-20 v2
-- `diag/android-calendar-intent-compare` — **진단 브랜치(261120, 머지 금지·유지)**. PR #170 브랜치 기준으로 `a231ecd` 를 옮기고 E안(구글 캘린더 앱 지정 VIEW intent) 추가. `/diag/calendar` 로그인 없이 열림. 결과: 크롬 계열은 C2·E 실패, A(.ics) 성공, 카카오 인앱은 INSERT 성공 → PR #170 분기의 근거
-- `diag/android-calendar-check` — **리모트에만 남은 진단 브랜치(261118 확인, 삭제하지 않음)**. 커밋 `a231ecd` "안드로이드 캘린더 추가 방식 비교 진단 페이지 (`/diag/calendar`, 머지 금지)". `main` 에 머지되지 않았고 로컬 브랜치는 없다. 안드로이드 실기기 캘린더 방식 비교용 스파이크이며, 결과를 반영할 때 별도로 판단한다. 정리(삭제)는 사용자 결정.
+- `diag/pwa-splash-no-title` — 삭제(261121, 로컬·리모트) — 복구용 SHA `904116c`, 반영 PR #173
+- `diag/android-calendar-intent-compare` — 삭제(261121, 로컬·리모트, 진단 페이지 `/diag/calendar` 포함) — 복구용 SHA `b4ed70c`, 반영 PR #170
+  - 안드로이드 캘린더 방식 재비교가 필요하면 `b4ed70c`로 복구
+- `diag/android-calendar-check` — 삭제(261121, 리모트만 있었음) — 복구용 SHA `a231ecd`, 반영 PR #170(`diag/android-calendar-intent-compare`로 옮겨져 이어짐)
 - `chore/e2e-stabilization-handoff` — PR #169 squash 머지 완료(머지 커밋 `5bb580b`), 로컬·리모트 브랜치 삭제됨. 패스코드 입력 하이드레이션 대기(보류 15번) + e2e/db 스펙 파일 수 가드(보류 17번) + 핸드오프 정합성. CI(Lint·Unit·Build, E2E, Vercel) 통과
 - `chore/capacitor-init` — PR #111~#116 모두 병합 완료 상태 그대로 `main` 미머지 유지. 그 사이
   `main`이 커플 계정 전환(PR #118~127) + 닉네임 설정(PR #128)으로 크게 앞서 나가 이 브랜치의

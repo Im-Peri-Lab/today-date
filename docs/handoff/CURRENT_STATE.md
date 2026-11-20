@@ -1,6 +1,6 @@
 # CURRENT_STATE.md
 
-> **마지막 업데이트: 2026-11-20 (PR #134~#171 반영)**
+> **마지막 업데이트: 2026-11-20 (PR #134~#172 반영)**
 
 ## 현재 단계
 커플(2인) 계정 전환 완료 + 파트너 표시용 닉네임 추가 단계 — 계정 없는 단일 워크스페이스에서
@@ -55,6 +55,9 @@ PROJECT_CONTEXT §5(인증 F-01)·§20.
 는 상세 → CHANGELOG 2026-07-29~2026-08-11.
 
 ## 브랜치 상태
+- `docs/concurrent-session-worktree-rule` — PR #172 squash 머지, 로컬·리모트 브랜치·worktree 삭제. 리포 루트 `CLAUDE.md` 신설(동시 세션 안전 규칙: 전용 worktree·커밋 전 브랜치 확인·포트/`.env.local`·자기 worktree 만 제거)
+- `wip/capacitor-app-id-change`(`9c56088`) — **보류 작업 보존용(머지 대상 아님)**. `e159d31`(`chore/capacitor-init` 포함) 위에 worktree 에 커밋 안 돼 있던 `project.pbxproj` `DEVELOPMENT_TEAM` 2줄을 커밋. worktree 는 제거됨
+- `backup/undo-dialog-diagnosis`(`a715202`) — **보존용**. 어느 브랜치에도 없던 커밋("docs: backfill PR #108 into handoff docs")에 붙인 브랜치. worktree 는 제거됨. 정리(삭제)는 사용자 결정
 - `feat/list-sort-planned-first` — PR #171 squash 머지, 로컬·리모트 브랜치 삭제. `/list` 위시리스트 3그룹 정렬(다가오는 예정 → 지난 예정 → 예정 없음, KST 기준). Preview 화면 확인은 사용자가 완료
 - `diag/pwa-splash-no-title` — **다른 세션의 진단 브랜치(머지 금지)**. 브랜치 충돌 사고로 정렬 커밋 `8c6b263` 이 V1~V3 사이에 섞여 있다(PR #171 과 같은 내용). 사용자 지시로 수정하지 않음 → 상세 CHANGELOG 2026-11-20 v2
 - `fix/android-calendar-intent-pwa-splash` — PR #170 squash 머지 완료, 로컬·리모트 브랜치 삭제됨. Android 캘린더 추가 분기(애플=`.ics` / Android 카카오톡 인앱=intent / 그 외 Android=`.ics` + 안내 토스트 / PC=구글 웹, 앱 id `apple-ics`→`ics`). 갤럭시 실기기(크롬 `.ics` → 앱 등록 화면·카카오 intent·안내 토스트)는 사용자가 확인 완료. 스플래시 아이콘 확대(`e767316`)는 같은 PR 안에서 revert(`ff19f4f`) — 프로덕션 아이콘 변경 없음. CI(Lint·Unit·Build, E2E, Vercel) 통과
@@ -146,7 +149,7 @@ PROJECT_CONTEXT §5(인증 F-01)·§20.
 - 플랫폼: Vercel
 - URL: `https://today-date-seven.vercel.app`
 - 함수 리전: `syd1`(`vercel.json`, PR #152). 미들웨어는 엣지 실행이라 이 설정과 무관
-- 현재 브랜치: `main` (PR #171 반영 기준. PR #128 머지 커밋 `238d3de`만 예외적으로 squash가 아닌 일반 머지)
+- 현재 브랜치: `main` (PR #172 반영 기준. PR #128 머지 커밋 `238d3de`만 예외적으로 squash가 아닌 일반 머지)
 
 ## 진행 중 / 남은 작업
 

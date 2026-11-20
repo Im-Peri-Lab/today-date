@@ -1,6 +1,6 @@
 # CHANGELOG.md
 
-> **마지막 업데이트: 2026-11-20 (PR #134~#175 반영)**
+> **마지막 업데이트: 2026-11-21 (PR #134~#176 반영)**
 
 > 260531~261022 핸드오프 전체를 날짜순으로 기록한 변경 이력입니다. 새 AI는 일반적으로 `PROJECT_CONTEXT.md`와 `CURRENT_STATE.md`만 먼저 읽고, 과거 판단 근거가 필요할 때 이 문서를 참고하세요.
 
@@ -1356,3 +1356,24 @@ PR #161 의 "+ 시간 추가" 버튼 → 탭하면 칸 펼침 → 다이닝 미�
 ### 검증
 - vitest 전체 + `visitedDate.test.ts` 7건(`TZ=UTC`·`TZ=Asia/Seoul` 모두 통과, KST 00:30 케이스 포함), `tsc --noEmit`, `next build` 통과. worktree 안에서는 `npm run lint` 가 상위 `.eslintrc.json` 과 플러그인 충돌 → 변경 파일만 `eslint --no-eslintrc -c .eslintrc.json` 으로 통과(CI Lint 로 최종 확인).
 - `.env.local` 이 없어 로컬 화면 확인 대신 Track B 로 전환, Vercel Preview 에서 사용자 확인 완료.
+
+---
+
+## 2026-11-21 — iOS 홈 화면 PWA 시작 이미지(하트 스플래시) (PR #176)
+
+### 변경
+- **배경**: iPhone 홈 화면 PWA 를 실행하면 첫 화면 전까지 라이트는 흰 화면, 다크는 검은 화면만 보였다. `apple-touch-startup-image` 가 없었고, `NativeBootOverlay` 는 Capacitor 전용·하이드레이션 후 렌더라 PWA 에는 해당이 없었다(가설 확인).
+- **최종 결과**: `metadata.appleWebApp.startupImage` 로 기기별 시작 이미지 22장(iPhone 13종·iPad 9종, 세로, 기기당 1장)만 둔다. 앱 안의 HTML 스플래시 레이어는 없다.
+  - 배경 `#ede9fe`(사용자 지정, SKILL 토큰 아님), 하트 = 앱 아이콘 원본(`assets/_icon-only.svg`, `chore/capacitor-init`) path·그라데이션 `#a855f7→#ec4899`(그림자 없음), 타이틀 "Today Date" `#1a1033`(Geist wght 500 글리프를 SVG path 로 변환). 크기·배치는 BrandHeader 와 같고 화면 전체 기준 가운데.
+  - 단일 출처 `src/components/boot/pwaSplash.mjs`(기기 목록·링크·생성용 마크업), 생성기 `scripts/generate-pwa-splash.mjs`(Playwright 로 기기 해상도별 캡처 → `public/splash/{w}x{h}@{dpr}x.png`).
+  - 시작 이미지가 사라지면 곧바로 SSR 첫 화면(홈 대시보드 또는 `/lock`)이 그려진다 — 빈 배경·로딩 상태 없음. 다크에서는 라벤더 → 어두운 그라데이션으로 밝기 차이는 있다.
+- **거쳐 간 시도(같은 PR 안에서 되돌림)**:
+  1. 라이트/다크 시작 이미지 2벌(`prefers-color-scheme` media) + 하이드레이션 전부터 보이는 HTML 스플래시(head 인라인 스크립트로 iOS standalone 만 표시, 하이드레이션 후 페이드아웃) → 실기기에서 **시작 이미지는 홈 화면 추가 시점 모드로 고정**돼 현재 모드를 따르는 HTML 스플래시와 색이 어긋남.
+  2. 단일 색(#7c3aed → #c084fc → #f5f3ff 순으로 조정) → 실기기(다이내믹 아일랜드)에서 시작 이미지 → HTML 스플래시 전환 시 **마크 위치가 어긋남**: head 에서 `(screen.height − innerHeight)/2` 만큼 올리는 보정이 있을 때 약 60pt, 보정이 없을 때 약 30pt 아래. 데스크톱 에뮬레이션에선 재현 안 됨.
+  3. 진단 브랜치 `diag/ios-splash-metrics`(측정 오버레이) 배포 후, 측정 대신 **HTML 스플래시 레이어 자체를 제거**하기로 결정 → 진단 브랜치는 머지하지 않고 삭제.
+
+### 검증
+- `tsc --noEmit`, vitest 306, `next build` 통과. worktree 안 `npm run lint` 는 상위 `.eslintrc.json` 과 플러그인 충돌 → 변경 파일만 `eslint --no-eslintrc -c .eslintrc.json` 통과(CI Lint 로 최종 확인).
+- Preview: 시작 이미지 링크 22개 모두 200 `image/png`, 픽셀 크기 = media 조건(device-width·height × dpr). 일반 브라우저·Capacitor 앱 동작 변화 없음(layout 은 main 대비 startupImage 링크만 추가).
+- 실기기(iPhone) 확인은 사용자가 완료.
+

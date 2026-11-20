@@ -941,6 +941,8 @@ ActivityCard·PlaceCard 모두 동일한 정보 줄 우선순위(memo→location
 
 - **같은 작업 폴더를 여러 세션이 함께 쓰면 브랜치가 몰래 바뀐다 — 커밋 직전에 현재 브랜치를 확인하고, 동시 작업이 있으면 worktree 를 쓴다.** 정렬 작업 중 다른 세션이 `diag/pwa-splash-no-title` 로 checkout 해, 정렬 커밋이 진단 브랜치(머지 금지) 위에 만들어지고 `git push origin feat/...` 는 main 과 같은 빈 브랜치를 올렸다. Vercel 대기도 커밋에 상태가 없어 10분을 허비했다. 커밋 전 `git branch --show-current` 확인, 푸시 후 `git ls-remote` 로 원격 SHA 가 내 커밋인지 확인한다. 복구는 별도 worktree 에서 cherry-pick 후 일반 푸시(261120, PR #171). 이 규칙은 리포 루트 `CLAUDE.md` "동시 세션 안전 규칙"으로 승격(PR #172).
 
+- **iOS PWA 스플래시는 시작 이미지(`apple-touch-startup-image`)만 쓴다 — 앱 안에 HTML 스플래시 레이어를 다시 넣지 말 것(261121, PR #176).** ① iOS 는 시작 이미지를 "홈 화면에 추가" 시점의 라이트/다크 모드로 고정한다 — `prefers-color-scheme` 로 두 벌을 나눠도 실행 시점 모드를 따르지 않으므로 기기당 한 장, 단일 색으로 만든다. ② HTML 스플래시를 시작 이미지와 같은 자리에 맞추는 것은 실패했다 — 다이내믹 아일랜드 실기기에서 `fixed; inset:0` 가운데 정렬은 약 30pt 아래, `(screen.height − innerHeight)/2` 보정을 넣으면 약 60pt 어긋났고 데스크톱 에뮬레이션에선 재현되지 않는다(원인 미측정). ③ 시작 이미지는 `node scripts/generate-pwa-splash.mjs` 로 `src/components/boot/pwaSplash.mjs` 의 마크업을 캡처해 만든다 — 색·기기를 바꾸면 재생성하고, 실기기 확인 전엔 기존 홈 화면 아이콘을 지우고 다시 추가해야 새 이미지가 보인다(iOS 가 추가 시점에 저장). 하트는 앱 아이콘 원본 그라데이션(`#a855f7→#ec4899`)이고 색값을 추정해 바꾸지 않는다.
+
 ---
 
 ## 21. 새 AI가 처음 해야 할 일

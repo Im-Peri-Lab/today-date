@@ -181,7 +181,7 @@ PROJECT_CONTEXT §5(인증 F-01)·§20.
 17. ~~e2e/db 스펙 파일 수 가드 — 미착수(261118 등록, PR #168 후속)~~ → **해소(PR #169, 머지 커밋 `5bb580b`, 261118)**: `src/test/e2eDbSpecGuard.test.ts` 단위 테스트가 `e2e/db/*.spec.ts` 가 2개 이상이면 실패한다. `npm test`(CI Unit Test 단계)에서 돌아간다. 설정 로드 시점 체크 대신 단위 테스트를 고른 이유: 설정 로드는 E2E 실행 때만 일어나 CI 의 Unit Test 단계에서는 잡히지 않는다. 배경 → CHANGELOG 2026-11-18.
 18. **Sentry/관측성 연동 — 미착수(261118 등록)**
 19. **getDashboardStats 에러 경계 개선 — 미착수(261118 등록)**
-20. **Android PWA 스플래시 하트–이름 간격 — 네이티브 앱 단계로 보류(261120, PR #170)**: 크롬이 manifest 로 자동 생성하는 고정 레이아웃이라 웹에서는 아이콘으로만 조정 가능. 아이콘 하트 확대(any 85%·maskable 64%)는 실기기에서 너무 커서 원복했다. 아이콘 확대 말고 네이티브 앱 셸(`chore/capacitor-init`) 스플래시에서 다룬다 → PROJECT_CONTEXT §20
+20. **Android PWA 스플래시 하트–이름 간격 → 문구 숨김으로 해결 진행 중(261120, `fix/pwa-splash-hide-title`)**: 아이콘 확대는 하트가 너무 커서 원복(PR #170). 대신 manifest `name` 을 `"\u200B"` 로 두어 로딩 화면 문구를 숨긴다(갤럭시 V3 실기기 확인). 아이콘은 원본 유지 → PROJECT_CONTEXT §20
 
 **그 외 남은 작업**
 - **`chore/capacitor-init` → `main` 최종 머지**: PR #111~#116 모두 병합 완료 상태지만, 전체

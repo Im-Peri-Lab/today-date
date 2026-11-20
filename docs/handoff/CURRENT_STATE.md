@@ -55,7 +55,7 @@ PROJECT_CONTEXT §5(인증 F-01)·§20.
 는 상세 → CHANGELOG 2026-07-29~2026-08-11.
 
 ## 브랜치 상태
-- `fix/android-calendar-intent-pwa-splash` — **PR #170 머지 대기(사용자 결정)**. Android 캘린더 추가 분기(애플=.ics / Android 카카오톡 인앱=intent / 그 외 Android=.ics + 안내 토스트 / PC=구글 웹, 앱 id `apple-ics`→`ics` 정리 — 저장값 없음) + Android PWA 스플래시 하트–이름 간격(any 아이콘 하트 85%·maskable 64%·iOS apple-touch-icon 기존 모양 유지). 웹 intent 로 INSERT 불가 교훈 → PROJECT_CONTEXT §20. 남은 확인: 갤럭시 실기기 체크리스트(PR 본문)
+- `fix/android-calendar-intent-pwa-splash` — **PR #170 머지 대기(사용자 결정)**. Android 캘린더 추가 분기(애플=.ics / Android 카카오톡 인앱=intent / 그 외 Android=.ics + 안내 토스트 / PC=구글 웹, 앱 id `apple-ics`→`ics` 정리 — 저장값 없음). 웹 intent 로 INSERT 불가 교훈 → PROJECT_CONTEXT §20. Android PWA 스플래시 하트–이름 간격은 아이콘 확대 시도 후 너무 커서 원복(revert) — 보류, 교훈 → PROJECT_CONTEXT §20. 남은 확인: 갤럭시 실기기 체크리스트(PR 본문)
 - `diag/android-calendar-intent-compare` — **진단 브랜치(261120, 머지 금지·유지)**. PR #170 브랜치 기준으로 `a231ecd` 를 옮기고 E안(구글 캘린더 앱 지정 VIEW intent) 추가. `/diag/calendar` 로그인 없이 열림. 결과: 크롬 계열은 C2·E 실패, A(.ics) 성공, 카카오 인앱은 INSERT 성공 → PR #170 분기의 근거
 - `diag/android-calendar-check` — **리모트에만 남은 진단 브랜치(261118 확인, 삭제하지 않음)**. 커밋 `a231ecd` "안드로이드 캘린더 추가 방식 비교 진단 페이지 (`/diag/calendar`, 머지 금지)". `main` 에 머지되지 않았고 로컬 브랜치는 없다. 안드로이드 실기기 캘린더 방식 비교용 스파이크이며, 결과를 반영할 때 별도로 판단한다. 정리(삭제)는 사용자 결정.
 - `chore/e2e-stabilization-handoff` — PR #169 squash 머지 완료(머지 커밋 `5bb580b`), 로컬·리모트 브랜치 삭제됨. 패스코드 입력 하이드레이션 대기(보류 15번) + e2e/db 스펙 파일 수 가드(보류 17번) + 핸드오프 정합성. CI(Lint·Unit·Build, E2E, Vercel) 통과

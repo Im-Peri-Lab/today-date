@@ -1,6 +1,6 @@
 # CURRENT_STATE.md
 
-> **마지막 업데이트: 2026-11-21 (PR #134~#177 반영)**
+> **마지막 업데이트: 2026-11-21 (PR #134~#177 + `chore/codex-agents-md` 반영)**
 
 ## 현재 단계
 커플(2인) 계정 전환 완료 + 파트너 표시용 닉네임 추가 단계 — 계정 없는 단일 워크스페이스에서
@@ -55,6 +55,7 @@ PROJECT_CONTEXT §5(인증 F-01)·§20.
 는 상세 → CHANGELOG 2026-07-29~2026-08-11.
 
 ## 브랜치 상태
+- `chore/codex-agents-md` — **진행 중(로컬 확인 대기)**. 원래 폴더에 untracked 로 있던 `AGENTS.md`(Codex 지침, `CLAUDE.md` 사본에 경로만 `.Codex`)를 worktree 로 옮겨(mv, 복사 아님) 커밋. 본문은 `CLAUDE.md` 를 단일 출처로 가리키는 포인터 + Codex 전용 차이(디자인 기준 `.claude/skills/today-date-design/SKILL.md` 직접 읽기, worktree 경로 `.Codex/worktrees`)만 남김. `/.agents/`(디자인 SKILL 사본)는 `.gitignore` 에 추가, 파일은 삭제하지 않음. `CLAUDE.md` 변경 없음
 - `feat/list-card-dday` — PR #177 squash 머지, 로컬·리모트 브랜치·worktree 삭제. 위시리스트 카드 D-day(`D-n`/`D-DAY`/`D+n`, KST). Preview 화면 확인은 사용자가 완료
 - `feat/ios-pwa-splash` — PR #176 squash 머지, 로컬·리모트 브랜치·worktree 삭제. iOS 홈 화면 PWA 시작 이미지 22장(배경 `#ede9fe`, 아이콘 그라데이션 하트 + 타이틀). HTML 스플래시 레이어는 위치 어긋남으로 제거. 진단 브랜치 `diag/ios-splash-metrics` 는 머지 없이 삭제. 실기기 확인은 사용자가 완료
 - `feat/visited-date-default-planned` — PR #175 squash 머지, 로컬·리모트 브랜치·worktree 삭제. '다녀왔어요' 방문 날짜 기본값 = 방문예정일(오늘/지난 날짜일 때), 없거나 미래면 오늘(기기 로컬). Preview 화면 확인은 사용자가 완료
@@ -62,11 +63,10 @@ PROJECT_CONTEXT §5(인증 F-01)·§20.
 - `wip/capacitor-app-id-change`(`9c56088`) — **보류 작업 보존용(머지 대상 아님)**. `e159d31`(`chore/capacitor-init` 포함) 위에 worktree 에 커밋 안 돼 있던 `project.pbxproj` `DEVELOPMENT_TEAM` 2줄을 커밋. worktree 는 제거됨
 - `backup/undo-dialog-diagnosis`(`a715202`) — **보존용**. 어느 브랜치에도 없던 커밋("docs: backfill PR #108 into handoff docs")에 붙인 브랜치. worktree 는 제거됨. 정리(삭제)는 사용자 결정
 - `feat/list-sort-planned-first` — PR #171 squash 머지, 로컬·리모트 브랜치 삭제. `/list` 위시리스트 3그룹 정렬(다가오는 예정 → 지난 예정 → 예정 없음, KST 기준). Preview 화면 확인은 사용자가 완료
-- `diag/pwa-splash-no-title` — **다른 세션의 진단 브랜치(머지 금지)**. 브랜치 충돌 사고로 정렬 커밋 `8c6b263` 이 V1~V3 사이에 섞여 있다(PR #171 과 같은 내용). 사용자 지시로 수정하지 않음 → 상세 CHANGELOG 2026-11-20 v2
 - `fix/android-calendar-intent-pwa-splash` — PR #170 squash 머지 완료(머지 커밋 `c5de098`), 로컬·리모트 브랜치 삭제됨. Android 캘린더 추가 분기(애플=`.ics` / Android 카카오톡 인앱=intent / 그 외 Android=`.ics` + 안내 토스트 / PC=구글 웹, 앱 id `apple-ics`→`ics`). 갤럭시 실기기(크롬 `.ics` → 앱 등록 화면·카카오 intent·안내 토스트)는 사용자가 확인 완료. 스플래시 아이콘 확대(`e767316`)는 같은 PR 안에서 revert(`ff19f4f`) — 프로덕션 아이콘 변경 없음. CI(Lint·Unit·Build, E2E, Vercel) 통과
 - `fix/ios-apple-touch-icon` — PR #174 squash 머지 완료(머지 커밋 `2a80cb8`), 로컬·리모트 브랜치·worktree 삭제됨. iOS 홈 화면 아이콘 "T" → `apple-touch-icon.png`(180px, 기존 모양) 복원 + `metadata.icons.apple`. CI 통과. **남은 확인: iPhone 기존 아이콘 삭제 후 "홈 화면에 추가" 아이콘이 하트인지**
 - `fix/pwa-splash-hide-title` — PR #173 squash 머지 완료(머지 커밋 `e8d84fe`), 로컬·리모트 브랜치·worktree 삭제됨. manifest `name` → `"\u200B"`(Android 로딩 화면 문구 숨김) + `appleWebApp.title`. CI(Lint·Unit·Build, E2E, Vercel) 통과
-- `diag/pwa-splash-no-title` — **진단 브랜치(261120, 머지 금지·유지)**. V1(name 삭제)·V2(`" "`)·V3(`"\u200B"`) + 하트 60% 아이콘. V3 만 문구가 사라짐 → PR #173 근거. ⚠️ 다른 세션 커밋 `8c6b263`(위시리스트 정렬, main 에는 #171 로 별도 머지)이 이 브랜치에 섞여 있다(동시 세션 사고, CLAUDE.md 규칙 신설 계기)
+- `diag/pwa-splash-no-title` — **진단 브랜치(261120, 머지 금지·유지)**. V1(name 삭제)·V2(`" "`)·V3(`"\u200B"`) + 하트 60% 아이콘. V3 만 문구가 사라짐 → PR #173 근거. ⚠️ 브랜치 충돌 사고(동시 세션 사고, CLAUDE.md 규칙 신설 계기)로 정렬 작업 세션의 커밋 `8c6b263`(위시리스트 정렬, PR #171 과 같은 내용 — main 에는 #171 로 별도 머지)이 V1~V3 사이에 섞여 있다. 사용자 지시로 수정하지 않음 → 상세 CHANGELOG 2026-11-20 v2
 - `diag/android-calendar-intent-compare` — **진단 브랜치(261120, 머지 금지·유지)**. PR #170 브랜치 기준으로 `a231ecd` 를 옮기고 E안(구글 캘린더 앱 지정 VIEW intent) 추가. `/diag/calendar` 로그인 없이 열림. 결과: 크롬 계열은 C2·E 실패, A(.ics) 성공, 카카오 인앱은 INSERT 성공 → PR #170 분기의 근거
 - `diag/android-calendar-check` — **리모트에만 남은 진단 브랜치(261118 확인, 삭제하지 않음)**. 커밋 `a231ecd` "안드로이드 캘린더 추가 방식 비교 진단 페이지 (`/diag/calendar`, 머지 금지)". `main` 에 머지되지 않았고 로컬 브랜치는 없다. 안드로이드 실기기 캘린더 방식 비교용 스파이크이며, 결과를 반영할 때 별도로 판단한다. 정리(삭제)는 사용자 결정.
 - `chore/e2e-stabilization-handoff` — PR #169 squash 머지 완료(머지 커밋 `5bb580b`), 로컬·리모트 브랜치 삭제됨. 패스코드 입력 하이드레이션 대기(보류 15번) + e2e/db 스펙 파일 수 가드(보류 17번) + 핸드오프 정합성. CI(Lint·Unit·Build, E2E, Vercel) 통과
@@ -162,7 +162,7 @@ PROJECT_CONTEXT §5(인증 F-01)·§20.
 
 ## 진행 중 / 남은 작업
 
-**보류 작업 (261013 정리, 우선순위 순 — 다음 세션이 놓치면 안 되는 것)**
+**보류 작업 (261013 정리·261121 갱신, 우선순위 순 — 다음 세션이 놓치면 안 되는 것)**
 - **로컬 `.env.local` 없음(261120 확인)**: 루트에 `.env.local.example` 만 있어 로컬 dev 에서 `SUPABASE_URL` 이 비고 `/api/auth/setup/send-verify` 가 500(`supabaseUrl is required`) → 로컬 로그인 불가. 코드 문제 아님, 로컬 화면 확인이 필요하면 env 준비(사용자)
 1. **`android/`·`ios/` 빌드 캐시 `.gitignore` 패턴 — 머지 완료(PR #140, 머지 커밋 `7635617`, 261118 확인)**: `/android/build/`·`/android/.idea/`·`/ios/App/Pods/`·`/ios/DerivedData/` 등 빌드 캐시 패턴은 `main` 에 이미 들어 있다. 이전 기록의 "PR/머지 전"은 낡은 정보였다. **남은 결정**: `android/`·`ios/` 소스 자체(현재 `main` 작업 트리에 untracked, `git log -- ios/` 비어 있음)를 커밋할지는 여전히 미정 — `chore/capacitor-init`(Capacitor 셸, 미머지) 결정과 함께 정할 것. 원인은 그 브랜치 작업물이 남은 것으로 **추정**(미확인). 그 전까지 `git add -A`로 실수 커밋하지 않게 주의.
 2. **헤더 40/22·카드 ⋮ 36/20·28/16 쌍 gap 2px 최종 실기기 확인 미기록(PR #139)**: 프리뷰는 사용자가 일부 확인해 복사하기·연필 간격 피드백이 반영됐지만 머지 후 확인 기록은 없다. 탭 영역(헤더 한 변 91%, 카드 ⋮ 82%)이 불편하다는 신호가 오면 28px 사용처와 함께 일괄 재검토.
@@ -182,7 +182,7 @@ PROJECT_CONTEXT §5(인증 F-01)·§20.
 13. **탭 직후 시각 반응 부족 — 별도 청크 대기(261022)**: 홈 카드·리스트 카드·헤더 아이콘은 `<Link>` 라 topLoader 가 자동으로 걸리지만, 이동이 prefetch·캐시로 빨리 커밋되면 막대가 보이기 전에 끝날 수 있다(코드상 추론, 실측 없음). `.headerNavBtn`·`.iconBtn`·`.cardInteractive` 에는 터치 `:active` 규칙도 없다. 후보: route-level `loading.tsx`(`pushState` 시점이 바뀌므로 #154 의 rAF 지연과 상호작용 확인 필요), `:active` 피드백(`.statRow:active`·`.fab:active` 선례). 신호가 오면 로더와 CSS 를 분리해 진행.
 
 14. ~~`.ics` 세미콜론 미이스케이프~~ → **해소(261103, PR #162, 머지 커밋 `aa7aad0`)**: `escapeIcsText` 치환 문자열을 `String.raw` 로 바꿔 `;` → `\;` 가 실제로 나간다. 점검 결과 `,`·`\`·줄바꿈은 원래 정상이었고 `;` 만 누락. 잘못된 값을 고정하던 테스트(`ics.test.ts:25·99`)를 `String.raw` 기대값으로 바로잡고 케이스 추가. 저장소 전체 `no-useless-escape` 스캔에서 같은 패턴은 이 3곳뿐(규칙은 `next/core-web-vitals`·`next/typescript` 에 포함돼 있지 않아 꺼진 상태). **iOS 실기기 확인(제목에 `;`·`,`) 대기**
-15. e2e `chromium-db` 잠금 화면 테스트 간헐 실패 → **수정 반영, CI 관찰 중(PR #169, 머지 커밋 `5bb580b`, 261118)**. 로컬 `--workers=1 --repeat-each=15`(잠금·로그인 관련 29개 ×15 = 435회) 비교: main 0건 실패, 이 브랜치 0건 실패 — main 에서도 재현되지 않아 수정 효과는 로컬에서 입증하지 못했다(원인 분석은 하이드레이션 전 입력 유실이며 수정은 그 경로를 막는다). CI 에서 재발하면 다시 연다. 수정 내용: 패스코드 입력 전에 `PasscodeInput` 의 키보드 리스너 등록(하이드레이션) 완료를 `data-passcode-ready` 표지로 기다린다(`e2e/helpers/passcode.ts` `typePasscode`, `isolation.spec.ts` 의 모든 패스코드 입력이 사용). 로컬 전체 E2E 4회 연속 94/94 통과(재현 0회). 재현 기록(수정 전): `page.goto('/lock')` 직후 `page.keyboard.type(passcode)` 가 페이지 준비(하이드레이션) 전에 시작되면 입력이 누락돼(스냅샷 "패스코드 5/6자리 입력됨") 잠금해제 다음 단계(`waitForURL('/')`·"내 이메일 주소" 입력)에서 타임아웃난다. `main`(fc52b27) 전체 E2E 3회 중 1회에서 2건 실패(`:854` 평소 잠금해제 회귀, `:1039` 로그아웃 기기 기억), `feat/planned-visit-time` 로컬에서도 실행마다 1건씩 번갈아 실패. 단독 재실행·CI(PR #161, 재시도 없이 79 통과)는 통과.
+15. ~~e2e `chromium-db` 잠금 화면 테스트 간헐 실패~~ → **해소(261121 종결, 수정 PR #169, 머지 커밋 `5bb580b`, 261118)**: 머지 후 관찰 기간 261118 13:08 KST(`5bb580b` push) ~ 261121 00:47 KST(`7b76653` #177 push)의 CI 실행 25건(main push 11·PR 14) 전부 success, E2E 잡 25개 모두 94 passed, 재실행(attempt 2+) 0건. CI 는 `retries: 1`(`playwright.config.ts:35`)이라 재시도 통과가 success 로 묻힐 수 있어 E2E 로그 25개를 전수 확인 — `retry #`·`flaky`·`✘` 0건(로그의 "failed" 는 `[WebServer] email failed: RESEND_FROM_EMAIL not configured` 서버 출력뿐). 이하 기존 기록: 로컬 `--workers=1 --repeat-each=15`(잠금·로그인 관련 29개 ×15 = 435회) 비교: main 0건 실패, 이 브랜치 0건 실패 — main 에서도 재현되지 않아 수정 효과는 로컬에서 입증하지 못했다(원인 분석은 하이드레이션 전 입력 유실이며 수정은 그 경로를 막는다). CI 에서 재발하면 다시 연다. 수정 내용: 패스코드 입력 전에 `PasscodeInput` 의 키보드 리스너 등록(하이드레이션) 완료를 `data-passcode-ready` 표지로 기다린다(`e2e/helpers/passcode.ts` `typePasscode`, `isolation.spec.ts` 의 모든 패스코드 입력이 사용). 로컬 전체 E2E 4회 연속 94/94 통과(재현 0회). 재현 기록(수정 전): `page.goto('/lock')` 직후 `page.keyboard.type(passcode)` 가 페이지 준비(하이드레이션) 전에 시작되면 입력이 누락돼(스냅샷 "패스코드 5/6자리 입력됨") 잠금해제 다음 단계(`waitForURL('/')`·"내 이메일 주소" 입력)에서 타임아웃난다. `main`(fc52b27) 전체 E2E 3회 중 1회에서 2건 실패(`:854` 평소 잠금해제 회귀, `:1039` 로그아웃 기기 기억), `feat/planned-visit-time` 로컬에서도 실행마다 1건씩 번갈아 실패. 단독 재실행·CI(PR #161, 재시도 없이 79 통과)는 통과.
 16. **필드 라벨 계위 기준 통일(`design/field-label-hierarchy`, 미착수, 261103 등록)** — 상세 화면과 편집 화면의 라벨 크기가 달라 기준부터 확정하기로 함. 상세 → PROJECT_CONTEXT §19 그룹 8.
     - 잠정 기준: 보는 화면 = 표시 라벨(`.fieldLabel` 12/500/sub/0.3px) / 입력하는 화면 = 폼 라벨(`Label` 14/500/ink). 인라인 편집은 필드 1개면 표시 라벨 유지(`/account`·`/settings`), 여러 필드 블록이면 폼 라벨(상세 등록 정보·방문 기록 편집). 섹션 헤더 12/600/sub/자간 0. 위저드 질문 문장은 제외.
     - 할 일: `/account/delete` 섹션 라벨 `tracking-wide` 제거, 표시 라벨 `uppercase` 제거(한글 무효), `mb-1.5`·`tracking-wide` 를 `.fieldLabel` 로 흡수(4개 파일 복붙 정리), 표시·폼 라벨 토큰화, SKILL §2-C·§10 문서와 실제 코드 불일치 수정(§2-C "`.fieldLabel` 은 DetailRow 만" → 실제 4곳, 자간 미기재, §10 블록 제목 "폼 라벨과 같은 결" 이지만 굵기 600 vs 500).
@@ -191,6 +191,7 @@ PROJECT_CONTEXT §5(인증 F-01)·§20.
 18. **Sentry/관측성 연동 — 미착수(261118 등록)**
 19. **getDashboardStats 에러 경계 개선 — 미착수(261118 등록)**
 20. ~~Android PWA 스플래시 하트–이름 간격~~ → **해소(PR #173, 261120)**: 아이콘 확대는 하트가 너무 커서 원복(PR #170). 대신 manifest `name` 을 `"\u200B"` 로 두어 로딩 화면 문구를 숨겼다(갤럭시 V3 실기기 확인, 아이콘 원본 유지). iOS 홈 화면 이름은 `apple-mobile-web-app-title` 로 고정. 남은 확인: 갤럭시 기존 설치 기기의 이름 변경 확인 창, 최근 앱 목록 이름, iPhone 새로 추가 시 이름 → PROJECT_CONTEXT §20
+21. **Codex worktree 경로 미확정(261121 등록)**: `AGENTS.md` 의 `.Codex/worktrees/<이름>` 은 사용자가 만든 원본 값을 그대로 둔 것이다. Codex 공식 문서 근거는 찾지 못했다(Codex 앱이 관리하는 worktree 는 `$CODEX_HOME/worktrees`, 기본 `~/.codex/worktrees`). 또 `.git/info/exclude` 에는 `.claude/worktrees/` 만 있어 리포 안 `.Codex/worktrees/` 에 만들면 원래 폴더 `git status` 에 untracked 로 보인다. 경로 확정은 사용자 결정
 
 **그 외 남은 작업**
 - **`chore/capacitor-init` → `main` 최종 머지**: PR #111~#116 모두 병합 완료 상태지만, 전체

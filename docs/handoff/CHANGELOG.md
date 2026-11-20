@@ -1,6 +1,6 @@
 # CHANGELOG.md
 
-> **마지막 업데이트: 2026-11-21 (PR #134~#176 반영)**
+> **마지막 업데이트: 2026-11-21 (PR #134~#177 반영)**
 
 > 260531~261022 핸드오프 전체를 날짜순으로 기록한 변경 이력입니다. 새 AI는 일반적으로 `PROJECT_CONTEXT.md`와 `CURRENT_STATE.md`만 먼저 읽고, 과거 판단 근거가 필요할 때 이 문서를 참고하세요.
 
@@ -1377,3 +1377,17 @@ PR #161 의 "+ 시간 추가" 버튼 → 탭하면 칸 펼침 → 다이닝 미�
 - Preview: 시작 이미지 링크 22개 모두 200 `image/png`, 픽셀 크기 = media 조건(device-width·height × dpr). 일반 브라우저·Capacitor 앱 동작 변화 없음(layout 은 main 대비 startupImage 링크만 추가).
 - 실기기(iPhone) 확인은 사용자가 완료.
 
+## 2026-11-21 — `/list` 위시리스트 카드 D-day 표시 (PR #177)
+
+### 변경
+- **배경**: PR #171 로 위시리스트가 예정일 기준 3그룹 정렬이 됐지만, 카드에는 예정일만 있어 얼마나 남았는지·지났는지 한눈에 보이지 않았다.
+- **표시**: 카드 방문예정일 footer 끝에 `D-n`(다가옴)·`D-DAY`(오늘, 굵게)·`D+n`(지남). 예: `26.12.19 오후 7:00 방문 예정 D-3`. 공용 `PlannedFooterLabel` 수정이라 액티비티·다이닝 카드 동시 적용. 예정일 없는 카드·다녀온 카드·홈 미리보기는 변경 없음. 폭이 모자라면 기존대로 시간 조각만 말줄임.
+- **계산**: `daysUntil(iso, today)`·`formatDday(days)`(`lib/date.ts`, UTC 자정 기준 일 수 차이라 타임존·DST 무관). "오늘"은 정렬과 같은 `todayKstIso` — `useTodayKst`(신규 훅)가 마운트 후 채워 SSR·첫 렌더에는 D-day 를 그리지 않는다(hydration mismatch 방지, `useIsIosSafari` 와 같은 패턴).
+- **색(날짜 상태 색 규칙, SKILL §8-A)**: 다가옴·오늘 = `--s-accent`, 지남 = `--destructive`(새 빨강 토큰 없음, 사용자 결정). 색만으로 의미를 전달하지 않고 텍스트를 병기. `--destructive` 12px 대비 라이트 3.78:1 / 다크 4.35:1 로 AA 미만 — 알려진 한계로 기록(전용 토큰 `--s-overdue` 제안은 보류).
+- **SKILL 정합성**: §8-A "방문예정" 필터·§10-L "정렬" 항목이 PR #171 이전 정렬(`planned_at` 오름차순, `plannedOnly`)을 적고 있어 3그룹 정렬로 정정.
+- **알려진 동작**: 화면을 연 채 KST 자정을 넘기면 D-day 는 다음 렌더에 새 날짜를, 정렬은 다음 목록 조회에 새 날짜를 따른다(당겨서 새로고침으로 맞춰짐).
+
+### 검증
+- 단위 테스트(`date.test.ts`): 오늘/내일/어제, 월말(30·31일·2월·윤년 2028), 연말, KST 자정 전후(UTC 15:00), 해석 불가 값. vitest 311 통과, `tsc --noEmit`·`next build` 통과.
+- 린트: worktree 가 리포 폴더 안(`.claude/worktrees/`)이라 `npm run lint` 가 상위 `.eslintrc.json` 과 플러그인 충돌로 실행되지 않음 → `eslint --no-eslintrc -c .eslintrc.json` 로 같은 범위 실행, 오류 없음. CI 린트는 별도 통과 확인.
+- Vercel Preview 에서 사용자가 화면 확인 완료.

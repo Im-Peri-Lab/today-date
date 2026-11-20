@@ -8,7 +8,7 @@ import { useCalendarTitlePrefix } from './useCalendarTitlePrefix'
 
 /**
  * "캘린더에 추가" 동작 한 벌 — 상세 블록 버튼·카드 ⋮ 메뉴·예정일 저장 직후 토스트가 공유한다.
- * - add(item): 기기 기준 캘린더(iOS 계열=애플 .ics, Android=기기 캘린더 앱 intent, 그 외=구글 링크)로 바로 실행한다. 선택 UI 없음.
+ * - add(item): 기기 기준 캘린더(애플 기기=.ics, Android=.ics + 안내 토스트·카카오톡 인앱만 intent, 그 외=구글 링크)로 바로 실행한다. 선택 UI 없음.
  *   단, 머리말을 한 번도 정한 적 없는 첫 실행이면 머리말 다이얼로그를 먼저 띄우고,
  *   그 다이얼로그가 끝나는 순간 이어서 실행한다(사용자는 "추가"를 누른 것이므로 한 번 더 누르게 하지 않는다).
  *   다이얼로그의 저장/취소는 문구에만 적용되고 캘린더 추가는 항상 진행된다 — 저장이면 그 문구로,
@@ -31,7 +31,10 @@ export function useCalendarAdd(track: CalendarTrack) {
       toast.error('캘린더에 추가할 날짜가 없어요')
       return
     }
-    resolveCalendarApp().open(event)
+    const app = resolveCalendarApp()
+    app.open(event)
+    // 같은 id 로 띄워 연속 추가해도 안내가 쌓이지 않는다
+    if (app.hint) toast(app.hint, { id: 'calendar-open-hint' })
   }
 
   function add(item: CalendarItem) {

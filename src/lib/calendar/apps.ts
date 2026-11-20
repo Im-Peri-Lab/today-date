@@ -18,6 +18,15 @@ export interface CalendarApp {
   label: string
   /** 이벤트를 이 캘린더로 보낸다(사용자 제스처 안에서 동기 호출) */
   open: (event: CalendarEvent) => void
+  /** 실행 직후 한 줄 안내 토스트(있을 때만). 다음 행동이 화면 밖(다운로드 파일 열기)에 있을 때 쓴다. */
+  hint?: string
+}
+
+/** Android .ics 경로 안내 — 다운로드만 되고 캘린더 등록은 사용자가 파일을 열어야 이어진다. */
+export const ANDROID_ICS_HINT = '다운로드된 파일을 열면 캘린더에 추가돼요'
+
+function downloadEventIcs(event: CalendarEvent) {
+  downloadIcsFile(buildIcs([event], nowStamp()), toIcsFilename(event.title))
 }
 
 /** 'YYYYMMDDTHHMMSSZ' — DTSTAMP 용. 지금 시각이라 이 함수만 시계를 읽는다. */
@@ -99,9 +108,17 @@ export function buildAndroidCalendarIntentUrl(event: CalendarEvent): string {
 
 export const CALENDAR_APPS: CalendarApp[] = [
   {
-    id: 'apple-ics',
-    label: '애플 캘린더',
-    open: (event) => downloadIcsFile(buildIcs([event], nowStamp()), toIcsFilename(event.title)),
+    id: 'ics',
+    label: '캘린더 파일(.ics)',
+    // 애플 기기: 다운로드가 곧바로 네이티브 "캘린더에 추가" 시트로 이어져 안내가 필요 없다.
+    open: downloadEventIcs,
+  },
+  {
+    id: 'android-ics',
+    label: '캘린더 파일(.ics, Android)',
+    // Android 크롬·삼성 인터넷·PWA: 다운로드 → 파일 열기 → 앱 선택 → 등록 화면(실기기 확인).
+    open: downloadEventIcs,
+    hint: ANDROID_ICS_HINT,
   },
   {
     id: 'google',
@@ -110,8 +127,10 @@ export const CALENDAR_APPS: CalendarApp[] = [
   },
   {
     id: 'android-intent',
-    label: '기기 캘린더(Android)',
-    // 같은 창 이동이어야 Chrome·PWA(standalone)가 intent 로 앱을 띄운다(새 탭이면 웹 화면이 남는다)
+    label: '기기 캘린더(Android 인앱)',
+    // 카카오톡 인앱 브라우저 전용 — 크롬 계열은 intent:// 에 CATEGORY_BROWSABLE 을 붙이는데 캘린더 앱의
+    // ACTION_INSERT 필터에는 BROWSABLE 이 없어 해석되지 않고 fallback 으로 간다(Chromium
+    // ExternalNavigationHandler.sanitizeQueryIntentActivitiesIntent, 실기기 확인). 같은 창 이동이어야 한다.
     open: (event) => {
       window.location.href = buildAndroidCalendarIntentUrl(event)
     },
@@ -124,14 +143,17 @@ export function findCalendarApp(id: string | null | undefined): CalendarApp | un
 }
 
 /**
- * 이 기기의 기본 캘린더. 애플 기기(iOS·iPadOS·Mac)면 애플, Android 면 기기 캘린더 앱(intent),
- * 그 외(PC 등)는 구글 웹.
+ * 이 기기의 기본 캘린더.
+ * - 애플 기기(iOS·iPadOS·Mac) → .ics
+ * - Android + 카카오톡 인앱 브라우저 → intent(앱 선택 + 등록 화면)
+ * - 그 외 Android(크롬·삼성 인터넷·PWA) → .ics + 안내 토스트 (웹에서 INSERT intent 는 불가, .ics 가 최선)
+ * - 그 외(PC 등) → 구글 웹
  * 브라우저 전용 — 클릭 핸들러 안에서만 호출한다.
  */
 export function detectDefaultCalendarAppId(): CalendarAppId {
   const ua = navigator.userAgent
-  if (/iphone|ipad|ipod|Macintosh/i.test(ua)) return 'apple-ics'
-  if (/android/i.test(ua)) return 'android-intent'
+  if (/iphone|ipad|ipod|Macintosh/i.test(ua)) return 'ics'
+  if (/android/i.test(ua)) return /KAKAOTALK/i.test(ua) ? 'android-intent' : 'android-ics'
   return 'google'
 }
 

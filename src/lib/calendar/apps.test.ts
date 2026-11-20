@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from 'vitest'
 import {
+  ANDROID_ICS_HINT,
   buildAndroidCalendarIntentUrl,
   buildGoogleCalendarUrl,
   CALENDAR_APPS,
@@ -58,9 +59,10 @@ describe('buildGoogleCalendarUrl', () => {
 })
 
 describe('CALENDAR_APPS', () => {
-  it('apple-ics·google·android-intent 세 앱이 있고 id 가 유일하다', () => {
+  it('ics·android-ics·google·android-intent 네 앱이 있고 id 가 유일하다', () => {
     const ids = CALENDAR_APPS.map((a) => a.id)
-    expect(ids).toEqual(['apple-ics', 'google', 'android-intent'])
+    expect(ids).toEqual(['ics', 'android-ics', 'google', 'android-intent'])
+    expect(new Set(ids).size).toBe(ids.length)
     expect(findCalendarApp('google')?.label).toBe('구글 캘린더')
     expect(findCalendarApp('nope')).toBeUndefined()
     expect(findCalendarApp(null)).toBeUndefined()
@@ -78,19 +80,33 @@ describe('detectDefaultCalendarAppId / resolveCalendarApp', () => {
   }
   const IPHONE = 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 Mobile/15E148'
   const MAC = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 Safari/605.1.15'
-  const ANDROID = 'Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 Chrome/120 Mobile Safari/537.36'
+  const CHROME_ANDROID =
+    'Mozilla/5.0 (Linux; Android 14; SM-S921N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Mobile Safari/537.36'
+  const SAMSUNG_INTERNET =
+    'Mozilla/5.0 (Linux; Android 14; SM-S921N) AppleWebKit/537.36 (KHTML, like Gecko) SamsungBrowser/26.0 Chrome/122.0.0.0 Mobile Safari/537.36'
+  const KAKAO_ANDROID =
+    'Mozilla/5.0 (Linux; Android 14; SM-S921N Build/UP1A.231005.007; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/130.0.0.0 Mobile Safari/537.36 KAKAOTALK/10.9.0 (INAPP)'
+  const KAKAO_IPHONE =
+    'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 KAKAOTALK 10.9.0'
   const WINDOWS = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120 Safari/537.36'
 
-  it('애플 기기는 apple-ics, Android 는 android-intent, 그 외는 google', () => {
-    withUa(IPHONE, () => expect(detectDefaultCalendarAppId()).toBe('apple-ics'))
-    withUa(MAC, () => expect(detectDefaultCalendarAppId()).toBe('apple-ics'))
-    withUa(ANDROID, () => expect(detectDefaultCalendarAppId()).toBe('android-intent'))
-    withUa(WINDOWS, () => expect(detectDefaultCalendarAppId()).toBe('google'))
+  it.each([
+    ['iPhone Safari', IPHONE, 'ics'],
+    ['Mac Safari', MAC, 'ics'],
+    ['카카오톡 인앱(iPhone) — 애플 기기 규칙이 먼저', KAKAO_IPHONE, 'ics'],
+    ['카카오톡 인앱(Android)', KAKAO_ANDROID, 'android-intent'],
+    ['크롬(Android, PWA 포함)', CHROME_ANDROID, 'android-ics'],
+    ['삼성 인터넷', SAMSUNG_INTERNET, 'android-ics'],
+    ['PC 크롬', WINDOWS, 'google'],
+  ])('%s → %s', (_name, ua, expected) => {
+    withUa(ua, () => expect(detectDefaultCalendarAppId()).toBe(expected))
   })
 
-  it('resolveCalendarApp 은 감지 결과의 앱을 돌려준다', () => {
-    withUa(IPHONE, () => expect(resolveCalendarApp().id).toBe('apple-ics'))
-    withUa(ANDROID, () => expect(resolveCalendarApp().id).toBe('android-intent'))
+  it('resolveCalendarApp 은 감지 결과의 앱을 돌려주고, 안내 토스트는 Android .ics 에만 있다', () => {
+    withUa(IPHONE, () => expect(resolveCalendarApp().hint).toBeUndefined())
+    withUa(CHROME_ANDROID, () => expect(resolveCalendarApp().hint).toBe(ANDROID_ICS_HINT))
+    withUa(KAKAO_ANDROID, () => expect(resolveCalendarApp().hint).toBeUndefined())
+    withUa(WINDOWS, () => expect(resolveCalendarApp().hint).toBeUndefined())
   })
 })
 

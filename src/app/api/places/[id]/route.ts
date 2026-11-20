@@ -19,6 +19,7 @@ import {
   apiRatingSchema,
   apiReviewNoteSchema,
 } from '@/lib/schemas/apiFields'
+import { ServerTiming } from '@/lib/diag/serverTiming'
 
 const patchSchema = z.object({
   title: apiTitleSchema.optional(),
@@ -45,12 +46,14 @@ const NOT_FOUND = () =>
 export async function GET(_req: NextRequest, { params }: RouteContext) {
   const { id } = await params
   try {
-    const scope = await requireCoupleScope()
+    const st = new ServerTiming('place')
+    const scope = await st.time('auth', () => requireCoupleScope())
     if (!scope.ok) return scope.response
 
-    const data = await getPlaceById(id, scope.coupleId)
+    const data = await st.time('db', () => getPlaceById(id, scope.coupleId))
     if (!data) return NOT_FOUND()
-    return NextResponse.json({ data })
+    st.total()
+    return st.apply(NextResponse.json({ data }))
   } catch (err) {
     console.error('[GET /api/places/[id]]', err)
     return NextResponse.json({ error: '서버 오류가 발생했습니다.' }, { status: 500 })

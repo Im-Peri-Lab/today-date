@@ -1,16 +1,19 @@
 import { NextResponse } from 'next/server'
 import { getDashboardStats } from '@/lib/data/dashboard'
 import { requireCoupleScope } from '@/lib/auth/coupleScope'
+import { ServerTiming } from '@/lib/diag/serverTiming'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET() {
   try {
-    const scope = await requireCoupleScope()
+    const st = new ServerTiming('stats')
+    const scope = await st.time('auth', () => requireCoupleScope())
     if (!scope.ok) return scope.response
 
-    const data = await getDashboardStats(scope.coupleId)
-    return NextResponse.json(data)
+    const data = await st.time('db', () => getDashboardStats(scope.coupleId))
+    st.total()
+    return st.apply(NextResponse.json(data))
   } catch (err) {
     console.error('[GET /api/dashboard/stats]', err)
     return NextResponse.json({ error: '통계를 불러오지 못했습니다.' }, { status: 500 })

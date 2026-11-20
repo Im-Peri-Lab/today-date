@@ -17,6 +17,7 @@ import {
 import { verifyPasscode } from '@/lib/auth/passcode'
 import { PENDING_USER_COOKIE, readPendingUser } from '@/lib/auth/pendingUser'
 import { getSession } from '@/lib/auth/session'
+import { ServerTiming } from '@/lib/diag/serverTiming'
 
 const MAX_ATTEMPTS = 5
 const LOCK_MINUTES = 10
@@ -30,7 +31,19 @@ const schema = z.object({
   email: z.string().email().optional(),
 })
 
+/**
+ * [진단 전용 — diag/loading-server-timing, 머지 금지]
+ * 원래 핸들러(handle)를 그대로 실행하고 모든 응답(성공·401·409·423·500)에
+ * unlock-* 구간의 Server-Timing 을 붙인다.
+ */
 export async function POST(req: NextRequest) {
+  const st = new ServerTiming('unlock')
+  const res = await handle(req, st)
+  st.total()
+  return st.apply(res)
+}
+
+async function handle(req: NextRequest, st: ServerTiming) {
   try {
     const body = await req.json()
     const result = schema.safeParse(body)
@@ -53,12 +66,17 @@ export async function POST(req: NextRequest) {
      * 것과 같이 동작한다. 어느 경로든 패스코드 검증은 동일하게 거친다 — 쿠키는
      * "누구로 발급할지"만 정하고 인증 자체를 대신하지 않는다.
      */
-    const pending = await readPendingUser(req.cookies.get(PENDING_USER_COOKIE)?.value)
-    const device = await readDeviceUser(req.cookies.get(DEVICE_USER_COOKIE)?.value)
+    const [pending, device] = await st.time('cookies', async () => [
+      await readPendingUser(req.cookies.get(PENDING_USER_COOKIE)?.value),
+      await readDeviceUser(req.cookies.get(DEVICE_USER_COOKIE)?.value),
+    ] as const)
+    st.declare('getcouple')
+    const timedGetCouple = (id: string) =>
+      st.time('getcouple', () => getCoupleById(id), { counted: true })
 
     let couple: CoupleRow | null
     if (pending) {
-      couple = await getCoupleById(pending.couple_id)
+      couple = await timedGetCouple(pending.couple_id)
     } else {
       /**
        * 기기 기억이 커플도 함께 담고 있으므로 getSoleCouple 의 "커플이 정확히 1개일 때만"
@@ -66,7 +84,8 @@ export async function POST(req: NextRequest) {
        * 사라졌다면(다른 기기에서 계정 삭제 후 재가입 등) 실패시키지 않고 폴백한다.
        */
       couple =
-        (device ? await getCoupleById(device.couple_id) : null) ?? (await getSoleCouple())
+        (device ? await timedGetCouple(device.couple_id) : null) ??
+        (await st.time('solecouple', () => getSoleCouple(), { counted: true }))
     }
 
     if (!couple?.passcode_hash) {
@@ -81,7 +100,8 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const isCorrect = await verifyPasscode(passcode, couple.passcode_hash)
+    const passcodeHash = couple.passcode_hash
+    const isCorrect = await st.time('bcrypt', () => verifyPasscode(passcode, passcodeHash))
 
     if (!isCorrect) {
       const newAttempts = (couple.failed_attempts ?? 0) + 1
@@ -90,10 +110,13 @@ export async function POST(req: NextRequest) {
         ? new Date(Date.now() + LOCK_MINUTES * 60 * 1000).toISOString()
         : null
 
-      await supabase
-        .from('couples')
-        .update({ failed_attempts: newAttempts, locked_until: lockedUntil })
-        .eq('id', couple.id)
+      const coupleId = couple.id
+      await st.time('fail-update', () =>
+        supabase
+          .from('couples')
+          .update({ failed_attempts: newAttempts, locked_until: lockedUntil })
+          .eq('id', coupleId)
+      )
 
       return NextResponse.json(
         {
@@ -115,7 +138,8 @@ export async function POST(req: NextRequest) {
      * 기기 기억은 그 커플의 것일 때만 넘긴다 — 다른 커플의 기억이 남아 있는 기기에서
      * 그 user_id 가 이 커플 사용자 목록에 있을 수는 없지만, 의도를 코드로 못 박아 둔다.
      */
-    const users = await getCoupleUsers(couple.id)
+    const confirmedId = couple.id
+    const users = await st.time('users', () => getCoupleUsers(confirmedId))
     const resolution = resolveSessionUser({
       users,
       pendingUserId: pending?.user_id,
@@ -124,10 +148,12 @@ export async function POST(req: NextRequest) {
     })
 
     // 패스코드는 맞았으니 실패 카운터는 어느 분기로 가든 초기화한다.
-    await supabase
-      .from('couples')
-      .update({ failed_attempts: 0, locked_until: null })
-      .eq('id', couple.id)
+    await st.time('reset-update', () =>
+      supabase
+        .from('couples')
+        .update({ failed_attempts: 0, locked_until: null })
+        .eq('id', confirmedId)
+    )
 
     /*
      * 누구인지 모른다 → 세션을 발급하지 않고 이메일을 묻는다.
@@ -160,13 +186,13 @@ export async function POST(req: NextRequest) {
 
     const sessionUser = resolution.user
 
-    const session = await getSession()
+    const session = await st.time('session-get', () => getSession())
     session.authenticated = true
     session.lastVerifiedAt = Date.now()
     session.sessionVersion = couple.session_version
     session.user_id = sessionUser.id
     session.couple_id = couple.id
-    await session.save()
+    await st.time('session-save', () => session.save())
 
     const res = NextResponse.json({ success: true })
 
@@ -183,7 +209,9 @@ export async function POST(req: NextRequest) {
      */
     res.cookies.set(
       DEVICE_USER_COOKIE,
-      await sealDeviceUser({ user_id: sessionUser.id, couple_id: couple.id }),
+      await st.time('device-seal', () =>
+        sealDeviceUser({ user_id: sessionUser.id, couple_id: confirmedId })
+      ),
       {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',

@@ -5,9 +5,13 @@ import { getDashboardStats } from '@/lib/data/dashboard'
 import { HomeDashboard } from '@/components/HomeDashboard'
 import styles from '@/components/screens.module.css'
 import { cn } from '@/lib/utils'
+import { ServerTiming } from '@/lib/diag/serverTiming'
 
 export default async function HomePage() {
-  const session = await getSession()
+  // [진단 전용] 서버 컴포넌트는 Next 14 에서 응답 헤더를 쓸 수 없어 서버 로그로만 남긴다.
+  // 같은 쿼리 세트의 Server-Timing 은 /api/diag/render-timing?page=home 이 낸다.
+  const st = new ServerTiming('home')
+  const session = await st.time('session', () => getSession())
 
   // couple_id 없는 세션은 전환 이전 쿠키다 — 미들웨어가 만료 처리하지만,
   // 서버 컴포넌트가 커플 없이 데이터를 읽는 경로를 남기지 않도록 여기서도 닫는다.
@@ -20,11 +24,16 @@ export default async function HomePage() {
    * 경로를 쓰지 않는다) — 커플이 여러 개가 되어도 홈은 항상 자기 커플의 상태를 본다.
    * SOLO 일 때만 파트너 초대 진입점을 그린다(§ HomeDashboard).
    */
-  const [initialStats, couple, users] = await Promise.all([
-    getDashboardStats(session.couple_id),
-    getCoupleById(session.couple_id),
-    getCoupleUsers(session.couple_id),
-  ])
+  const coupleId = session.couple_id
+  const [initialStats, couple, users] = await st.time('queries', () =>
+    Promise.all([
+      st.time('stats', () => getDashboardStats(coupleId)),
+      st.time('getcouple', () => getCoupleById(coupleId), { counted: true }),
+      st.time('users', () => getCoupleUsers(coupleId)),
+    ])
+  )
+  st.total()
+  st.log('home-render')
 
   return (
     <main className={cn(styles.page, styles.pageHome)}>

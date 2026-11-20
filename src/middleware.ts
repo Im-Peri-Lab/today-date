@@ -5,6 +5,8 @@ import { unsealData } from 'iron-session'
 import { getWorkspaceStatus, WorkspaceState } from '@/lib/auth/couple'
 import { isSessionVersionCurrent } from '@/lib/auth/sessionVersionCache'
 import { sessionOptions, SessionData } from '@/lib/auth/session'
+import { getCoupleById } from '@/lib/auth/couple'
+import { ServerTiming } from '@/lib/diag/serverTiming'
 
 // /setup, /api/auth/setup/* 는 미설정 상태에서도 접근 가능
 const SETUP_PREFIXES = ['/setup', '/api/auth/setup']
@@ -25,6 +27,11 @@ function expireSession(req: NextRequest, pathname: string, message: string) {
   return res
 }
 
+/**
+ * [진단 전용 — diag/loading-server-timing, 머지 금지]
+ * 원래 미들웨어(handle)를 그대로 실행하고, 반환된 응답(통과·리다이렉트·401 모두)에
+ * mw-* 구간의 Server-Timing 을 붙인다. 정적 파일은 계측하지 않는다.
+ */
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl
 
@@ -37,6 +44,15 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next()
   }
 
+  const st = new ServerTiming('mw')
+  const res = await handle(req, st)
+  st.total()
+  return st.apply(res)
+}
+
+async function handle(req: NextRequest, st: ServerTiming) {
+  const { pathname } = req.nextUrl
+
   // 워크스페이스 상태 확인 (app-ready 쿠키 캐싱 — 있으면 DB 조회를 건너뛴다)
   const appReadyCookie = req.cookies.get('app-ready')?.value
   let isSetupComplete = appReadyCookie === '1'
@@ -45,7 +61,7 @@ export async function middleware(req: NextRequest) {
   if (!isSetupComplete) {
     // couples/users 에서 직접 확인 (app_config 는 더 이상 읽지 않는다)
     try {
-      const status = await getWorkspaceStatus()
+      const status = await st.time('workspace', () => getWorkspaceStatus())
       state = status.state
       isSetupComplete = status.setupComplete
     } catch {
@@ -99,9 +115,11 @@ export async function middleware(req: NextRequest) {
   }
 
   try {
-    const session = await unsealData<SessionData>(rawCookie, {
-      password: sessionOptions.password as string,
-    })
+    const session = await st.time('unseal', () =>
+      unsealData<SessionData>(rawCookie, {
+        password: sessionOptions.password as string,
+      })
+    )
 
     if (!session.authenticated) {
       return pathname.startsWith('/api/')
@@ -121,7 +139,22 @@ export async function middleware(req: NextRequest) {
       try {
         // 15초 TTL 인메모리 캐시를 거친다(§ lib/auth/sessionVersionCache.ts).
         // 커플 행이 사라졌거나 버전이 다르면 false — 그 세션은 무효다.
-        versionCurrent = await isSessionVersionCurrent(session.couple_id, session.sessionVersion)
+        //
+        // [진단] 로더를 계측 래퍼로 넘겨 getCoupleById 호출 횟수·시간을 잰다.
+        // 로더가 한 번도 안 불렸으면 캐시 hit(mw-sv-hit), 불렸으면 miss(mw-sv-miss).
+        st.declare('getcouple')
+        let loaded = false
+        const t0 = performance.now()
+        try {
+          versionCurrent = await isSessionVersionCurrent(session.couple_id, session.sessionVersion, {
+            load: (id) => {
+              loaded = true
+              return st.time('getcouple', () => getCoupleById(id), { counted: true })
+            },
+          })
+        } finally {
+          st.add(loaded ? 'sv-miss' : 'sv-hit', performance.now() - t0)
+        }
       } catch {
         // 조회 자체가 실패한 것은 세션이 무효라는 근거가 아니다 —
         // 일시적 DB 장애로 로그인된 기기가 전부 튕기지 않도록 통과시킨다(전환 이전과 동일).

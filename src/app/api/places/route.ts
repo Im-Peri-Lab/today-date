@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { getSupabaseClient } from '@/lib/supabase/client'
 import { requireCoupleScope } from '@/lib/auth/coupleScope'
+import { ServerTiming } from '@/lib/diag/serverTiming'
 import { orderByListRule, sortWishlistRows } from '@/lib/data/listOrder'
 import { todayKstIso } from '@/lib/date'
 import { readJsonBody, zodErrorResponse } from '@/lib/api/validation'
@@ -56,7 +57,8 @@ export async function GET(req: NextRequest) {
     if (!parsedQuery.success) return zodErrorResponse(parsedQuery.error)
     const { status, category_id, area, meal_time, q, planned_only } = parsedQuery.data
 
-    const scope = await requireCoupleScope()
+    const st = new ServerTiming('places')
+    const scope = await st.time('auth', () => requireCoupleScope())
     if (!scope.ok) return scope.response
 
     const supabase = getSupabaseClient()
@@ -83,11 +85,12 @@ export async function GET(req: NextRequest) {
       query = query.or(`title.ilike.%${term}%,memo.ilike.%${term}%,area.ilike.%${term}%`)
     }
 
-    const { data: rows, error } = await query
+    const { data: rows, error } = await st.time('db', () => query)
     if (error) throw error
     const data = status === 'wishlist' && rows ? sortWishlistRows(rows, todayKstIso()) : rows
 
-    return NextResponse.json({ data })
+    st.total()
+    return st.apply(NextResponse.json({ data }))
   } catch (err) {
     console.error('[GET /api/places]', err)
     return NextResponse.json({ error: '서버 오류가 발생했습니다.' }, { status: 500 })

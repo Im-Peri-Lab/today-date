@@ -1,6 +1,6 @@
 # CHANGELOG.md
 
-> **마지막 업데이트: 2026-11-20 (PR #134~#170 반영)**
+> **마지막 업데이트: 2026-11-20 (PR #134~#171 반영)**
 
 > 260531~261022 핸드오프 전체를 날짜순으로 기록한 변경 이력입니다. 새 AI는 일반적으로 `PROJECT_CONTEXT.md`와 `CURRENT_STATE.md`만 먼저 읽고, 과거 판단 근거가 필요할 때 이 문서를 참고하세요.
 
@@ -1285,3 +1285,21 @@ PR #161 의 "+ 시간 추가" 버튼 → 탭하면 칸 펼침 → 다이닝 미�
 - vitest 294 통과(UA 분기: 카카오 Android/iPhone, 크롬 Android, 삼성 인터넷, iPhone, Mac, PC + intent URL 6건), `tsc --noEmit`, `npm run lint`, `next build` 통과.
 - 갤럭시 실기기(사용자 확인): 크롬 `.ics` → 앱 등록 화면 ✅ / 카카오톡 인앱 intent ✅ / 안내 토스트 ✅.
 - PR #170 CI(Lint·Unit·Build, E2E, Vercel) 통과 후 squash 머지, 브랜치 `fix/android-calendar-intent-pwa-splash` 삭제. 진단 브랜치 `diag/android-calendar-intent-compare` 는 유지.
+
+## 2026-11-20 v2 — `/list` 위시리스트 3그룹 정렬: 다가오는 예정 → 지난 예정 → 예정 없음 (PR #171)
+
+### 변경
+- **배경**: 위시리스트 기본 정렬이 등록(`created_at`) 최신순뿐이라 예정일이 가까워도 오래전에 등록한 항목은 아래에 묻혔다. "방문예정만" 필터는 `planned_at` 오름차순이라 지난 예정일이 맨 위에 왔다.
+- **새 규칙**(`sortWishlistRows`, `src/lib/data/listOrder.ts`) — "오늘"은 KST(`todayKstIso`, `lib/date.ts`):
+  - ① 오늘 이후(오늘 포함) 예정: 예정일 가까운 순 → 같은 날 종일(`planned_time` NULL) 먼저 → 시작 시간 빠른 순
+  - ② 지난 예정: 예정일 최근 순(같은 날이면 ①의 시간 규칙)
+  - ③ 예정 없음: 등록 최신순. 모든 그룹의 마지막 동률은 등록 최신순.
+  - "방문예정만" 필터도 같은 규칙이고 ③만 빠진다(`.not('planned_at','is',null)`).
+- **구현 위치**: 그룹 경계가 "오늘"에 따라 달라 PostgREST `.order()` 로 표현할 수 없다. DB 에서는 등록 최신순으로 받고 `/api/activities`·`/api/places` GET 이 응답 직전에 재정렬한다(목록은 페이지 나눔 없이 전부 받으므로 전체에 적용, 클라이언트 재정렬은 여전히 없음). `orderByListRule` 의 `plannedOnly` 인자는 제거.
+- **변경 없음**: 다녀온 곳 정렬, 홈 대시보드 미리보기(위시리스트는 등록 최신순 그대로·이 규칙에 연결하지 않음, 다녀온 곳은 `orderByListRule` 공유 유지).
+- **작업 사고**: 같은 작업 폴더에서 다른 세션이 `diag/pwa-splash-no-title` 로 브랜치를 바꿔, 첫 커밋 `8c6b263` 이 그 진단 브랜치(머지 금지) 위에 만들어지고 `origin/feat/list-sort-planned-first` 에는 main 만 푸시됐다. 별도 worktree 에서 `8c6b263` 만 cherry-pick(`27c50f4`)해 일반 푸시로 바로잡았다. **diag 브랜치에는 정렬 커밋이 남아 있다**(사용자 지시로 수정하지 않음, 머지 금지 브랜치라 main 영향 없음). 교훈 → PROJECT_CONTEXT §20.
+
+### 검증
+- 단위 테스트(`listOrder.test.ts`): 3그룹 순서, 그룹 안 순서, 내일 예정인 오래된 항목이 맨 위, 원본 불변, KST 날짜 경계(UTC 15:00·연말). vitest 299 통과, `tsc --noEmit`·`npm run lint`·`next build` 통과.
+- Vercel Preview 에서 사용자가 화면 확인 완료.
+- 로컬 확인은 `.env.local` 이 없어 `/api/auth/setup/send-verify` 가 500(`supabaseUrl is required`)으로 로그인 불가 → Preview 로 전환. 정렬과 무관해 이번 PR 에서는 손대지 않았다.

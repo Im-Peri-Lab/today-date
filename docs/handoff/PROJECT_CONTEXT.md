@@ -1,6 +1,6 @@
 # PROJECT_CONTEXT.md
 
-> **마지막 업데이트: 2026-11-13**
+> **마지막 업데이트: 2026-11-20**
 
 > 이 문서는 Today Date 프로젝트의 장기 컨텍스트입니다. 260531~261022 전체 핸드오프를 다시 읽고, 초기 컨텍스트에서 이후 작업으로 변경·확정된 내용을 반영한 최신본입니다. 새 AI에게는 이 파일과 `CURRENT_STATE.md`를 먼저 전달하고, 과거 의사결정 확인이 필요할 때만 `CHANGELOG.md`를 참고하게 하세요.
 >
@@ -507,7 +507,7 @@ Claude Code가 PR 생성 → squash 머지 → 원격·로컬 정리를 한 번�
 ### 캘린더 추가 · 설정 화면 (신규, 261103, PR #159)
 
 - 캘린더 추가(`lib/calendar/` `event.ts`·`ics.ts`·`apps.ts`·`download.ts`·`time.ts`, 훅 `useCalendarAdd`·`useCalendarTitlePrefix`·`useStoredString`, `CalendarAddButton`·`CalendarTitlePrefixDialog`) — **다녀온 곳**(`visited_at`~`visited_end_at`)과 **시간 없는 방문예정**(`planned_at`)은 종일 일정으로. 방문예정에 시작 시간(`planned_time`, 021)이 있으면 시간 지정 일정(Asia/Seoul→UTC `Z`, 시작+120분, 아래 "방문 예정 시간")으로. iOS 계열은 클라이언트 `Blob` `.ics`, 그 외는 구글 캘린더 URL. **서버 라우트·서명 토큰 없음**(PR #159 시점 DB 변경 없음, 이후 021 `planned_time` 한 컬럼만 추가), 앱 선택 UI 없음 → **SKILL §10-L**
-- **방문 예정 시간(신규, 261103, PR #161, 021)** — `activities`·`places.planned_time time null`(+CHECK `planned_time is null or planned_at is not null`). API 는 `'HH:mm'` 또는 null(`'HH:mm:ss'` 는 `'HH:mm'` 으로 정규화, `apiPlannedTimeSchema`), 날짜와의 짝 규칙은 `applyPlannedTimeRule`(같은 요청 안에서만 판정). 입력은 `PlannedTimeField`(날짜가 있으면 방문 예정일 필드 아래 "시간 (선택)" 칸이 바로 보임, 비우면 종일, 저장값 규칙 `plannedTimePayload`), 표시는 `formatKoreanTime`/`formatDotDateTime`(`lib/date.ts`) 단일 출처, `/list` 방문예정 정렬은 같은 날 종일 먼저 → 시간 오름차순 → **SKILL §10-L**
+- **방문 예정 시간(신규, 261103, PR #161, 021)** — `activities`·`places.planned_time time null`(+CHECK `planned_time is null or planned_at is not null`). API 는 `'HH:mm'` 또는 null(`'HH:mm:ss'` 는 `'HH:mm'` 으로 정규화, `apiPlannedTimeSchema`), 날짜와의 짝 규칙은 `applyPlannedTimeRule`(같은 요청 안에서만 판정). 입력은 `PlannedTimeField`(날짜가 있으면 방문 예정일 필드 아래 "시간 (선택)" 칸이 바로 보임, 비우면 종일, 저장값 규칙 `plannedTimePayload`), 표시는 `formatKoreanTime`/`formatDotDateTime`(`lib/date.ts`) 단일 출처, `/list` 위시리스트 정렬은 같은 날 종일 먼저 → 시간 오름차순(3그룹 규칙은 아래 "목록 정렬 규칙") → **SKILL §10-L**
 - 설정 화면(`/settings`) — 홈 삼선 메뉴 이동형 항목 "설정". 설정은 카드 한 장씩 쌓는다. 지금은 이 기기 `localStorage` 값(캘린더 제목 문구)뿐이라 서버 조회 없이 세션만 확인 → **SKILL §10-L**
 
 ### 방문 기간(시작~종료) — activity 전용 (신규, 260710)
@@ -539,7 +539,7 @@ ActivityCard·PlaceCard 모두 동일한 정보 줄 우선순위(memo→location
 
 ### 목록 정렬 규칙 (신규, 260729, PR #99)
 
-- 위시리스트(`status=wishlist`): 등록(`created_at`) 최신순 — 기존 동작 유지.
+- 위시리스트(`status=wishlist`, PR #171로 변경): 3그룹 — ① 오늘(KST) 이후 예정: 예정일 가까운 순 → 종일 먼저 → 시작 시간 빠른 순 ② 지난 예정: 예정일 최근 순 ③ 예정 없음: 등록(`created_at`) 최신순. 마지막 동률은 등록 최신순. "방문예정만"(`planned_only`)도 같은 규칙에서 ③만 뺀다. 그룹 경계가 "오늘"에 따라 달라 `.order()` 로는 표현할 수 없어, DB 는 등록 최신순으로 받고 API 가 응답 직전에 `sortWishlistRows(rows, todayKstIso())` 로 재정렬한다(목록에 페이지 나눔이 없어서 가능 — 나중에 페이지 나눔을 넣으면 이 규칙을 DB 로 옮겨야 한다).
 - 다녀온 곳(`status=visited`): 방문일(`visited_at`) 최신순 우선, 방문일이 같으면 마지막 수정(`updated_at`) 최신순. 방문일이 없는 레코드는 뒤로(`nullsFirst: false`).
 - 두 정렬 모두 `/api/activities`, `/api/places` GET에서 `status` 파라미터로 분기해 서버가 결정한다(클라이언트 재정렬 없음).
 - **규칙의 단일 출처(PR #146)**: `src/lib/data/listOrder.ts` `orderByListRule(query, status)`. 두 API 라우트와 홈 대시보드(`getDashboardStats`)의 "다녀온 곳" 미리보기 제목 쿼리가 같은 함수를 쓴다 — 홈 타일의 최근 항목이 `/list` 의 1번 카드와 항상 일치한다. 홈 위시리스트 미리보기는 등록(`created_at`) 최신순 그대로.
@@ -937,6 +937,8 @@ ActivityCard·PlaceCard 모두 동일한 정보 줄 우선순위(memo→location
 - **인접 아이콘 쌍의 간격은 박스 gap이 아니라 글리프 "잉크" 간 거리로 비교한다.** 박스 gap이 같아도 아이콘 모양이 다르면 거리가 달라진다(박스 gap 0에서 연필·복사하기 13.5px / 지도·▾ 17.0px, ▾ 그림이 9×5px로 작아 여백이 크다). 네 아이콘 모두 박스 안 정중앙이라 한쪽으로 쏠린 것이 아니다. 측정은 4배율 캡처의 픽셀 열 분석(Playwright)으로 한다. 사용자 시각 피드백(연필·복사하기가 헤더 23.0px 옆에서 빡빡함)으로 28/16 인접 쌍은 gap 2px(15.5/19.0px)로 통일했고, `MapLink` gap 2px→0px 변경(PR #138)을 이력(#37, 36px 박스 기준의 의도된 값) 확인 뒤 되돌린 셈이다 — 의도된 값은 이력을 보고 바꾸고, 바꾸면 근거를 문서에 남긴다(261013, PR #138·#139).
 - **상태 확인 출력은 `head`로 자르지 않는다.** `git status -sb | head -2`가 셋째 줄 `?? ios/`를 잘라 "ios/가 사라졌다"고 잘못 보고했다(실제로는 그대로 untracked). 일부만 본 출력으로 "없어졌다/사라졌다"를 단정하지 않고, 부재를 말하기 전에 전체 출력으로 재확인한다(261013).
 - **`sed` 같은 텍스트 치환은 구문 오류로 조용히 실패할 수 있고, 실패해도 명령 체인이 이어지면 커밋까지 그대로 통과한다.** "현재 브랜치" 줄을 최신 PR/커밋으로 갱신하려던 `sed`가 실패했는데 확인 없이 커밋·머지돼, 문서에 옛 값이 남은 채 PR #142가 나갔다(PR #143으로 사후 정정, 261013). "검증 명령은 `&&`로 이어 실패하면 커밋이 막히게 한다"(PR #132·#136)와 같은 결이다 — 문서 치환도 실행 성공 여부가 아니라 치환 **결과**(`git diff` 또는 `grep`)를 직접 보고 커밋한다.
+
+- **같은 작업 폴더를 여러 세션이 함께 쓰면 브랜치가 몰래 바뀐다 — 커밋 직전에 현재 브랜치를 확인하고, 동시 작업이 있으면 worktree 를 쓴다.** 정렬 작업 중 다른 세션이 `diag/pwa-splash-no-title` 로 checkout 해, 정렬 커밋이 진단 브랜치(머지 금지) 위에 만들어지고 `git push origin feat/...` 는 main 과 같은 빈 브랜치를 올렸다. Vercel 대기도 커밋에 상태가 없어 10분을 허비했다. 커밋 전 `git branch --show-current` 확인, 푸시 후 `git ls-remote` 로 원격 SHA 가 내 커밋인지 확인한다. 복구는 별도 worktree 에서 cherry-pick 후 일반 푸시(261120, PR #171).
 
 ---
 

@@ -1,6 +1,6 @@
 # CURRENT_STATE.md
 
-> **마지막 업데이트: 2026-11-18 (PR #134~#169 반영)**
+> **마지막 업데이트: 2026-11-20 (PR #134~#170 반영)**
 
 ## 현재 단계
 커플(2인) 계정 전환 완료 + 파트너 표시용 닉네임 추가 단계 — 계정 없는 단일 워크스페이스에서
@@ -55,7 +55,7 @@ PROJECT_CONTEXT §5(인증 F-01)·§20.
 는 상세 → CHANGELOG 2026-07-29~2026-08-11.
 
 ## 브랜치 상태
-- `fix/android-calendar-intent-pwa-splash` — **PR #170 머지 대기(사용자 결정)**. Android 캘린더 추가 분기(애플=.ics / Android 카카오톡 인앱=intent / 그 외 Android=.ics + 안내 토스트 / PC=구글 웹, 앱 id `apple-ics`→`ics` 정리 — 저장값 없음). 웹 intent 로 INSERT 불가 교훈 → PROJECT_CONTEXT §20. Android PWA 스플래시 하트–이름 간격은 아이콘 확대 시도 후 너무 커서 원복(revert) — 보류, 교훈 → PROJECT_CONTEXT §20. 남은 확인: 갤럭시 실기기 체크리스트(PR 본문)
+- `fix/android-calendar-intent-pwa-splash` — PR #170 squash 머지 완료, 로컬·리모트 브랜치 삭제됨. Android 캘린더 추가 분기(애플=`.ics` / Android 카카오톡 인앱=intent / 그 외 Android=`.ics` + 안내 토스트 / PC=구글 웹, 앱 id `apple-ics`→`ics`). 갤럭시 실기기(크롬 `.ics` → 앱 등록 화면·카카오 intent·안내 토스트)는 사용자가 확인 완료. 스플래시 아이콘 확대(`e767316`)는 같은 PR 안에서 revert(`ff19f4f`) — 프로덕션 아이콘 변경 없음. CI(Lint·Unit·Build, E2E, Vercel) 통과
 - `diag/android-calendar-intent-compare` — **진단 브랜치(261120, 머지 금지·유지)**. PR #170 브랜치 기준으로 `a231ecd` 를 옮기고 E안(구글 캘린더 앱 지정 VIEW intent) 추가. `/diag/calendar` 로그인 없이 열림. 결과: 크롬 계열은 C2·E 실패, A(.ics) 성공, 카카오 인앱은 INSERT 성공 → PR #170 분기의 근거
 - `diag/android-calendar-check` — **리모트에만 남은 진단 브랜치(261118 확인, 삭제하지 않음)**. 커밋 `a231ecd` "안드로이드 캘린더 추가 방식 비교 진단 페이지 (`/diag/calendar`, 머지 금지)". `main` 에 머지되지 않았고 로컬 브랜치는 없다. 안드로이드 실기기 캘린더 방식 비교용 스파이크이며, 결과를 반영할 때 별도로 판단한다. 정리(삭제)는 사용자 결정.
 - `chore/e2e-stabilization-handoff` — PR #169 squash 머지 완료(머지 커밋 `5bb580b`), 로컬·리모트 브랜치 삭제됨. 패스코드 입력 하이드레이션 대기(보류 15번) + e2e/db 스펙 파일 수 가드(보류 17번) + 핸드오프 정합성. CI(Lint·Unit·Build, E2E, Vercel) 통과
@@ -136,13 +136,14 @@ PROJECT_CONTEXT §5(인증 F-01)·§20.
 - 상세 블록 타이포 정리: 방문 기록 날짜 16px/500 → 표준 `.bodyText` 14px/400, `DetailBlock` 블록 제목 500→600(PR #158) → 상세 CHANGELOG 2026-11-03
 - 방문예정 시간(PR #161, 021): 방문예정에만 선택 시작 시간 `planned_time`(API `'HH:mm'`, 날짜·시간 짝 규칙 같은 요청 안에서 판정). 입력 "시간 (선택)" 칸(날짜가 있으면 바로 노출, 비우면 종일 — PR #163 에서 "+ 시간 추가" 버튼·다이닝 미리 채우기 제거), 표시 "2026.12.19 (토) 오후 7:00"·카드 footer 시간 말줄임, `/list` 같은 날 종일→시간순, 캘린더 시간 지정 일정(Asia/Seoul→UTC `Z`, +120분, 시간 없으면 종일 바이트 동일). 다녀온 곳 변경 없음 → 상세 CHANGELOG 2026-11-03 (021)
 - 캘린더 추가(PR #159): 방문 예정·방문 기록 → 기기 기준(iOS 계열=Blob `.ics` 다운로드, 그 외=구글 캘린더 URL) 종일 일정. 진입점 3곳(상세 블록 날짜 옆 아이콘·카드 ⋮ "캘린더에 추가"·예정일 저장 직후 토스트), 앱 선택 UI 없음. 홈 삼선 메뉴 "설정" → `/settings`(첫 항목 캘린더 제목 문구, 인라인 취소/저장), 머리말 미설정 상태의 첫 추가 직전 안내 다이얼로그 1회 → 상세 CHANGELOG 2026-11-03
+- Android 캘린더 추가(PR #170): 크롬·삼성 인터넷·PWA 는 `.ics` 다운로드 + 안내 토스트("다운로드된 파일을 열면 캘린더에 추가돼요"), 카카오톡 인앱만 intent(INSERT). 웹 intent 로는 앱 "새 일정" 화면을 열 수 없음(BROWSABLE 제약) → 상세 CHANGELOG 2026-11-20, 교훈 PROJECT_CONTEXT §20
 - E2E DB 스펙 파일 단일화(PR #168): `calendar-offer.spec.ts` 를 `isolation.spec.ts` 로 합쳐 워커 분리로 인한 스텁 상태 충돌(CI #217 실패) 수정, 테스트 수 94 그대로 → 상세 CHANGELOG 2026-11-18
 
 ## 배포 상태
 - 플랫폼: Vercel
 - URL: `https://today-date-seven.vercel.app`
 - 함수 리전: `syd1`(`vercel.json`, PR #152). 미들웨어는 엣지 실행이라 이 설정과 무관
-- 현재 브랜치: `main` (PR #169 반영 기준, 머지 커밋 `5bb580b`. PR #128 머지 커밋 `238d3de`만 예외적으로 squash가 아닌 일반 머지)
+- 현재 브랜치: `main` (PR #170 반영 기준. PR #128 머지 커밋 `238d3de`만 예외적으로 squash가 아닌 일반 머지)
 
 ## 진행 중 / 남은 작업
 
@@ -173,6 +174,7 @@ PROJECT_CONTEXT §5(인증 F-01)·§20.
 17. ~~e2e/db 스펙 파일 수 가드 — 미착수(261118 등록, PR #168 후속)~~ → **해소(PR #169, 머지 커밋 `5bb580b`, 261118)**: `src/test/e2eDbSpecGuard.test.ts` 단위 테스트가 `e2e/db/*.spec.ts` 가 2개 이상이면 실패한다. `npm test`(CI Unit Test 단계)에서 돌아간다. 설정 로드 시점 체크 대신 단위 테스트를 고른 이유: 설정 로드는 E2E 실행 때만 일어나 CI 의 Unit Test 단계에서는 잡히지 않는다. 배경 → CHANGELOG 2026-11-18.
 18. **Sentry/관측성 연동 — 미착수(261118 등록)**
 19. **getDashboardStats 에러 경계 개선 — 미착수(261118 등록)**
+20. **Android PWA 스플래시 하트–이름 간격 — 네이티브 앱 단계로 보류(261120, PR #170)**: 크롬이 manifest 로 자동 생성하는 고정 레이아웃이라 웹에서는 아이콘으로만 조정 가능. 아이콘 하트 확대(any 85%·maskable 64%)는 실기기에서 너무 커서 원복했다. 아이콘 확대 말고 네이티브 앱 셸(`chore/capacitor-init`) 스플래시에서 다룬다 → PROJECT_CONTEXT §20
 
 **그 외 남은 작업**
 - **`chore/capacitor-init` → `main` 최종 머지**: PR #111~#116 모두 병합 완료 상태지만, 전체

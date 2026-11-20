@@ -3,13 +3,7 @@ import localFont from 'next/font/local'
 import NextTopLoader from 'nextjs-toploader'
 import { Toaster } from '@/components/ui/sonner'
 import { NativeBootOverlay } from '@/components/boot/NativeBootOverlay'
-import { PwaSplashDismiss } from '@/components/boot/PwaSplashDismiss'
-import {
-  PWA_SPLASH_CSS,
-  PWA_SPLASH_HEAD_SCRIPT,
-  PWA_SPLASH_HTML,
-  pwaStartupImages,
-} from '@/components/boot/pwaSplash.mjs'
+import { pwaStartupImages } from '@/components/boot/pwaSplash.mjs'
 import { Providers } from './providers'
 import { cn } from '@/lib/utils'
 import './globals.css'
@@ -31,8 +25,8 @@ export const metadata: Metadata = {
   manifest: '/manifest.json',
   // manifest name 은 Android 로딩 화면 문구를 숨기려고 "\u200B"(폭 없는 공백, 보이지 않는 문자)다(PROJECT_CONTEXT §20).
   // iOS "홈 화면에 추가" 기본 이름이 그 값을 쓰지 않도록 apple-mobile-web-app-title 로 고정한다.
-  // startupImage: iOS 홈 화면 실행 시 첫 페인트 전까지 보이는 시작 이미지(기기별·라이트/다크).
-  // 마크업·기기 목록의 단일 출처는 components/boot/pwaSplash.mjs (PROJECT_CONTEXT §20).
+  // startupImage: iOS 홈 화면 실행 시 첫 페인트 전까지 보이는 시작 이미지(기기별 1장, 색 모드 분기 없음).
+  // 기기 목록·생성용 마크업의 단일 출처는 components/boot/pwaSplash.mjs (PROJECT_CONTEXT §20).
   appleWebApp: { title: 'Today Date', startupImage: pwaStartupImages() },
   // iOS 홈 화면 아이콘은 manifest icons 가 아니라 apple-touch-icon 을 쓴다 — 없으면 이름 첫 글자("T")로 나온다.
   // 기존 icon-512 와 같은 모양(하트 약 52%, 배경 #f5f3ff)의 180px 이다(PROJECT_CONTEXT §20).
@@ -56,16 +50,8 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    // suppressHydrationWarning: head 스크립트가 하이드레이션 전에 html 에 pwa-splash 클래스를 붙인다.
-    <html lang="ko" className={cn('font-sans', geistSans.variable)} suppressHydrationWarning>
-      <head>
-        <style dangerouslySetInnerHTML={{ __html: PWA_SPLASH_CSS }} />
-        <script dangerouslySetInnerHTML={{ __html: PWA_SPLASH_HEAD_SCRIPT }} />
-      </head>
+    <html lang="ko" className={cn('font-sans', geistSans.variable)}>
       <body className={`${geistMono.variable} antialiased`}>
-        {/* iOS 홈 화면 PWA 전용 스플래시 — 그 외 환경에선 display:none. 시작 이미지와 같은 자리·크기 */}
-        <div id="pwa-splash" aria-hidden="true" dangerouslySetInnerHTML={{ __html: PWA_SPLASH_HTML }} />
-        <PwaSplashDismiss />
         {/* color = --s-active-line (#7c3aed). CSS 변수는 JS inline-style 주입 방식 특성상 직접 참조 불가 */}
         <NextTopLoader color="#7c3aed" height={2} showSpinner={false} />
         <NativeBootOverlay />

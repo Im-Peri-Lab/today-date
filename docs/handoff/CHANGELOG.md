@@ -1284,7 +1284,7 @@ PR #161 의 "+ 시간 추가" 버튼 → 탭하면 칸 펼침 → 다이닝 미�
 ### 검증
 - vitest 294 통과(UA 분기: 카카오 Android/iPhone, 크롬 Android, 삼성 인터넷, iPhone, Mac, PC + intent URL 6건), `tsc --noEmit`, `npm run lint`, `next build` 통과.
 - 갤럭시 실기기(사용자 확인): 크롬 `.ics` → 앱 등록 화면 ✅ / 카카오톡 인앱 intent ✅ / 안내 토스트 ✅.
-- PR #170 CI(Lint·Unit·Build, E2E, Vercel) 통과 후 squash 머지, 브랜치 `fix/android-calendar-intent-pwa-splash` 삭제. 진단 브랜치 `diag/android-calendar-intent-compare` 는 유지.
+- PR #170 CI(Lint·Unit·Build, E2E, Vercel) 통과 후 squash 머지(머지 커밋 `c5de098`), 브랜치 `fix/android-calendar-intent-pwa-splash` 삭제. 진단 브랜치 `diag/android-calendar-intent-compare` 는 유지.
 
 ## 2026-11-20 v2 — `/list` 위시리스트 3그룹 정렬: 다가오는 예정 → 지난 예정 → 예정 없음 (PR #171)
 
@@ -1328,7 +1328,7 @@ PR #161 의 "+ 시간 추가" 버튼 → 탭하면 칸 펼침 → 다이닝 미�
 ### 검증
 - vitest 299, `tsc --noEmit`, `npm run lint`, `next build` 통과. 빌드 HTML `<head>` 에 `apple-mobile-web-app-title` 출력 확인.
 - 코드에서 manifest `name` 을 읽는 곳 없음(화면·이메일·`metadata.title` 의 "Today Date" 는 별도 하드코딩).
-- PR #173 CI(Lint·Unit·Build, E2E, Vercel) 통과 후 squash 머지, 브랜치·worktree `fix/pwa-splash-hide-title` 삭제.
+- PR #173 CI(Lint·Unit·Build, E2E, Vercel) 통과 후 squash 머지(머지 커밋 `e8d84fe`), 브랜치·worktree `fix/pwa-splash-hide-title` 삭제.
 
 ## 2026-11-20 — iOS 홈 화면 아이콘이 "T" 글자로 나오는 문제: apple-touch-icon 복원 (PR #174)
 
@@ -1342,5 +1342,5 @@ PR #161 의 "+ 시간 추가" 버튼 → 탭하면 칸 펼침 → 다이닝 미�
 ### 검증
 - vitest 299, `tsc --noEmit`, `npm run lint`, `next build` 통과. 빌드 HTML `<head>` 에 apple-touch-icon 링크 확인.
 - 프리뷰(Vercel 보호 → Vercel 연동 도구, 23시간 임시 공유 링크 생성): `/lock` `<head>` 링크 확인, `/apple-touch-icon.png` 200 `image/png` 5872바이트.
-- PR #174 CI(Lint·Unit·Build, E2E, Vercel) 통과 후 squash 머지, 브랜치·worktree `fix/ios-apple-touch-icon` 삭제.
+- PR #174 CI(Lint·Unit·Build, E2E, Vercel) 통과 후 squash 머지(머지 커밋 `2a80cb8`), 브랜치·worktree `fix/ios-apple-touch-icon` 삭제.
 - **남은 확인**: iPhone 실기기에서 "홈 화면에 추가" 아이콘이 하트인지(기존 아이콘 삭제 후 새로 추가).

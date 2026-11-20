@@ -61,6 +61,8 @@ PROJECT_CONTEXT §5(인증 F-01)·§20.
 - `feat/list-sort-planned-first` — PR #171 squash 머지, 로컬·리모트 브랜치 삭제. `/list` 위시리스트 3그룹 정렬(다가오는 예정 → 지난 예정 → 예정 없음, KST 기준). Preview 화면 확인은 사용자가 완료
 - `diag/pwa-splash-no-title` — **다른 세션의 진단 브랜치(머지 금지)**. 브랜치 충돌 사고로 정렬 커밋 `8c6b263` 이 V1~V3 사이에 섞여 있다(PR #171 과 같은 내용). 사용자 지시로 수정하지 않음 → 상세 CHANGELOG 2026-11-20 v2
 - `fix/android-calendar-intent-pwa-splash` — PR #170 squash 머지 완료, 로컬·리모트 브랜치 삭제됨. Android 캘린더 추가 분기(애플=`.ics` / Android 카카오톡 인앱=intent / 그 외 Android=`.ics` + 안내 토스트 / PC=구글 웹, 앱 id `apple-ics`→`ics`). 갤럭시 실기기(크롬 `.ics` → 앱 등록 화면·카카오 intent·안내 토스트)는 사용자가 확인 완료. 스플래시 아이콘 확대(`e767316`)는 같은 PR 안에서 revert(`ff19f4f`) — 프로덕션 아이콘 변경 없음. CI(Lint·Unit·Build, E2E, Vercel) 통과
+- `fix/pwa-splash-hide-title` — PR #173 squash 머지 완료, 로컬·리모트 브랜치·worktree 삭제됨. manifest `name` → `"\u200B"`(Android 로딩 화면 문구 숨김) + `appleWebApp.title`. CI(Lint·Unit·Build, E2E, Vercel) 통과
+- `diag/pwa-splash-no-title` — **진단 브랜치(261120, 머지 금지·유지)**. V1(name 삭제)·V2(`" "`)·V3(`"\u200B"`) + 하트 60% 아이콘. V3 만 문구가 사라짐 → PR #173 근거. ⚠️ 다른 세션 커밋 `8c6b263`(위시리스트 정렬, main 에는 #171 로 별도 머지)이 이 브랜치에 섞여 있다(동시 세션 사고, CLAUDE.md 규칙 신설 계기)
 - `diag/android-calendar-intent-compare` — **진단 브랜치(261120, 머지 금지·유지)**. PR #170 브랜치 기준으로 `a231ecd` 를 옮기고 E안(구글 캘린더 앱 지정 VIEW intent) 추가. `/diag/calendar` 로그인 없이 열림. 결과: 크롬 계열은 C2·E 실패, A(.ics) 성공, 카카오 인앱은 INSERT 성공 → PR #170 분기의 근거
 - `diag/android-calendar-check` — **리모트에만 남은 진단 브랜치(261118 확인, 삭제하지 않음)**. 커밋 `a231ecd` "안드로이드 캘린더 추가 방식 비교 진단 페이지 (`/diag/calendar`, 머지 금지)". `main` 에 머지되지 않았고 로컬 브랜치는 없다. 안드로이드 실기기 캘린더 방식 비교용 스파이크이며, 결과를 반영할 때 별도로 판단한다. 정리(삭제)는 사용자 결정.
 - `chore/e2e-stabilization-handoff` — PR #169 squash 머지 완료(머지 커밋 `5bb580b`), 로컬·리모트 브랜치 삭제됨. 패스코드 입력 하이드레이션 대기(보류 15번) + e2e/db 스펙 파일 수 가드(보류 17번) + 핸드오프 정합성. CI(Lint·Unit·Build, E2E, Vercel) 통과
@@ -181,7 +183,7 @@ PROJECT_CONTEXT §5(인증 F-01)·§20.
 17. ~~e2e/db 스펙 파일 수 가드 — 미착수(261118 등록, PR #168 후속)~~ → **해소(PR #169, 머지 커밋 `5bb580b`, 261118)**: `src/test/e2eDbSpecGuard.test.ts` 단위 테스트가 `e2e/db/*.spec.ts` 가 2개 이상이면 실패한다. `npm test`(CI Unit Test 단계)에서 돌아간다. 설정 로드 시점 체크 대신 단위 테스트를 고른 이유: 설정 로드는 E2E 실행 때만 일어나 CI 의 Unit Test 단계에서는 잡히지 않는다. 배경 → CHANGELOG 2026-11-18.
 18. **Sentry/관측성 연동 — 미착수(261118 등록)**
 19. **getDashboardStats 에러 경계 개선 — 미착수(261118 등록)**
-20. **Android PWA 스플래시 하트–이름 간격 — 네이티브 앱 단계로 보류(261120, PR #170)**: 크롬이 manifest 로 자동 생성하는 고정 레이아웃이라 웹에서는 아이콘으로만 조정 가능. 아이콘 하트 확대(any 85%·maskable 64%)는 실기기에서 너무 커서 원복했다. 아이콘 확대 말고 네이티브 앱 셸(`chore/capacitor-init`) 스플래시에서 다룬다 → PROJECT_CONTEXT §20
+20. ~~Android PWA 스플래시 하트–이름 간격~~ → **해소(PR #173, 261120)**: 아이콘 확대는 하트가 너무 커서 원복(PR #170). 대신 manifest `name` 을 `"\u200B"` 로 두어 로딩 화면 문구를 숨겼다(갤럭시 V3 실기기 확인, 아이콘 원본 유지). iOS 홈 화면 이름은 `apple-mobile-web-app-title` 로 고정. 남은 확인: 갤럭시 기존 설치 기기의 이름 변경 확인 창, 최근 앱 목록 이름, iPhone 새로 추가 시 이름 → PROJECT_CONTEXT §20
 
 **그 외 남은 작업**
 - **`chore/capacitor-init` → `main` 최종 머지**: PR #111~#116 모두 병합 완료 상태지만, 전체

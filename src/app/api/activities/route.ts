@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { getSupabaseClient } from '@/lib/supabase/client'
 import { requireCoupleScope } from '@/lib/auth/coupleScope'
-import { orderByListRule } from '@/lib/data/listOrder'
+import { orderByListRule, sortWishlistRows } from '@/lib/data/listOrder'
+import { todayKstIso } from '@/lib/date'
 import { readJsonBody, zodErrorResponse } from '@/lib/api/validation'
 import {
   apiTitleSchema,
@@ -69,11 +70,11 @@ export async function GET(req: NextRequest) {
       .eq('couple_id', scope.coupleId)
       .eq('status', status)
 
-    // 다녀온 곳: 다녀온 날짜 최신순, 같으면 마지막 수정 최신순 / 그 외: 등록 최신순.
-    // 규칙은 홈 대시보드 미리보기와 공유한다(§ lib/data/listOrder.ts).
-    // 방문예정만(위시리스트 전용): 예정일 있는 행만 + 임박순.
+    // 다녀온 곳: 다녀온 날짜 최신순, 같으면 마지막 수정 최신순 / 위시리스트: 아래에서 3그룹 재정렬.
+    // 규칙은 § lib/data/listOrder.ts 한 곳에 있다.
+    // 방문예정만(위시리스트 전용): 예정일 있는 행만(정렬 규칙은 같고 "예정 없음" 그룹만 빠진다).
     const plannedOnly = status === 'wishlist' && planned_only === 'true'
-    query = orderByListRule(query, status, plannedOnly)
+    query = orderByListRule(query, status)
     if (plannedOnly) query = query.not('planned_at', 'is', null)
 
     const ids = splitCommaIds(category_id)
@@ -87,8 +88,9 @@ export async function GET(req: NextRequest) {
       query = query.or(`title.ilike.%${term}%,memo.ilike.%${term}%`)
     }
 
-    const { data, error } = await query
+    const { data: rows, error } = await query
     if (error) throw error
+    const data = status === 'wishlist' && rows ? sortWishlistRows(rows, todayKstIso()) : rows
 
     return NextResponse.json({ data })
   } catch (err) {

@@ -147,3 +147,19 @@ export function formatDotDateTime(iso?: string | null, time?: string | null): st
   const t = formatKoreanTime(time)
   return date && t ? `${date} ${t}` : date
 }
+
+/**
+ * 한국 시간(Asia/Seoul) 기준 오늘 날짜(ISO 'YYYY-MM-DD'). 위시리스트 정렬의 "오늘" 경계용.
+ * 서버(배포 환경 UTC)에서 실행돼도 KST 자정 기준으로 날짜가 바뀌게 타임존을 못 박는다.
+ * (en-CA 로케일은 'YYYY-MM-DD' 형식으로 포맷한다)
+ */
+const KST_ISO_DATE_FORMAT = new Intl.DateTimeFormat('en-CA', {
+  timeZone: 'Asia/Seoul',
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+})
+
+export function todayKstIso(now: Date = new Date()): string {
+  return KST_ISO_DATE_FORMAT.format(now)
+}

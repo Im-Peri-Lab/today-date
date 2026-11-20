@@ -1,6 +1,6 @@
 # CHANGELOG.md
 
-> **마지막 업데이트: 2026-11-20 (PR #134~#171 반영)**
+> **마지막 업데이트: 2026-11-20 (PR #134~#172 반영)**
 
 > 260531~261022 핸드오프 전체를 날짜순으로 기록한 변경 이력입니다. 새 AI는 일반적으로 `PROJECT_CONTEXT.md`와 `CURRENT_STATE.md`만 먼저 읽고, 과거 판단 근거가 필요할 때 이 문서를 참고하세요.
 
@@ -1303,3 +1303,14 @@ PR #161 의 "+ 시간 추가" 버튼 → 탭하면 칸 펼침 → 다이닝 미�
 - 단위 테스트(`listOrder.test.ts`): 3그룹 순서, 그룹 안 순서, 내일 예정인 오래된 항목이 맨 위, 원본 불변, KST 날짜 경계(UTC 15:00·연말). vitest 299 통과, `tsc --noEmit`·`npm run lint`·`next build` 통과.
 - Vercel Preview 에서 사용자가 화면 확인 완료.
 - 로컬 확인은 `.env.local` 이 없어 `/api/auth/setup/send-verify` 가 500(`supabaseUrl is required`)으로 로그인 불가 → Preview 로 전환. 정렬과 무관해 이번 PR 에서는 손대지 않았다.
+
+## 2026-11-20 v3 — 동시 세션 안전 규칙(리포 `CLAUDE.md` 신설) + worktree 정리 (PR #172)
+
+### 변경
+- **리포 루트 `CLAUDE.md` 신설**(이전에는 추적 중인 지침 파일 없음): 핸드오프 문서·디자인 스킬 위치 안내 + "동시 세션 안전 규칙" 4개 — ① 새 브랜치 작업은 전용 worktree(`.claude/worktrees/<이름>`, `.git/info/exclude` 로 이미 무시됨)에서, 원래 작업 폴더의 브랜치는 바꾸지 않음 ② 커밋·푸시 직전 `git branch --show-current` 확인, 다르거나 내가 수정하지 않은 변경이 보이면 멈추고 보고, 푸시 후 `git ls-remote` 로 원격 SHA 확인 ③ 포트 3000 사용 중이면 다른 포트, worktree 에는 `.env.local` 이 없으니 필요하면 보고 ④ 머지 후 내가 만든 worktree 만 제거. 배경은 2026-11-20 v2 의 브랜치 꼬임 사고.
+- **worktree 정리(코드 변경 없음, PR 밖에서 진행)**: 남아 있던 detached worktree 2개를 보존 후 제거.
+  - `capacitor-app-id-change`(detached `e159d31`, `chore/capacitor-init` 포함) — 커밋 안 된 `project.pbxproj`(`DEVELOPMENT_TEAM` 2줄, 같은 값이 이미 `origin/chore/capacitor-init` 에 공개)를 `wip/capacitor-app-id-change`(`9c56088`)로 커밋·푸시. 추적 안 하는 `swiftpm/Package.resolved`(Xcode 재생성)·`.agents/` SKILL 사본(`ace0e3c` 와 동일)은 커밋하지 않고 함께 제거.
+  - `undo-dialog-diagnosis`(detached `a715202`, 어느 브랜치에도 없던 커밋) — `backup/undo-dialog-diagnosis` 브랜치를 붙여 푸시.
+
+### 검증
+- 문서만 변경(코드 없음). 사용자 diff 확인 후 진행.

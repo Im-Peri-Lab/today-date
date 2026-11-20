@@ -1,6 +1,6 @@
 # CHANGELOG.md
 
-> **마지막 업데이트: 2026-11-18 (PR #134~#169 반영)**
+> **마지막 업데이트: 2026-11-20 (PR #134~#170 반영)**
 
 > 260531~261022 핸드오프 전체를 날짜순으로 기록한 변경 이력입니다. 새 AI는 일반적으로 `PROJECT_CONTEXT.md`와 `CURRENT_STATE.md`만 먼저 읽고, 과거 판단 근거가 필요할 때 이 문서를 참고하세요.
 
@@ -1267,3 +1267,21 @@ PR #161 의 "+ 시간 추가" 버튼 → 탭하면 칸 펼침 → 다이닝 미�
 - 수정 효과 비교: 잠금·로그인 관련 chromium-db 테스트 29개를 `--workers=1 --repeat-each=15`(435회)로 main 과 이 브랜치에서 각각 실행 → 둘 다 435 passed, 실패 0. main 에서도 재현되지 않아 로컬에서는 수정 효과를 입증하지 못했다. 보류 15번은 "수정 반영, CI 관찰 중"으로 둔다.
 - `keyboard.type` 사용처 점검: `isolation.spec.ts` 밖에는 없다(헬퍼 `passcode.ts` 내부 1곳뿐).
 - PR #169 CI 통과(Lint·Unit·Build, E2E, Vercel) 후 squash 머지(머지 커밋 `5bb580b`), 브랜치 `chore/e2e-stabilization-handoff` 삭제.
+
+## 2026-11-20 — Android 캘린더 추가: `.ics` + 안내 토스트, 카카오톡 인앱만 intent / 스플래시 간격 보류 (PR #170)
+
+### 변경
+- **배경**: Android 는 캘린더 추가가 구글 웹 작성 화면으로 가서 모바일 앱 등록까지 이어지지 않았다(PR #159 이후 "구글/Android 실기기 미확인").
+- **1차 시도(intent, 실패)**: `buildAndroidCalendarIntentUrl`(ACTION_INSERT + `vnd.android.cursor.item/event`, 종일 = UTC 자정·배타 종료, 시간 지정 = `timedEventStamps`, `S.browser_fallback_url` = 구글 웹)로 기기 캘린더 앱을 열려 했다. 실기기 결과: 카카오톡 인앱만 앱 선택창 + 등록 화면, 크롬·삼성 인터넷·PWA 는 fallback(구글 웹)으로 갔다.
+- **원인**: Chromium `ExternalNavigationHandler.sanitizeQueryIntentActivitiesIntent` 가 `intent://` 에 `CATEGORY_BROWSABLE` 을 붙이고 component·selector 를 지운다(원문 확인). 캘린더 앱의 INSERT 필터는 `DEFAULT` 만 있어(AOSP Calendar manifest) 해석되지 않는다.
+- **진단**: `diag/android-calendar-intent-compare`(PR #170 브랜치 기준, `a231ecd` 이식 + E안, 머지 금지·유지) `/diag/calendar` 로 갤럭시에서 비교. 크롬 계열: C2(INSERT+fallback) 실패, E(구글 캘린더 앱 지정 VIEW intent `package=com.google.android.calendar`) 실패, B(eventedit) 웹 화면, **A(`.ics` 다운로드) → 파일 열기 → 앱 선택 → 앱 등록 화면 성공**.
+- **최종 분기**(`detectDefaultCalendarAppId`): 애플 기기 = `ics` / Android + 카카오톡 인앱(UA `KAKAOTALK`) = `android-intent` / 그 외 Android(크롬·삼성 인터넷·PWA) = `android-ics`(`.ics` + 안내 토스트) / PC = `google`.
+  - 앱 id `apple-ics` → `ics`(애플·Android 공용 `.ics`). 캘린더 앱 id 는 저장되지 않아 호환성 영향 없음.
+  - 안내 토스트 "다운로드된 파일을 열면 캘린더에 추가돼요": `CalendarApp.hint`(`ANDROID_ICS_HINT`) → `useCalendarAdd` 가 `id: 'calendar-open-hint'` 로 띄움(연속 추가에도 쌓이지 않음). 일정 수정 토스트의 "다시 추가"는 액션 클릭으로 그 토스트가 닫힌 뒤 안내가 떠 겹치지 않는다. SKILL §10-L 반영.
+- **스플래시 하트–이름 간격(보류)**: 크롬이 manifest 로 자동 생성하는 고정 레이아웃이라 아이콘으로만 조정 가능. any 아이콘 하트 85%·maskable 64%·iOS `apple-touch-icon`(기존 모양) 으로 시도했으나(`e767316`) 실기기에서 하트가 너무 커서 어색해 `git revert`(`ff19f4f`). 아이콘·manifest·layout 은 이전과 동일. **네이티브 앱 단계로 보류.**
+- 교훈 2건 → PROJECT_CONTEXT §20 ("웹 intent 로 INSERT 불가(BROWSABLE 제약), `.ics` 가 웹 최선", "스플래시 간격 보류 — 아이콘 확대 시도 후 원복").
+
+### 검증
+- vitest 294 통과(UA 분기: 카카오 Android/iPhone, 크롬 Android, 삼성 인터넷, iPhone, Mac, PC + intent URL 6건), `tsc --noEmit`, `npm run lint`, `next build` 통과.
+- 갤럭시 실기기(사용자 확인): 크롬 `.ics` → 앱 등록 화면 ✅ / 카카오톡 인앱 intent ✅ / 안내 토스트 ✅.
+- PR #170 CI(Lint·Unit·Build, E2E, Vercel) 통과 후 squash 머지, 브랜치 `fix/android-calendar-intent-pwa-splash` 삭제. 진단 브랜치 `diag/android-calendar-intent-compare` 는 유지.

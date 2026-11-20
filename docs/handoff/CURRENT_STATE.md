@@ -1,6 +1,6 @@
 # CURRENT_STATE.md
 
-> **마지막 업데이트: 2026-11-21 (PR #134~#176 반영)**
+> **마지막 업데이트: 2026-11-21 (PR #134~#177 반영)**
 
 ## 현재 단계
 커플(2인) 계정 전환 완료 + 파트너 표시용 닉네임 추가 단계 — 계정 없는 단일 워크스페이스에서
@@ -55,6 +55,7 @@ PROJECT_CONTEXT §5(인증 F-01)·§20.
 는 상세 → CHANGELOG 2026-07-29~2026-08-11.
 
 ## 브랜치 상태
+- `feat/list-card-dday` — PR #177 squash 머지, 로컬·리모트 브랜치·worktree 삭제. 위시리스트 카드 D-day(`D-n`/`D-DAY`/`D+n`, KST). Preview 화면 확인은 사용자가 완료
 - `feat/ios-pwa-splash` — PR #176 squash 머지, 로컬·리모트 브랜치·worktree 삭제. iOS 홈 화면 PWA 시작 이미지 22장(배경 `#ede9fe`, 아이콘 그라데이션 하트 + 타이틀). HTML 스플래시 레이어는 위치 어긋남으로 제거. 진단 브랜치 `diag/ios-splash-metrics` 는 머지 없이 삭제. 실기기 확인은 사용자가 완료
 - `feat/visited-date-default-planned` — PR #175 squash 머지, 로컬·리모트 브랜치·worktree 삭제. '다녀왔어요' 방문 날짜 기본값 = 방문예정일(오늘/지난 날짜일 때), 없거나 미래면 오늘(기기 로컬). Preview 화면 확인은 사용자가 완료
 - `docs/concurrent-session-worktree-rule` — PR #172 squash 머지, 로컬·리모트 브랜치·worktree 삭제. 리포 루트 `CLAUDE.md` 신설(동시 세션 안전 규칙: 전용 worktree·커밋 전 브랜치 확인·포트/`.env.local`·자기 worktree 만 제거)
@@ -148,6 +149,7 @@ PROJECT_CONTEXT §5(인증 F-01)·§20.
 - 상세 블록 타이포 정리: 방문 기록 날짜 16px/500 → 표준 `.bodyText` 14px/400, `DetailBlock` 블록 제목 500→600(PR #158) → 상세 CHANGELOG 2026-11-03
 - 방문예정 시간(PR #161, 021): 방문예정에만 선택 시작 시간 `planned_time`(API `'HH:mm'`, 날짜·시간 짝 규칙 같은 요청 안에서 판정). 입력 "시간 (선택)" 칸(날짜가 있으면 바로 노출, 비우면 종일 — PR #163 에서 "+ 시간 추가" 버튼·다이닝 미리 채우기 제거), 표시 "2026.12.19 (토) 오후 7:00"·카드 footer 시간 말줄임, `/list` 같은 날 종일→시간순, 캘린더 시간 지정 일정(Asia/Seoul→UTC `Z`, +120분, 시간 없으면 종일 바이트 동일). 다녀온 곳 변경 없음 → 상세 CHANGELOG 2026-11-03 (021)
 - 캘린더 추가(PR #159): 방문 예정·방문 기록 → 기기 기준(iOS 계열=Blob `.ics` 다운로드, 그 외=구글 캘린더 URL) 종일 일정. 진입점 3곳(상세 블록 날짜 옆 아이콘·카드 ⋮ "캘린더에 추가"·예정일 저장 직후 토스트), 앱 선택 UI 없음. 홈 삼선 메뉴 "설정" → `/settings`(첫 항목 캘린더 제목 문구, 인라인 취소/저장), 머리말 미설정 상태의 첫 추가 직전 안내 다이얼로그 1회 → 상세 CHANGELOG 2026-11-03
+- 위시리스트 카드 D-day(PR #177): 방문예정일 footer 끝에 `D-n`·`D-DAY`(굵게)는 `--s-accent`, `D+n` 은 `--destructive`. 오늘은 KST(`todayKstIso`, 마운트 후 계산). 날짜 상태 색 규칙 → SKILL §8-A, 상세 CHANGELOG 2026-11-21
 - `/list` 위시리스트 3그룹 정렬(PR #171): 오늘 이후 예정(가까운 순·종일 먼저·시간 순) → 지난 예정(최근 순) → 예정 없음(등록 최신순), "방문예정만"은 ③만 제외. API 응답 직전 `sortWishlistRows` 재정렬, "오늘"은 KST → 상세 CHANGELOG 2026-11-20 v2
 - Android 캘린더 추가(PR #170): 크롬·삼성 인터넷·PWA 는 `.ics` 다운로드 + 안내 토스트("다운로드된 파일을 열면 캘린더에 추가돼요"), 카카오톡 인앱만 intent(INSERT). 웹 intent 로는 앱 "새 일정" 화면을 열 수 없음(BROWSABLE 제약) → 상세 CHANGELOG 2026-11-20, 교훈 PROJECT_CONTEXT §20
 - E2E DB 스펙 파일 단일화(PR #168): `calendar-offer.spec.ts` 를 `isolation.spec.ts` 로 합쳐 워커 분리로 인한 스텁 상태 충돌(CI #217 실패) 수정, 테스트 수 94 그대로 → 상세 CHANGELOG 2026-11-18
@@ -156,7 +158,7 @@ PROJECT_CONTEXT §5(인증 F-01)·§20.
 - 플랫폼: Vercel
 - URL: `https://today-date-seven.vercel.app`
 - 함수 리전: `syd1`(`vercel.json`, PR #152). 미들웨어는 엣지 실행이라 이 설정과 무관
-- 현재 브랜치: `main` (PR #172 반영 기준. PR #128 머지 커밋 `238d3de`만 예외적으로 squash가 아닌 일반 머지)
+- 현재 브랜치: `main` (PR #177 반영 기준. PR #128 머지 커밋 `238d3de`만 예외적으로 squash가 아닌 일반 머지)
 
 ## 진행 중 / 남은 작업
 

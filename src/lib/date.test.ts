@@ -1,5 +1,14 @@
 import { describe, it, expect } from 'vitest'
-import { formatDotDateTime, formatKoreanTime, nextDayIso, prevDayIso, toHHmm } from './date'
+import {
+  daysUntil,
+  formatDday,
+  formatDotDateTime,
+  formatKoreanTime,
+  nextDayIso,
+  prevDayIso,
+  todayKstIso,
+  toHHmm,
+} from './date'
 
 describe('nextDayIso', () => {
   it('같은 달 안에서 하루 올린다', () => {
@@ -68,5 +77,41 @@ describe('formatDotDateTime / toHHmm', () => {
   it('toHHmm 은 초를 잘라낸다', () => {
     expect(toHHmm('19:00:00')).toBe('19:00')
     expect(toHHmm(null)).toBe('')
+  })
+})
+
+describe('daysUntil / formatDday (위시리스트 카드 D-day)', () => {
+  const dday = (iso: string, today: string) => formatDday(daysUntil(iso, today)!)
+
+  it('오늘 / 내일 / 어제', () => {
+    expect(dday('2026-11-21', '2026-11-21')).toBe('D-DAY')
+    expect(dday('2026-11-22', '2026-11-21')).toBe('D-1')
+    expect(dday('2026-11-20', '2026-11-21')).toBe('D+1')
+  })
+
+  it('월말 경계(30일·31일·2월·윤년)', () => {
+    expect(dday('2026-12-01', '2026-11-30')).toBe('D-1')
+    expect(dday('2026-11-30', '2026-12-01')).toBe('D+1')
+    expect(dday('2027-02-01', '2027-01-31')).toBe('D-1')
+    expect(dday('2027-03-01', '2027-02-28')).toBe('D-1')
+    expect(dday('2028-03-01', '2028-02-28')).toBe('D-2') // 2028 윤년(2/29)
+  })
+
+  it('연말 경계', () => {
+    expect(dday('2027-01-01', '2026-12-31')).toBe('D-1')
+    expect(dday('2026-12-31', '2027-01-01')).toBe('D+1')
+    expect(dday('2027-12-31', '2026-12-31')).toBe('D-365')
+  })
+
+  it('KST 자정 전후: todayKstIso 와 함께 쓰면 UTC 15:00 에 하루 줄어든다', () => {
+    const before = todayKstIso(new Date('2026-11-20T14:59:59Z')) // KST 11-20 23:59:59
+    const after = todayKstIso(new Date('2026-11-20T15:00:00Z')) // KST 11-21 00:00
+    expect(dday('2026-11-21', before)).toBe('D-1')
+    expect(dday('2026-11-21', after)).toBe('D-DAY')
+  })
+
+  it('해석할 수 없는 값은 null', () => {
+    expect(daysUntil('', '2026-11-21')).toBeNull()
+    expect(daysUntil('2026-11-21', 'bad')).toBeNull()
   })
 })

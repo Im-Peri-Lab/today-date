@@ -323,6 +323,23 @@
   color: var(--s-accent, #7c3aed);
 }
 
+/*
+ * 위시리스트 카드 footer 의 D-day(PlannedFooterLabel). 새 색 없이 기존 토큰만 쓴다.
+ * 다가오는·오늘 = --s-accent(카테고리 아이콘과 같은 강조색), 지난 = --destructive(삭제 글자와 같은 빨강,
+ * "예정일이 지나 수정이 필요함" 신호). 오늘(D-DAY)만 굵게.
+ */
+.ddayUpcoming {
+  color: var(--s-accent, #7c3aed);
+  font-weight: 500;
+}
+.ddayPast {
+  color: hsl(var(--destructive));
+  font-weight: 500;
+}
+.ddayToday {
+  font-weight: 700;
+}
+
 /* ── 브랜드 헤더 (홈 상단, 인증 헤더보다 작게) ──── */
 .miniHeart {
   /* 크기는 Tailwind(h-/w-)로 반응형 지정 — 모듈은 글로우만 */

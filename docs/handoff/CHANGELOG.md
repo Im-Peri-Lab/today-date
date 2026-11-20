@@ -1,6 +1,6 @@
 # CHANGELOG.md
 
-> **마지막 업데이트: 2026-11-21 (PR #134~#178 반영)**
+> **마지막 업데이트: 2026-11-21 (PR #134~#179 반영)**
 
 > 260531~261022 핸드오프 전체를 날짜순으로 기록한 변경 이력입니다. 새 AI는 일반적으로 `PROJECT_CONTEXT.md`와 `CURRENT_STATE.md`만 먼저 읽고, 과거 판단 근거가 필요할 때 이 문서를 참고하세요.
 
@@ -1409,3 +1409,16 @@ PR #161 의 "+ 시간 추가" 버튼 → 탭하면 칸 펼침 → 다이닝 미�
 ### 검증
 - 코드 변경 없음, `CLAUDE.md` 변경 없음. vitest 311 통과, `next build` 통과. 로컬 lint 는 위 충돌로 worktree 에서 실행되지 않아 CI Lint 로 확인.
 - 로컬 확인은 사용자가 완료.
+
+## 2026-11-21 v3 — `.eslintrc.json` `root: true`: 리포 안 worktree 로컬 lint 충돌 해소 (PR #179)
+
+### 변경
+- **원인**: `.eslintrc.json` 에 `root: true` 가 없어 ESLint 8 이 상위 폴더 설정을 계속 찾아 올라갔다. worktree(`.claude/worktrees/<이름>`)에서는 원래 리포 루트 `.eslintrc.json`(`../../../.eslintrc.json`)까지 읽어, 서로 다른 `node_modules` 의 `@next/next` 플러그인이 충돌했다(`Plugin "@next/next" was conflicted ...`, exit 1). 상위 폴더(`~/workspace` 등)에 다른 eslintrc 는 없음을 확인. CI 는 깨끗한 checkout 이라 영향 없었다.
+- **수정**: `.eslintrc.json` 에 `"root": true` 한 줄 추가. 린트 규칙은 변경 없음.
+- 이제 worktree 에서도 `npm run lint` 를 그대로 쓴다. PR #177·#178 에서 쓴 `eslint --no-eslintrc -c .eslintrc.json` 우회는 더 이상 필요 없다.
+
+### 검증
+- worktree `npm run lint`: 변경 전 exit 1(재현) → 변경 후 exit 0, 경고·오류 0.
+- 원래 폴더 lint: 변경 전 exit 0·경고 0, 변경 후 설정 적용 시에도 동일.
+- `eslint --print-config src/app/page.tsx` 규칙 집합: 변경 전(원래 폴더) 99개 = 변경 후 99개, 내용·플러그인 목록 동일.
+- vitest 311 통과(27 파일), `next build` 통과. 로컬 확인은 사용자가 완료.

@@ -163,3 +163,26 @@ const KST_ISO_DATE_FORMAT = new Intl.DateTimeFormat('en-CA', {
 export function todayKstIso(now: Date = new Date()): string {
   return KST_ISO_DATE_FORMAT.format(now)
 }
+
+function isoToUtcDay(iso: string): number | null {
+  const [y, m, d] = iso.split('-').map(Number)
+  if (!y || !m || !d) return null
+  return Date.UTC(y, m - 1, d) / 86_400_000
+}
+
+/**
+ * 예정일까지 남은 날 수 — today(KST 'YYYY-MM-DD', `todayKstIso()`) 기준. 내일 = 1, 오늘 = 0, 어제 = -1.
+ * 두 날짜를 UTC 자정으로 놓고 일 수만 빼므로 실행 환경 타임존·DST 영향이 없다. 해석 불가면 null.
+ */
+export function daysUntil(iso: string, today: string): number | null {
+  const target = isoToUtcDay(iso)
+  const base = isoToUtcDay(today)
+  if (target === null || base === null) return null
+  return Math.round(target - base)
+}
+
+/** D-day 표기 — 남았으면 "D-n", 오늘이면 "D-DAY", 지났으면 "D+n". 위시리스트 카드 footer 전용. */
+export function formatDday(days: number): string {
+  if (days === 0) return 'D-DAY'
+  return days > 0 ? `D-${days}` : `D+${-days}`
+}

@@ -1329,3 +1329,18 @@ PR #161 의 "+ 시간 추가" 버튼 → 탭하면 칸 펼침 → 다이닝 미�
 - vitest 299, `tsc --noEmit`, `npm run lint`, `next build` 통과. 빌드 HTML `<head>` 에 `apple-mobile-web-app-title` 출력 확인.
 - 코드에서 manifest `name` 을 읽는 곳 없음(화면·이메일·`metadata.title` 의 "Today Date" 는 별도 하드코딩).
 - PR #173 CI(Lint·Unit·Build, E2E, Vercel) 통과 후 squash 머지, 브랜치·worktree `fix/pwa-splash-hide-title` 삭제.
+
+## 2026-11-20 — iOS 홈 화면 아이콘이 "T" 글자로 나오는 문제: apple-touch-icon 복원 (PR #174)
+
+### 변경
+- **현상**: PR #173 머지 후 iPhone Safari "홈 화면에 추가"에서 이름은 "Today Date" 로 정상, 아이콘이 하트가 아니라 이름 첫 글자 "T"(아이콘을 못 찾았을 때 iOS 기본 글자 아이콘).
+- **수정**: `e767316` 의 `public/apple-touch-icon.png`(180px, 하트 52.2%, 배경 `#f5f3ff`, 현재 `icon-512` 축소본과 픽셀 차이 0) 복원 + `layout.tsx` `metadata.icons.apple` → `<link rel="apple-touch-icon" href="/apple-touch-icon.png">`. manifest·다른 아이콘 무변경.
+- **정정**: PR #173 `layout.tsx` 주석에 실제 U+200B 문자가 들어가 `""` 처럼 보이던 것을 `"\u200B"` 표기로. 저장소 전체 U+200B 문자 잔존 없음 확인(manifest 는 이스케이프 표기).
+- **원인(추정, 미확인)**: ① PR #173 `appleWebApp` 지정으로 Next 가 `apple-mobile-web-app-capable="yes"` 를 출력해 Safari 가 manifest 아이콘 대신 레거시 웹 클립 규칙(apple-touch-icon 만)을 탔을 가능성 ② PR #173 이전에도 새로 추가 시 "T" 였을 가능성(이전 기록 없음). 어느 쪽이든 apple-touch-icon 명시로 해결.
+- 교훈 → PROJECT_CONTEXT §20 ("iOS 홈 화면 아이콘은 apple-touch-icon 필수", 편집 도구가 `\u200B` 를 실제 문자로 저장할 수 있음).
+
+### 검증
+- vitest 299, `tsc --noEmit`, `npm run lint`, `next build` 통과. 빌드 HTML `<head>` 에 apple-touch-icon 링크 확인.
+- 프리뷰(Vercel 보호 → Vercel 연동 도구, 23시간 임시 공유 링크 생성): `/lock` `<head>` 링크 확인, `/apple-touch-icon.png` 200 `image/png` 5872바이트.
+- PR #174 CI(Lint·Unit·Build, E2E, Vercel) 통과 후 squash 머지, 브랜치·worktree `fix/ios-apple-touch-icon` 삭제.
+- **남은 확인**: iPhone 실기기에서 "홈 화면에 추가" 아이콘이 하트인지(기존 아이콘 삭제 후 새로 추가).

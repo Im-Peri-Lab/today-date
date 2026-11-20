@@ -3,6 +3,7 @@ import localFont from 'next/font/local'
 import NextTopLoader from 'nextjs-toploader'
 import { Toaster } from '@/components/ui/sonner'
 import { NativeBootOverlay } from '@/components/boot/NativeBootOverlay'
+import { pwaStartupImages } from '@/components/boot/pwaSplash.mjs'
 import { Providers } from './providers'
 import { cn } from '@/lib/utils'
 import './globals.css'
@@ -24,7 +25,9 @@ export const metadata: Metadata = {
   manifest: '/manifest.json',
   // manifest name 은 Android 로딩 화면 문구를 숨기려고 "\u200B"(폭 없는 공백, 보이지 않는 문자)다(PROJECT_CONTEXT §20).
   // iOS "홈 화면에 추가" 기본 이름이 그 값을 쓰지 않도록 apple-mobile-web-app-title 로 고정한다.
-  appleWebApp: { title: 'Today Date' },
+  // startupImage: iOS 홈 화면 실행 시 첫 페인트 전까지 보이는 시작 이미지(기기별 1장, 색 모드 분기 없음).
+  // 기기 목록·생성용 마크업의 단일 출처는 components/boot/pwaSplash.mjs (PROJECT_CONTEXT §20).
+  appleWebApp: { title: 'Today Date', startupImage: pwaStartupImages() },
   // iOS 홈 화면 아이콘은 manifest icons 가 아니라 apple-touch-icon 을 쓴다 — 없으면 이름 첫 글자("T")로 나온다.
   // 기존 icon-512 와 같은 모양(하트 약 52%, 배경 #f5f3ff)의 180px 이다(PROJECT_CONTEXT §20).
   icons: { apple: '/apple-touch-icon.png' },

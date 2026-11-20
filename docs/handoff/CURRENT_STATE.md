@@ -1,6 +1,6 @@
 # CURRENT_STATE.md
 
-> **마지막 업데이트: 2026-11-20 (PR #134~#175 반영)**
+> **마지막 업데이트: 2026-11-21 (PR #134~#176 반영)**
 
 ## 현재 단계
 커플(2인) 계정 전환 완료 + 파트너 표시용 닉네임 추가 단계 — 계정 없는 단일 워크스페이스에서
@@ -55,6 +55,7 @@ PROJECT_CONTEXT §5(인증 F-01)·§20.
 는 상세 → CHANGELOG 2026-07-29~2026-08-11.
 
 ## 브랜치 상태
+- `feat/ios-pwa-splash` — PR #176 squash 머지, 로컬·리모트 브랜치·worktree 삭제. iOS 홈 화면 PWA 시작 이미지 22장(배경 `#ede9fe`, 아이콘 그라데이션 하트 + 타이틀). HTML 스플래시 레이어는 위치 어긋남으로 제거. 진단 브랜치 `diag/ios-splash-metrics` 는 머지 없이 삭제. 실기기 확인은 사용자가 완료
 - `feat/visited-date-default-planned` — PR #175 squash 머지, 로컬·리모트 브랜치·worktree 삭제. '다녀왔어요' 방문 날짜 기본값 = 방문예정일(오늘/지난 날짜일 때), 없거나 미래면 오늘(기기 로컬). Preview 화면 확인은 사용자가 완료
 - `docs/concurrent-session-worktree-rule` — PR #172 squash 머지, 로컬·리모트 브랜치·worktree 삭제. 리포 루트 `CLAUDE.md` 신설(동시 세션 안전 규칙: 전용 worktree·커밋 전 브랜치 확인·포트/`.env.local`·자기 worktree 만 제거)
 - `wip/capacitor-app-id-change`(`9c56088`) — **보류 작업 보존용(머지 대상 아님)**. `e159d31`(`chore/capacitor-init` 포함) 위에 worktree 에 커밋 안 돼 있던 `project.pbxproj` `DEVELOPMENT_TEAM` 2줄을 커밋. worktree 는 제거됨
@@ -92,6 +93,7 @@ PROJECT_CONTEXT §5(인증 F-01)·§20.
 - `fix/e2e-db-spec-single-file` — PR #168 squash 머지 완료(머지 커밋 `29b2cb2`), 로컬·리모트 브랜치 삭제됨. DB 스펙 파일을 `isolation.spec.ts` 하나로 단일화해 CI #217 실패(워커 분리로 스텁 상태 충돌) 수정. CI(Lint·Unit·Build, E2E, Vercel) 통과
 
 ## 최근 구현 완료
+- iOS 홈 화면 PWA 시작 이미지(`apple-touch-startup-image`, `src/components/boot/pwaSplash.mjs` + `scripts/generate-pwa-splash.mjs`, PR #176) → 상세 CHANGELOG 2026-11-21
 - '다녀왔어요' 방문 날짜 기본값을 방문예정일로(`src/lib/visitedDate.ts`, PR #175) → 상세 CHANGELOG 2026-11-20
 - 자동화 테스트·CI, dark/hover/focus 정합화, 추천위저드 History/URL 동기화 공통 훅, 폼-API
   입력 검증 공유 → 상세 CHANGELOG 2026-07-29. 전체 누적 기능 목록은 PROJECT_CONTEXT §5 참조

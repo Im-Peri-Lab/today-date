@@ -386,6 +386,7 @@ export function PlaceDetail({ id, initialData, initialEdit, returnTo }: Props) {
               visited_at: place.visited_at,
               rating: place.rating,
               review_note: place.review_note,
+              planned_at: place.planned_at,
             }}
           />
           <PlannedAtDialog

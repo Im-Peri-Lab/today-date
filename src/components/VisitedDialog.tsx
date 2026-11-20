@@ -20,13 +20,9 @@ import { RatingStars } from '@/components/track/RatingStars'
 import { useUpdateActivity } from '@/hooks/useActivities'
 import { useUpdatePlace } from '@/hooks/usePlaces'
 import { cn } from '@/lib/utils'
+import { defaultVisitedDate, localTodayIso } from '@/lib/visitedDate'
 import styles from '@/components/screens.module.css'
 
-function todayISO() {
-  const now = new Date()
-  const offset = now.getTimezoneOffset()
-  return new Date(now.getTime() - offset * 60_000).toISOString().slice(0, 10)
-}
 
 interface VisitedDialogProps {
   open: boolean
@@ -39,6 +35,8 @@ interface VisitedDialogProps {
     visited_end_at?: string | null
     rating?: number | null
     review_note?: string | null
+    /** 방문예정일 — 새로 '다녀왔어요' 할 때 방문 날짜 기본값 결정에 쓴다(오늘/지난 날짜면 그 날짜). */
+    planned_at?: string | null
   }
   onSuccess?: () => void
 }
@@ -54,7 +52,7 @@ export function VisitedDialog({
 }: VisitedDialogProps) {
   // 기간(시작~종료) 방문은 activities 전용. places 는 기존 단일 날짜 그대로.
   const isActivity = track === 'activity'
-  const [visitedAt, setVisitedAt] = useState(initial?.visited_at ?? todayISO())
+  const [visitedAt, setVisitedAt] = useState(initial?.visited_at ?? defaultVisitedDate(initial?.planned_at))
   const [visitedEnd, setVisitedEnd] = useState(initial?.visited_end_at ?? '')
   const [showEnd, setShowEnd] = useState(Boolean(initial?.visited_end_at))
   const [rating, setRating] = useState(initial?.rating ?? 5)
@@ -67,7 +65,7 @@ export function VisitedDialog({
   // 다이얼로그가 열릴 때마다 초기값 동기화
   useEffect(() => {
     if (open) {
-      setVisitedAt(initial?.visited_at ?? todayISO())
+      setVisitedAt(initial?.visited_at ?? defaultVisitedDate(initial?.planned_at))
       setVisitedEnd(initial?.visited_end_at ?? '')
       setShowEnd(Boolean(initial?.visited_end_at))
       setRating(initial?.rating ?? 5)
@@ -77,7 +75,7 @@ export function VisitedDialog({
   }, [open])
 
   async function handleSave() {
-    const start = visitedAt || todayISO()
+    const start = visitedAt || localTodayIso()
     // 종료일은 activity + 토글 켬 + 값 있을 때만. end < start 는 저장 차단(클라 단 방어).
     const end = isActivity && showEnd && visitedEnd ? visitedEnd : null
     if (end && end < start) {

@@ -56,7 +56,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    // suppressHydrationWarning: head 스크립트가 하이드레이션 전에 html 에 pwa-splash 클래스·변수를 붙인다.
+    // suppressHydrationWarning: head 스크립트가 하이드레이션 전에 html 에 pwa-splash 클래스를 붙인다.
     <html lang="ko" className={cn('font-sans', geistSans.variable)} suppressHydrationWarning>
       <head>
         <style dangerouslySetInnerHTML={{ __html: PWA_SPLASH_CSS }} />

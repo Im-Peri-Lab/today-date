@@ -1,7 +1,7 @@
 /**
  * iOS apple-touch-startup-image 생성기.
  * src/components/boot/pwaSplash.mjs 의 HTML 스플래시를 기기 해상도별로 그대로 캡처하므로
- * 시작 이미지와 HTML 스플래시의 하트·타이틀 위치·크기가 같다(시작 이미지는 화면 전체 기준 → shift 0).
+ * 시작 이미지와 HTML 스플래시의 하트·타이틀 위치·크기가 같다(둘 다 화면 전체 기준).
  *
  * 실행: node scripts/generate-pwa-splash.mjs   (Playwright chromium 필요: npx playwright install chromium)
  * 출력: public/splash/{w}x{h}@{dpr}x.png

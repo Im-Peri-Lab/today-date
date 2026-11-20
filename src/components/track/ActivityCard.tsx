@@ -226,6 +226,7 @@ export function ActivityCard({ activity, hideMenu, actionSlot, returnTo }: Activ
           visited_end_at: activity.visited_end_at,
           rating: activity.rating,
           review_note: activity.review_note,
+          planned_at: activity.planned_at,
         }}
       />
       <PlannedAtClearDialog

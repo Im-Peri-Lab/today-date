@@ -208,6 +208,7 @@ export function PlaceCard({ place, hideMenu, actionSlot, returnTo }: PlaceCardPr
           visited_at: place.visited_at,
           rating: place.rating,
           review_note: place.review_note,
+          planned_at: place.planned_at,
         }}
       />
       <PlannedAtClearDialog

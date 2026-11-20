@@ -416,6 +416,7 @@ export function ActivityDetail({ id, initialData, initialEdit, returnTo }: Props
               visited_end_at: activity.visited_end_at,
               rating: activity.rating,
               review_note: activity.review_note,
+              planned_at: activity.planned_at,
             }}
           />
           <PlannedAtDialog

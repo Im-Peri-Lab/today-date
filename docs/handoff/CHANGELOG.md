@@ -1,6 +1,6 @@
 # CHANGELOG.md
 
-> **마지막 업데이트: 2026-11-21 (PR #134~#177 반영)**
+> **마지막 업데이트: 2026-11-21 (PR #134~#178 반영)**
 
 > 260531~261022 핸드오프 전체를 날짜순으로 기록한 변경 이력입니다. 새 AI는 일반적으로 `PROJECT_CONTEXT.md`와 `CURRENT_STATE.md`만 먼저 읽고, 과거 판단 근거가 필요할 때 이 문서를 참고하세요.
 
@@ -1391,3 +1391,21 @@ PR #161 의 "+ 시간 추가" 버튼 → 탭하면 칸 펼침 → 다이닝 미�
 - 단위 테스트(`date.test.ts`): 오늘/내일/어제, 월말(30·31일·2월·윤년 2028), 연말, KST 자정 전후(UTC 15:00), 해석 불가 값. vitest 311 통과, `tsc --noEmit`·`next build` 통과.
 - 린트: worktree 가 리포 폴더 안(`.claude/worktrees/`)이라 `npm run lint` 가 상위 `.eslintrc.json` 과 플러그인 충돌로 실행되지 않음 → `eslint --no-eslintrc -c .eslintrc.json` 로 같은 범위 실행, 오류 없음. CI 린트는 별도 통과 확인.
 - Vercel Preview 에서 사용자가 화면 확인 완료.
+
+## 2026-11-21 v2 — Codex 지침 `AGENTS.md` 커밋, `.agents/` ignore, E2E 잠금 화면 flake 종결 (PR #178)
+
+### 변경
+- **`AGENTS.md`**: 원래 작업 폴더에 untracked 로 있던 Codex 지침(`CLAUDE.md` 사본, 경로만 `.Codex`)을 worktree 로 옮겨(mv, 복사 아님 — 머지 후 원래 폴더 pull 충돌 방지) 커밋했다. 규칙 본문은 `CLAUDE.md` 단일 출처를 가리키는 포인터로 줄이고 Codex 전용 차이만 남겼다.
+  - 디자인 기준은 `.claude/skills/today-date-design/SKILL.md` 를 직접 읽는다.
+  - worktree: Codex 는 worktree 를 리포 밖 `$CODEX_HOME/worktrees`(기본 `~/.codex/worktrees`)에서 관리한다(Codex 공식 문서). 그래서 처음 사본에 있던 리포 안 `.Codex/worktrees` 경로는 지웠다.
+- **`.gitignore`**: `/.agents/` 추가. `.agents/skills/today-date-design/SKILL.md` 는 디자인 SoT 사본이라 커밋하지 않는다(파일은 삭제하지 않음). 참고로 Codex 의 리포 스킬 경로는 `.agents/skills` 이므로 Codex 가 스킬을 자동으로 찾지는 않고, `AGENTS.md` 의 경로 안내로 읽는다.
+- **CURRENT_STATE**
+  - 보류 15번(e2e `chromium-db` 잠금 화면 간헐 실패) 종결: PR #169 머지(`5bb580b`, 261118 13:08 KST)부터 261121 00:47 KST(`7b76653`)까지 CI 실행 25건(main push 11·PR 14)이 모두 success, E2E 잡 25개 모두 94 passed, 재실행 0건.
+  - CI 는 `retries: 1` 이라 재시도 통과가 success 로 묻힐 수 있어 E2E 로그를 전수 확인했다 — `retry #`·`flaky`·`✘` 0건.
+  - `diag/pwa-splash-no-title` 중복 항목을 하나로 통합했다(정보 보존).
+  - 보류 21번(Codex worktree 경로)을 등록한 뒤 해소했다.
+  - 남은 작업에 "리포 안 worktree 에서 로컬 `npm run lint` 가 상위 `.eslintrc.json` 과 충돌" 항목을 추가했다(`root: true` 검토 대기).
+
+### 검증
+- 코드 변경 없음, `CLAUDE.md` 변경 없음. vitest 311 통과, `next build` 통과. 로컬 lint 는 위 충돌로 worktree 에서 실행되지 않아 CI Lint 로 확인.
+- 로컬 확인은 사용자가 완료.

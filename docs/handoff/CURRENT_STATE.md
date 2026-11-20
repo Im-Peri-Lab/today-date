@@ -1,6 +1,6 @@
 # CURRENT_STATE.md
 
-> **마지막 업데이트: 2026-11-21 (PR #134~#178 반영)**
+> **마지막 업데이트: 2026-11-21 (PR #134~#179 반영)**
 
 ## 현재 단계
 커플(2인) 계정 전환 완료 + 파트너 표시용 닉네임 추가 단계 — 계정 없는 단일 워크스페이스에서
@@ -86,6 +86,7 @@ PROJECT_CONTEXT §5(인증 F-01)·§20.
 - `design/detail-date-typography-unify` — PR #158 squash 머지 완료, 브랜치 삭제됨 (CI 통과, 시각 확인은 사용자 몫)
 - `chore/eslint-no-useless-escape` — PR #164 squash 머지 완료(머지 커밋 `db4225c`), 브랜치 삭제됨. `no-useless-escape: error`, 켤 당시 새 위반 0건
 - `chore/lint-scope-e2e` — PR #166 squash 머지 완료(머지 커밋 `d2080ee`), 브랜치 삭제됨. `npm run lint` 범위를 `src`+`e2e`+루트 설정 파일 5개로 확장(PR #164 Codex 지적), 새 위반 0건
+- `chore/eslint-root-config` — PR #179 squash 머지, 브랜치 삭제. `.eslintrc.json` `root: true` 로 리포 안 worktree lint 충돌 해소, 규칙 99개·경고 0 변경 전과 동일
 - `fix/calendar-ux-polish` — PR #165 squash 머지 완료(머지 커밋 `d518941`), 로컬·리모트 브랜치 삭제됨. 머리말 안내 다이얼로그 취소·저장(문구에만 적용, 추가는 항상 진행, SKILL §11 의도된 예외) + 일정 수정 토스트("일정이 바뀌었어요…" + "다시 추가", 방문 예정·방문 기록) + `/settings` 안내 줄 삭제. CI·Vercel 통과, 프리뷰는 사용자 확인 완료
 - `design/planned-time-inline-field` — PR #163 squash 머지 완료(머지 커밋 `3a2ce97`), 로컬·리모트 브랜치 삭제됨. 방문예정 시간 입력 UI 단순화("+ 시간 추가" 제거·상시 노출·미리 채우기 제거, 화면 라벨 없이 날짜 박스와 8px 한 묶음). CI(E2E 82 통과)·Vercel 통과. **남은 확인: iOS Safari 빈 시간 칸 높이·휠(사용자)**
 - `fix/ics-escape-text` — PR #162 squash 머지 완료(머지 커밋 `aa7aad0`), 로컬·리모트 브랜치 삭제됨. `.ics` TEXT 이스케이프(`;`) 수정, 보류 14번 해소. **남은 확인: iOS 실기기(제목에 `;`·`,`)**
@@ -195,7 +196,7 @@ PROJECT_CONTEXT §5(인증 F-01)·§20.
 21. ~~Codex worktree 경로 미확정(261121 등록)~~ → **해소(261121)**: Codex 는 worktree 를 리포 밖 `$CODEX_HOME/worktrees`(기본 `~/.codex/worktrees`)에서 관리한다(Codex 공식 문서 developers.openai.com/codex/app/worktrees). 그래서 `AGENTS.md` 에서 처음 사본에 있던 리포 안 `.Codex/worktrees/<이름>` 언급을 지우고 이 사실로 바꿨다. 리포 안 `.claude/worktrees/` 는 Claude Code 전용이다(`.git/info/exclude` 에 등록돼 있음)
 
 **그 외 남은 작업**
-- **worktree 가 리포 안(`.claude/worktrees`)에 있으면 로컬 `npm run lint` 가 상위 `.eslintrc.json` 과 충돌해 실패(261121 확인)** — CI 무관, `.eslintrc.json` `root: true` 검토 대기
+- ~~worktree 가 리포 안(`.claude/worktrees`)에 있으면 로컬 `npm run lint` 가 상위 `.eslintrc.json` 과 충돌해 실패(261121 확인)~~ → **해소(PR #179, 261121)**: `.eslintrc.json` 에 `"root": true` 추가. 이제 worktree 에서도 `npm run lint` 를 그대로 쓴다(`--no-eslintrc -c` 우회 불필요). 규칙 집합 변화 없음(99개 동일)
 - **`chore/capacitor-init` → `main` 최종 머지**: PR #111~#116 모두 병합 완료 상태지만, 전체
   Capacitor 네이티브 셸 자체를 `main`(프로덕션 배포 소스)에 반영할지는 아직 사용자 확인 전 —
   머지 시점·방식(ff-only/squash)은 별도로 지시받아 진행할 것. `main`이 그 사이 커플 계정 전환

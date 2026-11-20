@@ -1314,3 +1314,18 @@ PR #161 의 "+ 시간 추가" 버튼 → 탭하면 칸 펼침 → 다이닝 미�
 
 ### 검증
 - 문서만 변경(코드 없음). 사용자 diff 확인 후 진행.
+
+## 2026-11-20 — Android PWA 로딩 화면 앱 이름 문구 숨김: manifest name "\u200B" (PR #173)
+
+### 변경
+- **배경**: 크롬 WebAPK 로딩 화면의 하트–이름 간격이 어색했다. 크롬이 manifest 로 자동 생성하는 고정 레이아웃이라 웹에서 조정할 수 있는 것은 아이콘과 이름뿐. 아이콘 확대(85%·64%, 이후 60%)는 하트가 너무 커서 원복(PR #170) → 문구 자체를 없애는 쪽으로 전환.
+- **진단**(`diag/pwa-splash-no-title`, 머지 금지·유지): V1 `name` 삭제 / V2 `" "` / V3 `"\u200B"`. Chromium 원문 근거 — 로딩 화면은 `SplashUtils.createSplashView` 가 `R.string.name` 을 그림, 빈 `name` 은 `ShortcutInfo.UpdateFromManifest` 가 `short_name` 으로 채움, `ParseSingleLineString` 이 `StripWhiteSpace` 로 공백 제거, U+200B 는 공백(WS)이 아니라 남음. 갤럭시 실기기에서 V3 만 문구가 사라지고 하트만 보임.
+- **적용**: `public/manifest.json` `name` → `"\u200B"`(JSON 이스케이프 표기 — 실제 문자는 diff·편집기에서 빈 값처럼 보여 실수로 지워지기 쉬움). `short_name: "Today Date"` 유지(설치 조건 `IsManifestNameValid`·홈 아이콘 이름). 아이콘 원본 유지.
+- **iOS**: `layout.tsx` `metadata.appleWebApp.title = 'Today Date'` → `<meta name="apple-mobile-web-app-title" content="Today Date">`. Next 가 `apple-mobile-web-app-capable="yes"`·`apple-mobile-web-app-status-bar-style="default"` 도 함께 출력한다(manifest `display: standalone`·iOS 기본 상태바와 같아 동작 변화 없음).
+- **부작용**: Android 설치 팝업·최근 앱 목록 등 `name` 을 쓰는 곳은 빈칸일 수 있음(추정). 기존 설치자에게 크롬의 앱 이름 변경 확인 창이 1회(`WebApkUpdateManager` `NAME_DIFFERS`).
+- 교훈 → PROJECT_CONTEXT §20 (빈 이름이 아니라 의도된 값 — 되돌리거나 지우지 말 것).
+
+### 검증
+- vitest 299, `tsc --noEmit`, `npm run lint`, `next build` 통과. 빌드 HTML `<head>` 에 `apple-mobile-web-app-title` 출력 확인.
+- 코드에서 manifest `name` 을 읽는 곳 없음(화면·이메일·`metadata.title` 의 "Today Date" 는 별도 하드코딩).
+- PR #173 CI(Lint·Unit·Build, E2E, Vercel) 통과 후 squash 머지, 브랜치·worktree `fix/pwa-splash-hide-title` 삭제.

@@ -22,6 +22,9 @@ export const metadata: Metadata = {
   title: 'Today Date',
   description: '우리 둘만의 데이트 기록',
   manifest: '/manifest.json',
+  // manifest name 은 Android 로딩 화면 문구를 숨기려고 "​"(보이지 않는 문자)다(PROJECT_CONTEXT §20).
+  // iOS "홈 화면에 추가" 기본 이름이 그 값을 쓰지 않도록 apple-mobile-web-app-title 로 고정한다.
+  appleWebApp: { title: 'Today Date' },
   // iOS Safari가 이메일처럼 보이는 텍스트를 자동으로 밑줄+링크화하는 것을 막는다 —
   // 그 자동 밑줄이 줄바꿈 경계에서 끊겨 보이는 문제(계정/파트너 정보 화면의 이메일 표시)가 있었다.
   formatDetection: { email: false },

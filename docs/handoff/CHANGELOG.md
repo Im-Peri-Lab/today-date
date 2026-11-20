@@ -1,6 +1,6 @@
 # CHANGELOG.md
 
-> **마지막 업데이트: 2026-11-20 (PR #134~#172 반영)**
+> **마지막 업데이트: 2026-11-20 (PR #134~#175 반영)**
 
 > 260531~261022 핸드오프 전체를 날짜순으로 기록한 변경 이력입니다. 새 AI는 일반적으로 `PROJECT_CONTEXT.md`와 `CURRENT_STATE.md`만 먼저 읽고, 과거 판단 근거가 필요할 때 이 문서를 참고하세요.
 
@@ -1344,3 +1344,15 @@ PR #161 의 "+ 시간 추가" 버튼 → 탭하면 칸 펼침 → 다이닝 미�
 - 프리뷰(Vercel 보호 → Vercel 연동 도구, 23시간 임시 공유 링크 생성): `/lock` `<head>` 링크 확인, `/apple-touch-icon.png` 200 `image/png` 5872바이트.
 - PR #174 CI(Lint·Unit·Build, E2E, Vercel) 통과 후 squash 머지(머지 커밋 `2a80cb8`), 브랜치·worktree `fix/ios-apple-touch-icon` 삭제.
 - **남은 확인**: iPhone 실기기에서 "홈 화면에 추가" 아이콘이 하트인지(기존 아이콘 삭제 후 새로 추가).
+
+## 2026-11-20 — '다녀왔어요' 방문 날짜 기본값을 방문예정일로 (PR #175)
+
+### 변경
+- **배경**: 다녀온 곳으로 옮길 때 방문 날짜가 항상 오늘로 채워졌다. 방문예정일이 있으면 그날 다녀왔을 가능성이 높다.
+- **규칙**: 방문예정일이 있고 오늘이거나 지난 날짜 → 방문예정일 / 없거나 미래 → 오늘. 이미 `visited_at` 이 있으면(방문 기록 수정) 그 값 우선. 사용자가 바꿔 저장하는 동작은 그대로.
+- `src/lib/visitedDate.ts` 신설: `defaultVisitedDate(plannedAt, today)` + `localTodayIso()`(VisitedDialog 의 로컬 `todayISO` 를 옮김). 비교는 'YYYY-MM-DD' 문자열끼리 — Date 변환이 없어 UTC 하루 밀림이 없다. "오늘"은 기기 로컬 기준(위시리스트 정렬의 `todayKstIso` 는 서버에서도 도는 코드라 KST 고정 — 용도가 다름).
+- 진입 경로 4곳(PlaceCard·ActivityCard·PlaceDetail·ActivityDetail)이 모두 `VisitedDialog` 하나로 모이며, 4곳 모두 `initial.planned_at` 전달. 폼(새로 만들기·수정)에는 상태를 '다녀온 곳'으로 바꾸는 경로가 없다.
+
+### 검증
+- vitest 전체 + `visitedDate.test.ts` 7건(`TZ=UTC`·`TZ=Asia/Seoul` 모두 통과, KST 00:30 케이스 포함), `tsc --noEmit`, `next build` 통과. worktree 안에서는 `npm run lint` 가 상위 `.eslintrc.json` 과 플러그인 충돌 → 변경 파일만 `eslint --no-eslintrc -c .eslintrc.json` 으로 통과(CI Lint 로 최종 확인).
+- `.env.local` 이 없어 로컬 화면 확인 대신 Track B 로 전환, Vercel Preview 에서 사용자 확인 완료.

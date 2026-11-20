@@ -48,3 +48,6 @@ next-env.d.ts
 /ios/App/Pods/
 /ios/App/build/
 /ios/DerivedData/
+
+# Codex 스킬 사본 (디자인 SoT 는 .claude/skills/today-date-design/SKILL.md — AGENTS.md 참고)
+/.agents/

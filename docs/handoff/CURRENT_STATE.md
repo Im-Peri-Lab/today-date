@@ -55,7 +55,7 @@ PROJECT_CONTEXT §5(인증 F-01)·§20.
 는 상세 → CHANGELOG 2026-07-29~2026-08-11.
 
 ## 브랜치 상태
-- `chore/codex-agents-md` — **진행 중(로컬 확인 대기)**. 원래 폴더에 untracked 로 있던 `AGENTS.md`(Codex 지침, `CLAUDE.md` 사본에 경로만 `.Codex`)를 worktree 로 옮겨(mv, 복사 아님) 커밋. 본문은 `CLAUDE.md` 를 단일 출처로 가리키는 포인터 + Codex 전용 차이(디자인 기준 `.claude/skills/today-date-design/SKILL.md` 직접 읽기, worktree 경로 `.Codex/worktrees`)만 남김. `/.agents/`(디자인 SKILL 사본)는 `.gitignore` 에 추가, 파일은 삭제하지 않음. `CLAUDE.md` 변경 없음
+- `chore/codex-agents-md` — **진행 중(로컬 확인 대기)**. 원래 폴더에 untracked 로 있던 `AGENTS.md`(Codex 지침, `CLAUDE.md` 사본에 경로만 `.Codex`)를 worktree 로 옮겨(mv, 복사 아님) 커밋. 본문은 `CLAUDE.md` 를 단일 출처로 가리키는 포인터 + Codex 전용 차이(디자인 기준 `.claude/skills/today-date-design/SKILL.md` 직접 읽기, worktree 는 리포 밖 `$CODEX_HOME/worktrees`)만 남김. `/.agents/`(디자인 SKILL 사본)는 `.gitignore` 에 추가, 파일은 삭제하지 않음. `CLAUDE.md` 변경 없음
 - `feat/list-card-dday` — PR #177 squash 머지, 로컬·리모트 브랜치·worktree 삭제. 위시리스트 카드 D-day(`D-n`/`D-DAY`/`D+n`, KST). Preview 화면 확인은 사용자가 완료
 - `feat/ios-pwa-splash` — PR #176 squash 머지, 로컬·리모트 브랜치·worktree 삭제. iOS 홈 화면 PWA 시작 이미지 22장(배경 `#ede9fe`, 아이콘 그라데이션 하트 + 타이틀). HTML 스플래시 레이어는 위치 어긋남으로 제거. 진단 브랜치 `diag/ios-splash-metrics` 는 머지 없이 삭제. 실기기 확인은 사용자가 완료
 - `feat/visited-date-default-planned` — PR #175 squash 머지, 로컬·리모트 브랜치·worktree 삭제. '다녀왔어요' 방문 날짜 기본값 = 방문예정일(오늘/지난 날짜일 때), 없거나 미래면 오늘(기기 로컬). Preview 화면 확인은 사용자가 완료
@@ -191,9 +191,10 @@ PROJECT_CONTEXT §5(인증 F-01)·§20.
 18. **Sentry/관측성 연동 — 미착수(261118 등록)**
 19. **getDashboardStats 에러 경계 개선 — 미착수(261118 등록)**
 20. ~~Android PWA 스플래시 하트–이름 간격~~ → **해소(PR #173, 261120)**: 아이콘 확대는 하트가 너무 커서 원복(PR #170). 대신 manifest `name` 을 `"\u200B"` 로 두어 로딩 화면 문구를 숨겼다(갤럭시 V3 실기기 확인, 아이콘 원본 유지). iOS 홈 화면 이름은 `apple-mobile-web-app-title` 로 고정. 남은 확인: 갤럭시 기존 설치 기기의 이름 변경 확인 창, 최근 앱 목록 이름, iPhone 새로 추가 시 이름 → PROJECT_CONTEXT §20
-21. **Codex worktree 경로 미확정(261121 등록)**: `AGENTS.md` 의 `.Codex/worktrees/<이름>` 은 사용자가 만든 원본 값을 그대로 둔 것이다. Codex 공식 문서 근거는 찾지 못했다(Codex 앱이 관리하는 worktree 는 `$CODEX_HOME/worktrees`, 기본 `~/.codex/worktrees`). 또 `.git/info/exclude` 에는 `.claude/worktrees/` 만 있어 리포 안 `.Codex/worktrees/` 에 만들면 원래 폴더 `git status` 에 untracked 로 보인다. 경로 확정은 사용자 결정
+21. ~~Codex worktree 경로 미확정(261121 등록)~~ → **해소(261121)**: Codex 는 worktree 를 리포 밖 `$CODEX_HOME/worktrees`(기본 `~/.codex/worktrees`)에서 관리한다(Codex 공식 문서 developers.openai.com/codex/app/worktrees). 그래서 `AGENTS.md` 에서 처음 사본에 있던 리포 안 `.Codex/worktrees/<이름>` 언급을 지우고 이 사실로 바꿨다. 리포 안 `.claude/worktrees/` 는 Claude Code 전용이다(`.git/info/exclude` 에 등록돼 있음)
 
 **그 외 남은 작업**
+- **worktree 가 리포 안(`.claude/worktrees`)에 있으면 로컬 `npm run lint` 가 상위 `.eslintrc.json` 과 충돌해 실패(261121 확인)** — CI 무관, `.eslintrc.json` `root: true` 검토 대기
 - **`chore/capacitor-init` → `main` 최종 머지**: PR #111~#116 모두 병합 완료 상태지만, 전체
   Capacitor 네이티브 셸 자체를 `main`(프로덕션 배포 소스)에 반영할지는 아직 사용자 확인 전 —
   머지 시점·방식(ff-only/squash)은 별도로 지시받아 진행할 것. `main`이 그 사이 커플 계정 전환

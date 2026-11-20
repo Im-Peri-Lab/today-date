@@ -4,6 +4,14 @@ import { useEffect } from 'react'
 
 const FADE_MS = 250
 
+/** head 스크립트가 스플래시 색으로 바꿔 둔 theme-color(상태바 영역)를 원래 값으로 되돌린다. */
+function restoreThemeColor() {
+  const meta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"][data-pws-orig]')
+  if (!meta) return
+  meta.setAttribute('content', meta.getAttribute('data-pws-orig') ?? '')
+  meta.removeAttribute('data-pws-orig')
+}
+
 /**
  * iOS 홈 화면 PWA 스플래시(pwaSplash.mjs)를 첫 화면 하이드레이션 직후 페이드아웃한다.
  * 최소 노출 시간은 두지 않는다 — 실제 화면이 준비되면 바로 걷는다.
@@ -19,6 +27,7 @@ export function PwaSplashDismiss() {
     const raf1 = requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         root.classList.add('pwa-splash-fade')
+        restoreThemeColor()
         fadeTimer = setTimeout(() => root.classList.add('pwa-splash-done'), FADE_MS)
       })
     })

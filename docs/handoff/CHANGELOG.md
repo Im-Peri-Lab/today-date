@@ -1472,5 +1472,5 @@ PR #161 의 "+ 시간 추가" 버튼 → 탭하면 칸 펼침 → 다이닝 미�
 
 ### 검증
 - `next build` 통과. Preview 에서 icon-512 는 새 파일, 나머지 세 파일은 main 과 같은 해시인 것을 확인했다.
-- PR #181 CI 통과 후 squash 머지(머지 커밋 (머지 후 기입)), 브랜치·worktree `fix/pwa-splash-icon-512-heart20` 삭제.
+- PR #181 CI 통과 후 squash 머지(머지 커밋 `9850390`), 브랜치·worktree `fix/pwa-splash-icon-512-heart20` 삭제.
 - 갤럭시 실기기 확인(로딩 하트 약 12.5% / 홈 아이콘 유지)은 프로덕션에서 사용자가 한다 → CURRENT_STATE 보류 23번.

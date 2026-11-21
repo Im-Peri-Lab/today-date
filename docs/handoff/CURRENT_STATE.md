@@ -55,7 +55,7 @@ PROJECT_CONTEXT §5(인증 F-01)·§20.
 는 상세 → CHANGELOG 2026-07-29~2026-08-11.
 
 ## 브랜치 상태
-- `fix/pwa-splash-icon-512-heart20` — PR #181 squash 머지(머지 커밋 (머지 후 기입)), 로컬·리모트 브랜치·worktree 삭제. `public/icon-512.png` 하트 폭 52%→20%(같은 중심·배경 `#f5f3ff`). Android 12+ WebAPK 로딩 화면(240dp 고정)의 하트를 화면 폭 약 34%→약 12.5% 로. 홈 아이콘(icon-192)·`apple-touch-icon`·manifest 변경 없음. 갤럭시 실기기 확인은 대기(보류 23번)
+- `fix/pwa-splash-icon-512-heart20` — PR #181 squash 머지(머지 커밋 `9850390`), 로컬·리모트 브랜치·worktree 삭제. `public/icon-512.png` 하트 폭 52%→20%(같은 중심·배경 `#f5f3ff`). Android 12+ WebAPK 로딩 화면(240dp 고정)의 하트를 화면 폭 약 34%→약 12.5% 로. 홈 아이콘(icon-192)·`apple-touch-icon`·manifest 변경 없음. 갤럭시 실기기 확인은 대기(보류 23번)
 - `perf/app-ready-on-login` — PR #180 squash 머지, 로컬·리모트 브랜치·worktree 삭제. 잠금해제 성공 응답에 `app-ready` 발급(속성은 `lib/auth/appReady.ts` 단일 출처, 기존 값 그대로) + 미들웨어 `expireSession` 에서 `app-ready` 삭제(다른 기기 계정 삭제 후 재가입 경로 보존). Preview 확인은 사용자가 완료. 사용자 iPhone PWA 재로그인 완료(261121, `app-ready` 적용). 확인용 `diag/app-ready-verify`(이 브랜치 + diag 계측)는 머지 없이 삭제
 - `diag/loading-server-timing`(`443f1cc`) — **머지 금지·재측정용(유지)**. 미들웨어·unlock·목록 API·홈/상세 렌더 구간별 Server-Timing 계측. 서버 컴포넌트는 Next 14 에서 헤더를 못 써서 홈·상세 렌더는 `/api/diag/render-timing` + 서버 로그 `[server-timing]` 로 잰다. 재측정 시 main 위로 rebase 후 Preview 로 띄울 것. worktree 는 제거됨
 - `chore/codex-agents-md` — PR #178 squash 머지, 로컬·리모트 브랜치·worktree 삭제. 원래 폴더에 untracked 로 있던 `AGENTS.md`(Codex 지침, `CLAUDE.md` 사본에 경로만 `.Codex`)를 worktree 로 옮겨(mv, 복사 아님) 커밋. 본문은 `CLAUDE.md` 를 단일 출처로 가리키는 포인터 + Codex 전용 차이(디자인 기준 `.claude/skills/today-date-design/SKILL.md` 직접 읽기, worktree 는 리포 밖 `$CODEX_HOME/worktrees`)만 남김. 로컬 확인은 사용자가 완료. `/.agents/`(디자인 SKILL 사본)는 `.gitignore` 에 추가, 파일은 삭제하지 않음. `CLAUDE.md` 변경 없음

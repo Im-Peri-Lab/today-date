@@ -426,8 +426,14 @@
     );
   }
 }
-.cardInteractive:active {
-  transform: translateY(0);
+/*
+ * 눌림(:active) — 터치에서도 탭 순간 반응이 보이게 살짝 수축(scale 0.98, §5 눌림 표준).
+ * transform 이라 레이아웃·주변 카드는 밀리지 않는다. 마우스에선 hover 부상(-2px)도 함께 취소된다.
+ * 보더·그림자는 바꾸지 않는다 — 스크롤하려고 스칠 때 보라 보더가 번쩍이지 않게(160ms 트랜지션이라 스침은 미세하게만 보임).
+ * 카드 안 ⋮(button) 을 누르는 동안엔 카드는 그대로 — 버튼 자체 눌림만 보이게.
+ */
+.cardInteractive:active:not(:has(button:active)) {
+  transform: scale(0.98);
 }
 /*
  * 카드 ⋮ 메뉴 열림 동안 보더 강조 — hover와 동일 톤(--s-card-hover-border).
@@ -570,7 +576,8 @@
   cursor: pointer;
   transition:
     background 140ms ease,
-    color 140ms ease;
+    color 140ms ease,
+    transform 140ms ease;
 }
 @media (hover: hover) {
   .iconBtn:hover:not(:disabled) {
@@ -584,6 +591,23 @@
     /* 다크 현행 유지. 라이트 규칙과 별도 재선언 + 다른 토큰(중성→accent) 사용은 토큰 값이
        못 바뀌어서가 아니라 SKILL.md §5-A가 명시한 "유틸리티 아이콘 hover는 다크에서만
        accent 소프트로 강조" 의도적 구분 — 단일 토큰 자동전환으로 통일 대상 아님. */
+    background: var(--s-accent-soft-bg, #f5f0ff);
+    color: var(--s-accent, #7c3aed);
+  }
+}
+/*
+ * 눌림(:active) — hover 와 같은 면 + scale 0.96(FAB 선례). @media(hover) 밖이라 터치에서도 발동.
+ * 면 색은 hover 와 같은 토큰(라이트 중성 / 다크 accent 소프트, §5-A), scale 로 focus(정적 면)와 구분.
+ */
+.iconBtn:active:not(:disabled),
+.headerNavBtn:active:not(:disabled) {
+  background: var(--s-card-border-strong, #eceaf3);
+  color: var(--s-ink, #1a1033);
+  transform: scale(0.96);
+}
+@media (prefers-color-scheme: dark) {
+  .iconBtn:active:not(:disabled),
+  .headerNavBtn:active:not(:disabled) {
     background: var(--s-accent-soft-bg, #f5f0ff);
     color: var(--s-accent, #7c3aed);
   }
@@ -621,7 +645,8 @@
   cursor: pointer;
   transition:
     background 140ms ease,
-    color 140ms ease;
+    color 140ms ease,
+    transform 140ms ease;
 }
 @media (hover: hover) {
   .headerNavBtn:hover:not(:disabled) {

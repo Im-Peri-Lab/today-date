@@ -559,10 +559,16 @@ description: >
 | 선택·컨트롤 버튼(칩·세그먼트·필터 등) | `scale(0.97)` |
 | 탭 카드(`.cardInteractive`) | `scale(0.98)` — hover 부상 취소 겸 터치 눌림. 보더·그림자 변화 없음(스크롤 스침 깜빡임 방지). 내부 ⋮(button) 누르는 동안엔 미적용(`:not(:has(button:active))`) |
 | 옵션 카드(`.optionCard`) | `translateY(0)` (hover 부상 취소) |
-| 유틸 아이콘 버튼(`.headerNavBtn`·`.iconBtn`·`.mapActionBtn`·`.dialogCloseBtn`) | hover 와 같은 면(라이트 `--s-card-border-strong`+`--s-ink` / 다크 `--s-accent-soft-bg`+`--s-accent`) + scale(박스별 수축 ≈3px: 40px `0.92` / 36px `0.91` / 28px `0.90`). 누를 땐 `transition-duration: 0`(즉시), 뗄 때만 `200ms ease-out` 복귀 — 짧은 탭에서도 눌림이 보이게. hover 진입 속도는 기존 유지. `@media(hover)` 밖 — 터치에서도 발동 |
+| 유틸 아이콘 버튼(`.headerNavBtn`·`.iconBtn`·`.mapActionBtn`·`.dialogCloseBtn`) | hover 와 같은 면(라이트 `--s-card-border-strong`+`--s-ink` / 다크 `--s-accent-soft-bg`+`--s-accent`) + scale(박스별 수축 ≈3px: 40px `0.92` / 36px `0.91` / 28px `0.90`). 타이밍은 아래 공통 규칙. `@media(hover)` 밖 — 터치에서도 발동 |
 | 입력 필드 · 텍스트 링크 | active 없음 |
 
 원칙: focus(글로우/보더/면)는 정적 표시, active(눌림)는 순간 물리 변형(scale) → 동시에 같은 모습이 되지 않는다.
+
+**공통 눌림 타이밍 (탭 카드 · 유틸 아이콘 버튼):**
+- 누를 때: `:active` 에 `transition-duration: 0ms` — 즉시 눌림 상태.
+- 뗄 때: 기본 규칙의 `200ms ease-out` 으로 복귀(카드는 transform 만, 아이콘 버튼은 background·color·transform).
+- hover 진입 속도는 hover 규칙에 기존 값(카드 160ms ease / 아이콘 140ms, X 150ms)을 다시 선언해 유지. hover 이탈은 기본 규칙을 따르므로 200ms ease-out.
+- 이유: iOS 짧은 탭은 `:active` 가 아주 잠깐만 유지돼, 진입 트랜지션이 있으면 끝값에 닿기 전에 풀려 눌림이 거의 안 보였다(사용자 실기기 관찰, 261121).
 
 iOS Safari 의 `:active` 는 조상에 touchstart 리스너가 있어야 발동한다 — React 가 루트(`document`)에 passive touchstart 를 등록하므로 앱 전역에서 별도 조치(`ontouchstart=""` 등) 없이 발동한다.
 

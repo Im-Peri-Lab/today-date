@@ -407,8 +407,9 @@
 }
 /* 클릭 가능한 카드: 호버 시 살짝 떠오름 */
 .cardInteractive {
+  /* transform 200ms ease-out = 눌림 해제 복귀(§5 공통 눌림 타이밍). 보더·그림자는 기존 160ms. */
   transition:
-    transform 160ms ease,
+    transform 200ms ease-out,
     box-shadow 160ms ease,
     border-color 160ms ease;
 }
@@ -418,6 +419,11 @@
  */
 @media (hover: hover) {
   .cardInteractive:hover {
+    /* hover 진입 속도는 기존 유지 — 200ms 는 눌림 해제 복귀용 */
+    transition:
+      transform 160ms ease,
+      box-shadow 160ms ease,
+      border-color 160ms ease;
     transform: translateY(-2px);
     border-color: var(--s-card-hover-border, rgba(168, 85, 247, 0.4));
     box-shadow: var(
@@ -428,12 +434,14 @@
 }
 /*
  * 눌림(:active) — 터치에서도 탭 순간 반응이 보이게 살짝 수축(scale 0.98, §5 눌림 표준).
+ * 타이밍은 아이콘 버튼과 공통: 누를 땐 transition 0 으로 즉시, 뗄 때만 기본 규칙 200ms ease-out 복귀.
  * transform 이라 레이아웃·주변 카드는 밀리지 않는다. 마우스에선 hover 부상(-2px)도 함께 취소된다.
  * 보더·그림자는 바꾸지 않는다 — 스크롤하려고 스칠 때 보라 보더가 번쩍이지 않게(160ms 트랜지션이라 스침은 미세하게만 보임).
  * 카드 안 ⋮(button) 을 누르는 동안엔 카드는 그대로 — 버튼 자체 눌림만 보이게.
  */
 .cardInteractive:active:not(:has(button:active)) {
   transform: scale(0.98);
+  transition-duration: 0ms;
 }
 /*
  * 카드 ⋮ 메뉴 열림 동안 보더 강조 — hover와 동일 톤(--s-card-hover-border).

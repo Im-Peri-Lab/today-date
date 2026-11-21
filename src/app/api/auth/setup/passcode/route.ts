@@ -9,6 +9,7 @@ import {
   sealDeviceUser,
 } from '@/lib/auth/deviceUser'
 import { getSession } from '@/lib/auth/session'
+import { APP_READY_COOKIE, appReadyCookieOptions } from '@/lib/auth/appReady'
 
 const schema = z.object({
   passcode: z
@@ -17,8 +18,6 @@ const schema = z.object({
     .max(6, '6자리를 입력하세요.')
     .regex(/^\d+$/, '숫자만 입력하세요.'),
 })
-
-const COOKIE_MAX_AGE = 30 * 24 * 60 * 60 // 30일
 
 export async function POST(req: NextRequest) {
   try {
@@ -90,14 +89,8 @@ export async function POST(req: NextRequest) {
       }
     )
 
-    // app-ready 쿠키도 응답에 추가
-    res.cookies.set('app-ready', '1', {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: COOKIE_MAX_AGE,
-      path: '/',
-    })
+    // app-ready 쿠키도 응답에 추가(§ lib/auth/appReady.ts)
+    res.cookies.set(APP_READY_COOKIE, '1', appReadyCookieOptions())
 
     return res
   } catch {

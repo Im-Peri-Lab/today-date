@@ -17,6 +17,7 @@ import {
 import { verifyPasscode } from '@/lib/auth/passcode'
 import { PENDING_USER_COOKIE, readPendingUser } from '@/lib/auth/pendingUser'
 import { getSession } from '@/lib/auth/session'
+import { APP_READY_COOKIE, appReadyCookieOptions } from '@/lib/auth/appReady'
 
 const MAX_ATTEMPTS = 5
 const LOCK_MINUTES = 10
@@ -192,6 +193,14 @@ export async function POST(req: NextRequest) {
         path: '/',
       }
     )
+
+    /*
+     * 설정 완료 캐시도 심는다(§ lib/auth/appReady.ts). 여기까지 왔다는 것은 커플에
+     * passcode_hash 가 있고 인증된 사용자로 세션이 발급됐다는 뜻 — isSetupComplete 와
+     * 같은 조건이다. 최초 설정을 하지 않은 기기(파트너·재로그인·새 PWA)는 이 쿠키가
+     * 없어 미들웨어가 요청마다 couples→users 를 순차 조회하고 있었다.
+     */
+    res.cookies.set(APP_READY_COOKIE, '1', appReadyCookieOptions())
 
     return res
   } catch {

@@ -5,6 +5,7 @@ import { unsealData } from 'iron-session'
 import { getWorkspaceStatus, WorkspaceState } from '@/lib/auth/couple'
 import { isSessionVersionCurrent } from '@/lib/auth/sessionVersionCache'
 import { sessionOptions, SessionData } from '@/lib/auth/session'
+import { APP_READY_COOKIE } from '@/lib/auth/appReady'
 
 // /setup, /api/auth/setup/* 는 미설정 상태에서도 접근 가능
 const SETUP_PREFIXES = ['/setup', '/api/auth/setup']
@@ -16,12 +17,21 @@ const SETUP_PREFIXES = ['/setup', '/api/auth/setup']
 // 핸들러가 직접 한다(src/app/invite/route.ts) — 미들웨어는 통과만 시킨다.
 const OPEN_PREFIXES = ['/lock', '/forgot', '/reset', '/invite', '/api/auth/']
 
-/** 세션을 신뢰할 수 없을 때: API 는 401, 화면은 /lock 으로 보내고 쿠키를 지운다. */
+/**
+ * 세션을 신뢰할 수 없을 때: API 는 401, 화면은 /lock 으로 보내고 쿠키를 지운다.
+ *
+ * app-ready 도 함께 지운다. 잠금해제가 이 캐시를 심게 되면서(§ lib/auth/appReady.ts)
+ * 한 계정의 여러 기기가 쿠키를 갖는다 — 한 기기에서 계정을 지우면 다른 기기는 커플 행이
+ * 사라져 여기로 오는데, 캐시가 남아 있으면 /setup 이 홈으로 되돌려져 그 기기에서는
+ * 재가입을 시작할 수 없다. 캐시를 지우는 것은 언제나 안전하다(다음 요청에서 DB 로 재판정,
+ * 다시 로그인하면 unlock 이 다시 심는다).
+ */
 function expireSession(req: NextRequest, pathname: string, message: string) {
   const res = pathname.startsWith('/api/')
     ? NextResponse.json({ error: message }, { status: 401 })
     : NextResponse.redirect(new URL('/lock', req.url))
   res.cookies.delete('today-date-session')
+  res.cookies.delete(APP_READY_COOKIE)
   return res
 }
 
@@ -38,7 +48,7 @@ export async function middleware(req: NextRequest) {
   }
 
   // 워크스페이스 상태 확인 (app-ready 쿠키 캐싱 — 있으면 DB 조회를 건너뛴다)
-  const appReadyCookie = req.cookies.get('app-ready')?.value
+  const appReadyCookie = req.cookies.get(APP_READY_COOKIE)?.value
   let isSetupComplete = appReadyCookie === '1'
   let state: WorkspaceState | null = null
 

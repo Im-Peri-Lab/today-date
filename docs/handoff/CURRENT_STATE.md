@@ -199,6 +199,7 @@ PROJECT_CONTEXT §5(인증 F-01)·§20.
 21. ~~Codex worktree 경로 미확정(261121 등록)~~ → **해소(261121)**: Codex 는 worktree 를 리포 밖 `$CODEX_HOME/worktrees`(기본 `~/.codex/worktrees`)에서 관리한다(Codex 공식 문서 developers.openai.com/codex/app/worktrees). 그래서 `AGENTS.md` 에서 처음 사본에 있던 리포 안 `.Codex/worktrees/<이름>` 언급을 지우고 이 사실로 바꿨다. 리포 안 `.claude/worktrees/` 는 Claude Code 전용이다(`.git/info/exclude` 에 등록돼 있음)
 22. 상세 "추천 결과로"는 Link push라 브라우저 뒤로가기와 히스토리 동작이 다르다 — 문제 여부 미판단, 보류 (261121: 중복 번호 11 → 22 로 이동, 12~21 번호는 기존 참조 유지를 위해 그대로)
 23. **실기기 확인 대기 — 갤럭시 앱 재설치 후 로딩 화면 하트 크기(화면 폭 약 12.5%) / 홈 아이콘 유지 확인(261121, PR #181)**: 프로덕션에서 기존 앱을 지우고 다시 설치한 뒤 홈 아이콘으로 실행해 확인한다. 로딩 하트가 화면 폭의 약 12.5%(360dp 폭 기기는 약 13%)이고, 홈 화면 아이콘이 이전과 같은 모습(icon-192, 하트 52%)이면 종결. 크롬 메뉴·설치 직후 "열기"로 실행했을 때 이름이 보이는 다른 로딩 화면이 뜨는지도 함께 보면 이전 7% 화면의 경로를 가릴 수 있다(→ CHANGELOG 2026-11-21 v5)
+    → 확인 후 PROJECT_CONTEXT §20 의 PR #173 설명('\u200B 덕분에 문구가 사라졌다')을 실기기 결과에 맞게 정리(Android 12+ WebAPK 로딩 화면에 원래 제목이 없는지, '홈 화면에 추가' 바로가기 방식에서는 제목이 나오는지 함께 기록)
 
 **그 외 남은 작업**
 - ~~worktree 가 리포 안(`.claude/worktrees`)에 있으면 로컬 `npm run lint` 가 상위 `.eslintrc.json` 과 충돌해 실패(261121 확인)~~ → **해소(PR #179, 261121)**: `.eslintrc.json` 에 `"root": true` 추가. 이제 worktree 에서도 `npm run lint` 를 그대로 쓴다(`--no-eslintrc -c` 우회 불필요). 규칙 집합 변화 없음(99개 동일)

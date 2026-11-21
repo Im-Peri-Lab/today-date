@@ -14,6 +14,9 @@ import styles from '@/components/auth/auth.module.css'
 // true 일 때는 5회 실패 없이도 잠금 배너가 보이고, 09:42 가짜 카운트다운이 표시된다.
 const DEV_FORCE_LOCK = false
 
+/** 로그인 성공 후 홈 전환이 이 시간 안에 끝나지 않으면 로딩을 풀어 다시 시도할 수 있게 한다. */
+const NAV_TIMEOUT_MS = 15000
+
 function formatCountdown(totalSeconds: number) {
   const mm = String(Math.floor(totalSeconds / 60)).padStart(2, '0')
   const ss = String(totalSeconds % 60).padStart(2, '0')
@@ -83,6 +86,15 @@ export default function LockPage() {
   const [countdown, setCountdown] = useState(0)
   const [isLoading, setIsLoading] = useState(false)
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  /**
+   * 요청~홈 전환 동안의 중복 제출 가드.
+   *
+   * disabled 는 state 라 리렌더 전 연속 탭을 못 막는다 → ref 로 즉시 막는다.
+   * 성공 시 router.push 는 기다리지 않고 반환되므로(홈 RSC·데이터 로딩은 그 뒤),
+   * 로딩은 이 화면이 언마운트될 때까지 유지하고, 이동이 멈추면 NAV_TIMEOUT_MS 후 푼다.
+   */
+  const inFlightRef = useRef(false)
+  const navTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   /**
    * "누구인지" 확인 단계.
@@ -110,7 +122,14 @@ export default function LockPage() {
     return () => { if (timerRef.current) clearInterval(timerRef.current) }
   }, [lockedUntil])
 
+  useEffect(() => () => {
+    if (navTimeoutRef.current) clearTimeout(navTimeoutRef.current)
+  }, [])
+
   const submitUnlock = useCallback(async (passcode: string, identityEmail?: string) => {
+    if (inFlightRef.current) return
+    inFlightRef.current = true
+    let navigating = false
     setIsLoading(true)
     setError('')
     topLoader.start()
@@ -149,12 +168,22 @@ export default function LockPage() {
         return
       }
 
+      navigating = true
       router.push('/')
       router.refresh()
+      // 이동이 실패·정지해도 버튼이 로딩에 갇히지 않게 하는 안전장치(정상이면 언마운트로 정리됨).
+      navTimeoutRef.current = setTimeout(() => {
+        inFlightRef.current = false
+        setIsLoading(false)
+        topLoader.done()
+      }, NAV_TIMEOUT_MS)
     } catch {
       topLoader.done()
     } finally {
-      setIsLoading(false)
+      if (!navigating) {
+        inFlightRef.current = false
+        setIsLoading(false)
+      }
     }
   }, [router, topLoader])
 

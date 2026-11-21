@@ -556,7 +556,7 @@ description: >
 | 요소 군 | 표현 |
 |---|---|
 | 채움형 CTA · 패스코드 키 | `scale(0.96)` + inset 눌림 그림자 |
-| 선택·컨트롤 버튼(칩·세그먼트·필터 등) | `scale(0.97)` — 현재 코드 반영은 `.chip` 만(나머지는 CURRENT_STATE 보류 23) |
+| 선택·컨트롤 버튼(칩·세그먼트·필터 등) | `scale(0.97)` — 현재 코드 반영은 `.chip` 만(나머지는 CURRENT_STATE 보류 24) |
 | 탭 카드(`.cardInteractive`) | `scale(0.98)` — hover 부상 취소 겸 터치 눌림. 보더·그림자 변화 없음(스크롤 스침 깜빡임 방지). 내부 ⋮(button) 누르는 동안엔 미적용(`:not(:has(button:active))`) |
 | 옵션 카드(`.optionCard`, 추천 위저드) | `scale(0.98)` — 탭 카드와 같은 값(전체 폭 카드에서 0.97 은 과함). hover 부상 취소 겸. 색·보더 불변 |
 | 유틸 아이콘 버튼(`.headerNavBtn`·`.iconBtn`·`.mapActionBtn`·`.dialogCloseBtn`) | hover 와 같은 면(라이트 `--s-card-border-strong`+`--s-ink` / 다크 `--s-accent-soft-bg`+`--s-accent`) + scale(박스별 수축 ≈3px: 40px `0.92` / 36px `0.91` / 28px `0.90`). 타이밍은 아래 공통 규칙. `@media(hover)` 밖 — 터치에서도 발동 |

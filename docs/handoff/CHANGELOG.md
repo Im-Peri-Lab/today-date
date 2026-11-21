@@ -1,6 +1,6 @@
 # CHANGELOG.md
 
-> **마지막 업데이트: 2026-11-21 (PR #134~#180 반영)**
+> **마지막 업데이트: 2026-11-22 (PR #134~#183 반영)**
 
 > 260531~261121 핸드오프 전체를 날짜순으로 기록한 변경 이력입니다. 새 AI는 일반적으로 `PROJECT_CONTEXT.md`와 `CURRENT_STATE.md`만 먼저 읽고, 과거 판단 근거가 필요할 때 이 문서를 참고하세요.
 
@@ -1450,3 +1450,72 @@ PR #161 의 "+ 시간 추가" 버튼 → 탭하면 칸 펼침 → 다이닝 미�
 ### 검증
 - 단위 테스트(신규 8): unlock 발급 조건·속성(성공만 발급, 401·409·403 미발급), 미들웨어 게이트(쿠키 있으면 워크스페이스 조회 0회, 없으면 DB 판정·미설정 시 `/setup`, NONE 에서 `/setup` 개방, 만료 시 `app-ready` 삭제). vitest 319 통과, lint·build 통과, E2E 94 passed(계정 삭제→재가입·`/setup` 게이트 포함).
 - Preview 확인은 사용자가 완료. 확인용 `diag/app-ready-verify`(이 브랜치 + diag 계측)는 머지 없이 삭제.
+
+---
+
+## 2026-11-21 v5 — Android PWA 로딩 화면 하트 축소: icon-512 하트 52%→20% (PR #181)
+
+### 배경
+- PR #173(`name: "\u200B"`) 이후 갤럭시에서 앱을 지우고 다시 설치하자 로딩 화면 문구는 사라졌지만, 하트 폭이 화면 폭의 약 7% → 34% 로 커졌다. 아이콘 파일은 그대로였다(icon-192/512, 하트 약 52%, maskable 없음).
+
+### 진단 (Chromium main 소스, 코드 변경 없음)
+- **경로**: 홈 아이콘 → `H2OOpaqueMainActivity` → 셸 `SplashActivity`(휴대폰은 항상, `isNewStyleWebApk` = ARC 아님). Android 12 시스템 SplashScreen 은 셸 테마 `values-v31/styles.xml` 의 `windowIsTranslucent=true` 로 꺼져 있고, `SplashActivity.androidSSplashScreenEnabled()` 는 `false` 로 하드코딩돼 있다. 그래서 Android 12+ 에서는 `SplashUtilsForS.createSplashView` 가 **제목 없는** 화면을 그리고, 크롬은 그 스크린샷을 그대로 띄운다(`WebappSplashController.buildSplashWithWebApkProvidedScreenshot`).
+- **크기**: `layout-v31/splash_screen_view.xml` 의 ImageView 는 `oom_splash_icon_size = 240dp`, FIT_CENTER. 하트 52% × 240 = 약 125dp → 384dp 폭 화면의 약 33%(관찰 34% 와 일치).
+- **`name` 은 원인이 아니다**: 어느 경로로 그릴지에 `name` 은 쓰이지 않는다. 제목과 작은 하트가 함께 나오는 화면은 크롬이 직접 그리는 `SplashLayout`(`webapp_splash_screen_large`: 아이콘 wrap_content 최대 128dp, 제목은 아래 고정)뿐이다. 이전의 '7% + 제목' 화면은 이 경로였던 것으로 보인다(추정 — 7% ≈ 아이콘 48dp 로 홈 아이콘 크기와 같음). 그렇다면 PR #173 이후 문구가 사라진 것도 U+200B 가 아니라 이 경로 전환 때문일 수 있다(미확정, `name` 은 그대로 둠).
+- **아이콘 선택 분리**: 홈 아이콘(`InstallableIconFetcher`)은 any 48dp(`webapp_home_screen_icon_size`), 로딩 화면(`ShortcutInfo::UpdateBestSplashIcon`)은 128dp(`webapp_splash_image_size_ideal`)를 목표로 `ManifestIconSelector`(목표 이상 중 가장 작은 것)로 고른다. 갤럭시(밀도 2.6~3.5)에서 홈은 126~168px → **icon-192**, 로딩은 336~448px → **icon-512**. 둘 다 maskable 을 먼저 찾으므로 maskable 을 추가하면 홈·로딩이 함께 바뀐다(로딩은 adaptive 처리로 1.5배 더 커짐) → **purpose 가 아니라 크기로 나눈다.**
+- 비율별 예상(240dp, 화면 폭 384dp): 25% → 약 15.6%, **20% → 약 12.5%**, 16% → 약 10%.
+
+### 변경
+- `public/icon-512.png` 만 바꿨다. 기존 하트를 같은 중심(255, 258)에 두고 폭만 52% → 20%(102px)로 줄였다(다운샘플). 배경 `#f5f3ff`, 512×512 그대로.
+- `icon-192.png`·`apple-touch-icon.png`·`manifest.json` 은 변경 없음.
+- 주의(추정): PC 크롬으로 설치하면 OS 가 큰 아이콘 자리에 512 를 써서 하트가 작게 보일 수 있다. 기존 설치 기기에 바로 반영되는지는 확실하지 않다 → 확인은 앱을 지우고 다시 설치해서 한다.
+
+### 검증
+- `next build` 통과. Preview 에서 icon-512 는 새 파일, 나머지 세 파일은 main 과 같은 해시인 것을 확인했다.
+- PR #181 CI 통과 후 squash 머지(머지 커밋 `9850390`), 브랜치·worktree `fix/pwa-splash-icon-512-heart20` 삭제.
+- 갤럭시 실기기 확인(로딩 하트 약 12.5% / 홈 아이콘 유지)은 프로덕션에서 사용자가 한다 → CURRENT_STATE 보류 23번.
+
+---
+
+## 2026-11-21 v6 — 로그인 버튼: 홈 전환 완료까지 로딩 유지 + 연속 탭 중복 요청 차단 (PR #182)
+
+### 배경
+- 첫 로그인(패스코드 → 이메일 → 홈)에서 [로그인]을 누르면 "스피너+확인 중..."이 찰나만 보이고 다시 활성 [로그인] 버튼으로 돌아온 채 홈이 뜰 때까지 수 초간 머물러, 안 눌린 줄 알고 재탭하게 됐다.
+
+### 원인 (`src/app/lock/page.tsx` `submitUnlock`)
+- 성공 시 `router.push('/')` 는 이동 완료를 기다리지 않고 반환되는데, 바로 뒤 `finally` 가 `setIsLoading(false)` 를 실행했다 → 홈 전환(RSC·데이터 로딩) 구간에 로딩 표시가 없었다.
+- 중복 제출 가드가 `disabled`(state)뿐이라 리렌더 전 연속 탭은 막지 못했다.
+
+### 변경
+- 성공 경로는 로딩을 해제하지 않는다 → 화면 언마운트(홈 도착)까지 유지. 이동이 실패·정지해도 갇히지 않게 `NAV_TIMEOUT_MS`(15초) 후 로딩·toploader 해제(언마운트 시 타이머 정리).
+- `inFlightRef` 로 요청~전환 동안 재진입을 즉시 차단 → 연속 탭에도 `/api/auth/unlock` 1회.
+- 실패(잠금·needsEmail·4xx·네트워크 오류)는 기존대로 즉시 해제·기존 에러 표시. 인증·세션(iron-session)·API·버튼 UI 변경 없음.
+- 패스코드만으로 로그인되는 경로도 같은 함수를 쓰므로 홈 전환까지 키패드가 비활성으로 유지된다(입력·검증 흐름은 그대로).
+
+### 검증
+- tsc·lint·vitest 319·build 통과. Preview 실기기 확인은 사용자가 완료.
+
+---
+
+## 2026-11-22 — 탭 눌림(:active) 피드백 + 위저드 선택 전환 지연·더블탭 차단 (PR #183)
+
+### 배경
+- CURRENT_STATE 보류 13번: 카드·헤더 아이콘·카드 ⋮을 탭해도 이동이 빨리 커밋되면 topLoader 가 안 보여 반응이 없다고 느껴졌다. 로더(`loading.tsx`)는 #154 rAF 지연과 상호작용이 있어 제외하고 CSS 눌림만 진행.
+- 진단: `.headerNavBtn`·`.iconBtn` 은 `:active` 없음, `.cardInteractive:active` 는 `translateY(0)`(hover 부상 취소)뿐이라 터치에선 무변화.
+
+### 변경
+- `:active` 눌림 — 탭 카드 `scale(0.98)`(보더·그림자 불변, 내부 ⋮ 누를 땐 미적용 `:not(:has(button:active))`), 유틸 아이콘 버튼 4종 hover 와 같은 면 + scale(박스별 수축 ≈3px: 40px 0.92 / 36px 0.91 / 28px 0.90), 위저드 `.optionCard` 0.98(전체 폭 카드에서 0.97 은 과함)·`.chip` 0.97(`/list`·폼 칩에도 적용).
+- 공통 눌림 타이밍 — `:active` 에서 `transition-duration: 0`(즉시), 뗄 때 기본 규칙 200ms ease-out 복귀. hover 진입 속도는 hover 규칙에 기존 값 재선언으로 유지(hover 이탈만 200ms).
+- 위저드 자동 전환(활동 1~3단계·다이닝 1단계) — `useDelayedAdvance`: 선택값 즉시 반영, `setStep`·히스토리 replace/push 는 150ms 뒤. 대기 중 재탭 무시, 이전·다음·처음부터·popstate 는 대기 취소. 전환 뒤엔 pointerdown 이 전환+300ms 이후인 포인터 탭만 수락(이전 단계에서 시작된 탭·더블탭 두 번째 탭 차단, 키보드 detail 0 영향 없음).
+- `.dialogCloseBtn`·`.optionCard` 는 Tailwind `transition-all` 을 덮도록 클래스 중복 specificity. Button 의 `active:not-aria-[haspopup]:translate-y-px` 는 Tailwind 3.4 가 `not-` 변형을 몰라 생성되지 않음(빌드 CSS 확인).
+- iOS `:active` 발동 조건(조상 touchstart 리스너)은 React 가 `document` 루트에 passive touchstart 를 등록해 앱 전역에서 충족 — 별도 조치 없음.
+- CURRENT_STATE 보류 24번 신규: SKILL `scale(0.97)` 미구현 `.option`·`.filterToggle`·`.tab`·`.resetBtn`·`.dateClear`(`.notice` 확인 필요).
+
+### 실기기 피드백으로 바뀐 것
+1. 0.96 + 140ms 진입 트랜지션 → 짧은 탭에서 눌림이 거의 안 보임 → 즉시 눌림·200ms 복귀 + scale 확대.
+2. 위저드 선택지는 선택 즉시 전환돼 누른 카드가 사라짐 → 150ms 틴트 노출 후 전환.
+3. 빠른 두 번 탭이 가끔 두 단계를 넘김(타이머 해제 뒤 같은 자리의 다음 단계 카드에 두 번째 탭) → pointerdown 시각 기반 차단 + 보조 300ms.
+
+### 검증
+- lint·tsc·vitest 319·build 통과, E2E 97 통과(신규: 같은 틱 연타 history +1, 첫 탭 250ms 뒤 두 번째 탭 미선택, 정상 연속 선택). 신규 가드 테스트는 가드 제거 시 실패하는 것 확인.
+- 사용자 실기기(iPhone PWA·Safari) 확인 완료.

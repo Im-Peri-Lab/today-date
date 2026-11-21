@@ -27,6 +27,7 @@ import {
   type ActivityRecommendResponse,
 } from '@/hooks/useRecommend'
 import { useWizardUrlSync } from '@/hooks/useWizardUrlSync'
+import { useDelayedAdvance } from '@/hooks/useDelayedAdvance'
 import { readActivityResult, stashActivityResult } from '@/lib/recommend/resultCache'
 import { pushWizardUrl, replaceWizardUrl, currentWizardUrl } from '@/lib/recommend/wizardUrl'
 import { buildDetailHref } from '@/lib/listReturn'
@@ -92,6 +93,8 @@ export function ActivityRecommendWizard() {
 
   const cats = useActivityCategories()
   const recommend = useRecommendActivity()
+  // 선택 카드 자동 전환(1~3단계): 선택 틴트를 잠깐 보여 준 뒤 전환 + 연타 방지(SKILL §5)
+  const advance = useDelayedAdvance()
 
   // 조건만으로 결과를 다시 조회 — 마운트 시 URL이 이미 step=result인데 sessionStorage
   // 캐시가 없을 때(사생활 보호 모드 등 저장이 막혔거나 최초 진입 등)의 폴백 전용.
@@ -122,6 +125,7 @@ export function ActivityRecommendWizard() {
   // 사이드 전환(예: 상세 화면 "추천 결과로" 복귀) 중에는 렌더 시점에 아직 갱신되지 않은 경우가
   // 있어 useState 지연 초기화 대신 커밋 이후 실행되는 이펙트에서 읽어야 안전하다.
   useWizardUrlSync(readActivityWizardUrlState, (next, source) => {
+    advance.cancel() // 대기 중 자동 전환이 있으면 히스토리 이동이 우선
     setDuration(next.duration)
     setTimeOfDay(next.timeOfDay)
     setLocationType(next.locationType)
@@ -216,6 +220,7 @@ export function ActivityRecommendWizard() {
   }
 
   function reset() {
+    advance.cancel()
     setStep(1)
     setShowResult(false)
     setResult(null)
@@ -464,28 +469,32 @@ export function ActivityRecommendWizard() {
                       const isOvernight = d.value === 'overnight'
                       const nextTimeOfDay = isOvernight ? null : timeOfDay
                       const nextStep = isOvernight ? 3 : 2
+                      // 선택값은 즉시(틴트 노출), 단계 전환·히스토리는 잠시 뒤. 대기 중 연타는 무시.
+                      const scheduled = advance.schedule(() => {
+                        setStep(nextStep)
+                        // 방금 고른 값을 "떠나는" step1 엔트리에도 반영 — 그래야 이후 이
+                        // 단계로 되돌아왔을 때(뒤로가기 포함) 방금 고른 값이 그대로 활성 표시된다.
+                        replaceActivityWizardState({
+                          step: 1,
+                          duration: d.value,
+                          timeOfDay: nextTimeOfDay,
+                          locationType,
+                          categoryIds,
+                        })
+                        pushActivityWizardState({
+                          step: nextStep,
+                          duration: d.value,
+                          timeOfDay: nextTimeOfDay,
+                          locationType,
+                          categoryIds,
+                        })
+                      })
+                      if (!scheduled) return
                       setDuration(d.value)
                       if (isOvernight) {
                         // 1박 이상은 낮/밤 구분이 무의미 → 시간대 단계 건너뛰고 바로 실내/실외로
                         setTimeOfDay(null)
                       }
-                      setStep(nextStep)
-                      // 방금 고른 값을 "떠나는" step1 엔트리에도 반영 — 그래야 이후 이
-                      // 단계로 되돌아왔을 때(뒤로가기 포함) 방금 고른 값이 그대로 활성 표시된다.
-                      replaceActivityWizardState({
-                        step: 1,
-                        duration: d.value,
-                        timeOfDay: nextTimeOfDay,
-                        locationType,
-                        categoryIds,
-                      })
-                      pushActivityWizardState({
-                        step: nextStep,
-                        duration: d.value,
-                        timeOfDay: nextTimeOfDay,
-                        locationType,
-                        categoryIds,
-                      })
                     }}
                     className={cn(
                       'flex w-full items-center gap-3 rounded-xl border p-4 text-left transition-all',
@@ -522,24 +531,26 @@ export function ActivityRecommendWizard() {
                     key={t.value}
                     type="button"
                     onClick={() => {
-                      setTimeOfDay(t.value)
-                      setStep(3)
-                      // 방금 고른 값을 "떠나는" step2 엔트리에도 반영 — 뒤로가기로 이 단계에
-                      // 돌아왔을 때 방금 고른 값이 미선택 상태로 보이지 않도록.
-                      replaceActivityWizardState({
-                        step: 2,
-                        duration,
-                        timeOfDay: t.value,
-                        locationType,
-                        categoryIds,
+                      const scheduled = advance.schedule(() => {
+                        setStep(3)
+                        // 방금 고른 값을 "떠나는" step2 엔트리에도 반영 — 뒤로가기로 이 단계에
+                        // 돌아왔을 때 방금 고른 값이 미선택 상태로 보이지 않도록.
+                        replaceActivityWizardState({
+                          step: 2,
+                          duration,
+                          timeOfDay: t.value,
+                          locationType,
+                          categoryIds,
+                        })
+                        pushActivityWizardState({
+                          step: 3,
+                          duration,
+                          timeOfDay: t.value,
+                          locationType,
+                          categoryIds,
+                        })
                       })
-                      pushActivityWizardState({
-                        step: 3,
-                        duration,
-                        timeOfDay: t.value,
-                        locationType,
-                        categoryIds,
-                      })
+                      if (scheduled) setTimeOfDay(t.value)
                     }}
                     className={cn(
                       'flex flex-col items-center justify-center gap-1 rounded-xl border p-3 transition-all',
@@ -563,6 +574,7 @@ export function ActivityRecommendWizard() {
                 variant="outline"
                 className="h-10 w-full"
                 onClick={() => {
+                  advance.cancel()
                   setStep(1)
                   pushActivityWizardState({
                     step: 1,
@@ -593,24 +605,26 @@ export function ActivityRecommendWizard() {
                     key={o.value}
                     type="button"
                     onClick={() => {
-                      setLocationType(o.value)
-                      setStep(4)
-                      // 방금 고른 값을 "떠나는" step3 엔트리에도 반영 — 뒤로가기로 이 단계에
-                      // 돌아왔을 때 방금 고른 값이 미선택 상태로 보이지 않도록.
-                      replaceActivityWizardState({
-                        step: 3,
-                        duration,
-                        timeOfDay,
-                        locationType: o.value,
-                        categoryIds,
+                      const scheduled = advance.schedule(() => {
+                        setStep(4)
+                        // 방금 고른 값을 "떠나는" step3 엔트리에도 반영 — 뒤로가기로 이 단계에
+                        // 돌아왔을 때 방금 고른 값이 미선택 상태로 보이지 않도록.
+                        replaceActivityWizardState({
+                          step: 3,
+                          duration,
+                          timeOfDay,
+                          locationType: o.value,
+                          categoryIds,
+                        })
+                        pushActivityWizardState({
+                          step: 4,
+                          duration,
+                          timeOfDay,
+                          locationType: o.value,
+                          categoryIds,
+                        })
                       })
-                      pushActivityWizardState({
-                        step: 4,
-                        duration,
-                        timeOfDay,
-                        locationType: o.value,
-                        categoryIds,
-                      })
+                      if (scheduled) setLocationType(o.value)
                     }}
                     className={cn(
                       'flex flex-col items-center justify-center gap-1 rounded-xl border p-3 transition-all',
@@ -636,6 +650,7 @@ export function ActivityRecommendWizard() {
                   styles.detailPrimaryBtn
                 )}
                 onClick={() => {
+                  advance.cancel()
                   setLocationType(null)
                   setStep(4)
                   replaceActivityWizardState({
@@ -660,6 +675,7 @@ export function ActivityRecommendWizard() {
                 variant="outline"
                 className="h-10 w-full"
                 onClick={() => {
+                  advance.cancel()
                   const prevStep = duration === 'overnight' ? 1 : 2
                   setStep(prevStep)
                   pushActivityWizardState({

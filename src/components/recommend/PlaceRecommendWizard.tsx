@@ -26,6 +26,7 @@ import {
   type PlaceRecommendResponse,
 } from '@/hooks/useRecommend'
 import { useWizardUrlSync } from '@/hooks/useWizardUrlSync'
+import { useDelayedAdvance } from '@/hooks/useDelayedAdvance'
 import { readPlaceResult, stashPlaceResult } from '@/lib/recommend/resultCache'
 import { pushWizardUrl, replaceWizardUrl, currentWizardUrl } from '@/lib/recommend/wizardUrl'
 import { buildDetailHref } from '@/lib/listReturn'
@@ -81,6 +82,8 @@ export function PlaceRecommendWizard() {
 
   const cats = usePlaceCategories()
   const recommend = useRecommendPlace()
+  // 선택 카드 자동 전환(1단계 식사): 선택 틴트를 잠깐 보여 준 뒤 전환 + 연타 방지(SKILL §5)
+  const advance = useDelayedAdvance()
 
   // 조건만으로 결과를 다시 조회 — 마운트 시 URL이 이미 step=result인데 sessionStorage
   // 캐시가 없을 때(사생활 보호 모드 등 저장이 막혔거나 최초 진입 등)의 폴백 전용.
@@ -110,6 +113,7 @@ export function PlaceRecommendWizard() {
   // 사이드 전환(예: 상세 화면 "추천 결과로" 복귀) 중에는 렌더 시점에 아직 갱신되지 않은 경우가
   // 있어 useState 지연 초기화 대신 커밋 이후 실행되는 이펙트에서 읽어야 안전하다.
   useWizardUrlSync(readPlaceWizardUrlState, (next, source) => {
+    advance.cancel() // 대기 중 자동 전환이 있으면 히스토리 이동이 우선
     setMeal(next.meal)
     setArea(next.area)
     setCategoryIds(next.categoryIds)
@@ -178,6 +182,7 @@ export function PlaceRecommendWizard() {
   }
 
   function reset() {
+    advance.cancel()
     setStep(1)
     setShowResult(false)
     setResult(null)
@@ -351,12 +356,15 @@ export function PlaceRecommendWizard() {
                     key={m.value}
                     type="button"
                     onClick={() => {
-                      setMeal(m.value)
-                      setStep(2)
-                      // 방금 고른 값을 "떠나는" step1 엔트리에도 반영 — 뒤로가기로 이 단계에
-                      // 돌아왔을 때 방금 고른 값이 미선택 상태로 보이지 않도록.
-                      replacePlaceWizardState({ step: 1, meal: m.value, area, categoryIds })
-                      pushPlaceWizardState({ step: 2, meal: m.value, area, categoryIds })
+                      // 선택값은 즉시(틴트 노출), 단계 전환·히스토리는 잠시 뒤. 대기 중 연타는 무시.
+                      const scheduled = advance.schedule(() => {
+                        setStep(2)
+                        // 방금 고른 값을 "떠나는" step1 엔트리에도 반영 — 뒤로가기로 이 단계에
+                        // 돌아왔을 때 방금 고른 값이 미선택 상태로 보이지 않도록.
+                        replacePlaceWizardState({ step: 1, meal: m.value, area, categoryIds })
+                        pushPlaceWizardState({ step: 2, meal: m.value, area, categoryIds })
+                      })
+                      if (scheduled) setMeal(m.value)
                     }}
                     className={cn(
                       'flex flex-col items-center gap-1 rounded-xl border p-5 transition-all',

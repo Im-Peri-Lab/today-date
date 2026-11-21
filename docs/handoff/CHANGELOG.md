@@ -1,6 +1,6 @@
 # CHANGELOG.md
 
-> **마지막 업데이트: 2026-11-21 (PR #134~#180 반영)**
+> **마지막 업데이트: 2026-11-21 (PR #134~#181 반영)**
 
 > 260531~261121 핸드오프 전체를 날짜순으로 기록한 변경 이력입니다. 새 AI는 일반적으로 `PROJECT_CONTEXT.md`와 `CURRENT_STATE.md`만 먼저 읽고, 과거 판단 근거가 필요할 때 이 문서를 참고하세요.
 
@@ -1450,3 +1450,27 @@ PR #161 의 "+ 시간 추가" 버튼 → 탭하면 칸 펼침 → 다이닝 미�
 ### 검증
 - 단위 테스트(신규 8): unlock 발급 조건·속성(성공만 발급, 401·409·403 미발급), 미들웨어 게이트(쿠키 있으면 워크스페이스 조회 0회, 없으면 DB 판정·미설정 시 `/setup`, NONE 에서 `/setup` 개방, 만료 시 `app-ready` 삭제). vitest 319 통과, lint·build 통과, E2E 94 passed(계정 삭제→재가입·`/setup` 게이트 포함).
 - Preview 확인은 사용자가 완료. 확인용 `diag/app-ready-verify`(이 브랜치 + diag 계측)는 머지 없이 삭제.
+
+---
+
+## 2026-11-21 v5 — Android PWA 로딩 화면 하트 축소: icon-512 하트 52%→20% (PR #181)
+
+### 배경
+- PR #173(`name: "\u200B"`) 이후 갤럭시에서 앱을 지우고 다시 설치하자 로딩 화면 문구는 사라졌지만, 하트 폭이 화면 폭의 약 7% → 34% 로 커졌다. 아이콘 파일은 그대로였다(icon-192/512, 하트 약 52%, maskable 없음).
+
+### 진단 (Chromium main 소스, 코드 변경 없음)
+- **경로**: 홈 아이콘 → `H2OOpaqueMainActivity` → 셸 `SplashActivity`(휴대폰은 항상, `isNewStyleWebApk` = ARC 아님). Android 12 시스템 SplashScreen 은 셸 테마 `values-v31/styles.xml` 의 `windowIsTranslucent=true` 로 꺼져 있고, `SplashActivity.androidSSplashScreenEnabled()` 는 `false` 로 하드코딩돼 있다. 그래서 Android 12+ 에서는 `SplashUtilsForS.createSplashView` 가 **제목 없는** 화면을 그리고, 크롬은 그 스크린샷을 그대로 띄운다(`WebappSplashController.buildSplashWithWebApkProvidedScreenshot`).
+- **크기**: `layout-v31/splash_screen_view.xml` 의 ImageView 는 `oom_splash_icon_size = 240dp`, FIT_CENTER. 하트 52% × 240 = 약 125dp → 384dp 폭 화면의 약 33%(관찰 34% 와 일치).
+- **`name` 은 원인이 아니다**: 어느 경로로 그릴지에 `name` 은 쓰이지 않는다. 제목과 작은 하트가 함께 나오는 화면은 크롬이 직접 그리는 `SplashLayout`(`webapp_splash_screen_large`: 아이콘 wrap_content 최대 128dp, 제목은 아래 고정)뿐이다. 이전의 '7% + 제목' 화면은 이 경로였던 것으로 보인다(추정 — 7% ≈ 아이콘 48dp 로 홈 아이콘 크기와 같음). 그렇다면 PR #173 이후 문구가 사라진 것도 U+200B 가 아니라 이 경로 전환 때문일 수 있다(미확정, `name` 은 그대로 둠).
+- **아이콘 선택 분리**: 홈 아이콘(`InstallableIconFetcher`)은 any 48dp(`webapp_home_screen_icon_size`), 로딩 화면(`ShortcutInfo::UpdateBestSplashIcon`)은 128dp(`webapp_splash_image_size_ideal`)를 목표로 `ManifestIconSelector`(목표 이상 중 가장 작은 것)로 고른다. 갤럭시(밀도 2.6~3.5)에서 홈은 126~168px → **icon-192**, 로딩은 336~448px → **icon-512**. 둘 다 maskable 을 먼저 찾으므로 maskable 을 추가하면 홈·로딩이 함께 바뀐다(로딩은 adaptive 처리로 1.5배 더 커짐) → **purpose 가 아니라 크기로 나눈다.**
+- 비율별 예상(240dp, 화면 폭 384dp): 25% → 약 15.6%, **20% → 약 12.5%**, 16% → 약 10%.
+
+### 변경
+- `public/icon-512.png` 만 바꿨다. 기존 하트를 같은 중심(255, 258)에 두고 폭만 52% → 20%(102px)로 줄였다(다운샘플). 배경 `#f5f3ff`, 512×512 그대로.
+- `icon-192.png`·`apple-touch-icon.png`·`manifest.json` 은 변경 없음.
+- 주의(추정): PC 크롬으로 설치하면 OS 가 큰 아이콘 자리에 512 를 써서 하트가 작게 보일 수 있다. 기존 설치 기기에 바로 반영되는지는 확실하지 않다 → 확인은 앱을 지우고 다시 설치해서 한다.
+
+### 검증
+- `next build` 통과. Preview 에서 icon-512 는 새 파일, 나머지 세 파일은 main 과 같은 해시인 것을 확인했다.
+- PR #181 CI 통과 후 squash 머지(머지 커밋 (머지 후 기입)), 브랜치·worktree `fix/pwa-splash-icon-512-heart20` 삭제.
+- 갤럭시 실기기 확인(로딩 하트 약 12.5% / 홈 아이콘 유지)은 프로덕션에서 사용자가 한다 → CURRENT_STATE 보류 23번.

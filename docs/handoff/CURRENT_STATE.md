@@ -196,7 +196,7 @@ PROJECT_CONTEXT §5(인증 F-01)·§20.
 20. ~~Android PWA 스플래시 하트–이름 간격~~ → **해소(PR #173, 261120)**: 아이콘 확대는 하트가 너무 커서 원복(PR #170). 대신 manifest `name` 을 `"\u200B"` 로 두어 로딩 화면 문구를 숨겼다(갤럭시 V3 실기기 확인, 아이콘 원본 유지). iOS 홈 화면 이름은 `apple-mobile-web-app-title` 로 고정. 남은 확인: 갤럭시 기존 설치 기기의 이름 변경 확인 창, 최근 앱 목록 이름, iPhone 새로 추가 시 이름 → PROJECT_CONTEXT §20
 21. ~~Codex worktree 경로 미확정(261121 등록)~~ → **해소(261121)**: Codex 는 worktree 를 리포 밖 `$CODEX_HOME/worktrees`(기본 `~/.codex/worktrees`)에서 관리한다(Codex 공식 문서 developers.openai.com/codex/app/worktrees). 그래서 `AGENTS.md` 에서 처음 사본에 있던 리포 안 `.Codex/worktrees/<이름>` 언급을 지우고 이 사실로 바꿨다. 리포 안 `.claude/worktrees/` 는 Claude Code 전용이다(`.git/info/exclude` 에 등록돼 있음)
 22. 상세 "추천 결과로"는 Link push라 브라우저 뒤로가기와 히스토리 동작이 다르다 — 문제 여부 미판단, 보류 (261121: 중복 번호 11 → 22 로 이동, 12~21 번호는 기존 참조 유지를 위해 그대로)
-23. **`:active` 눌림 SKILL↔CSS 불일치 — 미착수(261121 등록)**: SKILL §5 는 선택·컨트롤 버튼 `scale(0.97)` 눌림을 정했지만 CSS 에 없다 — `.chip`·`.option`·`.filterToggle`·`.tab`·`.resetBtn`·`.dateClear` (`.notice` 는 탭 대상 여부부터 확인).
+23. **`:active` 눌림 SKILL↔CSS 불일치 — 일부 처리(261121)**: SKILL §5 는 선택·컨트롤 버튼 `scale(0.97)` 눌림을 정했지만 CSS 에 없다. ~~`.chip`~~ → 처리(`design/tap-active-feedback`, 위저드 옵션 카드 `.optionCard` 0.98 과 함께). 남은 것: `.option`(폼 SegmentedControl)·`.filterToggle`·`.tab`·`.resetBtn`·`.dateClear` (`.notice` 는 탭 대상 여부부터 확인).
 
 **그 외 남은 작업**
 - ~~worktree 가 리포 안(`.claude/worktrees`)에 있으면 로컬 `npm run lint` 가 상위 `.eslintrc.json` 과 충돌해 실패(261121 확인)~~ → **해소(PR #179, 261121)**: `.eslintrc.json` 에 `"root": true` 추가. 이제 worktree 에서도 `npm run lint` 를 그대로 쓴다(`--no-eslintrc -c` 우회 불필요). 규칙 집합 변화 없음(99개 동일)

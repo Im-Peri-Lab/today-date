@@ -1,6 +1,6 @@
 # CURRENT_STATE.md
 
-> **마지막 업데이트: 2026-11-21 (PR #134~#179 반영)**
+> **마지막 업데이트: 2026-11-21 (PR #134~#180 반영)**
 
 ## 현재 단계
 커플(2인) 계정 전환 완료 + 파트너 표시용 닉네임 추가 단계 — 계정 없는 단일 워크스페이스에서
@@ -55,6 +55,8 @@ PROJECT_CONTEXT §5(인증 F-01)·§20.
 는 상세 → CHANGELOG 2026-07-29~2026-08-11.
 
 ## 브랜치 상태
+- `perf/app-ready-on-login` — PR #180 squash 머지, 로컬·리모트 브랜치·worktree 삭제. 잠금해제 성공 응답에 `app-ready` 발급(속성은 `lib/auth/appReady.ts` 단일 출처, 기존 값 그대로) + 미들웨어 `expireSession` 에서 `app-ready` 삭제(다른 기기 계정 삭제 후 재가입 경로 보존). Preview 확인은 사용자가 완료. 확인용 `diag/app-ready-verify`(이 브랜치 + diag 계측)는 머지 없이 삭제
+- `diag/loading-server-timing`(`443f1cc`) — **머지 금지·재측정용(유지)**. 미들웨어·unlock·목록 API·홈/상세 렌더 구간별 Server-Timing 계측. 서버 컴포넌트는 Next 14 에서 헤더를 못 써서 홈·상세 렌더는 `/api/diag/render-timing` + 서버 로그 `[server-timing]` 로 잰다. 재측정 시 main 위로 rebase 후 Preview 로 띄울 것. worktree 는 제거됨
 - `chore/codex-agents-md` — PR #178 squash 머지, 로컬·리모트 브랜치·worktree 삭제. 원래 폴더에 untracked 로 있던 `AGENTS.md`(Codex 지침, `CLAUDE.md` 사본에 경로만 `.Codex`)를 worktree 로 옮겨(mv, 복사 아님) 커밋. 본문은 `CLAUDE.md` 를 단일 출처로 가리키는 포인터 + Codex 전용 차이(디자인 기준 `.claude/skills/today-date-design/SKILL.md` 직접 읽기, worktree 는 리포 밖 `$CODEX_HOME/worktrees`)만 남김. 로컬 확인은 사용자가 완료. `/.agents/`(디자인 SKILL 사본)는 `.gitignore` 에 추가, 파일은 삭제하지 않음. `CLAUDE.md` 변경 없음
 - `feat/list-card-dday` — PR #177 squash 머지, 로컬·리모트 브랜치·worktree 삭제. 위시리스트 카드 D-day(`D-n`/`D-DAY`/`D+n`, KST). Preview 화면 확인은 사용자가 완료
 - `feat/ios-pwa-splash` — PR #176 squash 머지, 로컬·리모트 브랜치·worktree 삭제. iOS 홈 화면 PWA 시작 이미지 22장(배경 `#ede9fe`, 아이콘 그라데이션 하트 + 타이틀). HTML 스플래시 레이어는 위치 어긋남으로 제거. 진단 브랜치 `diag/ios-splash-metrics` 는 머지 없이 삭제. 실기기 확인은 사용자가 완료
@@ -180,7 +182,7 @@ PROJECT_CONTEXT §5(인증 F-01)·§20.
 10. 복사하기를 연속 사용하면 `returnTo`가 중첩돼 URL이 길어진다 — 저빈도 엣지케이스, 방치 중
 11. **사파리 하단 바 뒤 흰 띠 + 홈 약 34pt 스크롤 잔존(261020, 수용한 한계)**: 주소창이 떠 있으면 웹 영역(예: 714pt) 밖 상태바·하단 바 뒤는 사파리가 `body` 색으로 칠해 CSS 로 위·아래를 따로 칠할 수 없다(`html`·`.page::before`·`body` 단색·`box-shadow`·진단 오버레이 시도 전부 걷어냄 — CHANGELOG 2026-10-20 "재시도 금지" 목록 참고). 홈은 웹 영역 714pt 에서 문서 748pt 라 여백 최솟값에도 약 34pt 스크롤이 남는다 — 더 줄이려면 `pb-20`(FAB 겹침 방지)을 건드려야 해 보류.
 11. 상세 "추천 결과로"는 Link push라 브라우저 뒤로가기와 히스토리 동작이 다르다 — 문제 여부 미판단, 보류
-12. **전역 로딩 지연 — 효과 미측정, 후속 판단 대기(261022)**: PR #152(리전)·#153(캐시) 반영 뒤 로그인 후 홈·`/list`·상세의 Network 탭 Waiting 값을 이전과 비교한 기록이 없다(캐시만 있던 프리뷰에서 사용자 체감은 "아주 약간 개선"). 아직 손대지 않은 구간(CHANGELOG 2026-10-22 "효과" 절): 홈 서버 렌더의 10쿼리 왕복과 미들웨어·페이지의 `getCoupleById` 중복 호출, `/list` 의 렌더 후 클라이언트 API 3건 왕복, `unlock` 의 bcrypt + 순차 DB 3~4회, `app-ready` 쿠키가 없는 기기에서 `/lock` 마다 붙는 미들웨어 DB 조회, `GET /api/activities` 의 `select *`·무페이지네이션. 측정 후 어느 구간이 남는지 확인하고 진행할 것(원인 확정 전).
+12. **전역 로딩 지연 — 실측 완료·미들웨어 병목 해소, 남은 비용은 리전 결정 대기(261121, PR #180)**: `diag/loading-server-timing`(Server-Timing 계측)으로 Preview 에서 콜드·웜 각 3회 측정(중앙값). **병목이었던 것**: 미들웨어 `mw-workspace`(couples→users 순차 DB 2회)가 요청마다 60~100ms(최대 300ms) — `app-ready` 쿠키를 최초 패스코드 설정에서만 심어, 최초 설정을 안 한 기기(파트너·재로그인·새 PWA)는 모든 요청에서 이 조회를 반복했다. **수정(PR #180)**: 잠금해제 성공 시에도 `app-ready` 발급 → 수정 후 미들웨어 전체 약 1ms, 요청당 체감 약 50~60ms 감소. **남은 비용**: 네트워크 + icn1→syd1 경로(요청당 약 150~250ms 추정) — Supabase 리전 결정 대기(코드 문제 아님). **미측정**: `unlock` 구간(bcrypt·순차 DB). 그 외 기존 후보(홈 렌더 쿼리 왕복·`getCoupleById` 중복, `/list` 렌더 후 API 3건, `GET /api/activities` 의 `select *`·무페이지네이션)는 위 리전 비용에 비해 작아 우선순위 낮음 — 재측정은 `diag/loading-server-timing` 을 main 위로 rebase 해 Preview 로 띄운다(브랜치 상태 참고).
 13. **탭 직후 시각 반응 부족 — 별도 청크 대기(261022)**: 홈 카드·리스트 카드·헤더 아이콘은 `<Link>` 라 topLoader 가 자동으로 걸리지만, 이동이 prefetch·캐시로 빨리 커밋되면 막대가 보이기 전에 끝날 수 있다(코드상 추론, 실측 없음). `.headerNavBtn`·`.iconBtn`·`.cardInteractive` 에는 터치 `:active` 규칙도 없다. 후보: route-level `loading.tsx`(`pushState` 시점이 바뀌므로 #154 의 rAF 지연과 상호작용 확인 필요), `:active` 피드백(`.statRow:active`·`.fab:active` 선례). 신호가 오면 로더와 CSS 를 분리해 진행.
 
 14. ~~`.ics` 세미콜론 미이스케이프~~ → **해소(261103, PR #162, 머지 커밋 `aa7aad0`)**: `escapeIcsText` 치환 문자열을 `String.raw` 로 바꿔 `;` → `\;` 가 실제로 나간다. 점검 결과 `,`·`\`·줄바꿈은 원래 정상이었고 `;` 만 누락. 잘못된 값을 고정하던 테스트(`ics.test.ts:25·99`)를 `String.raw` 기대값으로 바로잡고 케이스 추가. 저장소 전체 `no-useless-escape` 스캔에서 같은 패턴은 이 3곳뿐(규칙은 `next/core-web-vitals`·`next/typescript` 에 포함돼 있지 않아 꺼진 상태). **iOS 실기기 확인(제목에 `;`·`,`) 대기**

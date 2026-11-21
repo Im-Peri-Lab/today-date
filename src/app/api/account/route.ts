@@ -8,6 +8,7 @@ import { getSession } from '@/lib/auth/session'
 import { PENDING_USER_COOKIE } from '@/lib/auth/pendingUser'
 import { readJsonBody, zodErrorResponse } from '@/lib/api/validation'
 import { apiNicknameSchema } from '@/lib/schemas/apiFields'
+import { APP_READY_COOKIE } from '@/lib/auth/appReady'
 
 export const dynamic = 'force-dynamic'
 
@@ -105,7 +106,7 @@ export async function DELETE() {
      * 미들웨어는 여전히 설정 완료로 보고 /setup 접근을 홈으로 되돌린다 — 재가입 화면에
      * 들어갈 방법이 없어져 이 기능의 목적 자체가 무너진다.
      */
-    res.cookies.delete('app-ready')
+    res.cookies.delete(APP_READY_COOKIE)
 
     // 초대 수락 직후의 쪽지가 남아 있다면 함께 지운다 — 지워진 커플의 user_id 를
     // 가리키는 쪽지는 아무 의미가 없고, 30분 뒤 만료를 기다릴 이유도 없다.

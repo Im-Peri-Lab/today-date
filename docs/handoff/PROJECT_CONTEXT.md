@@ -259,7 +259,7 @@ Claude Code가 PR 생성 → squash 머지 → 원격·로컬 정리를 한 번�
   - 미설정 → `/setup`
   - 미인증 → `/lock`
   - `session_version` 검증(패스코드 재설정 후 다른 기기 세션 무효화): 쿠키의 `sessionVersion` 과 `couples.session_version` 을 비교한다. 값이 바뀌는 곳은 `/api/auth/reset`(+1) 하나뿐이다. 서버 세션 저장소가 없어 DB 비교가 유일한 무효화 수단이다. **15초 TTL 인메모리 캐시(`src/lib/auth/sessionVersionCache.ts`, PR #153)** 를 거친다 — 재설정 후 다른 기기의 옛 세션은 인스턴스당 최대 15초 유효하고, 캐시와 쿠키 값이 다르면 DB 로 재확인(새로 발급된 쿠키가 튕기지 않게), DB 조회 실패는 fail-open 그대로. 이 검증을 더 느슨하게 하거나 없애기 전에 위 무효화 보장 범위를 먼저 볼 것 → CHANGELOG 2026-10-22
-  - `app-ready` 쿠키는 패스코드 최초 설정(`setup/passcode`) 때만 발급(30일, 갱신 없음, 값 `'1'` 문자열 비교만). 없으면 미들웨어가 요청마다 설정 완료 여부를 DB 로 확인한다
+  - `app-ready` 쿠키(설정 완료 캐시, 30일, 값 `'1'` 문자열 비교만)는 패스코드 최초 설정(`setup/passcode`)과 **잠금해제 성공(`unlock`, PR #180)** 때 발급한다 — 이름·속성은 `src/lib/auth/appReady.ts` 단일 출처. 지우는 곳은 계정 삭제(`DELETE /api/account`, 재가입 성립 조건)와 미들웨어 `expireSession`(다른 기기에서 계정이 지워진 기기가 낡은 캐시로 `/setup` 에 못 들어가는 것 방지). 없으면 미들웨어가 요청마다 couples→users 순차 조회로 설정 완료 여부를 확인한다(실측 60~100ms/요청 → CHANGELOG 2026-11-21 v4). 캐시라 지우는 것은 항상 안전하고, 심는 것은 설정 완료가 확정된 성공 응답에서만 한다
 - **인증 단일 출처를 `app_config`에서 `couples`/`users`로 전환 (신규, 260907, PR #119)**: 미들웨어 게이트가 NONE/SOLO/PAIRED 상태 판별로 확장. `app_config`는 동결 백업으로만 남고 앱 코드는 더 이상 읽지도 쓰지도 않음 → 배경 → CHANGELOG 2026-09-07
 - **파트너 초대로 SOLO → PAIRED 전환 (신규, 260908, 015, PR #123)**: `POST /api/auth/invite`(SOLO 전용, 24시간 토큰) 발송 → `/invite?token=...`(인증 전 개방) 수락 → 패스코드는 커플 기존 값 그대로 공유, 신규 발급 없음 → `send-verify`가 자가가입 시 대기 초대를 먼저 확인해 같은 커플로 합류. `/lock`이 초대 결과 배너(성공/만료/중복/이미 PAIRED) 표시 → 구체 스펙·스키마 근거 → 아래 "새 커플 계정 전환" 절, 배경 → CHANGELOG 2026-09-08 v3
 - **파트너 정보 화면 + 초대 진입점 계위 분리 (신규, 260909, PR #124)**: PAIRED 전용 `/partner/info`(상대 이메일·가입일), 초대 진입점을 통계 리스트에서 분리해 상태 안내 배너(`styles.notice`)로 표면화 → 구체 스펙 SKILL §5-C, 배경 → CHANGELOG 2026-09-09

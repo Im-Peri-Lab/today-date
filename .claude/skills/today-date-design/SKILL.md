@@ -559,7 +559,7 @@ description: >
 | 선택·컨트롤 버튼(칩·세그먼트·필터 등) | `scale(0.97)` |
 | 탭 카드(`.cardInteractive`) | `scale(0.98)` — hover 부상 취소 겸 터치 눌림. 보더·그림자 변화 없음(스크롤 스침 깜빡임 방지). 내부 ⋮(button) 누르는 동안엔 미적용(`:not(:has(button:active))`) |
 | 옵션 카드(`.optionCard`) | `translateY(0)` (hover 부상 취소) |
-| 유틸 아이콘 버튼(`.headerNavBtn`·`.iconBtn`) | hover 와 같은 면(라이트 `--s-card-border-strong`+`--s-ink` / 다크 `--s-accent-soft-bg`+`--s-accent`) + `scale(0.96)`. `@media(hover)` 밖 — 터치에서도 발동 |
+| 유틸 아이콘 버튼(`.headerNavBtn`·`.iconBtn`·`.mapActionBtn`·`.dialogCloseBtn`) | hover 와 같은 면(라이트 `--s-card-border-strong`+`--s-ink` / 다크 `--s-accent-soft-bg`+`--s-accent`) + `scale(0.96)`. `@media(hover)` 밖 — 터치에서도 발동 |
 | 입력 필드 · 텍스트 링크 | active 없음 |
 
 원칙: focus(글로우/보더/면)는 정적 표시, active(눌림)는 순간 물리 변형(scale) → 동시에 같은 모습이 되지 않는다.

@@ -1212,6 +1212,19 @@
   outline: none;
   box-shadow: var(--s-focus-ring, 0 0 0 2px rgba(124, 58, 237, 0.5));
 }
+/*
+ * 눌림(:active) — hover 와 같은 면 + scale(0.96). 트랜지션은 Button 기본 transition-all.
+ * Button 기본 `active:not-aria-[haspopup]:translate-y-px` 는 Tailwind 3.4 가 not- 변형을 몰라 생성되지 않으므로 transform 충돌 없음.
+ */
+.dialogCloseBtn:active {
+  background: var(--s-card-border-strong, #eceaf3);
+  transform: scale(0.96);
+}
+@media (prefers-color-scheme: dark) {
+  .dialogCloseBtn:active {
+    background: var(--s-accent-soft-bg, #573f7f);
+  }
+}
 
 /*
  * 다이얼로그 backdrop. base-ui Backdrop 은 portal(body)로 나가 .page 다크 토큰을 못 받으므로
@@ -1426,7 +1439,8 @@
   cursor: pointer;
   transition:
     background 140ms ease,
-    color 140ms ease;
+    color 140ms ease,
+    transform 140ms ease;
 }
 @media (hover: hover) {
   .mapActionBtn:hover {
@@ -1449,6 +1463,18 @@
 }
 @media (prefers-color-scheme: dark) {
   .mapActionBtn:focus-visible {
+    background: var(--s-accent-soft-bg, #2d2540);
+    color: var(--s-accent, #c084fc);
+  }
+}
+/* 눌림(:active) — .iconBtn 과 동일: hover 와 같은 면 + scale(0.96). @media(hover) 밖이라 터치에서도 발동. */
+.mapActionBtn:active {
+  background: var(--s-card-border-strong, #eceaf3);
+  color: var(--s-ink, #1a1033);
+  transform: scale(0.96);
+}
+@media (prefers-color-scheme: dark) {
+  .mapActionBtn:active {
     background: var(--s-accent-soft-bg, #2d2540);
     color: var(--s-accent, #c084fc);
   }

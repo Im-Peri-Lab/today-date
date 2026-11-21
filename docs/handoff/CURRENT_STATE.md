@@ -1,6 +1,6 @@
 # CURRENT_STATE.md
 
-> **마지막 업데이트: 2026-11-21 (PR #134~#180 반영)**
+> **마지막 업데이트: 2026-11-21 (PR #134~#180 반영, 사용자 실기기 확인 결과 261121 반영)**
 
 ## 현재 단계
 커플(2인) 계정 전환 완료 + 파트너 표시용 닉네임 추가 단계 — 계정 없는 단일 워크스페이스에서
@@ -55,7 +55,7 @@ PROJECT_CONTEXT §5(인증 F-01)·§20.
 는 상세 → CHANGELOG 2026-07-29~2026-08-11.
 
 ## 브랜치 상태
-- `perf/app-ready-on-login` — PR #180 squash 머지, 로컬·리모트 브랜치·worktree 삭제. 잠금해제 성공 응답에 `app-ready` 발급(속성은 `lib/auth/appReady.ts` 단일 출처, 기존 값 그대로) + 미들웨어 `expireSession` 에서 `app-ready` 삭제(다른 기기 계정 삭제 후 재가입 경로 보존). Preview 확인은 사용자가 완료. 확인용 `diag/app-ready-verify`(이 브랜치 + diag 계측)는 머지 없이 삭제
+- `perf/app-ready-on-login` — PR #180 squash 머지, 로컬·리모트 브랜치·worktree 삭제. 잠금해제 성공 응답에 `app-ready` 발급(속성은 `lib/auth/appReady.ts` 단일 출처, 기존 값 그대로) + 미들웨어 `expireSession` 에서 `app-ready` 삭제(다른 기기 계정 삭제 후 재가입 경로 보존). Preview 확인은 사용자가 완료. 사용자 iPhone PWA 재로그인 완료(261121, `app-ready` 적용). 확인용 `diag/app-ready-verify`(이 브랜치 + diag 계측)는 머지 없이 삭제
 - `diag/loading-server-timing`(`443f1cc`) — **머지 금지·재측정용(유지)**. 미들웨어·unlock·목록 API·홈/상세 렌더 구간별 Server-Timing 계측. 서버 컴포넌트는 Next 14 에서 헤더를 못 써서 홈·상세 렌더는 `/api/diag/render-timing` + 서버 로그 `[server-timing]` 로 잰다. 재측정 시 main 위로 rebase 후 Preview 로 띄울 것. worktree 는 제거됨
 - `chore/codex-agents-md` — PR #178 squash 머지, 로컬·리모트 브랜치·worktree 삭제. 원래 폴더에 untracked 로 있던 `AGENTS.md`(Codex 지침, `CLAUDE.md` 사본에 경로만 `.Codex`)를 worktree 로 옮겨(mv, 복사 아님) 커밋. 본문은 `CLAUDE.md` 를 단일 출처로 가리키는 포인터 + Codex 전용 차이(디자인 기준 `.claude/skills/today-date-design/SKILL.md` 직접 읽기, worktree 는 리포 밖 `$CODEX_HOME/worktrees`)만 남김. 로컬 확인은 사용자가 완료. `/.agents/`(디자인 SKILL 사본)는 `.gitignore` 에 추가, 파일은 삭제하지 않음. `CLAUDE.md` 변경 없음
 - `feat/list-card-dday` — PR #177 squash 머지, 로컬·리모트 브랜치·worktree 삭제. 위시리스트 카드 D-day(`D-n`/`D-DAY`/`D+n`, KST). Preview 화면 확인은 사용자가 완료
@@ -66,7 +66,7 @@ PROJECT_CONTEXT §5(인증 F-01)·§20.
 - `backup/undo-dialog-diagnosis` — 삭제(261121, 로컬·리모트) — 복구용 SHA `a715202`, 반영 PR #109
 - `feat/list-sort-planned-first` — PR #171 squash 머지, 로컬·리모트 브랜치 삭제. `/list` 위시리스트 3그룹 정렬(다가오는 예정 → 지난 예정 → 예정 없음, KST 기준). Preview 화면 확인은 사용자가 완료
 - `fix/android-calendar-intent-pwa-splash` — PR #170 squash 머지 완료(머지 커밋 `c5de098`), 로컬·리모트 브랜치 삭제됨. Android 캘린더 추가 분기(애플=`.ics` / Android 카카오톡 인앱=intent / 그 외 Android=`.ics` + 안내 토스트 / PC=구글 웹, 앱 id `apple-ics`→`ics`). 갤럭시 실기기(크롬 `.ics` → 앱 등록 화면·카카오 intent·안내 토스트)는 사용자가 확인 완료. 스플래시 아이콘 확대(`e767316`)는 같은 PR 안에서 revert(`ff19f4f`) — 프로덕션 아이콘 변경 없음. CI(Lint·Unit·Build, E2E, Vercel) 통과
-- `fix/ios-apple-touch-icon` — PR #174 squash 머지 완료(머지 커밋 `2a80cb8`), 로컬·리모트 브랜치·worktree 삭제됨. iOS 홈 화면 아이콘 "T" → `apple-touch-icon.png`(180px, 기존 모양) 복원 + `metadata.icons.apple`. CI 통과. **남은 확인: iPhone 기존 아이콘 삭제 후 "홈 화면에 추가" 아이콘이 하트인지**
+- `fix/ios-apple-touch-icon` — PR #174 squash 머지 완료(머지 커밋 `2a80cb8`), 로컬·리모트 브랜치·worktree 삭제됨. iOS 홈 화면 아이콘 "T" → `apple-touch-icon.png`(180px, 기존 모양) 복원 + `metadata.icons.apple`. CI 통과. 실기기 확인 완료(261121): iPhone 기존 아이콘 삭제 후 "홈 화면에 추가" → 하트 아이콘
 - `fix/pwa-splash-hide-title` — PR #173 squash 머지 완료(머지 커밋 `e8d84fe`), 로컬·리모트 브랜치·worktree 삭제됨. manifest `name` → `"\u200B"`(Android 로딩 화면 문구 숨김) + `appleWebApp.title`. CI(Lint·Unit·Build, E2E, Vercel) 통과
 - `diag/pwa-splash-no-title` — 삭제(261121, 로컬·리모트) — 복구용 SHA `904116c`, 반영 PR #173
 - `diag/android-calendar-intent-compare` — 삭제(261121, 로컬·리모트, 진단 페이지 `/diag/calendar` 포함) — 복구용 SHA `b4ed70c`, 반영 PR #170
@@ -90,9 +90,9 @@ PROJECT_CONTEXT §5(인증 F-01)·§20.
 - `chore/lint-scope-e2e` — PR #166 squash 머지 완료(머지 커밋 `d2080ee`), 브랜치 삭제됨. `npm run lint` 범위를 `src`+`e2e`+루트 설정 파일 5개로 확장(PR #164 Codex 지적), 새 위반 0건
 - `chore/eslint-root-config` — PR #179 squash 머지, 브랜치 삭제. `.eslintrc.json` `root: true` 로 리포 안 worktree lint 충돌 해소, 규칙 99개·경고 0 변경 전과 동일
 - `fix/calendar-ux-polish` — PR #165 squash 머지 완료(머지 커밋 `d518941`), 로컬·리모트 브랜치 삭제됨. 머리말 안내 다이얼로그 취소·저장(문구에만 적용, 추가는 항상 진행, SKILL §11 의도된 예외) + 일정 수정 토스트("일정이 바뀌었어요…" + "다시 추가", 방문 예정·방문 기록) + `/settings` 안내 줄 삭제. CI·Vercel 통과, 프리뷰는 사용자 확인 완료
-- `design/planned-time-inline-field` — PR #163 squash 머지 완료(머지 커밋 `3a2ce97`), 로컬·리모트 브랜치 삭제됨. 방문예정 시간 입력 UI 단순화("+ 시간 추가" 제거·상시 노출·미리 채우기 제거, 화면 라벨 없이 날짜 박스와 8px 한 묶음). CI(E2E 82 통과)·Vercel 통과. **남은 확인: iOS Safari 빈 시간 칸 높이·휠(사용자)**
-- `fix/ics-escape-text` — PR #162 squash 머지 완료(머지 커밋 `aa7aad0`), 로컬·리모트 브랜치 삭제됨. `.ics` TEXT 이스케이프(`;`) 수정, 보류 14번 해소. **남은 확인: iOS 실기기(제목에 `;`·`,`)**
-- `feat/planned-visit-time` — PR #161 squash 머지 완료(머지 커밋 `bbb8c5f`), 로컬·리모트 브랜치 삭제됨. 방문예정 시간 입력 + 캘린더 시간 지정 일정(021). Supabase `021_planned_time.sql` 은 머지 전 사용자가 실행·두 테이블 CHECK 제약 확인 완료. CI(Lint·Unit Test·Build, E2E 79 통과·재시도 없음)·Vercel 통과. **남은 확인: iOS `.ics` 시간 지정 일정 실기기(사용자), 구글/Android 실기기**
+- `design/planned-time-inline-field` — PR #163 squash 머지 완료(머지 커밋 `3a2ce97`), 로컬·리모트 브랜치 삭제됨. 방문예정 시간 입력 UI 단순화("+ 시간 추가" 제거·상시 노출·미리 채우기 제거, 화면 라벨 없이 날짜 박스와 8px 한 묶음). CI(E2E 82 통과)·Vercel 통과. 실기기 확인 완료(261121): iOS Safari 빈 시간 칸 높이·휠 정상
+- `fix/ics-escape-text` — PR #162 squash 머지 완료(머지 커밋 `aa7aad0`), 로컬·리모트 브랜치 삭제됨. `.ics` TEXT 이스케이프(`;`) 수정, 보류 14번 해소. 실기기 확인 완료(261121): iOS 에서 제목에 `;`·`,` 포함 캘린더 추가 정상
+- `feat/planned-visit-time` — PR #161 squash 머지 완료(머지 커밋 `bbb8c5f`), 로컬·리모트 브랜치 삭제됨. 방문예정 시간 입력 + 캘린더 시간 지정 일정(021). Supabase `021_planned_time.sql` 은 머지 전 사용자가 실행·두 테이블 CHECK 제약 확인 완료. CI(Lint·Unit Test·Build, E2E 79 통과·재시도 없음)·Vercel 통과. iOS `.ics` 시간 지정 일정 실기기 확인 완료(261121). **남은 확인: 구글/Android 실기기**
 - `feat/calendar-export` — PR #159 squash 머지 완료, 로컬·리모트 브랜치 삭제됨 (CI·Vercel 통과, 상세 블록·설정 화면·토스트·iOS 실기기 캘린더 추가는 사용자가 직접 확인 완료. **미확인: 구글 캘린더/Android 실기기.** 남은 확인: 시크릿 모드로 머리말 최초 미설정 안내 다이얼로그 1회 — 나중에 가볍게). 사전 스파이크 `diag/ics-blob-standalone-check` 는 폐기·삭제
 - `feat/calendar-offer-on-create` — PR #167 squash 머지 완료(머지 커밋 `e364c47`), 로컬·리모트 브랜치 삭제됨 (CI·Vercel 통과, 토스트 가독성·[추가]·미표시 조건은 사용자가 실기기 확인 완료. **확정: 연속 등록 후 목록에서는 캘린더 제안을 표시하지 않음 — 연속 등록 중 미표시 판단과 같은 흐름. 목록에서는 대상 항목이 모호하므로, 필요하면 카드 ⋮ 메뉴로 추가**)
 - `fix/e2e-db-spec-single-file` — PR #168 squash 머지 완료(머지 커밋 `29b2cb2`), 로컬·리모트 브랜치 삭제됨. DB 스펙 파일을 `isolation.spec.ts` 하나로 단일화해 CI #217 실패(워커 분리로 스텁 상태 충돌) 수정. CI(Lint·Unit·Build, E2E, Vercel) 통과
@@ -162,30 +162,29 @@ PROJECT_CONTEXT §5(인증 F-01)·§20.
 - 플랫폼: Vercel
 - URL: `https://today-date-seven.vercel.app`
 - 함수 리전: `syd1`(`vercel.json`, PR #152). 미들웨어는 엣지 실행이라 이 설정과 무관
-- 현재 브랜치: `main` (PR #178 반영 기준. PR #128 머지 커밋 `238d3de`만 예외적으로 squash가 아닌 일반 머지)
+- 현재 브랜치: `main` (PR #180 반영 기준. PR #128 머지 커밋 `238d3de`만 예외적으로 squash가 아닌 일반 머지)
 
 ## 진행 중 / 남은 작업
 
 **보류 작업 (261013 정리·261121 갱신, 우선순위 순 — 다음 세션이 놓치면 안 되는 것)**
 - **로컬 `.env.local` 없음(261120 확인)**: 루트에 `.env.local.example` 만 있어 로컬 dev 에서 `SUPABASE_URL` 이 비고 `/api/auth/setup/send-verify` 가 500(`supabaseUrl is required`) → 로컬 로그인 불가. 코드 문제 아님, 로컬 화면 확인이 필요하면 env 준비(사용자)
 1. **`android/`·`ios/` 빌드 캐시 `.gitignore` 패턴 — 머지 완료(PR #140, 머지 커밋 `7635617`, 261118 확인)**: `/android/build/`·`/android/.idea/`·`/ios/App/Pods/`·`/ios/DerivedData/` 등 빌드 캐시 패턴은 `main` 에 이미 들어 있다. 이전 기록의 "PR/머지 전"은 낡은 정보였다. **남은 결정**: `android/`·`ios/` 소스 자체(현재 `main` 작업 트리에 untracked, `git log -- ios/` 비어 있음)를 커밋할지는 여전히 미정 — `chore/capacitor-init`(Capacitor 셸, 미머지) 결정과 함께 정할 것. 원인은 그 브랜치 작업물이 남은 것으로 **추정**(미확인). 그 전까지 `git add -A`로 실수 커밋하지 않게 주의.
-2. **헤더 40/22·카드 ⋮ 36/20·28/16 쌍 gap 2px 최종 실기기 확인 미기록(PR #139)**: 프리뷰는 사용자가 일부 확인해 복사하기·연필 간격 피드백이 반영됐지만 머지 후 확인 기록은 없다. 탭 영역(헤더 한 변 91%, 카드 ⋮ 82%)이 불편하다는 신호가 오면 28px 사용처와 함께 일괄 재검토.
+2. ~~헤더 40/22·카드 ⋮ 36/20·28/16 쌍 gap 2px 최종 실기기 확인 미기록(PR #139)~~ → **종결(261121)**: 사용자 실기기 확인 결과 헤더·카드 ⋮ 탭 영역(헤더 한 변 91%, 카드 ⋮ 82%) 불편 없음. 이후 불편 신호가 오면 보류 7번으로 28px 사용처와 함께 일괄 재검토.
 3. ~~카드 `Link`의 `pr-11`이 ⋮ 36px 박스와 약 2px 겹침(PR #139, 잔여)~~ → **해소(PR #149)**: `pr-11` 제거, 카테고리·제목 줄만 `pr-8`(14+32=46px = ⋮ 박스 끝과 정확히 맞닿음).
 4. **다이얼로그 X 포커스 글로우 링 (F) — 보류, 별도 이슈**: 다른 아이콘 버튼은 중성 면 포커스, X만 글로우 링.
 5. **폼 요소 안 아이콘 톤 — 미판단**: 필터 셰브런·입력창 돋보기·달력 트리거는 PR #135 통일 대상이 아니라(유틸 버튼이 아니라 폼 요소) 헤더 아이콘보다 옅게 남는다. `/list`에서 관찰됨. 손대려면 별도로 범위부터 정할 것.
-6. **PR #134~#136 실기기 확인 미기록 + `color-mix` 폴백**: 라이트/다크·390/1280px는 Playwright 렌더로만 확인했다. 아이콘 색은 `color-mix` 미지원 엔진에서 윗줄 폴백(`--s-sub` 단색)으로 떨어진다 — iOS/Android 앱 셸 WebView 에서 이질감이 보이면 이 폴백을 먼저 의심.
-7. **아이콘 버튼 박스(28/36/40px) 탭 영역 보완 여부 — 현재 보완 없음(의도된 트레이드오프, PROJECT_CONTEXT §20)**: 사용자가 "누르기 불편하다"는 신호를 줄 때만 28px 사용처(`MapLink`·닉네임 연필·상세 연필·복사하기)와 헤더·카드 ⋮를 일괄 재검토.
+6. **PR #134~#136 `color-mix` 폴백 — 실기기 이질감 없음(261121 사용자 확인)**: 라이트/다크·390/1280px는 Playwright 렌더로 확인했고, 실기기(iPhone)에서도 이질감 없음. 아이콘 색은 `color-mix` 미지원 엔진에서 윗줄 폴백(`--s-sub` 단색)으로 떨어진다 — iOS/Android 앱 셸 WebView 에서 이질감이 보이면 이 폴백을 먼저 의심.
+7. **아이콘 버튼 박스(28/36/40px) 탭 영역 보완 여부 — 현재 보완 없음(의도된 트레이드오프, PROJECT_CONTEXT §20)**: 사용자가 "누르기 불편하다"는 신호를 줄 때만 28px 사용처(`MapLink`·닉네임 연필·상세 연필·복사하기)와 헤더·카드 ⋮를 일괄 재검토. 신호 없음(261121 확인).
 8. **복귀 흐름 E2E 없음(PR #132)**: 리스트 카드 복사하기·상세 복사하기·추천 0건 "추가하기"·홈 FAB →
    신규 → 저장 → 새 상세의 상단 버튼은 사용자가 화면에서 직접 확인했지만 자동화 회귀 장치는
    단위 테스트(`listReturn.test.ts`)뿐이다(PROJECT_CONTEXT §19 그룹 7)
 9. 추천 결과에서 온 상세를 삭제한 뒤 결과 화면 캐시에 항목이 남는지 미확인(PROJECT_CONTEXT §19 그룹 7)
 10. 복사하기를 연속 사용하면 `returnTo`가 중첩돼 URL이 길어진다 — 저빈도 엣지케이스, 방치 중
 11. **사파리 하단 바 뒤 흰 띠 + 홈 약 34pt 스크롤 잔존(261020, 수용한 한계)**: 주소창이 떠 있으면 웹 영역(예: 714pt) 밖 상태바·하단 바 뒤는 사파리가 `body` 색으로 칠해 CSS 로 위·아래를 따로 칠할 수 없다(`html`·`.page::before`·`body` 단색·`box-shadow`·진단 오버레이 시도 전부 걷어냄 — CHANGELOG 2026-10-20 "재시도 금지" 목록 참고). 홈은 웹 영역 714pt 에서 문서 748pt 라 여백 최솟값에도 약 34pt 스크롤이 남는다 — 더 줄이려면 `pb-20`(FAB 겹침 방지)을 건드려야 해 보류.
-11. 상세 "추천 결과로"는 Link push라 브라우저 뒤로가기와 히스토리 동작이 다르다 — 문제 여부 미판단, 보류
 12. **전역 로딩 지연 — 실측 완료·미들웨어 병목 해소, 남은 비용은 리전 결정 대기(261121, PR #180)**: `diag/loading-server-timing`(Server-Timing 계측)으로 Preview 에서 콜드·웜 각 3회 측정(중앙값). **병목이었던 것**: 미들웨어 `mw-workspace`(couples→users 순차 DB 2회)가 요청마다 60~100ms(최대 300ms) — `app-ready` 쿠키를 최초 패스코드 설정에서만 심어, 최초 설정을 안 한 기기(파트너·재로그인·새 PWA)는 모든 요청에서 이 조회를 반복했다. **수정(PR #180)**: 잠금해제 성공 시에도 `app-ready` 발급 → 수정 후 미들웨어 전체 약 1ms, 요청당 체감 약 50~60ms 감소. **남은 비용**: 네트워크 + icn1→syd1 경로(요청당 약 150~250ms 추정) — Supabase 리전 결정 대기(코드 문제 아님). **미측정**: `unlock` 구간(bcrypt·순차 DB). 그 외 기존 후보(홈 렌더 쿼리 왕복·`getCoupleById` 중복, `/list` 렌더 후 API 3건, `GET /api/activities` 의 `select *`·무페이지네이션)는 위 리전 비용에 비해 작아 우선순위 낮음 — 재측정은 `diag/loading-server-timing` 을 main 위로 rebase 해 Preview 로 띄운다(브랜치 상태 참고).
 13. **탭 직후 시각 반응 부족 — 별도 청크 대기(261022)**: 홈 카드·리스트 카드·헤더 아이콘은 `<Link>` 라 topLoader 가 자동으로 걸리지만, 이동이 prefetch·캐시로 빨리 커밋되면 막대가 보이기 전에 끝날 수 있다(코드상 추론, 실측 없음). `.headerNavBtn`·`.iconBtn`·`.cardInteractive` 에는 터치 `:active` 규칙도 없다. 후보: route-level `loading.tsx`(`pushState` 시점이 바뀌므로 #154 의 rAF 지연과 상호작용 확인 필요), `:active` 피드백(`.statRow:active`·`.fab:active` 선례). 신호가 오면 로더와 CSS 를 분리해 진행.
 
-14. ~~`.ics` 세미콜론 미이스케이프~~ → **해소(261103, PR #162, 머지 커밋 `aa7aad0`)**: `escapeIcsText` 치환 문자열을 `String.raw` 로 바꿔 `;` → `\;` 가 실제로 나간다. 점검 결과 `,`·`\`·줄바꿈은 원래 정상이었고 `;` 만 누락. 잘못된 값을 고정하던 테스트(`ics.test.ts:25·99`)를 `String.raw` 기대값으로 바로잡고 케이스 추가. 저장소 전체 `no-useless-escape` 스캔에서 같은 패턴은 이 3곳뿐(규칙은 `next/core-web-vitals`·`next/typescript` 에 포함돼 있지 않아 꺼진 상태). **iOS 실기기 확인(제목에 `;`·`,`) 대기**
+14. ~~`.ics` 세미콜론 미이스케이프~~ → **해소(261103, PR #162, 머지 커밋 `aa7aad0`)**: `escapeIcsText` 치환 문자열을 `String.raw` 로 바꿔 `;` → `\;` 가 실제로 나간다. 점검 결과 `,`·`\`·줄바꿈은 원래 정상이었고 `;` 만 누락. 잘못된 값을 고정하던 테스트(`ics.test.ts:25·99`)를 `String.raw` 기대값으로 바로잡고 케이스 추가. 저장소 전체 `no-useless-escape` 스캔에서 같은 패턴은 이 3곳뿐(규칙은 `next/core-web-vitals`·`next/typescript` 에 포함돼 있지 않아 꺼진 상태). **iOS 실기기 확인 완료 → 종결(261121)**: 제목에 `;`·`,` 포함 캘린더 추가, 시간 지정 일정 추가 정상(PR #161·#162)
 15. ~~e2e `chromium-db` 잠금 화면 테스트 간헐 실패~~ → **해소(261121 종결, 수정 PR #169, 머지 커밋 `5bb580b`, 261118)**: 머지 후 관찰 기간 261118 13:08 KST(`5bb580b` push) ~ 261121 00:47 KST(`7b76653` #177 push)의 CI 실행 25건(main push 11·PR 14) 전부 success, E2E 잡 25개 모두 94 passed, 재실행(attempt 2+) 0건. CI 는 `retries: 1`(`playwright.config.ts:35`)이라 재시도 통과가 success 로 묻힐 수 있어 E2E 로그 25개를 전수 확인 — `retry #`·`flaky`·`✘` 0건(로그의 "failed" 는 `[WebServer] email failed: RESEND_FROM_EMAIL not configured` 서버 출력뿐). 이하 기존 기록: 로컬 `--workers=1 --repeat-each=15`(잠금·로그인 관련 29개 ×15 = 435회) 비교: main 0건 실패, 이 브랜치 0건 실패 — main 에서도 재현되지 않아 수정 효과는 로컬에서 입증하지 못했다(원인 분석은 하이드레이션 전 입력 유실이며 수정은 그 경로를 막는다). CI 에서 재발하면 다시 연다. 수정 내용: 패스코드 입력 전에 `PasscodeInput` 의 키보드 리스너 등록(하이드레이션) 완료를 `data-passcode-ready` 표지로 기다린다(`e2e/helpers/passcode.ts` `typePasscode`, `isolation.spec.ts` 의 모든 패스코드 입력이 사용). 로컬 전체 E2E 4회 연속 94/94 통과(재현 0회). 재현 기록(수정 전): `page.goto('/lock')` 직후 `page.keyboard.type(passcode)` 가 페이지 준비(하이드레이션) 전에 시작되면 입력이 누락돼(스냅샷 "패스코드 5/6자리 입력됨") 잠금해제 다음 단계(`waitForURL('/')`·"내 이메일 주소" 입력)에서 타임아웃난다. `main`(fc52b27) 전체 E2E 3회 중 1회에서 2건 실패(`:854` 평소 잠금해제 회귀, `:1039` 로그아웃 기기 기억), `feat/planned-visit-time` 로컬에서도 실행마다 1건씩 번갈아 실패. 단독 재실행·CI(PR #161, 재시도 없이 79 통과)는 통과.
 16. **필드 라벨 계위 기준 통일(`design/field-label-hierarchy`, 미착수, 261103 등록)** — 상세 화면과 편집 화면의 라벨 크기가 달라 기준부터 확정하기로 함. 상세 → PROJECT_CONTEXT §19 그룹 8.
     - 잠정 기준: 보는 화면 = 표시 라벨(`.fieldLabel` 12/500/sub/0.3px) / 입력하는 화면 = 폼 라벨(`Label` 14/500/ink). 인라인 편집은 필드 1개면 표시 라벨 유지(`/account`·`/settings`), 여러 필드 블록이면 폼 라벨(상세 등록 정보·방문 기록 편집). 섹션 헤더 12/600/sub/자간 0. 위저드 질문 문장은 제외.
@@ -196,6 +195,7 @@ PROJECT_CONTEXT §5(인증 F-01)·§20.
 19. **getDashboardStats 에러 경계 개선 — 미착수(261118 등록)**
 20. ~~Android PWA 스플래시 하트–이름 간격~~ → **해소(PR #173, 261120)**: 아이콘 확대는 하트가 너무 커서 원복(PR #170). 대신 manifest `name` 을 `"\u200B"` 로 두어 로딩 화면 문구를 숨겼다(갤럭시 V3 실기기 확인, 아이콘 원본 유지). iOS 홈 화면 이름은 `apple-mobile-web-app-title` 로 고정. 남은 확인: 갤럭시 기존 설치 기기의 이름 변경 확인 창, 최근 앱 목록 이름, iPhone 새로 추가 시 이름 → PROJECT_CONTEXT §20
 21. ~~Codex worktree 경로 미확정(261121 등록)~~ → **해소(261121)**: Codex 는 worktree 를 리포 밖 `$CODEX_HOME/worktrees`(기본 `~/.codex/worktrees`)에서 관리한다(Codex 공식 문서 developers.openai.com/codex/app/worktrees). 그래서 `AGENTS.md` 에서 처음 사본에 있던 리포 안 `.Codex/worktrees/<이름>` 언급을 지우고 이 사실로 바꿨다. 리포 안 `.claude/worktrees/` 는 Claude Code 전용이다(`.git/info/exclude` 에 등록돼 있음)
+22. 상세 "추천 결과로"는 Link push라 브라우저 뒤로가기와 히스토리 동작이 다르다 — 문제 여부 미판단, 보류 (261121: 중복 번호 11 → 22 로 이동, 12~21 번호는 기존 참조 유지를 위해 그대로)
 
 **그 외 남은 작업**
 - ~~worktree 가 리포 안(`.claude/worktrees`)에 있으면 로컬 `npm run lint` 가 상위 `.eslintrc.json` 과 충돌해 실패(261121 확인)~~ → **해소(PR #179, 261121)**: `.eslintrc.json` 에 `"root": true` 추가. 이제 worktree 에서도 `npm run lint` 를 그대로 쓴다(`--no-eslintrc -c` 우회 불필요). 규칙 집합 변화 없음(99개 동일)
@@ -241,5 +241,5 @@ PROJECT_CONTEXT §5(인증 F-01)·§20.
 - **실기기 진단 결과**(Vercel 프리뷰 PWA, 안전영역 아래 위치별 2px 고정 바 비교): +0 거의 안 보임 / +8 흐림 / +24 약간 부드러움 / +48·+96 선명. 스크롤되는(absolute) 줄과 하단 고정 줄은 처음 진단에서 선명했으나 +120 위치라 구간 밖이어서였음. 이후 absolute를 +8에 두고 다시 확인하니 흐림 — 고정 여부가 아니라 상태바 아래 약 20pt 구간 자체가 문제.
 - **시도한 수정과 보류 사유**: 바를 `safe-area-inset-top + 28px` 로 내리면 선명해지지만 홈·리스트 헤더(로고·아이콘 줄)와 바짝 붙어 보여 레이아웃을 해침 → 반영 보류. `apple-mobile-web-app-status-bar-style` 명시는 기본값과 같을 가능성이 커 시험하지 않음.
 - **참고**: 바 끝의 사선 글로우는 nextjs-toploader 기본 효과(`.peg` box-shadow)이며 `<NextTopLoader shadow={false}>` 로 끌 수 있음(미반영). 진단·시험은 `fix/pwa-status-bar-overlay` 브랜치(마지막 커밋 `0c607d1`)에서 했고 머지 없이 삭제함.
-- **완화 적용(PR #155, 2026-10-26)**: 위치는 그대로 두고 standalone 에서만 바 두께 3px(라이트·다크 공통), standalone+다크에서만 색 `#c084fc`. 색 후보 비교와 근거는 CHANGELOG 2026-10-26 항목. 3px 의 실기기 체감은 **미확인** — 부족하면 4px 로 올린다.
+- **완화 적용(PR #155, 2026-10-26)**: 위치는 그대로 두고 standalone 에서만 바 두께 3px(라이트·다크 공통), standalone+다크에서만 색 `#c084fc`. 색 후보 비교와 근거는 CHANGELOG 2026-10-26 항목. **3px 유지로 확정(261121 사용자 실기기 확인)** — 4px 상향은 하지 않는다.
 - **재개 조건**: 이후 iOS 업데이트에서 구간이 바뀌었는지 재확인, 또는 헤더 상단 여백을 늘리는 디자인 변경을 할 때 바를 +24~28px 로 내리는 안을 함께 검토.

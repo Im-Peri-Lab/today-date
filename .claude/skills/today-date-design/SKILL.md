@@ -556,11 +556,28 @@ description: >
 | 요소 군 | 표현 |
 |---|---|
 | 채움형 CTA · 패스코드 키 | `scale(0.96)` + inset 눌림 그림자 |
-| 선택·컨트롤 버튼(칩·세그먼트·필터 등) | `scale(0.97)` |
-| 카드(`.cardInteractive`·`.optionCard`) | `translateY(0)` (hover 부상 취소) |
+| 선택·컨트롤 버튼(칩·세그먼트·필터 등) | `scale(0.97)` — 현재 코드 반영은 `.chip` 만(나머지는 CURRENT_STATE 보류 24) |
+| 탭 카드(`.cardInteractive`) | `scale(0.98)` — hover 부상 취소 겸 터치 눌림. 보더·그림자 변화 없음(스크롤 스침 깜빡임 방지). 내부 ⋮(button) 누르는 동안엔 미적용(`:not(:has(button:active))`) |
+| 옵션 카드(`.optionCard`, 추천 위저드) | `scale(0.98)` — 탭 카드와 같은 값(전체 폭 카드에서 0.97 은 과함). hover 부상 취소 겸. 색·보더 불변 |
+| 유틸 아이콘 버튼(`.headerNavBtn`·`.iconBtn`·`.mapActionBtn`·`.dialogCloseBtn`) | hover 와 같은 면(라이트 `--s-card-border-strong`+`--s-ink` / 다크 `--s-accent-soft-bg`+`--s-accent`) + scale(박스별 수축 ≈3px: 40px `0.92` / 36px `0.91` / 28px `0.90`). 타이밍은 아래 공통 규칙. `@media(hover)` 밖 — 터치에서도 발동 |
 | 입력 필드 · 텍스트 링크 | active 없음 |
 
 원칙: focus(글로우/보더/면)는 정적 표시, active(눌림)는 순간 물리 변형(scale) → 동시에 같은 모습이 되지 않는다.
+
+**공통 눌림 타이밍 (탭 카드 · 옵션 카드 · 칩 · 유틸 아이콘 버튼):**
+- 누를 때: `:active` 에 `transition-duration: 0ms` — 즉시 눌림 상태.
+- 뗄 때: 기본 규칙의 `200ms ease-out` 으로 복귀(카드·옵션 카드·칩은 transform 만, 아이콘 버튼은 background·color·transform).
+- hover 진입 속도는 hover 규칙에 기존 값(카드 160ms ease / 옵션 카드 150ms / 아이콘 140ms, X 150ms)을 다시 선언해 유지(칩은 hover 가 transform 을 안 바꿔 불필요). hover 이탈은 기본 규칙을 따르므로 200ms ease-out.
+- 이유: iOS 짧은 탭은 `:active` 가 아주 잠깐만 유지돼, 진입 트랜지션이 있으면 끝값에 닿기 전에 풀려 눌림이 거의 안 보였다(사용자 실기기 관찰, 261121).
+
+**선택 후 자동 전환 (추천 위저드 `.optionCard` 단일 선택 단계):**
+- 선택값(선택됨 틴트+보라 보더)은 즉시 반영하고, 단계 전환·히스토리 기록은 `SELECTION_ADVANCE_DELAY_MS`(150ms) 뒤에 한다 — `useDelayedAdvance`(`src/hooks/useDelayedAdvance.ts`).
+- 이유: 선택 즉시 전환하면 누른 카드가 손을 떼자마자 사라져 눌림·선택 표시가 보일 틈이 없다(사용자 실기기 관찰, 261121).
+- 대기 중 다시 누르면 무시(연타·다른 카드 중복 선택으로 두 번 넘어가지 않음, 첫 선택 유지). 다른 경로의 단계 변경(이전·다음 버튼, 처음부터, 브라우저 뒤로가기)은 대기 전환을 취소한다.
+- 전환 뒤 새는 탭 차단: 선택 카드는 `onPointerDown` 시각을 기록하고, 포인터 탭은 그 pointerdown 이 **직전 자동 전환 + `ADVANCE_TAP_GUARD_MS`(300ms) 이후**일 때만 받는다. ① 이전 단계에서 시작된 탭 ② 전환 직후 시작된 더블탭의 두 번째 탭이 같은 자리에 렌더된 다음 단계 카드를 고르지 않게(사용자 실기기 관찰, 261122). 300ms 는 iOS 더블탭 간격 수준이고, 새 질문을 보고 고르는 의도적 탭은 이보다 빠르기 어렵다. 키보드 선택(click detail 0)·첫 단계는 영향 없음.
+- 적용 대상: 활동 위저드 1~3단계(기간·시간대·장소 유형), 다이닝 위저드 1단계(식사). 복수 선택(카테고리 칩)·"다음" 버튼으로 넘어가는 단계는 해당 없음.
+
+iOS Safari 의 `:active` 는 조상에 touchstart 리스너가 있어야 발동한다 — React 가 루트(`document`)에 passive touchstart 를 등록하므로 앱 전역에서 별도 조치(`ontouchstart=""` 등) 없이 발동한다.
 
 ---
 

@@ -1,6 +1,6 @@
 # CURRENT_STATE.md
 
-> **마지막 업데이트: 2026-11-21 (PR #134~#182 반영, 사용자 실기기 확인 결과 261121 반영)**
+> **마지막 업데이트: 2026-11-22 (PR #134~#183 반영, 사용자 실기기 확인 결과 261121 반영)**
 
 ## 현재 단계
 커플(2인) 계정 전환 완료 + 파트너 표시용 닉네임 추가 단계 — 계정 없는 단일 워크스페이스에서
@@ -9,6 +9,13 @@
 그 외 유지보수 / 점진적 UX 개선, Capacitor 네이티브 앱은 여전히 `main` 미머지 상태로 보류 중.
 
 ## 현재 한 줄 요약
+**탭 눌림 피드백 + 위저드 선택 전환 지연(신규, 261122, PR #183)**: 탭 카드(`.cardInteractive` 0.98)·유틸 아이콘
+버튼(`.headerNavBtn` 0.92 / `.iconBtn` 0.91 / `.mapActionBtn`·`.dialogCloseBtn` 0.90, hover 면 토큰)·위저드 `.optionCard` 0.98·`.chip` 0.97
+에 `:active` 추가 — 누를 땐 transition 0 즉시, 뗄 때 200ms ease-out 복귀(iOS 짧은 탭에서 보이게). 위저드 자동 전환 단계는 선택 틴트를
+150ms 보여 준 뒤 전환하고, 대기 중 재탭·전환+300ms 안에 시작된 탭은 무시(`useDelayedAdvance`). 상세 → CHANGELOG 2026-11-22,
+교훈 → PROJECT_CONTEXT §20, 스펙 → SKILL §5. 사용자 실기기 확인 완료.
+
+이전 배치(PR #137~#139):
 **아이콘 버튼 티어 박스를 글리프 대비 여백 비율로 재정의(신규, 261013, PR #137~#139)**: 박스 크기를 글리프 대비
 한쪽 여백 비율(0.375~0.41)로 정해 헤더 `.headerNavBtn` 44→40px(글리프 22px), 카드 ⋮ `.iconBtn` 44→36px(글리프 20px,
 22px는 카드 안에서 과해 의도된 예외), `.mapActionBtn` 28/16 유지. 28/16 인접 쌍(연필·복사하기, 지도·▾)은 박스 gap 2px로
@@ -186,7 +193,7 @@ PROJECT_CONTEXT §5(인증 F-01)·§20.
 10. 복사하기를 연속 사용하면 `returnTo`가 중첩돼 URL이 길어진다 — 저빈도 엣지케이스, 방치 중
 11. **사파리 하단 바 뒤 흰 띠 + 홈 약 34pt 스크롤 잔존(261020, 수용한 한계)**: 주소창이 떠 있으면 웹 영역(예: 714pt) 밖 상태바·하단 바 뒤는 사파리가 `body` 색으로 칠해 CSS 로 위·아래를 따로 칠할 수 없다(`html`·`.page::before`·`body` 단색·`box-shadow`·진단 오버레이 시도 전부 걷어냄 — CHANGELOG 2026-10-20 "재시도 금지" 목록 참고). 홈은 웹 영역 714pt 에서 문서 748pt 라 여백 최솟값에도 약 34pt 스크롤이 남는다 — 더 줄이려면 `pb-20`(FAB 겹침 방지)을 건드려야 해 보류.
 12. **전역 로딩 지연 — 실측 완료·미들웨어 병목 해소, 남은 비용은 리전 결정 대기(261121, PR #180)**: `diag/loading-server-timing`(Server-Timing 계측)으로 Preview 에서 콜드·웜 각 3회 측정(중앙값). **병목이었던 것**: 미들웨어 `mw-workspace`(couples→users 순차 DB 2회)가 요청마다 60~100ms(최대 300ms) — `app-ready` 쿠키를 최초 패스코드 설정에서만 심어, 최초 설정을 안 한 기기(파트너·재로그인·새 PWA)는 모든 요청에서 이 조회를 반복했다. **수정(PR #180)**: 잠금해제 성공 시에도 `app-ready` 발급 → 수정 후 미들웨어 전체 약 1ms, 요청당 체감 약 50~60ms 감소. **남은 비용**: 네트워크 + icn1→syd1 경로(요청당 약 150~250ms 추정) — Supabase 리전 결정 대기(코드 문제 아님). **미측정**: `unlock` 구간(bcrypt·순차 DB). 그 외 기존 후보(홈 렌더 쿼리 왕복·`getCoupleById` 중복, `/list` 렌더 후 API 3건, `GET /api/activities` 의 `select *`·무페이지네이션)는 위 리전 비용에 비해 작아 우선순위 낮음 — 재측정은 `diag/loading-server-timing` 을 main 위로 rebase 해 Preview 로 띄운다(브랜치 상태 참고).
-13. **탭 직후 시각 반응 부족 — 별도 청크 대기(261022)**: 홈 카드·리스트 카드·헤더 아이콘은 `<Link>` 라 topLoader 가 자동으로 걸리지만, 이동이 prefetch·캐시로 빨리 커밋되면 막대가 보이기 전에 끝날 수 있다(코드상 추론, 실측 없음). `.headerNavBtn`·`.iconBtn`·`.cardInteractive` 에는 터치 `:active` 규칙도 없다. 후보: route-level `loading.tsx`(`pushState` 시점이 바뀌므로 #154 의 rAF 지연과 상호작용 확인 필요), `:active` 피드백(`.statRow:active`·`.fab:active` 선례). 신호가 오면 로더와 CSS 를 분리해 진행.
+13. **탭 직후 시각 반응 부족 — `:active` 분리분 해소(261122, PR #183), 로더 분리분은 대기**: 카드·유틸 아이콘 버튼·위저드 선택지에 터치 눌림을 넣고(즉시 눌림·200ms 복귀), 위저드 자동 전환은 선택 틴트 150ms 노출 후 전환 + 더블탭 차단(상세 → CHANGELOG 2026-11-22, 스펙 → SKILL §5). 사용자 실기기 확인 완료. 남은 것: route-level `loading.tsx`(`pushState` 시점이 바뀌므로 #154 의 rAF 지연과 상호작용 확인 필요) — topLoader 가 빨리 커밋되는 이동에서 안 보이는 문제(코드상 추론, 실측 없음)는 신호가 오면 별도 진행.
 
 14. ~~`.ics` 세미콜론 미이스케이프~~ → **해소(261103, PR #162, 머지 커밋 `aa7aad0`)**: `escapeIcsText` 치환 문자열을 `String.raw` 로 바꿔 `;` → `\;` 가 실제로 나간다. 점검 결과 `,`·`\`·줄바꿈은 원래 정상이었고 `;` 만 누락. 잘못된 값을 고정하던 테스트(`ics.test.ts:25·99`)를 `String.raw` 기대값으로 바로잡고 케이스 추가. 저장소 전체 `no-useless-escape` 스캔에서 같은 패턴은 이 3곳뿐(규칙은 `next/core-web-vitals`·`next/typescript` 에 포함돼 있지 않아 꺼진 상태). **iOS 실기기 확인 완료 → 종결(261121)**: 제목에 `;`·`,` 포함 캘린더 추가, 시간 지정 일정 추가 정상(PR #161·#162)
 15. ~~e2e `chromium-db` 잠금 화면 테스트 간헐 실패~~ → **해소(261121 종결, 수정 PR #169, 머지 커밋 `5bb580b`, 261118)**: 머지 후 관찰 기간 261118 13:08 KST(`5bb580b` push) ~ 261121 00:47 KST(`7b76653` #177 push)의 CI 실행 25건(main push 11·PR 14) 전부 success, E2E 잡 25개 모두 94 passed, 재실행(attempt 2+) 0건. CI 는 `retries: 1`(`playwright.config.ts:35`)이라 재시도 통과가 success 로 묻힐 수 있어 E2E 로그 25개를 전수 확인 — `retry #`·`flaky`·`✘` 0건(로그의 "failed" 는 `[WebServer] email failed: RESEND_FROM_EMAIL not configured` 서버 출력뿐). 이하 기존 기록: 로컬 `--workers=1 --repeat-each=15`(잠금·로그인 관련 29개 ×15 = 435회) 비교: main 0건 실패, 이 브랜치 0건 실패 — main 에서도 재현되지 않아 수정 효과는 로컬에서 입증하지 못했다(원인 분석은 하이드레이션 전 입력 유실이며 수정은 그 경로를 막는다). CI 에서 재발하면 다시 연다. 수정 내용: 패스코드 입력 전에 `PasscodeInput` 의 키보드 리스너 등록(하이드레이션) 완료를 `data-passcode-ready` 표지로 기다린다(`e2e/helpers/passcode.ts` `typePasscode`, `isolation.spec.ts` 의 모든 패스코드 입력이 사용). 로컬 전체 E2E 4회 연속 94/94 통과(재현 0회). 재현 기록(수정 전): `page.goto('/lock')` 직후 `page.keyboard.type(passcode)` 가 페이지 준비(하이드레이션) 전에 시작되면 입력이 누락돼(스냅샷 "패스코드 5/6자리 입력됨") 잠금해제 다음 단계(`waitForURL('/')`·"내 이메일 주소" 입력)에서 타임아웃난다. `main`(fc52b27) 전체 E2E 3회 중 1회에서 2건 실패(`:854` 평소 잠금해제 회귀, `:1039` 로그아웃 기기 기억), `feat/planned-visit-time` 로컬에서도 실행마다 1건씩 번갈아 실패. 단독 재실행·CI(PR #161, 재시도 없이 79 통과)는 통과.
@@ -202,6 +209,7 @@ PROJECT_CONTEXT §5(인증 F-01)·§20.
 22. 상세 "추천 결과로"는 Link push라 브라우저 뒤로가기와 히스토리 동작이 다르다 — 문제 여부 미판단, 보류 (261121: 중복 번호 11 → 22 로 이동, 12~21 번호는 기존 참조 유지를 위해 그대로)
 23. **실기기 확인 대기 — 갤럭시 앱 재설치 후 로딩 화면 하트 크기(화면 폭 약 12.5%) / 홈 아이콘 유지 확인(261121, PR #181)**: 프로덕션에서 기존 앱을 지우고 다시 설치한 뒤 홈 아이콘으로 실행해 확인한다. 로딩 하트가 화면 폭의 약 12.5%(360dp 폭 기기는 약 13%)이고, 홈 화면 아이콘이 이전과 같은 모습(icon-192, 하트 52%)이면 종결. 크롬 메뉴·설치 직후 "열기"로 실행했을 때 이름이 보이는 다른 로딩 화면이 뜨는지도 함께 보면 이전 7% 화면의 경로를 가릴 수 있다(→ CHANGELOG 2026-11-21 v5)
     → 확인 후 PROJECT_CONTEXT §20 의 PR #173 설명('\u200B 덕분에 문구가 사라졌다')을 실기기 결과에 맞게 정리(Android 12+ WebAPK 로딩 화면에 원래 제목이 없는지, '홈 화면에 추가' 바로가기 방식에서는 제목이 나오는지 함께 기록)
+24. **`:active` 눌림 SKILL↔CSS 불일치 — 일부 처리(261121)**: SKILL §5 는 선택·컨트롤 버튼 `scale(0.97)` 눌림을 정했지만 CSS 에 없다. ~~`.chip`~~ → 처리(`design/tap-active-feedback`, 위저드 옵션 카드 `.optionCard` 0.98 과 함께). 남은 것: `.option`(폼 SegmentedControl)·`.filterToggle`·`.tab`·`.resetBtn`·`.dateClear` (`.notice` 는 탭 대상 여부부터 확인).
 
 **그 외 남은 작업**
 - ~~worktree 가 리포 안(`.claude/worktrees`)에 있으면 로컬 `npm run lint` 가 상위 `.eslintrc.json` 과 충돌해 실패(261121 확인)~~ → **해소(PR #179, 261121)**: `.eslintrc.json` 에 `"root": true` 추가. 이제 worktree 에서도 `npm run lint` 를 그대로 쓴다(`--no-eslintrc -c` 우회 불필요). 규칙 집합 변화 없음(99개 동일)

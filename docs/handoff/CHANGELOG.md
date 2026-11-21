@@ -1,6 +1,6 @@
 # CHANGELOG.md
 
-> **마지막 업데이트: 2026-11-21 (PR #134~#182 반영)**
+> **마지막 업데이트: 2026-11-22 (PR #134~#183 반영)**
 
 > 260531~261121 핸드오프 전체를 날짜순으로 기록한 변경 이력입니다. 새 AI는 일반적으로 `PROJECT_CONTEXT.md`와 `CURRENT_STATE.md`만 먼저 읽고, 과거 판단 근거가 필요할 때 이 문서를 참고하세요.
 
@@ -1495,3 +1495,27 @@ PR #161 의 "+ 시간 추가" 버튼 → 탭하면 칸 펼침 → 다이닝 미�
 ### 검증
 - tsc·lint·vitest 319·build 통과. Preview 실기기 확인은 사용자가 완료.
 
+---
+
+## 2026-11-22 — 탭 눌림(:active) 피드백 + 위저드 선택 전환 지연·더블탭 차단 (PR #183)
+
+### 배경
+- CURRENT_STATE 보류 13번: 카드·헤더 아이콘·카드 ⋮을 탭해도 이동이 빨리 커밋되면 topLoader 가 안 보여 반응이 없다고 느껴졌다. 로더(`loading.tsx`)는 #154 rAF 지연과 상호작용이 있어 제외하고 CSS 눌림만 진행.
+- 진단: `.headerNavBtn`·`.iconBtn` 은 `:active` 없음, `.cardInteractive:active` 는 `translateY(0)`(hover 부상 취소)뿐이라 터치에선 무변화.
+
+### 변경
+- `:active` 눌림 — 탭 카드 `scale(0.98)`(보더·그림자 불변, 내부 ⋮ 누를 땐 미적용 `:not(:has(button:active))`), 유틸 아이콘 버튼 4종 hover 와 같은 면 + scale(박스별 수축 ≈3px: 40px 0.92 / 36px 0.91 / 28px 0.90), 위저드 `.optionCard` 0.98(전체 폭 카드에서 0.97 은 과함)·`.chip` 0.97(`/list`·폼 칩에도 적용).
+- 공통 눌림 타이밍 — `:active` 에서 `transition-duration: 0`(즉시), 뗄 때 기본 규칙 200ms ease-out 복귀. hover 진입 속도는 hover 규칙에 기존 값 재선언으로 유지(hover 이탈만 200ms).
+- 위저드 자동 전환(활동 1~3단계·다이닝 1단계) — `useDelayedAdvance`: 선택값 즉시 반영, `setStep`·히스토리 replace/push 는 150ms 뒤. 대기 중 재탭 무시, 이전·다음·처음부터·popstate 는 대기 취소. 전환 뒤엔 pointerdown 이 전환+300ms 이후인 포인터 탭만 수락(이전 단계에서 시작된 탭·더블탭 두 번째 탭 차단, 키보드 detail 0 영향 없음).
+- `.dialogCloseBtn`·`.optionCard` 는 Tailwind `transition-all` 을 덮도록 클래스 중복 specificity. Button 의 `active:not-aria-[haspopup]:translate-y-px` 는 Tailwind 3.4 가 `not-` 변형을 몰라 생성되지 않음(빌드 CSS 확인).
+- iOS `:active` 발동 조건(조상 touchstart 리스너)은 React 가 `document` 루트에 passive touchstart 를 등록해 앱 전역에서 충족 — 별도 조치 없음.
+- CURRENT_STATE 보류 24번 신규: SKILL `scale(0.97)` 미구현 `.option`·`.filterToggle`·`.tab`·`.resetBtn`·`.dateClear`(`.notice` 확인 필요).
+
+### 실기기 피드백으로 바뀐 것
+1. 0.96 + 140ms 진입 트랜지션 → 짧은 탭에서 눌림이 거의 안 보임 → 즉시 눌림·200ms 복귀 + scale 확대.
+2. 위저드 선택지는 선택 즉시 전환돼 누른 카드가 사라짐 → 150ms 틴트 노출 후 전환.
+3. 빠른 두 번 탭이 가끔 두 단계를 넘김(타이머 해제 뒤 같은 자리의 다음 단계 카드에 두 번째 탭) → pointerdown 시각 기반 차단 + 보조 300ms.
+
+### 검증
+- lint·tsc·vitest 319·build 통과, E2E 97 통과(신규: 같은 틱 연타 history +1, 첫 탭 250ms 뒤 두 번째 탭 미선택, 정상 연속 선택). 신규 가드 테스트는 가드 제거 시 실패하는 것 확인.
+- 사용자 실기기(iPhone PWA·Safari) 확인 완료.

@@ -355,7 +355,8 @@ export function PlaceRecommendWizard() {
                   <button
                     key={m.value}
                     type="button"
-                    onClick={() => {
+                    onPointerDown={advance.onPointerDown}
+                    onClick={(e) => {
                       // 선택값은 즉시(틴트 노출), 단계 전환·히스토리는 잠시 뒤. 대기 중 연타는 무시.
                       const scheduled = advance.schedule(() => {
                         setStep(2)
@@ -363,7 +364,7 @@ export function PlaceRecommendWizard() {
                         // 돌아왔을 때 방금 고른 값이 미선택 상태로 보이지 않도록.
                         replacePlaceWizardState({ step: 1, meal: m.value, area, categoryIds })
                         pushPlaceWizardState({ step: 2, meal: m.value, area, categoryIds })
-                      })
+                      }, e)
                       if (scheduled) setMeal(m.value)
                     }}
                     className={cn(

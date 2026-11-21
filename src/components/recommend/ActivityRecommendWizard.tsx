@@ -465,7 +465,8 @@ export function ActivityRecommendWizard() {
                   <button
                     key={d.value}
                     type="button"
-                    onClick={() => {
+                    onPointerDown={advance.onPointerDown}
+                    onClick={(e) => {
                       const isOvernight = d.value === 'overnight'
                       const nextTimeOfDay = isOvernight ? null : timeOfDay
                       const nextStep = isOvernight ? 3 : 2
@@ -488,7 +489,7 @@ export function ActivityRecommendWizard() {
                           locationType,
                           categoryIds,
                         })
-                      })
+                      }, e)
                       if (!scheduled) return
                       setDuration(d.value)
                       if (isOvernight) {
@@ -530,7 +531,8 @@ export function ActivityRecommendWizard() {
                   <button
                     key={t.value}
                     type="button"
-                    onClick={() => {
+                    onPointerDown={advance.onPointerDown}
+                    onClick={(e) => {
                       const scheduled = advance.schedule(() => {
                         setStep(3)
                         // 방금 고른 값을 "떠나는" step2 엔트리에도 반영 — 뒤로가기로 이 단계에
@@ -549,7 +551,7 @@ export function ActivityRecommendWizard() {
                           locationType,
                           categoryIds,
                         })
-                      })
+                      }, e)
                       if (scheduled) setTimeOfDay(t.value)
                     }}
                     className={cn(
@@ -604,7 +606,8 @@ export function ActivityRecommendWizard() {
                   <button
                     key={o.value}
                     type="button"
-                    onClick={() => {
+                    onPointerDown={advance.onPointerDown}
+                    onClick={(e) => {
                       const scheduled = advance.schedule(() => {
                         setStep(4)
                         // 방금 고른 값을 "떠나는" step3 엔트리에도 반영 — 뒤로가기로 이 단계에
@@ -623,7 +626,7 @@ export function ActivityRecommendWizard() {
                           locationType: o.value,
                           categoryIds,
                         })
-                      })
+                      }, e)
                       if (scheduled) setLocationType(o.value)
                     }}
                     className={cn(

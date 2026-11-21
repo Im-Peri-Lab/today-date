@@ -1,6 +1,6 @@
 # CURRENT_STATE.md
 
-> **마지막 업데이트: 2026-11-21 (PR #134~#181 반영, 사용자 실기기 확인 결과 261121 반영)**
+> **마지막 업데이트: 2026-11-21 (PR #134~#182 반영, 사용자 실기기 확인 결과 261121 반영)**
 
 ## 현재 단계
 커플(2인) 계정 전환 완료 + 파트너 표시용 닉네임 추가 단계 — 계정 없는 단일 워크스페이스에서
@@ -55,6 +55,7 @@ PROJECT_CONTEXT §5(인증 F-01)·§20.
 는 상세 → CHANGELOG 2026-07-29~2026-08-11.
 
 ## 브랜치 상태
+- `fix/login-button-loading-until-home` — PR #182 squash 머지, 로컬·리모트 브랜치·worktree 삭제. `/lock` [로그인]·패스코드 제출 시 홈 전환 완료(언마운트)까지 로딩 유지(15초 안전 타임아웃), `inFlightRef` 로 연속 탭 중복 요청 차단. 실패 경로·인증 로직 변경 없음. Preview 확인은 사용자가 완료
 - `fix/pwa-splash-icon-512-heart20` — PR #181 squash 머지(머지 커밋 `9850390`), 로컬·리모트 브랜치·worktree 삭제. `public/icon-512.png` 하트 폭 52%→20%(같은 중심·배경 `#f5f3ff`). Android 12+ WebAPK 로딩 화면(240dp 고정)의 하트를 화면 폭 약 34%→약 12.5% 로. 홈 아이콘(icon-192)·`apple-touch-icon`·manifest 변경 없음. 갤럭시 실기기 확인은 대기(보류 23번)
 - `perf/app-ready-on-login` — PR #180 squash 머지, 로컬·리모트 브랜치·worktree 삭제. 잠금해제 성공 응답에 `app-ready` 발급(속성은 `lib/auth/appReady.ts` 단일 출처, 기존 값 그대로) + 미들웨어 `expireSession` 에서 `app-ready` 삭제(다른 기기 계정 삭제 후 재가입 경로 보존). Preview 확인은 사용자가 완료. 사용자 iPhone PWA 재로그인 완료(261121, `app-ready` 적용). 확인용 `diag/app-ready-verify`(이 브랜치 + diag 계측)는 머지 없이 삭제
 - `diag/loading-server-timing`(`443f1cc`) — **머지 금지·재측정용(유지)**. 미들웨어·unlock·목록 API·홈/상세 렌더 구간별 Server-Timing 계측. 서버 컴포넌트는 Next 14 에서 헤더를 못 써서 홈·상세 렌더는 `/api/diag/render-timing` + 서버 로그 `[server-timing]` 로 잰다. 재측정 시 main 위로 rebase 후 Preview 로 띄울 것. worktree 는 제거됨
@@ -99,6 +100,7 @@ PROJECT_CONTEXT §5(인증 F-01)·§20.
 - `fix/e2e-db-spec-single-file` — PR #168 squash 머지 완료(머지 커밋 `29b2cb2`), 로컬·리모트 브랜치 삭제됨. DB 스펙 파일을 `isolation.spec.ts` 하나로 단일화해 CI #217 실패(워커 분리로 스텁 상태 충돌) 수정. CI(Lint·Unit·Build, E2E, Vercel) 통과
 
 ## 최근 구현 완료
+- 로그인 버튼 홈 전환 완료까지 로딩 유지 + 연속 탭 중복 요청 차단(`src/app/lock/page.tsx`, PR #182) → 상세 CHANGELOG 2026-11-21 v6
 - Android PWA 로딩 화면 하트 축소: icon-512 만 하트 20%(홈=icon-192 / 로딩=icon-512 로 크기 분리, PR #181) → 상세 CHANGELOG 2026-11-21 v5
 - iOS 홈 화면 PWA 시작 이미지(`apple-touch-startup-image`, `src/components/boot/pwaSplash.mjs` + `scripts/generate-pwa-splash.mjs`, PR #176) → 상세 CHANGELOG 2026-11-21
 - '다녀왔어요' 방문 날짜 기본값을 방문예정일로(`src/lib/visitedDate.ts`, PR #175) → 상세 CHANGELOG 2026-11-20

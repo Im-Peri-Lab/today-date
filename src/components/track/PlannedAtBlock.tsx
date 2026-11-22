@@ -8,7 +8,15 @@ import { CalendarAddButton } from './CalendarAddButton'
 import { PlannedAtClearDialog } from './PlannedAtClearDialog'
 import { useUpdateActivity } from '@/hooks/useActivities'
 import { useUpdatePlace } from '@/hooks/usePlaces'
-import { formatDotDateTime } from '@/lib/date'
+import { DatePickerField } from '@/components/forms/DatePickerField'
+import { PlannedTimeField } from '@/components/forms/PlannedTimeField'
+import { Label } from '@/components/ui/label'
+import { CalendarTitlePrefixDialog } from '@/components/CalendarTitlePrefixDialog'
+import { useCalendarAdd } from '@/hooks/useCalendarAdd'
+import { plannedTimePayload } from '@/lib/plannedTime'
+import { classifyScheduleSave } from '@/lib/calendar/scheduleChange'
+import { showScheduleSavedToast } from '@/lib/calendar/scheduleToast'
+import { formatDotDateTime, toHHmm } from '@/lib/date'
 import type { CalendarItem } from '@/lib/calendar/event'
 import { cn } from '@/lib/utils'
 import styles from '@/components/screens.module.css'
@@ -20,8 +28,6 @@ interface PlannedAtBlockProps {
   item: CalendarItem
   /** 저장된 방문 예정일(ISO). 값이 있을 때만 이 블록을 렌더한다(호출부 책임) */
   plannedAt: string
-  /** 연필 → 날짜 수정 다이얼로그(PlannedAtDialog)는 호출부가 소유 — 하단 "언제 갈까요?"와 공용 */
-  onEdit: () => void
 }
 
 /**
@@ -29,11 +35,45 @@ interface PlannedAtBlockProps {
  * 저장하면 블록 등장(+버튼 사라짐), 휴지통 → 확인 후 지우면 블록 사라지고 버튼 복귀.
  * 연필(수정)-휴지통(지우기) 순, 휴지통이 모서리 앵커. 등록 정보 블록의 쌍과 같은 mapActionBtn 슬롯·간격.
  */
-export function PlannedAtBlock({ track, id, item, plannedAt, onEdit }: PlannedAtBlockProps) {
+export function PlannedAtBlock({ track, id, item, plannedAt }: PlannedAtBlockProps) {
+  const [editing, setEditing] = useState(false)
+  const [date, setDate] = useState(plannedAt)
+  const [time, setTime] = useState(toHHmm(item.planned_time))
   const [clearOpen, setClearOpen] = useState(false)
   const updateActivity = useUpdateActivity()
   const updatePlace = useUpdatePlace()
   const mutation = track === 'activity' ? updateActivity : updatePlace
+
+  const calendar = useCalendarAdd(track)
+
+  function startEdit() {
+    setDate(plannedAt)
+    setTime(toHHmm(item.planned_time))
+    setEditing(true)
+  }
+
+  function handleSave() {
+    if (!date || mutation.isPending) return
+    const patch = { planned_at: date, planned_time: plannedTimePayload(date, time) }
+    const kind = classifyScheduleSave(
+      { date: plannedAt, time: item.planned_time },
+      { date, time: patch.planned_time },
+    )
+
+    mutation.mutate({ id, patch }, {
+      onSuccess: (saved) => {
+        setEditing(false)
+        showScheduleSavedToast({
+          kind,
+          savedMessage: '방문 예정일을 저장했어요',
+          offerAddOnCreate: false,
+          onAdd: () => calendar.add(saved),
+        })
+      },
+      onError: (err: unknown) =>
+        toast.error(err instanceof Error ? err.message : '저장 중 오류가 발생했습니다.'),
+    })
+  }
 
   function handleClear() {
     mutation.mutate(
@@ -52,21 +92,30 @@ export function PlannedAtBlock({ track, id, item, plannedAt, onEdit }: PlannedAt
     <>
       <DetailBlock
         title="방문 예정"
-        editing={false}
-        onEdit={onEdit}
+        editing={editing}
+        onEdit={startEdit}
         onClear={() => setClearOpen(true)}
-        onCancel={() => {}}
-        onSave={() => {}}
-        saving={false}
+        onCancel={() => setEditing(false)}
+        onSave={handleSave}
+        saving={mutation.isPending}
+        saveDisabled={!date}
       >
-        <div className="flex items-center gap-1">
-          <span className={cn('inline-flex items-center gap-1.5', styles.bodyText)}>
-            <Calendar className={cn('h-3.5 w-3.5 shrink-0', styles.accent)} />
-            {/* 시간이 있으면 "2026.12.19 (토) 오후 7:00", 없으면 날짜만(021) */}
-            {formatDotDateTime(plannedAt, item.planned_time)}
-          </span>
-          <CalendarAddButton track={track} item={item} />
-        </div>
+        {editing ? (
+          <div className="space-y-1.5">
+            <Label htmlFor="planned_at_edit">방문 예정일</Label>
+            <DatePickerField id="planned_at_edit" value={date} onChange={setDate} />
+            <PlannedTimeField id="planned_time_edit" value={time} onChange={setTime} hasDate={Boolean(date)} />
+          </div>
+        ) : (
+          <div className="flex items-center gap-1">
+            <span className={cn('inline-flex items-center gap-1.5', styles.bodyText)}>
+              <Calendar className={cn('h-3.5 w-3.5 shrink-0', styles.accent)} />
+              {/* 시간이 있으면 "2026.12.19 (토) 오후 7:00", 없으면 날짜만(021) */}
+              {formatDotDateTime(plannedAt, item.planned_time)}
+            </span>
+            <CalendarAddButton track={track} item={item} />
+          </div>
+        )}
       </DetailBlock>
 
       <PlannedAtClearDialog
@@ -74,7 +123,8 @@ export function PlannedAtBlock({ track, id, item, plannedAt, onEdit }: PlannedAt
         onOpenChange={setClearOpen}
         loading={mutation.isPending}
         onConfirm={handleClear}
-        />
+      />
+      <CalendarTitlePrefixDialog {...calendar.prefixDialogProps} />
     </>
   )
 }

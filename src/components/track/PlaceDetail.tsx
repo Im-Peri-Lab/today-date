@@ -325,7 +325,7 @@ export function PlaceDetail({ id, initialData, initialEdit, returnTo }: Props) {
 
             {/* ── 방문 예정 블록 (값이 있는 위시리스트에서만 — 없으면 하단 "언제 갈까요?" 버튼만, 다녀온 곳이 되면 숨기고 값은 DB 에 보존) ── */}
             {place.status === 'wishlist' && place.planned_at && (
-              <PlannedAtBlock track="place" id={id} item={place} plannedAt={place.planned_at} onEdit={() => setPlannedOpen(true)} />
+              <PlannedAtBlock track="place" id={id} item={place} plannedAt={place.planned_at} />
             )}
 
             {/* ── 방문 기록 블록 (미방문이면 렌더 안 함) ── */}

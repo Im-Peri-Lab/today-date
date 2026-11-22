@@ -14,6 +14,7 @@ interface DetailBlockProps {
   onCancel: () => void
   onSave: () => void
   saving: boolean
+  saveDisabled?: boolean
   /**
    * 복사하기 (보기 모드 전용). 제공되면 연필 버튼 바로 왼쪽에 단독 버튼으로 노출.
    * 연필과 같은 absolute 패턴 — 텍스트 행 흐름에 끼우지 않아 행 높이를 늘리지 않는다.
@@ -58,6 +59,7 @@ export function DetailBlock({
   onCancel,
   onSave,
   saving,
+  saveDisabled,
   onCopy,
   onClear,
   hideEdit,
@@ -166,7 +168,7 @@ export function DetailBlock({
           <Button
             type="button"
             onClick={onSave}
-            disabled={saving}
+            disabled={saving || saveDisabled}
             className={cn(
               styles.detailPrimaryBtn,
               'h-9 gap-1.5 px-4 text-white transition-colors hover:brightness-105',

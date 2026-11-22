@@ -21,6 +21,8 @@ import { RevertConfirmDialog } from './RevertConfirmDialog'
 import { PlannedAtBlock } from './PlannedAtBlock'
 import { PlannedAtDialog } from './PlannedAtDialog'
 import { CalendarTitlePrefixDialog } from '@/components/CalendarTitlePrefixDialog'
+import { plannedTimePayload } from '@/lib/plannedTime'
+import { showScheduleSavedToast } from '@/lib/calendar/scheduleToast'
 import { useCalendarOfferOnArrival } from '@/hooks/useCalendarOfferOnArrival'
 import { VisitedDialog } from '@/components/VisitedDialog'
 import { usePlace, useDeletePlace, useUpdatePlace } from '@/hooks/usePlaces'
@@ -61,7 +63,8 @@ export function PlaceDetail({ id, initialData, initialEdit, returnTo }: Props) {
   const [revertOpen, setRevertOpen] = useState(false)
   const [plannedOpen, setPlannedOpen] = useState(false)
   // 등록 직후 도착이면 "캘린더에도 추가할까요?" 제안을 1회 띄운다(머리말 다이얼로그는 아래에 마운트)
-  const calendarOffer = useCalendarOfferOnArrival('place', id, place)
+  const calendar = useCalendarOfferOnArrival('place', id, place)
+  const canAddPlannedDate = place?.status === 'wishlist' && !place.planned_at
   const listHref = returnTo ?? DEFAULT_LIST_RETURN_TO
   const listLabel = getReturnLabel(returnTo, '목록으로')
 
@@ -154,17 +157,31 @@ export function PlaceDetail({ id, initialData, initialEdit, returnTo }: Props) {
 
   const onSaveInfo = handleSubmit(async (values) => {
     if (!place) return
-    // 방문 예정일은 이 인라인 편집 대상이 아니다("방문 예정" 블록이 전담) — payload 에 싣지 않는다.
+    const { planned_at, planned_time, ...info } = values
+    const plannedDate = canAddPlannedDate ? planned_at : undefined
     const payload = {
-      ...values,
+      ...info,
+      ...(plannedDate && {
+        planned_at: plannedDate,
+        planned_time: plannedTimePayload(plannedDate, planned_time),
+      }),
       category_id: values.category_id || null,
       reference_url: values.reference_url || null,
       location: values.location || null,
       memo: values.memo || null,
     }
     try {
-      await update.mutateAsync({ id: place.id, patch: payload })
-      toast.success('수정되었습니다!')
+      const saved = await update.mutateAsync({ id: place.id, patch: payload })
+      if (plannedDate && saved?.planned_at) {
+        showScheduleSavedToast({
+          kind: 'created',
+          savedMessage: '수정되었습니다!',
+          offerAddOnCreate: true,
+          onAdd: () => calendar.add(saved),
+        })
+      } else {
+        toast.success('수정되었습니다!')
+      }
       exitEditInfo()
     } catch (err) {
       toast.error(err instanceof Error ? err.message : '저장 중 오류가 발생했습니다.')
@@ -223,6 +240,7 @@ export function PlaceDetail({ id, initialData, initialEdit, returnTo }: Props) {
                   errors={errors}
                   watch={watch}
                   setValue={setValue}
+                  showPlannedAt={canAddPlannedDate}
                 />
               ) : (
                 /* 짧은 값: 2열 그리드 / 긴 텍스트(메모·링크): wide로 전체폭 / 모바일: 1열 */
@@ -307,7 +325,7 @@ export function PlaceDetail({ id, initialData, initialEdit, returnTo }: Props) {
 
             {/* ── 방문 예정 블록 (값이 있는 위시리스트에서만 — 없으면 하단 "언제 갈까요?" 버튼만, 다녀온 곳이 되면 숨기고 값은 DB 에 보존) ── */}
             {place.status === 'wishlist' && place.planned_at && (
-              <PlannedAtBlock track="place" id={id} item={place} plannedAt={place.planned_at} onEdit={() => setPlannedOpen(true)} />
+              <PlannedAtBlock track="place" id={id} item={place} plannedAt={place.planned_at} />
             )}
 
             {/* ── 방문 기록 블록 (미방문이면 렌더 안 함) ── */}
@@ -398,7 +416,7 @@ export function PlaceDetail({ id, initialData, initialEdit, returnTo }: Props) {
             title={place.title}
             value={place.planned_at ?? null}
           />
-          <CalendarTitlePrefixDialog {...calendarOffer} />
+          <CalendarTitlePrefixDialog {...calendar.prefixDialogProps} />
           <RevertConfirmDialog
             open={revertOpen}
             onOpenChange={setRevertOpen}

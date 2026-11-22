@@ -78,7 +78,7 @@ export default async function AccountDeletePage() {
           </div>
 
           <div className={styles.sheetRow}>
-            <p className={cn('mb-1.5 uppercase tracking-wide', styles.sectionLabel)}>
+            <p className={cn('mb-1.5', styles.sectionLabel)}>
               함께 삭제되는 것
             </p>
             <ul className={cn('list-disc space-y-1 pl-4', styles.bodyText)}>

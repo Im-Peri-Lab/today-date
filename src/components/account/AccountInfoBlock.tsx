@@ -79,7 +79,7 @@ export function AccountInfoBlock({
       */}
       <div className="[&>*:first-child]:!pt-0">
         <div className={styles.sheetRow}>
-          <p className={cn('mb-1.5 uppercase tracking-wide', styles.fieldLabel)}>닉네임</p>
+          <p className={styles.fieldLabel}>닉네임</p>
           {editing ? (
             <div>
               <Input

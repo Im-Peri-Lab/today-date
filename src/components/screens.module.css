@@ -110,6 +110,12 @@
   --type-section-label-weight: 600;
   --type-section-label-color:  var(--s-sub, #6b7280);
 
+  /* field-label: 12px / weight 500 / --s-sub */
+  --type-field-label:         0.75rem;
+  --type-field-label-weight:  500;
+  --type-field-label-color:   var(--s-sub, #6b7280);
+  --type-field-label-tracking: 0.025em;
+
   /* body: 14px / weight 400 / --s-ink */
   --type-body:                 0.875rem;  /* 14px */
   --type-body-weight:          400;
@@ -159,13 +165,16 @@
   font-size: var(--type-section-label, 0.75rem);
   font-weight: var(--type-section-label-weight, 600);
   color: var(--type-section-label-color, var(--s-sub, #6b7280));
+  letter-spacing: normal;
 }
 
-/* 필드명 라벨 (12/500/--s-sub) — 섹션 헤더(600)보다 약하게, 값(ink)에 종속된 라벨 */
+/* 필드명 라벨 (12/500/--s-sub) — 값 바로 위에 배치 */
 .fieldLabel {
-  font-size: var(--type-section-label, 0.75rem);
-  font-weight: 500;
-  color: var(--type-section-label-color, var(--s-sub, #6b7280));
+  margin-bottom: 0.375rem;
+  font-size: var(--type-field-label);
+  font-weight: var(--type-field-label-weight);
+  color: var(--type-field-label-color);
+  letter-spacing: var(--type-field-label-tracking);
 }
 
 /* 캡션·약한 라벨 (12/400/--s-faint) */

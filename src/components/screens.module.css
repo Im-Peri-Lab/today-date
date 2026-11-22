@@ -110,12 +110,6 @@
   --type-section-label-weight: 600;
   --type-section-label-color:  var(--s-sub, #6b7280);
 
-  /* field-label: 12px / weight 500 / --s-sub */
-  --type-field-label:         0.75rem;
-  --type-field-label-weight:  500;
-  --type-field-label-color:   var(--s-sub, #6b7280);
-  --type-field-label-tracking: 0.025em;
-
   /* body: 14px / weight 400 / --s-ink */
   --type-body:                 0.875rem;  /* 14px */
   --type-body-weight:          400;
@@ -168,13 +162,14 @@
   letter-spacing: normal;
 }
 
-/* 필드명 라벨 (12/500/--s-sub) — 값 바로 위에 배치 */
+/* 표시 필드 라벨 — 폼과 같은 타이포, 상세 행의 여백은 별도 적용 */
 .fieldLabel {
   margin-bottom: 0.375rem;
   font-size: var(--type-field-label);
   font-weight: var(--type-field-label-weight);
-  color: var(--type-field-label-color);
-  letter-spacing: var(--type-field-label-tracking);
+  color: var(--s-sub, #6b7280);
+  letter-spacing: normal;
+  line-height: 1.25rem;
 }
 
 /* 캡션·약한 라벨 (12/400/--s-faint) */

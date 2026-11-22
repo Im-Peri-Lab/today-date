@@ -156,19 +156,20 @@ description: >
 - 추천 위저드 h1 20px: 위저드 전용 사이즈(키우면 레이아웃 흔들림).
 - 다이얼로그 제목 20px: 페이지 h1과 분리된 전용 사이즈 (§11-A).
 - 빈 상태 14px/`--s-faint` (VisitRecordBlock "아직 방문 기록이 없어요" 등): body도 caption도 아닌 의도된 조합. (리스트 카드 정보 줄은 예전엔 이 조합이었으나, 배지 줄과 톤을 통일해 `text-xs`+`styles.sub`로 이전 — §8-A. 상세 화면 빈값은 §2-C 위계 참조.)
-- DetailBlock h2 블록 제목 14px/600: 크기는 본문과 동일, 굵기로만 구분(홈 `.statSectionHeader`와 같은 패턴). 날짜 텍스트(방문 기록·방문 예정)는 예외 없이 표준 `.bodyText` 14px/400 + 아이콘 `h-3.5 w-3.5`.
+- DetailBlock h2 블록 제목 15px / 600 / `--s-ink`: 아래 날짜·필드 라벨보다 한 단계 높다. 날짜 텍스트(방문 기록·방문 예정)는 예외 없이 표준 `.bodyText` 14px/400 + 아이콘 `h-3.5 w-3.5`.
 
 ### 2-C. 라벨 위계
 
 | 역할 | 클래스·컴포넌트 | 크기 / 굵기 / 색 / 자간 | 적용처 |
 |---|---|---|---|
 | 섹션 제목 | `.sectionLabel` | 12px / 600 / `--s-sub` / 기본 | 목록 필터 그룹, 계정 삭제의 “함께 삭제되는 것” |
-| 표시 라벨 | `.fieldLabel` | 12px / 500 / `--s-sub` / 0.025em (12px 기준 0.3px) | 상세·파트너 정보·계정 삭제의 `DetailRow`, 내 정보 닉네임, 설정 캘린더 제목 문구 |
-| 입력 라벨 | `Label` | 14px / 500 / `--s-ink` / 기본 | 등록 및 편집 폼, 입력 다이얼로그 |
+| 필드 라벨 | `.fieldLabel`, `Label` | 14px / 500 / `--s-sub` / 기본 | 상세 값 및 등록·편집·다이얼로그의 입력 필드 이름 |
+| 상세 카드 제목 | `DetailBlock`의 `h2` | 15px / 600 / `--s-ink` / 기본 | 방문 예정, 방문 기록 |
 
-- 표시 라벨 아래 여백은 6px이며 `.fieldLabel`에서 정의한다.
-- 닉네임·캘린더 제목 문구처럼 필드 하나를 인라인 편집할 때는 표시 라벨을 유지한다. 상세의 등록 정보·방문 기록처럼 여러 필드를 편집할 때는 입력 라벨을 사용한다.
-- 상세 블록 제목과 홈 최상위 구획 제목은 14px / 600 / `--s-ink`를 사용한다. 추천 위저드 질문은 본문 스타일을 사용한다.
+- 필드 라벨은 값 또는 입력 하나를 설명한다. 읽기·신규 등록·인라인 편집·다이얼로그에서 같은 크기·굵기·색을 사용한다.
+- 상세 행은 라벨 줄 높이 20px와 아래 여백 6px를 사용한다. 폼의 `Label`은 기존 줄 높이 1을 사용한다.
+- 방문 예정·방문 기록은 상세 카드 제목이다. 방문 예정일·방문 날짜·별점·후기는 편집 시 필드 라벨이다.
+- 홈 최상위 구획 제목은 14px / 600 / `--s-ink`다. 추천 위저드 질문은 본문 스타일을 사용한다.
 
 **상세 화면 값 위계 (내림차순 강도):**
 
@@ -410,11 +411,11 @@ description: >
 
 **폰트:**
 - 입력 본문(`Input`/`Textarea`): **16px** (`text-base`, `md:text-sm` 쓰지 않음 → iOS 포커스 자동 줌인 방지).
-- 라벨(`Label`): **14px / 500** (`--type-form-label`, `--type-form-label-weight`), 자간 기본.
+- 라벨(`Label`): **14px / 500** (`--type-field-label`, `--type-field-label-weight`), 자간 기본.
 
 **색 토큰 (shadcn 의존 금지, `--s-*`만):**
 - 이 앱은 `.dark` 클래스를 붙이지 않고 `@media (prefers-color-scheme: dark)` + `--s-*` 토큰으로만 다크를 처리한다. 따라서 폼 컨트롤은 shadcn HSL 토큰(`--foreground`/`--input`/`--muted-foreground`)을 쓰면 다크에서 라이트값에 고정되어 안 보인다(대비 ~1:1).
-- 라벨 색: `--s-ink` (`text-[color:var(--s-ink,#1a1033)]`) — `ui/label.tsx`에 적용 → `FormField`·`VisitRecordBlock` 라벨 모두 적용됨.
+- 라벨 색: `--s-sub` (`text-[color:var(--s-sub,#6b7280)]`) — `ui/label.tsx`에 적용 → `FormField`·`VisitRecordBlock` 라벨 모두 적용됨.
 - 입력/textarea 본문 색: `--s-ink`, placeholder: `--s-faint`.
 - **폼 컨트롤 보더는 `--s-input` 전용 토큰**(입력·textarea·세그먼트·칩·날짜 트리거/팝업). 라이트 `#eceaf3`(= `--s-card-border-strong`와 동일), **다크 `#4a3f63`** — 카드면(`#241a36`)·`--s-card-border-strong`(`#3a2f4e`)보다 한 단계 밝아 다크에서 보더가 또렷이 보인다. `--s-card-border-strong`은 뱃지·삭제버튼 등 **채움**으로도 쓰이므로 보더만 분리(채움 면엔 영향 없음). 라이트 값 동일 → 라이트 무변화.
 - 활성(칩·세그먼트): **틴트**(`--s-accent-soft-bg` + `--s-active-line` 보더 + `--s-active-text`, §5·§5-A). Primary 버튼: `styles.detailPrimaryBtn`(`--s-active-line` 단색).
@@ -900,7 +901,7 @@ iOS Safari 의 `:active` 는 조상에 touchstart 리스너가 있어야 발동�
 | 등록 정보 | 숨김(`blockTitle` 있으면 렌더 안 함) | 제목·카테고리·상태 태그가 자체 식별. 우상단에 복사하기(`onCopy`)+연필 버튼 (§10-B) |
 | 방문 기록 | `<h2>` 유지 ("방문 기록"), 톤은 필드 라벨과 동일 | 스크린리더 섹션 탐색 보장 |
 
-블록 제목은 `DetailBlock`의 `<h2>`이며 14px / 600 / `--s-ink`로 표시한다. 아래 입력 라벨(14px / 500)보다 굵게 표시해 블록을 구분한다.
+블록 제목은 `DetailBlock`의 `<h2>`이며 15px / 600 / `--s-ink`로 표시한다. 아래 필드 라벨은 14px / 500 / `--s-sub`를 사용한다.
 
 카드 클래스: `styles.card` + `styles.detailCard`
 - `styles.card`: `border-radius: 1rem`, 보더, 그림자 (공용)
@@ -977,7 +978,7 @@ iOS Safari 의 `:active` 는 조상에 touchstart 리스너가 있어야 발동�
 ```
 
 `styles.sheetRow`: `padding-top: 0.875rem` — 구분선(border-top) 없이 여백만으로 행 구분.  
-라벨: `.fieldLabel` — 12px / **500** / `--s-sub` / 0.3px (값보다 약하되 빈값보다 또렷한 필드명, §2-C)  
+라벨: `.fieldLabel` — 14px / **500** / `--s-sub` / 기본 (값보다 약하되 빈값보다 또렷한 필드명, §2-C)  
 값: `.bodyText` — 14px / 400 / `--s-ink`  
 빈값: `.faint` — `--s-faint` (라벨보다 약함)
 

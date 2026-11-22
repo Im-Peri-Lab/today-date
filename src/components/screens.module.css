@@ -496,6 +496,15 @@
   box-shadow: var(--s-focus-ring-card, 0 0 0 3px rgba(124, 58, 237, 0.5));
 }
 
+/* 링크 안내 배너에만 카드 눌림을 적용한다. 정적 안내는 움직이지 않는다. */
+a.notice {
+  transition: scale 200ms ease-out;
+}
+a.notice:active {
+  scale: 0.98;
+  transition-duration: 0ms;
+}
+
 /* 배너 안의 아이콘·글씨는 모두 accent 계열 — 틴트 면 위 "외곽선형 활성" 톤(§ 디자인 5) */
 .noticeIcon {
   flex-shrink: 0;
@@ -765,7 +774,8 @@
   cursor: pointer;
   transition:
     color 140ms ease,
-    border-color 140ms ease;
+    border-color 140ms ease,
+    scale 200ms ease-out;
 }
 .tab:hover {
   color: var(--s-ink, #1a1033);
@@ -1053,7 +1063,8 @@
   transition:
     border-color 140ms ease,
     color 140ms ease,
-    box-shadow 140ms ease;
+    box-shadow 140ms ease,
+    scale 200ms ease-out;
 }
 @media (hover: hover) {
   .option:hover:not(.optionActive) {
@@ -1162,6 +1173,7 @@
   background: transparent;
   color: var(--s-faint, #9ca3af);
   cursor: pointer;
+  transition: scale 200ms ease-out;
 }
 .dateClear:hover {
   color: var(--s-sub, #6b7280);
@@ -1329,7 +1341,8 @@
   cursor: pointer;
   transition:
     border-color 140ms ease,
-    color 140ms ease;
+    color 140ms ease,
+    scale 200ms ease-out;
 }
 @media (hover: hover) {
   .filterToggle:hover {
@@ -1372,13 +1385,24 @@
   cursor: pointer;
   transition:
     border-color 140ms ease,
-    color 140ms ease;
+    color 140ms ease,
+    scale 200ms ease-out;
 }
 @media (hover: hover) {
   .resetBtn:hover {
     border-color: var(--s-active-line, #c4b5fd);
     color: var(--s-active-text, #7c3aed);
   }
+}
+
+/* scale을 분리해 날짜 지우기의 세로 중앙 정렬을 유지한다. */
+.tab:active:not(:disabled),
+.option:active:not(:disabled),
+.filterToggle:active:not(:disabled),
+.resetBtn:active:not(:disabled),
+.dateClear:active:not(:disabled) {
+  scale: 0.97;
+  transition-duration: 0ms;
 }
 
 /*

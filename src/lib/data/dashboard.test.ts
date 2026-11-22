@@ -50,13 +50,22 @@ describe('getDashboardStats — DB 오류 처리', () => {
   })
 
   it('정상 응답은 그대로 집계한다', async () => {
-    outcome = { data: [{ title: '한강 산책' }, { title: '전시회' }], count: 2, error: null }
+    outcome = {
+      data: [{ title: '한강 산책', planned_at: '2026-12-12', visited_at: '2026-11-21' }, { title: '전시회' }],
+      count: 2,
+      error: null,
+    }
 
     const stats = await getDashboardStats(COUPLE)
 
     expect(stats.wishlistActivities).toBe(2)
     expect(stats.visitedPlaces).toBe(2)
     expect(stats.wishlistActivityTitles).toEqual(['한강 산책', '전시회'])
+    expect(stats.wishlistActivityPreviews).toEqual([
+      { title: '한강 산책', date: '2026-12-12' },
+      { title: '전시회', date: null },
+    ])
+    expect(stats.visitedPlacePreviews?.[0]).toEqual({ title: '한강 산책', date: '2026-11-21' })
   })
 
   it('빈 워크스페이스는 오류가 아니라 0으로 집계된다', async () => {

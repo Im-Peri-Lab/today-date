@@ -1946,21 +1946,18 @@ a.notice:active {
   }
 }
 
-/* 둘째 줄 — 모바일은 개수만, lg 이상은 "최근 항목명 외 N". (.statRowPreview 뒤에 선언해 display를 덮는다) */
-.statRowRecent {
+/* 추천 배너가 2열이 되는 lg 기준에서 미리보기도 확장한다. */
+.statTileCount,
+.statTileDesktopPreviews {
   display: none;
 }
 
-.statRowRecentTitle {
+.statTilePreviewTitle {
   min-width: 0;
+  color: color-mix(in srgb, var(--s-sub) 75%, var(--s-ink));
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.statRowRecentMore {
-  flex-shrink: 0;
-  white-space: pre;
 }
 
 @media (min-width: 1024px) {
@@ -1968,13 +1965,41 @@ a.notice:active {
     gap: 20px;
   }
 
+  .statTileTitle {
+    flex: 0 0 auto;
+  }
+
+  .statTileCount {
+    display: inline;
+    margin-left: -4px;
+    font-size: var(--type-preview-meta);
+    color: var(--s-sub);
+    white-space: nowrap;
+  }
+
   .statRowItem,
-  .statRowMore {
+  .statRowMore,
+  .statTileFallbackCount {
     display: none;
   }
 
-  .statRowRecent {
+  .statTileDesktopPreviews {
+    display: grid;
+    gap: 3px;
+  }
+
+  .statTilePreviewRow {
     display: flex;
+    align-items: baseline;
+    gap: 6px;
+    margin-top: 0;
+  }
+
+  .statTilePreviewDate {
+    flex-shrink: 0;
+    font-size: 0.6875rem;
+    color: var(--type-caption-color);
+    white-space: nowrap;
   }
 }
 

@@ -16,7 +16,7 @@ function client() {
       recs.push(rec)
       const chain: Record<string, unknown> = {}
       chain.select = (cols: string) => {
-        rec.titles = cols === 'title'
+        rec.titles = cols.startsWith('title, ')
         return chain
       }
       chain.eq = (col: string, v: unknown) => {

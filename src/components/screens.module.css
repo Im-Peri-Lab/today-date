@@ -1996,6 +1996,7 @@ a.notice:active {
 
   .statTilePreviewDate {
     flex-shrink: 0;
+    font-size: 0.6875rem;
     color: var(--type-caption-color);
     white-space: nowrap;
   }

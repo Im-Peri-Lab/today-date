@@ -262,11 +262,11 @@ description: >
 | 폭 | 내용 | 클래스 |
 |---|---|---|
 | 모바일(<1024px) | 2줄 — 항목명(말줄임) / "외 N개"·"외 N곳"(N>0일 때만) | `.statRowPreview.statRowItem` / `.statRowMore` |
-| lg 이상 | "최근 항목명 외 N개/N곳"(N = 개수 − 1, 0이면 항목명만). 항목명만 말줄임, "외 N개"는 항상 보임 | `.statRowPreview.statRowRecent` (+ `.statRowRecentTitle`/`.statRowRecentMore`) |
+| lg 이상(1024px부터, 추천 배너 2열과 동일) | 카드 제목 옆 전체 개수(12px, `--s-sub`), 최근 항목 최대 2개를 구분선 없이 표시. 항목명 옆에 값이 있는 날짜만 표시 | `.statTileCount` / `.statTileDesktopPreviews` |
 | 0개 | **폭과 무관하게 기존 빈 상태 문구** — 가보고 싶은 곳 "아직 담은 곳이 없어요" / 다녀온 곳 "아직 다녀온 곳이 없어요". "0개"로 쓰지 않는다 | `.statRowPreviewEmpty` |
 
 - 모바일에서도 항목명을 보인다: 세로 2단이라 2단 텍스트가 카드 전체 폭(쉐브론 자리 22px만 제외)을 쓰므로 항목명이 읽힌다. 길면 항목명만 말줄임, "외 N개"는 항상 보인다.
-- `.statRowItem`/`.statRowMore`(모바일)와 `.statRowRecent`(lg)는 `.statRowPreview`(display:block)보다 **뒤에 선언**해 display를 덮는다. 순서를 바꾸면 두 표현이 함께 보인다. Tailwind `hidden lg:flex`로 대신하지 말 것(CSS 모듈 클래스가 이겨서 적용되지 않는다).
+- 넓은 홈 카드의 항목명은 12px(`--type-preview-meta`)과 `color-mix(in srgb, var(--s-sub) 75%, var(--s-ink))`를 사용한다. 날짜는 11px과 `--type-caption-color`를 사용한다. 위시리스트는 방문 예정일 뒤에 "예정", 다녀온 곳은 방문일을 표시한다.
 - 빈 상태 문구는 한 줄 말줄임 대신 **최대 2줄**(`line-clamp: 2`)로 접고 `word-break: keep-all`로 어절 단위로 끊는다. 모바일에서는 두 섹션의 줄바꿈 위치를 맞추기 위해 **"아직 담은 / 곳이 없어요"**, **"아직 다녀온 / 곳이 없어요"**로 강제 줄바꿈한다(`<br className="lg:hidden">`, 둘째 줄이 "곳이 없어요"로 같아 위아래가 정렬됨). lg 이상은 한 줄. 모바일에서는 해당 타일이 2줄만큼 커진다(빈 계정에서만 보이는 상태이므로 허용).
 - 개수는 있는데 제목을 못 받은 경우(방어 분기)는 폭과 무관하게 개수만 보여준다(`{count}{unit}`).
 - 다녀온 곳 타일의 체크 배지(`.statCheckBadge`)는 개수 ≥ 1일 때만 칩 우상단에 붙는다(기존 규칙 유지).

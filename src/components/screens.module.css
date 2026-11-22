@@ -2067,10 +2067,25 @@
   text-decoration: none;
 }
 
-/* iPhone 비교용: 터치에서 홈 추천 배너의 축소만 제거한다. */
+/* 터치 눌림은 배경 면으로 표시해 카드와 글자의 위치를 유지한다. */
 @media (hover: none) {
+  .ctaCard::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgb(0 0 0 / 12%);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 140ms ease-out;
+  }
+
   .cardInteractive.ctaCard:active:not(:has(button:active)) {
     transform: none;
+  }
+
+  .ctaCard:active::after {
+    opacity: 1;
+    transition-duration: 0ms;
   }
 }
 

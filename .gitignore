@@ -51,3 +51,6 @@ next-env.d.ts
 
 # Codex 스킬 사본 (디자인 SoT 는 .claude/skills/today-date-design/SKILL.md — AGENTS.md 참고)
 /.agents/
+
+# 리전 이전 dump 산출물 (scripts/region-migration) — 커밋 금지
+/.migration/

@@ -1,6 +1,6 @@
 # PROJECT_CONTEXT.md
 
-> **마지막 업데이트: 2026-11-21**
+> **마지막 업데이트: 2026-11-22**
 
 > 이 문서는 Today Date 프로젝트의 장기 컨텍스트입니다. 260531~261022 전체 핸드오프를 다시 읽고, 초기 컨텍스트에서 이후 작업으로 변경·확정된 내용을 반영한 최신본입니다. 새 AI에게는 이 파일과 `CURRENT_STATE.md`를 먼저 전달하고, 과거 의사결정 확인이 필요할 때만 `CHANGELOG.md`를 참고하게 하세요.
 >
@@ -69,7 +69,9 @@
 - 실제 로컬 루트 표기: `/Users/sehee/Claude_Project`
 - GitHub: `https://github.com/Im-Peri-Lab/today-date`
 - Production: `https://today-date-seven.vercel.app`
-- Supabase 프로젝트 ID: `xxqfiipzljkjstkgtawj` Sydney `ap-southeast-2`
+- Supabase 프로젝트 ID: `zptouznrtacmjbcoikxw` Seoul `ap-northeast-2` (261122 리전 이전, PR #184)
+  - 이전 프로젝트 `xxqfiipzljkjstkgtawj` Sydney `ap-southeast-2` — 롤백용으로 1주 보관 후 삭제 예정(CURRENT_STATE 보류 26번)
+- 함수 리전: `icn1`(`vercel.json` `regions`, 261122 PR #184 — 이전 `syd1`). DB 와 같은 권역에 둔다
 
 ### 환경변수 이름
 
@@ -184,7 +186,7 @@ Claude Code가 PR 생성 → squash 머지 → 원격·로컬 정리를 한 번�
 - 브랜치 preview로 확인한다.
 - 한 화면/기능/리팩토링 덩어리가 승인되면 main에 머지한다.
 - main push 후 Vercel production 반영을 확인한다.
-- 함수 실행 리전은 `vercel.json` 의 `regions: ["syd1"]`(Supabase ap-southeast-2 권역, PR #152)로 고정돼 있다. 확인은 함수가 실행되는 요청의 `X-Vercel-Id` 가 `icn1::syd1::…` 인지로 한다(미들웨어에서 401 로 막히는 요청은 함수 리전이 헤더에 붙지 않는다). 미들웨어는 엣지 실행이라 이 설정과 무관하다. Hobby 플랜은 리전 1개만 가능.
+- 함수 실행 리전은 `vercel.json` 의 `regions: ["icn1"]`(Supabase ap-northeast-2 서울 권역, PR #184 — 이전 `syd1`/PR #152)로 고정돼 있다. **DB 리전과 함수 리전은 함께 옮긴다** — 한쪽만 옮기면 함수↔DB 왕복이 대륙 간이 돼 오히려 느려진다(261122 실측 → CHANGELOG 2026-11-22 v2). 확인은 함수가 실행되는 요청의 `X-Vercel-Id` 가 `icn1::icn1::…` 인지로 한다(미들웨어에서 401 로 막히는 요청은 함수 리전이 헤더에 붙지 않는다). 미들웨어는 엣지 실행이라 이 설정과 무관하다. Hobby 플랜은 리전 1개만 가능.
 - 브랜치 성격이 다르면 분리한다.
   - 예: 통계 카드 리팩토링과 앱 전체 타이포 표준화는 분리
 - 커밋 컨벤션:

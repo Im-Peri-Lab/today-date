@@ -159,13 +159,17 @@
   font-size: var(--type-section-label, 0.75rem);
   font-weight: var(--type-section-label-weight, 600);
   color: var(--type-section-label-color, var(--s-sub, #6b7280));
+  letter-spacing: normal;
 }
 
-/* 필드명 라벨 (12/500/--s-sub) — 섹션 헤더(600)보다 약하게, 값(ink)에 종속된 라벨 */
+/* 표시 필드 라벨 — 폼과 같은 타이포, 상세 행의 여백은 별도 적용 */
 .fieldLabel {
-  font-size: var(--type-section-label, 0.75rem);
-  font-weight: 500;
-  color: var(--type-section-label-color, var(--s-sub, #6b7280));
+  margin-bottom: 0.375rem;
+  font-size: var(--type-field-label);
+  font-weight: var(--type-field-label-weight);
+  color: var(--s-sub, #6b7280);
+  letter-spacing: normal;
+  line-height: 1.25rem;
 }
 
 /* 캡션·약한 라벨 (12/400/--s-faint) */

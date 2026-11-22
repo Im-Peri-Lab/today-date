@@ -22,7 +22,7 @@ export function DetailRow({ label, children, wide }: DetailRowProps) {
   return (
     <div className={cn(styles.sheetRow, wide && 'sm:col-span-2')}>
       {/* 라벨: sub/500 — ink(값) > sub·500(라벨) > faint(빈값) 위계 */}
-      <p className={cn('mb-1.5 uppercase tracking-wide', styles.fieldLabel)}>
+      <p className={styles.fieldLabel}>
         {label}
       </p>
       <div className={styles.bodyText}>{children}</div>

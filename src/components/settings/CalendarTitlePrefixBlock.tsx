@@ -36,7 +36,7 @@ export function CalendarTitlePrefixBlock() {
 
   return (
     <section className={cn(styles.card, styles.detailCard, 'px-5 py-4 lg:px-6 lg:py-5')}>
-      <p className={cn('mb-1.5 uppercase tracking-wide', styles.fieldLabel)}>캘린더 제목 문구</p>
+      <p className={styles.fieldLabel}>캘린더 제목 문구</p>
       {editing ? (
         <div>
           <Input

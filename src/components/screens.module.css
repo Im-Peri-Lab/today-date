@@ -2067,6 +2067,13 @@
   text-decoration: none;
 }
 
+/* iPhone 비교용: 터치에서 홈 추천 배너의 축소만 제거한다. */
+@media (hover: none) {
+  .cardInteractive.ctaCard:active:not(:has(button:active)) {
+    transform: none;
+  }
+}
+
 /* 태블릿(배너 536px): 배너가 넓어져 그래픽을 한 단계 키운다 */
 @media (min-width: 491px) and (max-width: 1023px) {
   .ctaCard {

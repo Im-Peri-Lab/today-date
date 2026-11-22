@@ -2073,7 +2073,7 @@
     content: '';
     position: absolute;
     inset: 0;
-    background: rgb(0 0 0 / 12%);
+    background: rgb(0 0 0 / 16%);
     opacity: 0;
     pointer-events: none;
     transition: opacity 140ms ease-out;

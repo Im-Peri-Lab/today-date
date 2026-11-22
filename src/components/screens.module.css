@@ -1954,7 +1954,7 @@ a.notice:active {
 
 .statTilePreviewTitle {
   min-width: 0;
-  color: var(--s-sub);
+  color: color-mix(in srgb, var(--s-sub) 75%, var(--s-ink));
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

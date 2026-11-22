@@ -35,5 +35,5 @@ export function useCalendarOfferOnArrival(track: CalendarTrack, id: string, item
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [track, id, itemId])
 
-  return calendar.prefixDialogProps
+  return calendar
 }

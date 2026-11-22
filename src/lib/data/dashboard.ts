@@ -24,10 +24,10 @@ export async function getDashboardStats(coupleId: string): Promise<DashboardStat
     supabase.from('places').select('*', countOpts).eq('status', 'wishlist').eq('couple_id', coupleId),
     supabase.from('activities').select('*', countOpts).eq('status', 'visited').eq('couple_id', coupleId),
     supabase.from('places').select('*', countOpts).eq('status', 'visited').eq('couple_id', coupleId),
-    supabase.from('activities').select('title').eq('status', 'wishlist').eq('couple_id', coupleId).order('created_at', titleOpts).limit(2),
-    supabase.from('places').select('title').eq('status', 'wishlist').eq('couple_id', coupleId).order('created_at', titleOpts).limit(2),
-    orderByListRule(supabase.from('activities').select('title').eq('status', 'visited').eq('couple_id', coupleId), 'visited').limit(2),
-    orderByListRule(supabase.from('places').select('title').eq('status', 'visited').eq('couple_id', coupleId), 'visited').limit(2),
+    supabase.from('activities').select('title, planned_at').eq('status', 'wishlist').eq('couple_id', coupleId).order('created_at', titleOpts).limit(2),
+    supabase.from('places').select('title, planned_at').eq('status', 'wishlist').eq('couple_id', coupleId).order('created_at', titleOpts).limit(2),
+    orderByListRule(supabase.from('activities').select('title, visited_at').eq('status', 'visited').eq('couple_id', coupleId), 'visited').limit(2),
+    orderByListRule(supabase.from('places').select('title, visited_at').eq('status', 'visited').eq('couple_id', coupleId), 'visited').limit(2),
   ])
 
   /**
@@ -65,8 +65,12 @@ export async function getDashboardStats(coupleId: string): Promise<DashboardStat
     visitedActivities: visitedAct.count ?? 0,
     visitedPlaces: visitedPlc.count ?? 0,
     wishlistActivityTitles: wishActTitles.data?.map(r => r.title) ?? [],
+    wishlistActivityPreviews: wishActTitles.data?.map(r => ({ title: r.title, date: r.planned_at ?? null })) ?? [],
     wishlistPlaceTitles: wishPlcTitles.data?.map(r => r.title) ?? [],
+    wishlistPlacePreviews: wishPlcTitles.data?.map(r => ({ title: r.title, date: r.planned_at ?? null })) ?? [],
     visitedActivityTitles: visitedActTitles.data?.map(r => r.title) ?? [],
+    visitedActivityPreviews: visitedActTitles.data?.map(r => ({ title: r.title, date: r.visited_at ?? null })) ?? [],
     visitedPlaceTitles: visitedPlcTitles.data?.map(r => r.title) ?? [],
+    visitedPlacePreviews: visitedPlcTitles.data?.map(r => ({ title: r.title, date: r.visited_at ?? null })) ?? [],
   }
 }

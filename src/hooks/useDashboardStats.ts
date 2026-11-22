@@ -3,15 +3,24 @@
 import { useQuery, type QueryClient } from '@tanstack/react-query'
 import { fetchJson } from './fetcher'
 
+export interface DashboardPreview {
+  title: string
+  date: string | null
+}
+
 export interface DashboardStats {
   wishlistActivities: number
   wishlistPlaces: number
   visitedActivities: number
   visitedPlaces: number
   wishlistActivityTitles: string[]
+  wishlistActivityPreviews?: DashboardPreview[]
   wishlistPlaceTitles: string[]
+  wishlistPlacePreviews?: DashboardPreview[]
   visitedActivityTitles: string[]
+  visitedActivityPreviews?: DashboardPreview[]
   visitedPlaceTitles: string[]
+  visitedPlacePreviews?: DashboardPreview[]
 }
 
 export function useDashboardStats(initialData?: DashboardStats) {

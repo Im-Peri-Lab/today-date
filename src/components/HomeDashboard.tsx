@@ -6,10 +6,11 @@ import { HomeFab } from '@/components/HomeFab'
 import { PageHeader } from '@/components/PageHeader'
 import { useQueryClient } from '@tanstack/react-query'
 import { PullToRefresh } from '@/components/PullToRefresh'
-import { useDashboardStats, type DashboardStats } from '@/hooks/useDashboardStats'
+import { useDashboardStats, type DashboardPreview, type DashboardStats } from '@/hooks/useDashboardStats'
 import type { WorkspaceState } from '@/lib/auth/couple'
 import { STATUS_LABELS } from '@/lib/labels'
 import { HOME_RETURN_TO } from '@/lib/listReturn'
+import { formatDotDateCompact } from '@/lib/date'
 import { cn } from '@/lib/utils'
 import styles from '@/components/screens.module.css'
 
@@ -26,9 +27,8 @@ function chipClass(type: 'activity' | 'place', status: 'wishlist' | 'visited'): 
  * 섹션(가보고 싶은 곳/다녀온 곳) 안의 바로가기 타일. 상태는 섹션 제목이 전담하므로
  * 타일 제목은 종류("액티비티"/"다이닝")만 쓴다.
  *
- * 둘째 줄은 폭에 따라 달라진다(lg = 1024px, /list 탭과 같은 기준):
- *   - 모바일: 개수만("3개"/"2곳") — 타일 하나가 ~169px라 항목명을 넣으면 "뮤지…"로 잘린다.
- *   - lg 이상: "최근 항목명 외 N개/N곳".
+ * 추천 배너가 2열로 바뀌는 lg(1024px)부터 제목 옆 전체 개수와 최근 항목 최대 2개를 표시한다.
+ * 그보다 좁은 화면은 기존 최근 항목 요약을 표시한다.
  * 0개일 때는 폭과 무관하게 빈 상태 문구를 그대로 쓴다("0개"로 쓰지 않는다).
  */
 function StatTile({
@@ -36,11 +36,13 @@ function StatTile({
   status,
   count,
   previewTitles,
+  previews,
 }: {
   type: 'activity' | 'place'
   status: 'wishlist' | 'visited'
   count: number
   previewTitles: string[]
+  previews?: DashboardPreview[]
 }) {
   const label = type === 'activity' ? '액티비티' : '다이닝'
   const unit = type === 'activity' ? '개' : '곳'
@@ -49,6 +51,7 @@ function StatTile({
   const Icon = type === 'activity' ? Sparkles : UtensilsCrossed
   const recent = previewTitles[0]
   const more = count - 1
+  const desktopPreviews = previews ?? previewTitles.map(title => ({ title, date: null }))
 
   return (
     <Link href={href} className={cn(styles.statSectionCard, styles.statRow, styles.statTile)}>
@@ -65,6 +68,9 @@ function StatTile({
           )}
         </div>
         <span className={cn(styles.statRowTitle, styles.statTileTitle)}>{label}</span>
+        {count > 0 && (
+          <span className={styles.statTileCount}>{count}{unit}</span>
+        )}
         <ChevronRight className={styles.statRowChevron} strokeWidth={1.75} aria-hidden="true" />
       </div>
       {/* 2단: 텍스트만, 카드 전체 폭 */}
@@ -85,20 +91,22 @@ function StatTile({
                 {unit}
               </span>
             )}
-            <span className={cn(styles.statRowPreview, styles.statRowRecent)}>
-              <span className={styles.statRowRecentTitle}>{recent}</span>
-              {more > 0 && (
-                <span className={styles.statRowRecentMore}>
-                  {' '}
-                  외 {more}
-                  {unit}
+            <div className={styles.statTileDesktopPreviews}>
+              {desktopPreviews.slice(0, 2).map(({ title, date }, index) => (
+                <span key={index} className={cn(styles.statRowPreview, styles.statTilePreviewRow)}>
+                  <span className={styles.statTilePreviewTitle}>{title}</span>
+                  {date && (
+                    <time dateTime={date} className={styles.statTilePreviewDate}>
+                      {formatDotDateCompact(date)}{status === 'wishlist' && ' 예정'}
+                    </time>
+                  )}
                 </span>
-              )}
-            </span>
+              ))}
+            </div>
           </>
         ) : (
           // 개수는 있는데 제목을 못 받은 경우(방어) — 폭과 무관하게 개수만
-          <span className={styles.statRowPreview}>
+          <span className={cn(styles.statRowPreview, styles.statTileFallbackCount)}>
             {count}
             {unit}
           </span>
@@ -250,12 +258,14 @@ export function HomeDashboard({
                 status="wishlist"
                 count={data?.wishlistActivities ?? 0}
                 previewTitles={data?.wishlistActivityTitles ?? []}
+                previews={data?.wishlistActivityPreviews}
               />
               <StatTile
                 type="place"
                 status="wishlist"
                 count={data?.wishlistPlaces ?? 0}
                 previewTitles={data?.wishlistPlaceTitles ?? []}
+                previews={data?.wishlistPlacePreviews}
               />
             </StatSection>
 
@@ -268,12 +278,14 @@ export function HomeDashboard({
                 status="visited"
                 count={data?.visitedActivities ?? 0}
                 previewTitles={data?.visitedActivityTitles ?? []}
+                previews={data?.visitedActivityPreviews}
               />
               <StatTile
                 type="place"
                 status="visited"
                 count={data?.visitedPlaces ?? 0}
                 previewTitles={data?.visitedPlaceTitles ?? []}
+                previews={data?.visitedPlacePreviews}
               />
             </StatSection>
           </div>

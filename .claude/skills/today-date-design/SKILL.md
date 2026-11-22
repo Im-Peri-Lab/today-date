@@ -386,7 +386,7 @@ description: >
 | "되돌리기"/"취소"(되돌리기 확인 다이얼로그) | "가보고 싶은 곳으로 되돌릴까요?" 다이얼로그 (4곳 공유) | `RevertConfirmDialog.tsx` |
 | "초기화"(`styles.resetBtn`) | 리스트 필터 | `ListView.tsx` |
 
-**다이얼로그 취소+확정 페어는 항상 같은 높이를 쓴다** — 삭제 확인(`DeleteConfirmDialog`)·되돌리기 확인 두 다이얼로그 모두 취소/확정 버튼이 `h-9`로 통일돼 있다.
+**확인 다이얼로그의 취소·확정은 각각 36px**. 좁은 화면에서 풀폭 세로 배치, 넓은 화면에서 내용폭 가로 배치를 사용한다. 삭제·되돌리기·방문 예정 지우기·계정 삭제 확인에 공통 적용한다.
 
 **페이지 높이/하단 여백**: 상세 페이지는 `cn(styles.page, styles.pageStatic)`를 써서 `.page`의 `min-height:100svh`는 유지하고, `.pageStatic`으로 하단 safe-area padding만 제거한다. 짧은 콘텐츠에서도 페이지 자체와 고정 배경(`.page::before`)이 뷰포트를 채우므로 별도 spacer를 두지 않는다.
 
@@ -586,6 +586,8 @@ iOS Safari 의 `:active` 는 조상에 touchstart 리스너가 있어야 발동�
 왜: hover와 "선택됨"을 요소마다 다르게 칠하지 않도록 **두 축**(① 채움 위계 ② hover 언어)을 한 원칙으로 고정한다. 추천 화면·`/list`·추가/수정 폼이 모두 같은 결로 읽혀야 한다.
 
 ### 채움 위계 (단색은 CTA 하나에만)
+
+- 공용 `Button`의 채움 배경은 `background-clip: border-box`로 투명 보더 아래까지 칠한다. 채움 면과 outline 테두리의 외곽 높이는 같은 버튼 박스 높이에 맞춘다. 포커스 링과 그림자는 면 높이에서 제외한다.
 - **단색 채움**(`--s-active-fill`/`--s-active-line` 솔리드 + 흰 글씨): **"지금 누를 단 하나의 CTA"에만.** 등록(`/activities/new`·`/places/new`의 흐름을 끝내는 Primary)·저장(인라인/상세 Primary)·추천 "다른 추천 보기" — `styles.detailPrimaryBtn`(`--s-active-line`). 같은 생성 폼의 "저장하고 계속 등록하기"는 흐름을 유지하는 보조 액션이므로 outline(§4-A).
 - **그라데이션 채움**(`styles.gradIcon`, `--s-grad`): **단독 진입 버튼에만** — 빈상태 "첫 활동/장소 추가하기"(`EmptyState`)·추천0개 "활동/장소 추가하기"(추천 위저드, **버튼이 1개일 때만**). 버튼이 2개인 박스(예: 활동 추천0개 "더 짧은 일정도 볼까요?" + "추가하기")는 **둘 다 그라데이션 금지** — Primary는 `detailPrimaryBtn` 단색, 보조는 outline.
 - **선택됨/활성**(옵션 카드·칩·세그먼트·필터 칩): **단색 채움 금지** → `--s-accent-soft-bg` 틴트 + `--s-active-line` accent 보더 + `--s-active-text` accent 글씨/체크 + **weight 500**. (`styles.chipActive`/`styles.optionActive`/`styles.optionCardActive`)
@@ -1197,8 +1199,8 @@ export const STATUS_LABELS: Record<Status, string> = {
 
 왜: 닫기 수단(상단 `X` + 하단 "취소")이 한 다이얼로그에 둘 다 있으면 중복이라 시선이 분산된다. **닫기 수단은 다이얼로그 종류에 따라 하나만** 둔다.
 
-- **입력 폼 다이얼로그** (`VisitedDialog`(저장)·`HomeSearchButton`(검색 후 이동) 등 — 값을 입력해 하나의 주행동을 실행): **상단 `X`만** 유지(`DialogContent`의 기본 `showCloseButton={true}`). 하단엔 "취소" 버튼을 두지 않고 **CTA(저장하기/검색) 하나만** 남겨 유일한 주행동으로 또렷하게 한다. → 닫기는 도구(`X`)로, 풋터는 주행동 전용. CTA는 데이터 생성이 아니어도(예: 검색→이동) 이 "입력 다이얼로그의 단 하나의 주행동" 자리이므로 `styles.detailPrimaryBtn` 풀폭 48px(`VisitedDialog` 패턴)을 공유한다.
-- **결정 다이얼로그** (`DeleteConfirmDialog` 등 — 확인/취소 두 결정 중 택1): **하단 "취소" 버튼만** 유지. 상단 `X`는 제거(`DialogContent`에 `showCloseButton={false}`). iOS Action Sheet 표준대로 **확인(삭제 등)·취소 두 결정을 풋터에 나란히 명시**해 동등한 선택지로 읽히게 한다.
+- **입력 폼 다이얼로그** (`VisitedDialog`(저장)·`HomeSearchButton`(검색 후 이동) 등 — 값을 입력해 하나의 주행동을 실행): **상단 `X`만** 유지(`DialogContent`의 기본 `showCloseButton={true}`). 하단엔 "취소" 버튼을 두지 않고 **CTA(저장하기/검색) 하나만** 남겨 유일한 주행동으로 또렷하게 한다. → 닫기는 도구(`X`)로, 풋터는 주행동 전용. CTA는 데이터 생성이 아니어도(예: 검색→이동) 이 "입력 다이얼로그의 단 하나의 주행동" 자리이므로 `styles.detailPrimaryBtn` 풀폭 40px(`VisitedDialog` 패턴)을 공유한다.
+- **결정 다이얼로그** (`DeleteConfirmDialog` 등 — 확인/취소 두 결정 중 택1): **하단 "취소" 버튼만** 유지. 상단 `X`는 제거(`DialogContent`에 `showCloseButton={false}`). iOS Action Sheet 표준대로 **확인(삭제 등)·취소 두 결정을 풋터에 명시**(배치와 높이는 §4-A)해 동등한 선택지로 읽히게 한다.
 - 판단 기준: **"이 다이얼로그가 입력을 받는가, 결정을 묻는가?"** 입력 폼 → `X`만(CTA 명시) / 결정 다이얼로그 → 취소 버튼만(확인/취소 두 결정 명시).
 - **의도된 예외 — 머리말 안내 다이얼로그(`CalendarTitlePrefixDialog`)**: 상단 `X` + 하단 **"취소 · 저장"**(우측 정렬, `/settings` 인라인 편집과 같은 버튼). 이 다이얼로그는 "추가"를 이미 누른 흐름 사이에 끼어드는 **문구 저장 여부 결정**이라, 입력 폼처럼 CTA 하나로 두면 "저장 안 함"을 고를 길이 X 뿐이고 X 의 의미(저장? 취소?)가 모호했다. 그래서 두 결정(저장/취소)을 버튼으로 명시하고 **X·Esc·바깥 탭은 취소와 같게** 맞췄다. 닫기 수단이 둘(X·취소)이지만 둘의 결과가 같아 혼동은 없다(PR #165).
 

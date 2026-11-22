@@ -60,3 +60,17 @@ scripts/region-migration/verify.sh       # 행 수·md5 전부 일치 확인
 
 스키마가 리허설 이후 바뀌었다면(새 마이그레이션) `reload-data.sh` 전에 그 마이그레이션을 서울에도 적용한다 —
 `reload-data.sh` 는 스키마를 건드리지 않으며, 컬럼이 다르면 COPY 단계에서 실패하고 전체 롤백된다.
+
+## 롤백 (시드니 프로젝트를 지우기 전까지만)
+
+1. Vercel Production 환경변수를 시드니 값으로 되돌리고, `vercel.json` `regions` 를 `syd1` 로 되돌려 배포한다.
+2. 컷오버 뒤 서울에 쌓인 쓰기를 시드니로 옮긴다 — 같은 스크립트를 방향만 뒤집어 쓴다.
+
+```bash
+# OLD_DB_URL=서울, NEW_DB_URL=시드니 로 적은 별도 env 파일
+export ENV_FILE=/path/to/.env.migration.rollback
+export OLD_HOST_EXPECT=ap-northeast-2 NEW_HOST_EXPECT=ap-southeast-2
+scripts/region-migration/reload-data.sh
+scripts/region-migration/verify.sh
+```
+

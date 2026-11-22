@@ -1,6 +1,6 @@
 # CURRENT_STATE.md
 
-> **마지막 업데이트: 2026-11-22 (PR #134~#183 반영, 사용자 실기기 확인 결과 261121·261122 반영)**
+> **마지막 업데이트: 2026-11-22 (PR #134~#184 반영, 사용자 실기기 확인 결과 261121·261122 반영)**
 
 ## 현재 단계
 커플(2인) 계정 전환 완료 + 파트너 표시용 닉네임 추가 단계 — 계정 없는 단일 워크스페이스에서
@@ -9,6 +9,13 @@
 그 외 유지보수 / 점진적 UX 개선, Capacitor 네이티브 앱은 여전히 `main` 미머지 상태로 보류 중.
 
 ## 현재 한 줄 요약
+**Supabase 서울 리전 이전 + 함수 리전 icn1(신규, 261122, PR #184)**: 운영 DB(public)를 시드니 `ap-southeast-2` 에서
+서울 `ap-northeast-2`(`zptouznrtacmjbcoikxw`)로 dump→restore(마이그레이션 재실행 없음, id·`session_version` 보존 → 기존
+세션 유지), 함수 리전 `syd1`→`icn1`. 컷오버 직전 재적재 후 행 수·내용 md5·RLS·제약·인덱스·트리거·GRANT 144항목 시드니와
+일치. Preview 실측 TTFB 함수 경로 약 1/3~1/5(unlock 269→72ms). 절차·롤백 → CHANGELOG 2026-11-22 v2,
+스크립트 `scripts/region-migration/`. 시드니 프로젝트·dump·`.env.migration` 은 261129 삭제 예정(보류 26번).
+
+이전 배치(PR #183):
 **탭 눌림 피드백 + 위저드 선택 전환 지연(신규, 261122, PR #183)**: 탭 카드(`.cardInteractive` 0.98)·유틸 아이콘
 버튼(`.headerNavBtn` 0.92 / `.iconBtn` 0.91 / `.mapActionBtn`·`.dialogCloseBtn` 0.90, hover 면 토큰)·위저드 `.optionCard` 0.98·`.chip` 0.97
 에 `:active` 추가 — 누를 땐 transition 0 즉시, 뗄 때 200ms ease-out 복귀(iOS 짧은 탭에서 보이게). 위저드 자동 전환 단계는 선택 틴트를
@@ -62,6 +69,7 @@ PROJECT_CONTEXT §5(인증 F-01)·§20.
 는 상세 → CHANGELOG 2026-07-29~2026-08-11.
 
 ## 브랜치 상태
+- `infra/supabase-seoul-region` — PR #184 squash 머지, 로컬·리모트 브랜치·worktree 삭제. `scripts/region-migration/`(dump·restore·reload-data·verify) + `vercel.json` `regions` `icn1`. Draft 로 연 뒤 DB 컷오버(재적재·검증·Production 환경변수 서울 교체) 완료 후 머지
 - `fix/login-button-loading-until-home` — PR #182 squash 머지, 로컬·리모트 브랜치·worktree 삭제. `/lock` [로그인]·패스코드 제출 시 홈 전환 완료(언마운트)까지 로딩 유지(15초 안전 타임아웃), `inFlightRef` 로 연속 탭 중복 요청 차단. 실패 경로·인증 로직 변경 없음. Preview 확인은 사용자가 완료
 - `fix/pwa-splash-icon-512-heart20` — PR #181 squash 머지(머지 커밋 `9850390`), 로컬·리모트 브랜치·worktree 삭제. `public/icon-512.png` 하트 폭 52%→20%(같은 중심·배경 `#f5f3ff`). Android 12+ WebAPK 로딩 화면(240dp 고정)의 하트를 화면 폭 약 34%→약 12.5% 로. 홈 아이콘(icon-192)·`apple-touch-icon`·manifest 변경 없음. 갤럭시 실기기 확인은 대기(보류 23번)
 - `perf/app-ready-on-login` — PR #180 squash 머지, 로컬·리모트 브랜치·worktree 삭제. 잠금해제 성공 응답에 `app-ready` 발급(속성은 `lib/auth/appReady.ts` 단일 출처, 기존 값 그대로) + 미들웨어 `expireSession` 에서 `app-ready` 삭제(다른 기기 계정 삭제 후 재가입 경로 보존). Preview 확인은 사용자가 완료. 사용자 iPhone PWA 재로그인 완료(261121, `app-ready` 적용). 확인용 `diag/app-ready-verify`(이 브랜치 + diag 계측)는 머지 없이 삭제
@@ -107,6 +115,8 @@ PROJECT_CONTEXT §5(인증 F-01)·§20.
 - `fix/e2e-db-spec-single-file` — PR #168 squash 머지 완료(머지 커밋 `29b2cb2`), 로컬·리모트 브랜치 삭제됨. DB 스펙 파일을 `isolation.spec.ts` 하나로 단일화해 CI #217 실패(워커 분리로 스텁 상태 충돌) 수정. CI(Lint·Unit·Build, E2E, Vercel) 통과
 
 ## 최근 구현 완료
+- Supabase 서울 리전 이전 + 함수 리전 `icn1`(PR #184) → 상세 CHANGELOG 2026-11-22 v2
+- 잠금해제 성공 시 `app-ready` 발급 — 로그인 기기의 미들웨어 워크스페이스 조회(couples→users 순차 2회) 제거(PR #180) → 상세 CHANGELOG 2026-11-21 v4
 - 로그인 버튼 홈 전환 완료까지 로딩 유지 + 연속 탭 중복 요청 차단(`src/app/lock/page.tsx`, PR #182) → 상세 CHANGELOG 2026-11-21 v6
 - Android PWA 로딩 화면 하트 축소: icon-512 만 하트 20%(홈=icon-192 / 로딩=icon-512 로 크기 분리, PR #181) → 상세 CHANGELOG 2026-11-21 v5
 - iOS 홈 화면 PWA 시작 이미지(`apple-touch-startup-image`, `src/components/boot/pwaSplash.mjs` + `scripts/generate-pwa-splash.mjs`, PR #176) → 상세 CHANGELOG 2026-11-21
@@ -172,8 +182,9 @@ PROJECT_CONTEXT §5(인증 F-01)·§20.
 ## 배포 상태
 - 플랫폼: Vercel
 - URL: `https://today-date-seven.vercel.app`
-- 함수 리전: `syd1`(`vercel.json`, PR #152). 미들웨어는 엣지 실행이라 이 설정과 무관
-- 현재 브랜치: `main` (PR #180 반영 기준. PR #128 머지 커밋 `238d3de`만 예외적으로 squash가 아닌 일반 머지)
+- 함수 리전: `icn1`(`vercel.json`, PR #184 — 이전 `syd1`/PR #152). 미들웨어는 엣지 실행이라 이 설정과 무관
+- DB: Supabase `zptouznrtacmjbcoikxw` 서울 `ap-northeast-2`(261122 컷오버, Vercel Production·Preview 환경변수 모두 서울). 이전 시드니 `xxqfiipzljkjstkgtawj` 는 롤백용으로 261129 까지 보관(보류 26번)
+- 현재 브랜치: `main` (PR #184 반영 기준. PR #128 머지 커밋 `238d3de`만 예외적으로 squash가 아닌 일반 머지)
 
 ## 진행 중 / 남은 작업
 
@@ -192,7 +203,7 @@ PROJECT_CONTEXT §5(인증 F-01)·§20.
 9. 추천 결과에서 온 상세를 삭제한 뒤 결과 화면 캐시에 항목이 남는지 미확인(PROJECT_CONTEXT §19 그룹 7)
 10. 복사하기를 연속 사용하면 `returnTo`가 중첩돼 URL이 길어진다 — 저빈도 엣지케이스, 방치 중
 11. **사파리 하단 바 뒤 흰 띠 + 홈 약 34pt 스크롤 잔존(261020, 수용한 한계)**: 주소창이 떠 있으면 웹 영역(예: 714pt) 밖 상태바·하단 바 뒤는 사파리가 `body` 색으로 칠해 CSS 로 위·아래를 따로 칠할 수 없다(`html`·`.page::before`·`body` 단색·`box-shadow`·진단 오버레이 시도 전부 걷어냄 — CHANGELOG 2026-10-20 "재시도 금지" 목록 참고). 홈은 웹 영역 714pt 에서 문서 748pt 라 여백 최솟값에도 약 34pt 스크롤이 남는다 — 더 줄이려면 `pb-20`(FAB 겹침 방지)을 건드려야 해 보류.
-12. **전역 로딩 지연 — 실측 완료·미들웨어 병목 해소, 남은 비용은 리전 결정 대기(261121, PR #180)**: `diag/loading-server-timing`(Server-Timing 계측)으로 Preview 에서 콜드·웜 각 3회 측정(중앙값). **병목이었던 것**: 미들웨어 `mw-workspace`(couples→users 순차 DB 2회)가 요청마다 60~100ms(최대 300ms) — `app-ready` 쿠키를 최초 패스코드 설정에서만 심어, 최초 설정을 안 한 기기(파트너·재로그인·새 PWA)는 모든 요청에서 이 조회를 반복했다. **수정(PR #180)**: 잠금해제 성공 시에도 `app-ready` 발급 → 수정 후 미들웨어 전체 약 1ms, 요청당 체감 약 50~60ms 감소. **남은 비용**: 네트워크 + icn1→syd1 경로(요청당 약 150~250ms 추정) — Supabase 리전 결정 대기(코드 문제 아님). **미측정**: `unlock` 구간(bcrypt·순차 DB). 그 외 기존 후보(홈 렌더 쿼리 왕복·`getCoupleById` 중복, `/list` 렌더 후 API 3건, `GET /api/activities` 의 `select *`·무페이지네이션)는 위 리전 비용에 비해 작아 우선순위 낮음 — 재측정은 `diag/loading-server-timing` 을 main 위로 rebase 해 Preview 로 띄운다(브랜치 상태 참고).
+12. **전역 로딩 지연 — 리전 이전으로 해소(261122, PR #180·#184)**: 미들웨어 병목(`mw-workspace` couples→users 순차 2회, 요청마다 60~100ms)은 잠금해제 시 `app-ready` 발급으로 제거(PR #180, 미들웨어 약 1ms). 남은 비용이던 icn1→syd1 경로는 Supabase 를 서울로 옮기고 함수 리전을 `icn1` 로 맞춰 해소(PR #184) — 디렉터 Preview 실측(TTFB 10회 중앙값) unlock 269→72ms, 홈 문서 375→181ms, `/list` 문서 290→96ms, `/api/activities` 348→103ms(→ CHANGELOG 2026-11-22 v2). **남은 것**: 프로덕션 도메인 기준 재측정(Preview 측정이라 엣지 정적 기준값이 도메인 간 107/39ms 로 달랐음, 원인 미확인), 기존 후보(홈 렌더 쿼리 왕복·`getCoupleById` 중복, `/list` 렌더 후 API 3건, `GET /api/activities` 의 `select *`·무페이지네이션)는 리전 비용이 빠진 뒤의 우선순위로 재판단. 재측정 도구는 `diag/loading-server-timing`(브랜치 상태 참고).
 13. **탭 직후 시각 반응 부족 — `:active` 분리분 해소(261122, PR #183), 로더 분리분은 대기**: 카드·유틸 아이콘 버튼·위저드 선택지에 터치 눌림을 넣고(즉시 눌림·200ms 복귀), 위저드 자동 전환은 선택 틴트 150ms 노출 후 전환 + 더블탭 차단(상세 → CHANGELOG 2026-11-22, 스펙 → SKILL §5). 사용자 실기기 확인 완료. 남은 것: route-level `loading.tsx`(`pushState` 시점이 바뀌므로 #154 의 rAF 지연과 상호작용 확인 필요) — topLoader 가 빨리 커밋되는 이동에서 안 보이는 문제(코드상 추론, 실측 없음)는 신호가 오면 별도 진행.
 
 14. ~~`.ics` 세미콜론 미이스케이프~~ → **해소(261103, PR #162, 머지 커밋 `aa7aad0`)**: `escapeIcsText` 치환 문자열을 `String.raw` 로 바꿔 `;` → `\;` 가 실제로 나간다. 점검 결과 `,`·`\`·줄바꿈은 원래 정상이었고 `;` 만 누락. 잘못된 값을 고정하던 테스트(`ics.test.ts:25·99`)를 `String.raw` 기대값으로 바로잡고 케이스 추가. 저장소 전체 `no-useless-escape` 스캔에서 같은 패턴은 이 3곳뿐(규칙은 `next/core-web-vitals`·`next/typescript` 에 포함돼 있지 않아 꺼진 상태). **iOS 실기기 확인 완료 → 종결(261121)**: 제목에 `;`·`,` 포함 캘린더 추가, 시간 지정 일정 추가 정상(PR #161·#162)
@@ -211,6 +222,7 @@ PROJECT_CONTEXT §5(인증 F-01)·§20.
     → 확인 후 PROJECT_CONTEXT §20 의 PR #173 설명('\u200B 덕분에 문구가 사라졌다')을 실기기 결과에 맞게 정리(Android 12+ WebAPK 로딩 화면에 원래 제목이 없는지, '홈 화면에 추가' 바로가기 방식에서는 제목이 나오는지 함께 기록)
 24. **`:active` 눌림 SKILL↔CSS 불일치 — 일부 처리(261121)**: SKILL §5 는 선택·컨트롤 버튼 `scale(0.97)` 눌림을 정했지만 CSS 에 없다. ~~`.chip`~~ → 처리(`design/tap-active-feedback`, 위저드 옵션 카드 `.optionCard` 0.98 과 함께). 남은 것: `.option`(폼 SegmentedControl)·`.filterToggle`·`.tab`·`.resetBtn`·`.dateClear` (`.notice` 는 탭 대상 여부부터 확인).
 25. **버튼·컨트롤 높이 기준 재검토 — 미착수(261122 등록)**: SKILL §5 Tier A/B 가 원칙적으로 일관된지 재검토. 1차 관찰 ① 다이얼로그 핵심 행동이 페어 여부로 40/36 갈림 ② Tier B 는 `w-auto` 정의인데 모바일 확인 다이얼로그는 세로 풀폭 ③ 액션 Tier 와 컨트롤 줄 40 이 별도 기준 ④ 규칙이 보이는 높이를 보장하지 않음(표준 클래스 미사용 채움 버튼 bg-clip 2px 손실 — 되돌리기 확인 34px, PR #106 실측에서 이관). 전수 실측 후 기준 확정 → 보정 구현(`fix/filled-button-visible-height` 보류 중).
+26. **시드니 Supabase 프로젝트·dump 파일·`.env.migration` 삭제 — 261129 예정(261122 등록, PR #184 후속)**: 컷오버 후 1주는 롤백용으로 보관한다(롤백 절차 → CHANGELOG 2026-11-22 v2). 261129 에 ① 시드니 프로젝트 `xxqfiipzljkjstkgtawj` 삭제(사용자, 대시보드) ② 원래 작업 폴더 루트 `.migration/`(dump — 운영 데이터 포함, git 무시) 삭제 ③ 리포 루트 `.env.migration`(DB 접속 문자열, `.git/info/exclude`) 삭제. 그 전에 롤백이 필요해지면 이 세 가지가 모두 있어야 한다. 참고: `.env.migration` 비밀번호는 대시보드 템플릿의 `[ ]` 가 남은 형태라 스크립트가 벗겨 쓴다.
 
 **그 외 남은 작업**
 - ~~worktree 가 리포 안(`.claude/worktrees`)에 있으면 로컬 `npm run lint` 가 상위 `.eslintrc.json` 과 충돌해 실패(261121 확인)~~ → **해소(PR #179, 261121)**: `.eslintrc.json` 에 `"root": true` 추가. 이제 worktree 에서도 `npm run lint` 를 그대로 쓴다(`--no-eslintrc -c` 우회 불필요). 규칙 집합 변화 없음(99개 동일)

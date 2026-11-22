@@ -1,8 +1,8 @@
 # CHANGELOG.md
 
-> **마지막 업데이트: 2026-11-22 (PR #134~#183 반영)**
+> **마지막 업데이트: 2026-11-22 (PR #134~#184 반영)**
 
-> 260531~261121 핸드오프 전체를 날짜순으로 기록한 변경 이력입니다. 새 AI는 일반적으로 `PROJECT_CONTEXT.md`와 `CURRENT_STATE.md`만 먼저 읽고, 과거 판단 근거가 필요할 때 이 문서를 참고하세요.
+> 260531~261122 핸드오프 전체를 날짜순으로 기록한 변경 이력입니다. 새 AI는 일반적으로 `PROJECT_CONTEXT.md`와 `CURRENT_STATE.md`만 먼저 읽고, 과거 판단 근거가 필요할 때 이 문서를 참고하세요.
 
 ---
 
@@ -1519,3 +1519,44 @@ PR #161 의 "+ 시간 추가" 버튼 → 탭하면 칸 펼침 → 다이닝 미�
 ### 검증
 - lint·tsc·vitest 319·build 통과, E2E 97 통과(신규: 같은 틱 연타 history +1, 첫 탭 250ms 뒤 두 번째 탭 미선택, 정상 연속 선택). 신규 가드 테스트는 가드 제거 시 실패하는 것 확인.
 - 사용자 실기기(iPhone PWA·Safari) 확인 완료.
+
+---
+
+## 2026-11-22 v2 — Supabase 서울 리전 이전 + 함수 리전 icn1 (PR #184)
+
+### 배경 — 11/22 baseline
+- 서울 엣지만 거치는 응답 118ms, 시드니 함수(DB 0회) 278ms → 함수 왕복당 약 160ms 가 리전 몫(보류 12번의 남은 비용).
+- DB 만 옮기면 함수(syd1)↔DB(서울) 왕복이 대륙 간이 돼 오히려 악화 → 함수 리전도 함께 `icn1` 로.
+- 대상은 `public` 스키마만(Supabase Auth·Storage 사용 0건).
+
+### 변경
+- 새 프로젝트 `zptouznrtacmjbcoikxw`(서울 `ap-northeast-2`, Postgres 17)에 운영 DB 를 dump→restore(Supabase 공식 "Backup and Restore using CLI" 기준). 001~021 마이그레이션 재실행 없음, id·`session_version` 값 그대로 → 기존 세션 쿠키 유지.
+- `vercel.json` `regions` `syd1` → `icn1`. Vercel 환경변수는 Preview·Production 모두 서울(Production 교체는 사용자).
+- `scripts/region-migration/` — `dump.sh`(시드니 읽기 전용)·`restore.sh`(최초 1회)·`reload-data.sh`(데이터만 재적재)·`verify.sh`/`verify.sql`(양쪽 diff). 사용법 → 같은 폴더 `README.md`.
+- 새 프로젝트 기본 함수 `public.rls_auto_enable()`(SECURITY DEFINER) 실행 권한을 `PUBLIC, anon, authenticated` 에서 회수 — Security Advisor WARN 2건이 시드니에 없던 차이로 생겨서. 함수·이벤트 트리거는 유지.
+
+### 절차
+1. 리허설(261122): `dump.sh` → `restore.sh` → `verify.sh` → `reload-data.sh` → `verify.sh`. Preview(icn1 + 서울 DB) 사용자 확인.
+2. 컷오버(261122): Production 환경변수 서울 교체(사용자) → `reload-data.sh`(시드니 최신 데이터로 서울 public TRUNCATE·재적재, 한 트랜잭션) → `verify.sh` → PR #184 머지(regions icn1 프로덕션 반영).
+
+### 검증
+- 컷오버 재적재 후 `verify.sh` 144항목 시드니와 일치: public 9테이블 490행(리허설 뒤 생긴 `recommendations_log` 1건 포함)·테이블별 내용 md5, RLS 9/9·정책 0, 제약 24(c6·f7·p9·u2)·인덱스 24·트리거 4 정의문, `touch_updated_at` search_path 고정, anon·authenticated·service_role·postgres GRANT·owner, enum 8.
+- Security Advisor 시드니 = 서울(Errors 0 / Warnings 0 / INFO `rls_enabled_no_policy` 9).
+- Preview: 함수 리전 icn1, 서울 Supabase API 로그에 Preview 발 조회 200.
+
+### 실측 비교 — 디렉터 측정(11/22, 같은 브라우저 연속, 각 10회 중앙값, TTFB)
+
+| 구간 | 프로덕션(syd1 + 시드니 DB) | Preview(icn1 + 서울 DB) |
+|---|---|---|
+| unlock(함수만) | 269ms | 72ms |
+| 홈 문서 | 375ms | 181ms |
+| `/list` 문서 | 290ms | 96ms |
+| `/api/activities` | 348ms | 103ms |
+| `/api/activity-categories` | 292ms | 106ms |
+| unlock(app-ready 없음) | 635ms | 117ms |
+| 엣지 정적 기준값 | 107ms | 39ms (도메인 간 차이, 원인 미확인) |
+
+### 롤백(시드니 프로젝트 보관 기한 261129 까지만 가능)
+1. Vercel Production 환경변수 `SUPABASE_URL`·`SUPABASE_SERVICE_ROLE_KEY` 를 시드니 값으로 되돌린다.
+2. `vercel.json` `regions` 를 `syd1` 로 되돌려 프로덕션 배포(PR #184 revert 또는 한 줄 PR).
+3. 컷오버 이후 서울에 쌓인 쓰기를 시드니로 옮긴다 — 방향을 뒤집어 같은 스크립트 사용: `OLD_DB_URL`=서울·`NEW_DB_URL`=시드니인 env 파일을 `ENV_FILE` 로 주고 `OLD_HOST_EXPECT=ap-northeast-2 NEW_HOST_EXPECT=ap-southeast-2` 로 `reload-data.sh` → `verify.sh`. 시드니 스키마는 그대로 남아 있어 `restore.sh` 는 필요 없다(이후 스키마 변경이 있었다면 시드니에도 먼저 적용).

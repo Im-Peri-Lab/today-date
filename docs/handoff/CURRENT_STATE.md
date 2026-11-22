@@ -69,7 +69,7 @@ PROJECT_CONTEXT §5(인증 F-01)·§20.
 는 상세 → CHANGELOG 2026-07-29~2026-08-11.
 
 ## 브랜치 상태
-- `infra/supabase-seoul-region` — PR #184 squash 머지, 로컬·리모트 브랜치·worktree 삭제. `scripts/region-migration/`(dump·restore·reload-data·verify) + `vercel.json` `regions` `icn1`. Draft 로 연 뒤 DB 컷오버(재적재·검증·Production 환경변수 서울 교체) 완료 후 머지
+- `infra/supabase-seoul-region` — PR #184 squash 머지(머지 커밋 `942c13d`), 로컬·리모트 브랜치·worktree 삭제. `scripts/region-migration/`(dump·restore·reload-data·verify) + `vercel.json` `regions` `icn1`. Draft 로 연 뒤 DB 컷오버(재적재·검증·Production 환경변수 서울 교체) 완료 후 머지
 - `fix/login-button-loading-until-home` — PR #182 squash 머지, 로컬·리모트 브랜치·worktree 삭제. `/lock` [로그인]·패스코드 제출 시 홈 전환 완료(언마운트)까지 로딩 유지(15초 안전 타임아웃), `inFlightRef` 로 연속 탭 중복 요청 차단. 실패 경로·인증 로직 변경 없음. Preview 확인은 사용자가 완료
 - `fix/pwa-splash-icon-512-heart20` — PR #181 squash 머지(머지 커밋 `9850390`), 로컬·리모트 브랜치·worktree 삭제. `public/icon-512.png` 하트 폭 52%→20%(같은 중심·배경 `#f5f3ff`). Android 12+ WebAPK 로딩 화면(240dp 고정)의 하트를 화면 폭 약 34%→약 12.5% 로. 홈 아이콘(icon-192)·`apple-touch-icon`·manifest 변경 없음. 갤럭시 실기기 확인은 대기(보류 23번)
 - `perf/app-ready-on-login` — PR #180 squash 머지, 로컬·리모트 브랜치·worktree 삭제. 잠금해제 성공 응답에 `app-ready` 발급(속성은 `lib/auth/appReady.ts` 단일 출처, 기존 값 그대로) + 미들웨어 `expireSession` 에서 `app-ready` 삭제(다른 기기 계정 삭제 후 재가입 경로 보존). Preview 확인은 사용자가 완료. 사용자 iPhone PWA 재로그인 완료(261121, `app-ready` 적용). 확인용 `diag/app-ready-verify`(이 브랜치 + diag 계측)는 머지 없이 삭제

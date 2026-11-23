@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { getSupabaseClient } from '@/lib/supabase/client'
+import { reportError } from '@/lib/observability'
 
 export const dynamic = 'force-dynamic'
 
@@ -15,7 +16,7 @@ export async function GET() {
     if (error) throw error
     return NextResponse.json({ data })
   } catch (err) {
-    console.error('[GET /api/place-categories]', err)
+    reportError('[GET /api/place-categories]', err)
     return NextResponse.json({ error: '서버 오류가 발생했습니다.' }, { status: 500 })
   }
 }

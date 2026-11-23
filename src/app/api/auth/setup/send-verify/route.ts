@@ -6,6 +6,7 @@ import { sendPartnerInvite } from '@/lib/auth/invite'
 import { createToken, findPendingInvite } from '@/lib/auth/tokens'
 import { sendEmail } from '@/lib/email/resend'
 import { getVerifyEmailTemplate } from '@/lib/email/templates'
+import { reportError } from '@/lib/observability'
 
 const schema = z.object({
   email: z.string().email('올바른 이메일 주소를 입력하세요.'),
@@ -54,7 +55,7 @@ export async function POST(req: NextRequest) {
         // already_registered — 초대는 대기 중인데 그 사이 그 이메일이 가입됐다.
         // already_paired    — 초대한 커플이 다른 사람으로 이미 짝을 채웠다.
         // 어느 쪽이든 이 초대로는 합류할 수 없다.
-        console.error('[send-verify] 대기 초대 재발송 실패:', resent.reason)
+        reportError('[send-verify] 대기 초대 재발송 실패:', resent.reason)
         return NextResponse.json(
           { error: '이 이메일로는 설정을 진행할 수 없습니다.' },
           { status: 409 }
@@ -85,7 +86,7 @@ export async function POST(req: NextRequest) {
         .single()
 
       if (coupleError || !created) {
-        console.error('[send-verify] couple 생성 실패:', coupleError)
+        reportError('[send-verify] couple 생성 실패:', coupleError)
         return NextResponse.json({ error: '서버 오류가 발생했습니다.' }, { status: 500 })
       }
       coupleId = created.id
@@ -109,7 +110,7 @@ export async function POST(req: NextRequest) {
     if (userError) {
       // users.email 은 전역 unique — 다른 커플에 이미 등록된 이메일이면 여기로 온다.
       // 어느 쪽이 원인인지 알려주지 않는다(사용자 열거 방지).
-      console.error('[send-verify] user 등록 실패:', userError)
+      reportError('[send-verify] user 등록 실패:', userError)
       return NextResponse.json(
         { error: '이 이메일로는 설정을 진행할 수 없습니다.' },
         { status: 409 }
@@ -127,13 +128,13 @@ export async function POST(req: NextRequest) {
     })
 
     if (!emailResult.success) {
-      console.error('[send-verify] email failed:', emailResult.error)
+      reportError('[send-verify] email failed:', emailResult.error)
     }
 
     // 사용자 열거 방지: 이메일 실패 여부와 무관하게 항상 200 반환
     return NextResponse.json({ success: true })
   } catch (e) {
-    console.error('[send-verify] unexpected error:', e)
+    reportError('[send-verify] unexpected error:', e)
     return NextResponse.json({ error: '서버 오류가 발생했습니다.' }, { status: 500 })
   }
 }

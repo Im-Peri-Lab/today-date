@@ -18,6 +18,7 @@ import { verifyPasscode } from '@/lib/auth/passcode'
 import { PENDING_USER_COOKIE, readPendingUser } from '@/lib/auth/pendingUser'
 import { getSession } from '@/lib/auth/session'
 import { APP_READY_COOKIE, appReadyCookieOptions } from '@/lib/auth/appReady'
+import { reportError } from '@/lib/observability'
 
 const MAX_ATTEMPTS = 5
 const LOCK_MINUTES = 10
@@ -155,7 +156,7 @@ export async function POST(req: NextRequest) {
     }
 
     if (resolution.kind === 'none') {
-      console.error('[unlock] 세션에 담을 사용자를 찾지 못했습니다 — couple:', couple.id)
+      reportError('[unlock] 세션에 담을 사용자를 찾지 못했습니다 — couple:', couple.id)
       return NextResponse.json({ error: '앱 설정이 완료되지 않았습니다.' }, { status: 403 })
     }
 

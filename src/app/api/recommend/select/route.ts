@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { getSupabaseClient } from '@/lib/supabase/client'
 import { requireCoupleScope } from '@/lib/auth/coupleScope'
 import { isRowOwnedByCouple } from '@/lib/data/ownership'
+import { reportError } from '@/lib/observability'
 
 export const dynamic = 'force-dynamic'
 
@@ -39,7 +40,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ success: true })
   } catch (err) {
-    console.error('[POST /api/recommend/select]', err)
+    reportError('[POST /api/recommend/select]', err)
     return NextResponse.json({ error: '저장 중 오류가 발생했습니다.' }, { status: 500 })
   }
 }

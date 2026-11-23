@@ -5,6 +5,7 @@ import {
   PENDING_USER_MAX_AGE,
   sealPendingUser,
 } from '@/lib/auth/pendingUser'
+import { reportError } from '@/lib/observability'
 
 /**
  * 초대 수락 진입점 — 메일의 "초대 수락하기" 버튼이 여는 GET 링크.
@@ -78,7 +79,7 @@ export async function GET(req: NextRequest) {
 
     return res
   } catch (e) {
-    console.error('[GET /invite]', e)
+    reportError('[GET /invite]', e)
     return redirectToLock('invite=error')
   }
 }

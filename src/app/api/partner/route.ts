@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { getSessionPartner } from '@/lib/auth/partner'
+import { reportError } from '@/lib/observability'
 
 export const dynamic = 'force-dynamic'
 
@@ -20,7 +21,7 @@ export async function GET() {
 
     return NextResponse.json({ partner: lookup.partner })
   } catch (err) {
-    console.error('[GET /api/partner]', err)
+    reportError('[GET /api/partner]', err)
     return NextResponse.json({ error: '파트너 정보를 불러오지 못했습니다.' }, { status: 500 })
   }
 }

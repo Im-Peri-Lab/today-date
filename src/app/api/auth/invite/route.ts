@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { requireCoupleScope } from '@/lib/auth/coupleScope'
 import { sendPartnerInvite } from '@/lib/auth/invite'
+import { reportError } from '@/lib/observability'
 
 export const dynamic = 'force-dynamic'
 
@@ -54,7 +55,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ success: true })
   } catch (e) {
-    console.error('[POST /api/auth/invite]', e)
+    reportError('[POST /api/auth/invite]', e)
     return NextResponse.json({ error: '서버 오류가 발생했습니다.' }, { status: 500 })
   }
 }

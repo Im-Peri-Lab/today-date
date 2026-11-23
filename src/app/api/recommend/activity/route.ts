@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { getSupabaseClient } from '@/lib/supabase/client'
 import { requireCoupleScope } from '@/lib/auth/coupleScope'
 import { recommendActivities } from '@/lib/recommend/activity'
+import { reportError } from '@/lib/observability'
 
 export const dynamic = 'force-dynamic'
 
@@ -50,7 +51,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ recommendations, reason, poolSize, log_id: log?.id ?? null })
   } catch (err) {
-    console.error('[POST /api/recommend/activity]', err)
+    reportError('[POST /api/recommend/activity]', err)
     return NextResponse.json({ error: '추천 중 오류가 발생했습니다.' }, { status: 500 })
   }
 }

@@ -19,6 +19,7 @@ import {
   apiRatingSchema,
   apiReviewNoteSchema,
 } from '@/lib/schemas/apiFields'
+import { reportError } from '@/lib/observability'
 
 const patchSchema = z.object({
   title: apiTitleSchema.optional(),
@@ -52,7 +53,7 @@ export async function GET(_req: NextRequest, { params }: RouteContext) {
     if (!data) return NOT_FOUND()
     return NextResponse.json({ data })
   } catch (err) {
-    console.error('[GET /api/places/[id]]', err)
+    reportError('[GET /api/places/[id]]', err)
     return NextResponse.json({ error: '서버 오류가 발생했습니다.' }, { status: 500 })
   }
 }
@@ -89,7 +90,7 @@ export async function PATCH(req: NextRequest, { params }: RouteContext) {
     if (error) return NOT_FOUND()
     return NextResponse.json({ data })
   } catch (err) {
-    console.error('[PATCH /api/places/[id]]', err)
+    reportError('[PATCH /api/places/[id]]', err)
     return NextResponse.json({ error: '서버 오류가 발생했습니다.' }, { status: 500 })
   }
 }
@@ -112,7 +113,7 @@ export async function DELETE(_req: NextRequest, { params }: RouteContext) {
     if (error) return NOT_FOUND()
     return NextResponse.json({ success: true })
   } catch (err) {
-    console.error('[DELETE /api/places/[id]]', err)
+    reportError('[DELETE /api/places/[id]]', err)
     return NextResponse.json({ error: '서버 오류가 발생했습니다.' }, { status: 500 })
   }
 }

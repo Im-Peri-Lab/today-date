@@ -17,6 +17,7 @@ import {
   apiListQueryBase,
   splitCommaIds,
 } from '@/lib/schemas/apiFields'
+import { reportError } from '@/lib/observability'
 
 const createSchema = z.object({
   title: apiTitleSchema,
@@ -94,7 +95,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({ data })
   } catch (err) {
-    console.error('[GET /api/activities]', err)
+    reportError('[GET /api/activities]', err)
     return NextResponse.json({ error: '서버 오류가 발생했습니다.' }, { status: 500 })
   }
 }
@@ -135,7 +136,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ data }, { status: 201 })
   } catch (err) {
-    console.error('[POST /api/activities]', err)
+    reportError('[POST /api/activities]', err)
     return NextResponse.json({ error: '서버 오류가 발생했습니다.' }, { status: 500 })
   }
 }

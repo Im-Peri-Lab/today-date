@@ -9,6 +9,7 @@ import { PENDING_USER_COOKIE } from '@/lib/auth/pendingUser'
 import { readJsonBody, zodErrorResponse } from '@/lib/api/validation'
 import { apiNicknameSchema } from '@/lib/schemas/apiFields'
 import { APP_READY_COOKIE } from '@/lib/auth/appReady'
+import { reportError } from '@/lib/observability'
 
 export const dynamic = 'force-dynamic'
 
@@ -42,7 +43,7 @@ export async function PATCH(req: NextRequest) {
 
     return NextResponse.json({ data: { nickname: updated.nickname } })
   } catch (err) {
-    console.error('[PATCH /api/account]', err)
+    reportError('[PATCH /api/account]', err)
     return NextResponse.json({ error: '서버 오류가 발생했습니다.' }, { status: 500 })
   }
 }
@@ -118,7 +119,7 @@ export async function DELETE() {
 
     return res
   } catch (err) {
-    console.error('[DELETE /api/account]', err)
+    reportError('[DELETE /api/account]', err)
     return NextResponse.json({ error: '서버 오류가 발생했습니다.' }, { status: 500 })
   }
 }

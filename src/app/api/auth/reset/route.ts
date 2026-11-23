@@ -5,6 +5,7 @@ import { getCoupleById, getUserByEmail } from '@/lib/auth/couple'
 import { hashPasscode } from '@/lib/auth/passcode'
 import { verifyToken, markTokenUsed } from '@/lib/auth/tokens'
 import { getSession } from '@/lib/auth/session'
+import { reportError } from '@/lib/observability'
 
 const schema = z.object({
   token: z.string().min(1),
@@ -58,7 +59,7 @@ export async function POST(req: NextRequest) {
       .eq('id', couple.id)
 
     if (updateError) {
-      console.error('[reset] couple 갱신 실패:', updateError)
+      reportError('[reset] couple 갱신 실패:', updateError)
       return NextResponse.json({ error: '서버 오류가 발생했습니다.' }, { status: 500 })
     }
 

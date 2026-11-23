@@ -10,6 +10,7 @@ import {
 } from '@/lib/auth/deviceUser'
 import { getSession } from '@/lib/auth/session'
 import { APP_READY_COOKIE, appReadyCookieOptions } from '@/lib/auth/appReady'
+import { reportError } from '@/lib/observability'
 
 const schema = z.object({
   passcode: z
@@ -57,7 +58,7 @@ export async function POST(req: NextRequest) {
       .eq('id', couple.id)
 
     if (updateError) {
-      console.error('[setup/passcode] couple 갱신 실패:', updateError)
+      reportError('[setup/passcode] couple 갱신 실패:', updateError)
       return NextResponse.json({ error: '서버 오류가 발생했습니다.' }, { status: 500 })
     }
 

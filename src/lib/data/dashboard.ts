@@ -31,14 +31,6 @@ export async function getDashboardStats(coupleId: string): Promise<DashboardStat
     orderByListRule(supabase.from('places').select('title, visited_at').eq('status', 'visited').eq('couple_id', coupleId), 'visited').limit(2),
   ])
 
-  // TEMP — Preview 검증용 강제 실패(머지 전 revert). count: 개수 쿼리 1개, preview: 제목 쿼리 4개.
-  const tempFail = (globalThis as { __tempFail?: string }).__tempFail
-  const forced = { count: null, data: null, error: { message: 'TEMP forced failure' } }
-  if (tempFail === 'count') Object.assign(wishAct, forced)
-  if (tempFail === 'preview') {
-    for (const q of [wishActTitles, wishPlcTitles, visitedActTitles, visitedPlcTitles]) Object.assign(q, forced)
-  }
-
   /**
    * 개수 쿼리 4개의 error 는 반드시 검사하고, 하나라도 실패하면 전체를 던진다.
    *

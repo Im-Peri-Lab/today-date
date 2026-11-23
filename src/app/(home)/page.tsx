@@ -6,15 +6,8 @@ import { HomeDashboard } from '@/components/HomeDashboard'
 import styles from '@/components/screens.module.css'
 import { cn } from '@/lib/utils'
 
-// TEMP — Sentry 서버 컴포넌트 수집 검증용(Preview 전용). 머지 전 revert 한다. main 에 남기지 않는다.
-export default async function HomePage({
-  searchParams,
-}: {
-  searchParams?: { __tempfail?: string }
-}) {
+export default async function HomePage() {
   const session = await getSession()
-  ;(globalThis as { __tempFail?: string }).__tempFail =
-    process.env.VERCEL_ENV === 'preview' ? searchParams?.__tempfail : undefined
 
   // couple_id 없는 세션은 전환 이전 쿠키다 — 미들웨어가 만료 처리하지만,
   // 서버 컴포넌트가 커플 없이 데이터를 읽는 경로를 남기지 않도록 여기서도 닫는다.

@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { requireCoupleScope } from '@/lib/auth/coupleScope'
 import { sendPartnerInvite } from '@/lib/auth/invite'
 import { reportError } from '@/lib/observability'
+import { readJsonBody } from '@/lib/api/validation'
 
 export const dynamic = 'force-dynamic'
 
@@ -28,8 +29,11 @@ export async function POST(req: NextRequest) {
     const scope = await requireCoupleScope()
     if (!scope.ok) return scope.response
 
-    const body = await req.json()
-    const result = schema.safeParse(body)
+    // 깨진 JSON·빈 본문은 클라이언트 입력 문제 — 500(과 Sentry 전송)이 아니라 400.
+    const parsed = await readJsonBody(req)
+    if (!parsed.ok) return parsed.response
+
+    const result = schema.safeParse(parsed.body)
     if (!result.success) {
       return NextResponse.json({ error: '올바른 이메일 주소를 입력하세요.' }, { status: 400 })
     }
@@ -49,6 +53,8 @@ export async function POST(req: NextRequest) {
             { status: 409 }
           )
         default:
+          // server_error 등 — 실제 실패이므로 Sentry 로 보낸다.
+          reportError('[POST /api/auth/invite] 초대 실패:', new Error(`invite failed: ${invite.reason}`))
           return NextResponse.json({ error: '서버 오류가 발생했습니다.' }, { status: 500 })
       }
     }

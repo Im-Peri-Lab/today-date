@@ -26,9 +26,28 @@ export function reportError(tag: string, err: unknown, extra?: Record<string, un
     const isError = err instanceof Error
     Sentry.captureException(isError ? err : new Error(tag), {
       tags: { route: tag },
+      // 같은 reportError 안에서 만든 오류는 스택이 같아 Sentry 가 서로 다른 지점의 오류를 한 이슈로 묶는다.
+      // tag(라우트·쿼리 이름)를 fingerprint 에 더해 지점별로 이슈를 나눈다.
+      fingerprint: ['{{ default }}', tag],
       extra: isError ? extra : { ...extra, original: err },
     })
   } catch {
     // 모니터링 실패가 요청 처리를 깨뜨리면 안 된다.
+  }
+}
+
+/**
+ * 오류 경계(error.tsx·global-error.tsx)용 클라이언트 보고.
+ *
+ * 서버 컴포넌트가 던진 오류는 서버에서 이미 원래 메시지로 수집된다(Sentry 의 서버 컴포넌트 자동 래핑).
+ * 클라이언트에 도착하는 같은 오류는 프로덕션에서 메시지가 가려지고 `digest` 만 남아 중복 이슈가 될 뿐이므로
+ * digest 가 있으면 보내지 않는다. digest 가 없는 오류는 브라우저에서 난 것이라 서버가 모른다 — 그대로 보낸다.
+ */
+export function reportBoundaryError(error: Error & { digest?: string }, boundary: string): void {
+  if (error.digest) return
+  try {
+    Sentry.captureException(error, { tags: { boundary } })
+  } catch {
+    // 모니터링 실패가 오류 화면을 깨뜨리면 안 된다.
   }
 }

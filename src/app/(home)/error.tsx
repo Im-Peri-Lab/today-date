@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react'
 import { CloudOff, RefreshCw } from 'lucide-react'
-import * as Sentry from '@sentry/nextjs'
+import { reportBoundaryError } from '@/lib/observability'
 import { Button } from '@/components/ui/button'
 import { PageHeader } from '@/components/PageHeader'
 import { cn } from '@/lib/utils'
@@ -37,7 +37,7 @@ export default function HomeError({
 }) {
   useEffect(() => {
     console.error('[HomePage error boundary]', error)
-    Sentry.captureException(error, { tags: { boundary: 'home' } })
+    reportBoundaryError(error, 'home')
   }, [error])
 
   // reset() 으로 React 오류 경계 상태를 먼저 지우고, 실제 데이터 재조회는

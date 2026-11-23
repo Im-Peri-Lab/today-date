@@ -4,6 +4,7 @@ import {
   getCoupleUsers,
 } from '@/lib/auth/couple'
 import { getSupabaseClient } from '@/lib/supabase/client'
+import { reportError } from '@/lib/observability'
 
 /**
  * SOLO 계정 삭제 — 커플 하나와 그에 딸린 모든 행을 지운다.
@@ -204,7 +205,7 @@ export async function deleteSoloAccount(coupleId: string): Promise<DeleteAccount
 
     return { ok: true, deleted }
   } catch (err) {
-    console.error('[deleteSoloAccount] 삭제 실패', { coupleId, deleted, err })
+    reportError('[deleteSoloAccount] 삭제 실패', err, { coupleId, deleted })
     return { ok: false, reason: 'server_error', deleted }
   }
 }

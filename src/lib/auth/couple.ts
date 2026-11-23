@@ -1,4 +1,5 @@
 import { getSupabaseClient } from '@/lib/supabase/client'
+import { logError, reportError } from '@/lib/observability'
 
 /**
  * 인증의 단일 출처인 couples/users 조회·갱신 계층.
@@ -232,7 +233,9 @@ export async function addCoupleUser(
     .single()
 
   if (error) {
-    console.error('[addCoupleUser] users 삽입 실패:', error)
+    // 23505(unique 위반)는 이미 가입된 이메일 — 호출부가 already_registered 로 처리하는 의도한 결과다.
+    if (error.code === '23505') logError('[addCoupleUser] users 삽입 충돌:', error)
+    else reportError('[addCoupleUser] users 삽입 실패:', error)
     return null
   }
 

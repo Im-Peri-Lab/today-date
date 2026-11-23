@@ -950,6 +950,8 @@ ActivityCard·PlaceCard 모두 동일한 정보 줄 우선순위(memo→location
 
 - **터치 눌림(`:active`)은 진입 트랜지션을 두지 않는다 — 누를 땐 즉시, 뗄 때만 천천히(261122, PR #183).** iOS 짧은 탭은 `:active` 가 수십~100ms 만 유지돼 140ms 트랜지션 + 작은 scale(0.96)로는 눈에 거의 안 보였다. 또 누른 요소가 곧바로 사라지는 화면(위저드 자동 전환)은 눌림 자체가 보일 틈이 없으므로 전환을 잠깐(150ms) 늦추고, 늦춘 만큼 생기는 연타·더블탭 누수(같은 자리에 렌더된 다음 단계 카드 선택)를 pointerdown 시각으로 함께 막아야 한다. 고정 대기 시간만 늘리는 방식은 피한다.
 
+- **Sentry 이벤트가 0건이면 코드보다 먼저 Vercel 환경변수 등록을 본다 — `NEXT_PUBLIC_*` 는 빌드 시점에 주입되므로 변수를 추가한 뒤에는 캐시 없이 재배포해야 한다(261123, PR #192).** 첫 Preview 에서 이벤트가 0건이었던 원인은 `NEXT_PUBLIC_SENTRY_DSN`·`SENTRY_*` 미등록이었다(진단 응답의 `hasEnvDsn`·`initialized` 로 확인). ① Next 14 에는 `onRequestError` 가 없고 API 라우트는 catch 에서 오류를 삼키므로 `reportError`(`src/lib/observability.ts`)로 직접 보낸다. 의도한 409 는 `logError`(로그만). ② flush 없이 응답해도 Vercel 에서 이벤트가 도착함을 실측했다(Sentry 가 라우트 핸들러를 감싸 `waitUntil` 로 flush) — 추가 `waitUntil` 불필요. ③ withSentryConfig 는 Next 14 에서 `instrumentationHook` 을 자동으로 켠다. ④ 프로덕션 서버 컴포넌트 오류의 자동 수집은 미검증.
+
 ---
 
 ## 21. 새 AI가 처음 해야 할 일

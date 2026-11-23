@@ -1,6 +1,6 @@
 # CHANGELOG.md
 
-> **마지막 업데이트: 2026-11-22 (PR #134~#189 반영)**
+> **마지막 업데이트: 2026-11-23 (PR #134~#192 반영)**
 
 > 260531~261122 핸드오프 전체를 날짜순으로 기록한 변경 이력입니다. 새 AI는 일반적으로 `PROJECT_CONTEXT.md`와 `CURRENT_STATE.md`만 먼저 읽고, 과거 판단 근거가 필요할 때 이 문서를 참고하세요.
 
@@ -1589,3 +1589,15 @@ PR #161 의 "+ 시간 추가" 버튼 → 탭하면 칸 펼침 → 다이닝 미�
 - 상단 추천 배너가 2열로 바뀌는 1024px 이상에서 홈 카드 제목 옆 전체 개수, 최근 항목 최대 2개와 해당 날짜를 표시한다. 항목명은 12px에 `--s-sub` 75%와 `--s-ink` 25%를 섞고 날짜는 11px에 캡션 색을 쓴다. 1024px 미만은 기존 요약을 사용한다.
 - GitHub CI와 Vercel 통과, 데스크톱 프리뷰 라이트·다크 확인. iPad 실기기 미확인.
 - 머지 `c80ab1b`, 원격 작업 브랜치 삭제 확인.
+
+---
+
+## 2026-11-23 — Sentry 오류 모니터링 연동 (PR #192, 보류 18번)
+
+- `@sentry/nextjs` 10.78.0 도입. 클라이언트/서버/엣지 초기화, `withSentryConfig`(org/project/authToken 은 환경변수, DSN·토큰 없으면 각각 비활성·업로드 생략), `environment` 는 `VERCEL_ENV`. 소스맵은 업로드 후 삭제.
+- 개인정보: `sendDefaultPii:false`, Replay 미사용, `src/lib/sentry/scrub.ts`(단위 테스트 포함)가 이벤트·breadcrumb·transaction 에서 이메일·패스코드·토큰·쿠키·헤더·본문·URL 쿼리를 제거. `tracesSampleRate` production 0.1·그 외 0.
+- `src/lib/observability.ts`: `reportError`(로그+Sentry)·`logError`(로그만). send-verify 의 의도한 409(already_registered·already_paired·unique 23505)는 로그만. 비-Error 값은 `Error(tag)` 로 감싸고 원본은 `extra.original`.
+- API 라우트 17개 파일의 실패 지점을 교체, `(home)/error.tsx` 에 captureException, `global-error.tsx` 신규.
+- 검증: lint·tsc·테스트 328개·빌드(DSN 있음/없음), CI 통과. Preview 임시 라우트(PR 에서 제거)로 이벤트 도착(flush·noflush), 이메일 마스킹, Request/User 비식별, route 태그, release 연결 확인.
+- 첫 Preview 에서 이벤트가 0건이었던 원인은 코드가 아니라 Vercel 환경변수 미등록이었다. 머지 `faa6c61`, 원격·로컬 브랜치·worktree 삭제 확인.
+- 남은 확인: 첫 Production 빌드의 소스맵 업로드, 홈 서버 컴포넌트 오류 자동 수집(미검증).

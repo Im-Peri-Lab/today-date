@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
-import * as Sentry from '@sentry/nextjs'
+import { reportBoundaryError } from '@/lib/observability'
 
 /**
  * 루트 레이아웃 자체가 깨졌을 때의 최후 경계. layout.tsx 를 대체하므로 <html>·<body> 를 직접 그리고,
@@ -14,7 +14,7 @@ export default function GlobalError({
 }) {
   useEffect(() => {
     console.error('[global error boundary]', error)
-    Sentry.captureException(error, { tags: { boundary: 'global' } })
+    reportBoundaryError(error, 'global')
   }, [error])
 
   return (

@@ -1,4 +1,5 @@
 import { Resend } from 'resend'
+import { reportError } from '@/lib/observability'
 
 let resendClient: Resend | null = null
 
@@ -17,7 +18,8 @@ export async function sendEmail(options: {
   const fromEmail = process.env.RESEND_FROM_EMAIL
 
   if (!fromEmail) {
-    console.error('[resend] RESEND_FROM_EMAIL is not set')
+    // 운영에서 비어 있으면 메일 전체가 멈추는 설정 오류 — Sentry 로 보낸다.
+    reportError('[resend] RESEND_FROM_EMAIL is not set', new Error('RESEND_FROM_EMAIL is not set'))
     return { success: false, error: 'RESEND_FROM_EMAIL not configured' }
   }
 

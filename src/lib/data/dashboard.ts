@@ -1,8 +1,9 @@
 import { getSupabaseClient } from '@/lib/supabase/client'
 import type { DashboardStats } from '@/hooks/useDashboardStats'
 import { orderByListRule } from '@/lib/data/listOrder'
+import { reportError } from '@/lib/observability'
 
-/** 8개 집계 쿼리 결과에서 오류 검사에 필요한 최소 형태. */
+/** 집계 쿼리 결과에서 오류 검사에 필요한 최소 형태. */
 type QueryOutcome = { error: { message: string } | null }
 
 /**
@@ -31,31 +32,47 @@ export async function getDashboardStats(coupleId: string): Promise<DashboardStat
   ])
 
   /**
-   * 8개 쿼리의 error 를 반드시 검사한다.
+   * 개수 쿼리 4개의 error 는 반드시 검사하고, 하나라도 실패하면 전체를 던진다.
    *
    * supabase-js 는 네트워크 실패조차 throw 하지 않고 `{ data: null, error }` 로
-   * 돌려준다. 이전 구현은 error 를 보지 않고 `count ?? 0` / `data ?? []` 로만
-   * 읽었기 때문에, DB 가 완전히 죽은 상태에서도 200 에 "전부 0" 이 나갔다 —
-   * 사용자에게는 장애가 아니라 "위시리스트가 비었다"로 보인다. 빈 워크스페이스와
-   * 장애를 구별할 수 없는 응답은 없는 것보다 나쁘다.
+   * 돌려준다. 이전 구현은 error 를 보지 않고 `count ?? 0` 으로만 읽었기 때문에,
+   * DB 가 완전히 죽은 상태에서도 200 에 "전부 0" 이 나갔다 — 사용자에게는 장애가 아니라
+   * "위시리스트가 비었다"로 보인다. 빈 워크스페이스와 장애를 구별할 수 없는 응답은
+   * 없는 것보다 나쁘다. 0개로 잘못 보이는 것보다 오류 화면이 낫다.
    *
-   * 실패한 쿼리의 이름을 함께 던진다 — 8개 중 어느 집계가 깨졌는지 로그에서
-   * 바로 보이게 한다(§ /api/dashboard/stats 의 console.error).
+   * 실패한 쿼리의 이름을 함께 던진다 — 4개 중 어느 집계가 깨졌는지 로그에서 바로 보이게 한다.
    */
-  const outcomes: [string, QueryOutcome][] = [
+  const counts: [string, QueryOutcome][] = [
     ['위시리스트 액티비티 수', wishAct],
     ['위시리스트 다이닝 수', wishPlc],
     ['다녀온 액티비티 수', visitedAct],
     ['다녀온 다이닝 수', visitedPlc],
+  ]
+
+  for (const [label, outcome] of counts) {
+    if (outcome.error) {
+      throw new Error(`대시보드 집계 실패(${label}): ${outcome.error.message}`)
+    }
+  }
+
+  /**
+   * 미리보기 제목 쿼리 4개는 부가 정보다 — 실패해도 홈 전체를 깨지 않고, 그 타일의 미리보기만
+   * 비운 채 개수는 정상으로 돌려준다(타일은 "개수만" 보여주는 기존 방어 분기를 쓴다).
+   * 실패는 삼키지 않고 Sentry 로 보낸다. 쿼리 이름이 태그에 남는다.
+   */
+  const previewOutcomes: [string, QueryOutcome][] = [
     ['위시리스트 액티비티 제목', wishActTitles],
     ['위시리스트 다이닝 제목', wishPlcTitles],
     ['다녀온 액티비티 제목', visitedActTitles],
     ['다녀온 다이닝 제목', visitedPlcTitles],
   ]
 
-  for (const [label, outcome] of outcomes) {
+  for (const [label, outcome] of previewOutcomes) {
     if (outcome.error) {
-      throw new Error(`대시보드 집계 실패(${label}): ${outcome.error.message}`)
+      reportError(
+        `[getDashboardStats] 미리보기 실패(${label})`,
+        new Error(`대시보드 미리보기 실패(${label}): ${outcome.error.message}`)
+      )
     }
   }
 

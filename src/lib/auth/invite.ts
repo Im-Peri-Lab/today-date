@@ -15,6 +15,7 @@ import {
 } from '@/lib/auth/tokens'
 import { sendEmail } from '@/lib/email/resend'
 import { getInvitePartnerTemplate } from '@/lib/email/templates'
+import { reportError } from '@/lib/observability'
 
 /**
  * 파트너 초대 — SOLO → PAIRED 전환의 두 반쪽(발송·수락)을 한 곳에 모은다.
@@ -104,7 +105,7 @@ export async function sendPartnerInvite(opts: {
   })
 
   if (!emailResult.success) {
-    console.error('[invite] email failed:', emailResult.error)
+    reportError('[invite] email failed:', emailResult.error)
   }
 
   return { ok: true }

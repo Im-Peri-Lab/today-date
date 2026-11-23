@@ -1600,4 +1600,5 @@ PR #161 의 "+ 시간 추가" 버튼 → 탭하면 칸 펼침 → 다이닝 미�
 - API 라우트 17개 파일의 실패 지점을 교체, `(home)/error.tsx` 에 captureException, `global-error.tsx` 신규.
 - 검증: lint·tsc·테스트 328개·빌드(DSN 있음/없음), CI 통과. Preview 임시 라우트(PR 에서 제거)로 이벤트 도착(flush·noflush), 이메일 마스킹, Request/User 비식별, route 태그, release 연결 확인.
 - 첫 Preview 에서 이벤트가 0건이었던 원인은 코드가 아니라 Vercel 환경변수 미등록이었다. 머지 `faa6c61`, 원격·로컬 브랜치·worktree 삭제 확인.
-- 남은 확인: 첫 Production 빌드의 소스맵 업로드, 홈 서버 컴포넌트 오류 자동 수집(미검증).
+- Production(`bb1bd0f`) 빌드 로그에서 "Successfully uploaded source maps to Sentry" 확인(사용자, 261123). 남은 확인: 홈 서버 컴포넌트 오류 자동 수집(미검증).
+- 후속 후보: npm install-scripts `allowScripts` 허용 목록 검토(낮음), `sentry.client.config.ts` → `instrumentation-client.ts` 는 Next 업그레이드 때(Next 15.3+ 전용).

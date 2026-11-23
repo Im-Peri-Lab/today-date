@@ -1,0 +1,19 @@
+// TEMP — Sentry Preview 검증 전용. 확인이 끝나면 이 파일(과 이 커밋)을 제거한다. main 에 남기지 않는다.
+import { NextResponse } from 'next/server'
+import { reportError } from '@/lib/observability'
+
+export const dynamic = 'force-dynamic'
+
+export async function GET() {
+  // Preview 배포에서만 동작한다. Production 에서는 404.
+  if (process.env.VERCEL_ENV !== 'preview') {
+    return NextResponse.json({ error: 'not found' }, { status: 404 })
+  }
+  // 가짜 PII 를 일부러 메시지·extra 에 넣어 beforeSend 가 거르는지 확인한다.
+  reportError(
+    '[GET /api/auth/sentry-verify]',
+    new Error('sentry preview verification — fake-user@example.com passcode 1234'),
+    { email: 'fake-user@example.com', passcode: '1234' }
+  )
+  return NextResponse.json({ ok: true, sent: true })
+}

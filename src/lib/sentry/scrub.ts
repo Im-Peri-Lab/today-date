@@ -1,4 +1,4 @@
-import type { Breadcrumb, ErrorEvent } from '@sentry/nextjs'
+import type { Breadcrumb, ErrorEvent, Event } from '@sentry/nextjs'
 
 /**
  * Sentry 로 나가는 이벤트에서 개인정보·비밀값을 제거한다 (sendDefaultPii: false 에 더해 한 번 더 거른다).
@@ -80,4 +80,40 @@ export function scrubBreadcrumb(breadcrumb: Breadcrumb): Breadcrumb | null {
     message: breadcrumb.message ? scrubString(breadcrumb.message) : breadcrumb.message,
     data,
   }
+}
+
+/** span·trace data 에서 URL 로 취급해 쿼리 값을 가릴 키. */
+const URL_DATA_KEYS = new Set(['url', 'url.full', 'http.url', 'http.target', 'url.path', 'http.route_url'])
+/** 쿼리 문자열 자체를 담는 키 — 통째로 가린다. */
+const QUERY_DATA_KEYS = new Set(['url.query', 'http.query', 'query', 'url.fragment', 'http.fragment'])
+
+function scrubSpanData(data: Record<string, unknown> | undefined): Record<string, unknown> | undefined {
+  if (!data) return data
+  const out: Record<string, unknown> = {}
+  for (const [key, value] of Object.entries(data)) {
+    if (QUERY_DATA_KEYS.has(key)) out[key] = FILTERED
+    else if (URL_DATA_KEYS.has(key) && typeof value === 'string') out[key] = scrubUrl(value)
+    else out[key] = SENSITIVE_KEY.test(key) ? FILTERED : scrubValue(value)
+  }
+  return out
+}
+
+/** span description 은 "GET https://host/path?query" 형태라 쿼리 이후를 잘라낸 뒤 이메일을 마스킹한다. */
+function scrubDescription(description: string): string {
+  return scrubString(description.replace(/\?\S*/g, `?${FILTERED}`))
+}
+
+/** 성능 추적(transaction) 이벤트용 — scrubEvent 에 더해 span·trace data 의 URL·쿼리를 거른다. */
+export function scrubTransaction<T extends Event>(event: T): T {
+  scrubEvent(event as unknown as ErrorEvent)
+  if (event.transaction) event.transaction = scrubUrl(event.transaction)
+  const trace = event.contexts?.trace
+  if (trace?.data) trace.data = scrubSpanData(trace.data) as typeof trace.data
+  if (event.spans) {
+    for (const span of event.spans) {
+      span.data = scrubSpanData(span.data) as typeof span.data
+      if (span.description) span.description = scrubDescription(span.description)
+    }
+  }
+  return event
 }

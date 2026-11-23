@@ -6,7 +6,7 @@ import { sendPartnerInvite } from '@/lib/auth/invite'
 import { createToken, findPendingInvite } from '@/lib/auth/tokens'
 import { sendEmail } from '@/lib/email/resend'
 import { getVerifyEmailTemplate } from '@/lib/email/templates'
-import { reportError } from '@/lib/observability'
+import { logError, reportError } from '@/lib/observability'
 
 const schema = z.object({
   email: z.string().email('올바른 이메일 주소를 입력하세요.'),
@@ -55,7 +55,12 @@ export async function POST(req: NextRequest) {
         // already_registered — 초대는 대기 중인데 그 사이 그 이메일이 가입됐다.
         // already_paired    — 초대한 커플이 다른 사람으로 이미 짝을 채웠다.
         // 어느 쪽이든 이 초대로는 합류할 수 없다.
-        reportError('[send-verify] 대기 초대 재발송 실패:', resent.reason)
+        // 409(합류 불가)는 의도한 거절이라 로그만 — server_error 만 실제 실패다.
+        if (resent.reason === 'server_error') {
+          reportError('[send-verify] 대기 초대 재발송 실패:', resent.reason)
+        } else {
+          logError('[send-verify] 대기 초대 재발송 거절:', resent.reason)
+        }
         return NextResponse.json(
           { error: '이 이메일로는 설정을 진행할 수 없습니다.' },
           { status: 409 }
@@ -110,7 +115,12 @@ export async function POST(req: NextRequest) {
     if (userError) {
       // users.email 은 전역 unique — 다른 커플에 이미 등록된 이메일이면 여기로 온다.
       // 어느 쪽이 원인인지 알려주지 않는다(사용자 열거 방지).
-      reportError('[send-verify] user 등록 실패:', userError)
+      // 23505(unique 위반)는 의도한 409 — 그 외 DB 오류만 Sentry 로 보낸다.
+      if (userError.code === '23505') {
+        logError('[send-verify] user 등록 충돌:', userError)
+      } else {
+        reportError('[send-verify] user 등록 실패:', userError)
+      }
       return NextResponse.json(
         { error: '이 이메일로는 설정을 진행할 수 없습니다.' },
         { status: 409 }

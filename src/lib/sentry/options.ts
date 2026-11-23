@@ -1,5 +1,5 @@
 import type { BrowserOptions, NodeOptions } from '@sentry/nextjs'
-import { scrubBreadcrumb, scrubEvent } from './scrub'
+import { scrubBreadcrumb, scrubEvent, scrubTransaction } from './scrub'
 
 /**
  * 클라이언트·서버·엣지 세 초기화가 공유하는 Sentry 옵션.
@@ -20,7 +20,7 @@ export function sentryOptions(): BrowserOptions & NodeOptions {
     sendDefaultPii: false,
     tracesSampleRate: environment === 'production' ? 0.1 : 0,
     beforeSend: event => scrubEvent(event),
-    beforeSendTransaction: event => scrubEvent(event as never) as never,
+    beforeSendTransaction: event => scrubTransaction(event),
     beforeBreadcrumb: scrubBreadcrumb,
   }
 }

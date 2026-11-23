@@ -952,6 +952,8 @@ ActivityCard·PlaceCard 모두 동일한 정보 줄 우선순위(memo→location
 
 - **Sentry 이벤트가 0건이면 코드보다 먼저 Vercel 환경변수 등록을 본다 — `NEXT_PUBLIC_*` 는 빌드 시점에 주입되므로 변수를 추가한 뒤에는 캐시 없이 재배포해야 한다(261123, PR #192).** 첫 Preview 에서 이벤트가 0건이었던 원인은 `NEXT_PUBLIC_SENTRY_DSN`·`SENTRY_*` 미등록이었다(진단 응답의 `hasEnvDsn`·`initialized` 로 확인). ① Next 14 에는 `onRequestError` 가 없고 API 라우트는 catch 에서 오류를 삼키므로 `reportError`(`src/lib/observability.ts`)로 직접 보낸다. 의도한 409 는 `logError`(로그만). ② flush 없이 응답해도 Vercel 에서 이벤트가 도착함을 실측했다(Sentry 가 라우트 핸들러를 감싸 `waitUntil` 로 flush) — 추가 `waitUntil` 불필요. ③ withSentryConfig 는 Next 14 에서 `instrumentationHook` 을 자동으로 켠다. ④ 프로덕션 서버 컴포넌트 오류의 자동 수집은 미검증.
 
+- **`reportError` 안에서 만든 Error 는 스택이 모두 같아 Sentry 가 서로 다른 지점의 오류를 한 이슈로 묶는다 — fingerprint 에 tag 를 넣는다(261123, PR #193).** 미리보기 쿼리 실패 4건이 개수 실패(서버 자동 수집) 이슈 TODAY-DATE-4 에 합쳐지고 제목이 마지막 이벤트로 바뀌었다. `reportError` 는 `fingerprint: ['{{ default }}', tag]` 를 지정한다(tag 는 `[GET /api/x]`·쿼리 이름). 또 서버 컴포넌트가 던진 오류는 서버에서 원래 메시지로 자동 수집되므로, 오류 경계의 클라이언트 `captureException` 은 `error.digest` 가 있으면 건너뛴다(`reportBoundaryError`) — 안 그러면 메시지가 가려진 중복 이슈가 생긴다. 의도한 거절(409·unique 23505)은 `logError`(로그만).
+
 ---
 
 ## 21. 새 AI가 처음 해야 할 일

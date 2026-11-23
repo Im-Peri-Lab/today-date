@@ -1,6 +1,6 @@
 # CHANGELOG.md
 
-> **마지막 업데이트: 2026-11-23 (PR #134~#192 반영)**
+> **마지막 업데이트: 2026-11-23 (PR #134~#193 반영)**
 
 > 260531~261122 핸드오프 전체를 날짜순으로 기록한 변경 이력입니다. 새 AI는 일반적으로 `PROJECT_CONTEXT.md`와 `CURRENT_STATE.md`만 먼저 읽고, 과거 판단 근거가 필요할 때 이 문서를 참고하세요.
 
@@ -1602,3 +1602,12 @@ PR #161 의 "+ 시간 추가" 버튼 → 탭하면 칸 펼침 → 다이닝 미�
 - 첫 Preview 에서 이벤트가 0건이었던 원인은 코드가 아니라 Vercel 환경변수 미등록이었다. 머지 `faa6c61`, 원격·로컬 브랜치·worktree 삭제 확인.
 - Production(`bb1bd0f`) 빌드 로그에서 "Successfully uploaded source maps to Sentry" 확인(사용자, 261123). 남은 확인: 홈 서버 컴포넌트 오류 자동 수집(미검증).
 - 후속 후보: npm install-scripts `allowScripts` 허용 목록 검토(낮음), `sentry.client.config.ts` → `instrumentation-client.ts` 는 Next 업그레이드 때(Next 15.3+ 전용).
+
+---
+
+## 2026-11-23 — 대시보드 미리보기 부분 실패 허용 + Sentry 후속 정리 (PR #193, 보류 19번)
+
+- `getDashboardStats`: 개수 쿼리 4개 실패는 전체 throw 유지, 미리보기 제목 쿼리 4개 실패는 그 타일의 미리보기만 비우고 개수는 정상 반환(화면은 개수만 표시). 실패한 쿼리는 쿼리별 Sentry 이슈로 보고. `/api/dashboard/stats` 도 같은 규칙.
+- `POST /api/auth/invite`: 깨진 JSON 400, `server_error`·초대 메일 실패 `reportError`. `reportError` 에 fingerprint(tag) 추가. 오류 경계(`(home)/error.tsx`·`global-error.tsx`)는 `error.digest` 가 있으면 클라이언트 전송 생략. `accountDeletion`·`resend`(설정 미지정)·forgot 발송 실패·`addCoupleUser` 실패 보고 정리(unique 23505 는 로그만).
+- Preview 검증(임시 커밋으로 강제 실패, PR 에서 revert): 홈 서버 컴포넌트 오류 자동 수집 확인(보류 18번 남은 확인 ② 종결), 클라이언트 중복 제거, 미리보기 실패 4건 쿼리별 이슈 분리 확인.
+- 머지 `5cf5d82`, 원격·로컬 브랜치·worktree 삭제 확인. 후속 후보: forgot 라우트 바깥 `catch` 의 깨진 JSON 500 처리.

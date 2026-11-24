@@ -1869,11 +1869,10 @@ a.notice:active {
   min-width: 0;
 }
 
-/* 쉐브론 — 모바일은 제목·개수 폭 확보를 위해 숨기고, lg 에서 세로 중앙·오른쪽 고정으로 보인다 */
+/* 쉐브론 — 모바일: 본문(대표 항목) 영역의 오른쪽 세로 중앙(제목 줄은 폭을 그대로 쓴다). lg: 타일 전체 세로 중앙 */
 .statTile .statRowChevron {
-  display: none;
   position: absolute;
-  right: 12px;
+  right: 0;
   top: 50%;
   transform: translateY(-50%);
 }
@@ -1883,7 +1882,9 @@ a.notice:active {
 }
 
 .statTileBody {
+  position: relative; /* 모바일: 쉐브론 기준 */
   min-width: 0;
+  padding-right: 20px; /* 항목 이름은 쉐브론 앞에서 말줄임 */
 }
 
 .statTileBody > span > .statRowPreview,
@@ -1984,11 +1985,8 @@ a.notice:active {
   }
 
   .statTileBody {
+    position: static; /* 쉐브론 기준을 타일로 되돌린다 */
     padding-right: 22px;
-  }
-
-  .statTile .statRowChevron {
-    display: block;
   }
 
   .statTileCount {

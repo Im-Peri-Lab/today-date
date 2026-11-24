@@ -27,8 +27,8 @@ function chipClass(type: 'activity' | 'place', status: 'wishlist' | 'visited'): 
  * 섹션(가보고 싶은 곳/다녀온 곳) 안의 바로가기 타일. 상태는 섹션 제목이 전담하므로
  * 타일 제목은 종류("액티비티"/"다이닝")만 쓴다.
  *
- * 추천 배너가 2열로 바뀌는 lg(1024px)부터 제목 옆 전체 개수와 최근 항목 최대 2개를 표시한다.
- * 그보다 좁은 화면은 기존 최근 항목 요약을 표시한다.
+ * 모바일·PC 공통으로 제목 옆에 전체 개수, 본문에 최근 항목 최대 2개를 표시한다.
+ * 날짜는 lg(1024px) 이상에서만 보이고 모바일은 이름만 보인다.
  * 0개일 때는 폭과 무관하게 빈 상태 문구를 그대로 쓴다("0개"로 쓰지 않는다).
  */
 function StatTile({
@@ -49,8 +49,6 @@ function StatTile({
   const href = `/list?tab=${type === 'activity' ? 'activity' : 'place'}&status=${status}`
   const showBadge = status === 'visited' && count > 0
   const Icon = type === 'activity' ? Sparkles : UtensilsCrossed
-  const recent = previewTitles[0]
-  const more = count - 1
   const desktopPreviews = previews ?? previewTitles.map(title => ({ title, date: null }))
 
   return (
@@ -82,35 +80,20 @@ function StatTile({
             <br className="lg:hidden" />
             곳이 없어요
           </span>
-        ) : recent ? (
-          <>
-            <span className={cn(styles.statRowPreview, styles.statRowItem)}>{recent}</span>
-            {more > 0 && (
-              <span className={cn(styles.statRowPreview, styles.statRowMore)}>
-                외 {more}
-                {unit}
+        ) : desktopPreviews.length > 0 ? (
+          <div className={styles.statTileDesktopPreviews}>
+            {desktopPreviews.slice(0, 2).map(({ title, date }, index) => (
+              <span key={index} className={cn(styles.statRowPreview, styles.statTilePreviewRow)}>
+                <span className={styles.statTilePreviewTitle}>{title}</span>
+                {date && (
+                  <time dateTime={date} className={styles.statTilePreviewDate}>
+                    {formatDotDateCompact(date)}{status === 'wishlist' && ' 예정'}
+                  </time>
+                )}
               </span>
-            )}
-            <div className={styles.statTileDesktopPreviews}>
-              {desktopPreviews.slice(0, 2).map(({ title, date }, index) => (
-                <span key={index} className={cn(styles.statRowPreview, styles.statTilePreviewRow)}>
-                  <span className={styles.statTilePreviewTitle}>{title}</span>
-                  {date && (
-                    <time dateTime={date} className={styles.statTilePreviewDate}>
-                      {formatDotDateCompact(date)}{status === 'wishlist' && ' 예정'}
-                    </time>
-                  )}
-                </span>
-              ))}
-            </div>
-          </>
-        ) : (
-          // 개수는 있는데 제목을 못 받은 경우(방어) — 폭과 무관하게 개수만
-          <span className={cn(styles.statRowPreview, styles.statTileFallbackCount)}>
-            {count}
-            {unit}
-          </span>
-        )}
+            ))}
+          </div>
+        ) : null}
       </div>
     </Link>
   )

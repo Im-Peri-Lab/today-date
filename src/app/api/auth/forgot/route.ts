@@ -5,6 +5,7 @@ import { createToken } from '@/lib/auth/tokens'
 import { sendEmail } from '@/lib/email/resend'
 import { getResetPasscodeTemplate } from '@/lib/email/templates'
 import { reportError } from '@/lib/observability'
+import { readJsonBody } from '@/lib/api/validation'
 
 const schema = z.object({
   email: z.string().email('올바른 이메일 주소를 입력하세요.'),
@@ -12,8 +13,11 @@ const schema = z.object({
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json()
-    const result = schema.safeParse(body)
+    // 깨진 JSON·빈 본문은 클라이언트 입력 문제 — 500(과 Sentry 전송)이 아니라 400.
+    const parsed = await readJsonBody(req)
+    if (!parsed.ok) return parsed.response
+
+    const result = schema.safeParse(parsed.body)
     if (!result.success) {
       // 사용자 열거 방지: 항상 success
       return NextResponse.json({ success: true })
@@ -40,7 +44,8 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json({ success: true })
-  } catch {
+  } catch (e) {
+    reportError('[POST /api/auth/forgot]', e)
     return NextResponse.json({ error: '서버 오류가 발생했습니다.' }, { status: 500 })
   }
 }

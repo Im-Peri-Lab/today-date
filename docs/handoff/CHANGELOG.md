@@ -1,6 +1,6 @@
 # CHANGELOG.md
 
-> **마지막 업데이트: 2026-11-23 (PR #134~#193 반영)**
+> **마지막 업데이트: 2026-11-24 (PR #134~#194 반영, 보류 12 종결)**
 
 > 260531~261122 핸드오프 전체를 날짜순으로 기록한 변경 이력입니다. 새 AI는 일반적으로 `PROJECT_CONTEXT.md`와 `CURRENT_STATE.md`만 먼저 읽고, 과거 판단 근거가 필요할 때 이 문서를 참고하세요.
 
@@ -1619,3 +1619,13 @@ PR #161 의 "+ 시간 추가" 버튼 → 탭하면 칸 펼침 → 다이닝 미�
 - `POST /api/auth/forgot`: `readJsonBody` 로 깨진 JSON·빈 본문 400(Sentry 전송 없음), 바깥 `catch` 는 `reportError` 후 기존 500. 스키마 실패·미가입·미인증 이메일은 그대로 `{ success: true }`(사용자 열거 방지 불변). 토큰·메일 발송 로직 불변.
 - 테스트 `forgot/route.test.ts` 7개 추가. lint·vitest 353·build·CI(E2E 포함) 통과. 로컬 서버 curl 확인은 worktree 에 `.env.local` 이 없어(미들웨어가 `/setup` 으로 리다이렉트) 생략, 단위 테스트로 대체.
 - 머지 `9dc5162`, 원격·로컬 브랜치·worktree 삭제 확인.
+
+---
+
+## 2026-11-24 v2 — 프로덕션 재측정, 보류 12번 종결
+
+- 측정: 사용자 데스크톱 Chrome 콘솔, 로그인 상태, throttling 없음. 구간별 10회 연속 fetch(no-store), TTFB = `responseStart−startTime` 중앙값. `x-vercel-id` icn1::icn1 확인.
+- 결과(ms): icon-192.png(HIT) 108.5 / 홈 218.5 / `/list` 151 / `/api/activities` 161.5 / `/api/activity-categories` 158.5.
+- 정적 기준값을 뺀 함수 구간 추정: 홈 ~110, `/list` ~43, activities ~53, categories ~50 (261122 syd1 프로덕션 ~268/183/241/185) → 리전 이전 효과가 프로덕션에서도 확인됨.
+- 판단: activities 의 `select *`·무페이지네이션은 작은 categories 와 차이가 없어 현재 데이터량에서는 비용 없음(데이터 증가 시 재검토). 홈 렌더(다른 경로의 약 2배)만 조건부 후보로 남기고 체감 지연 신호가 있을 때 진단. `/list` 렌더 후 API 3건(클라이언트 순차 여부)은 이 방식으로 측정되지 않아 미확인 유지. 프로덕션 도메인 정적 기준값 ~108ms(Preview 39ms) 차이는 엣지 수준이라 앱 코드와 무관, 원인 미확인 유지.
+- 교훈: DevTools 네트워크 제한(Slow 4G, 요청당 약 562ms)이 켜져 있으면 정적 HIT 포함 전 구간이 약 565ms 로 평평하게 나온다 — 측정 전 No throttling 확인.

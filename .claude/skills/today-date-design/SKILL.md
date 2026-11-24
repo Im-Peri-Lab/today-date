@@ -253,19 +253,18 @@ description: >
 |---|---|
 | 그리드 | `.statGrid` — `repeat(2, minmax(0, 1fr))`, gap 12px / lg 16px (`minmax(0,…)`로 긴 항목명이 열 폭을 밀지 못하게 함) |
 | 타일 | `<Link class="statSectionCard statRow">` 한 요소(카드 + 행). 조연 카드 표면(§ 3 조연 규칙)·14px radius 그대로 |
-| 구조 | **세로 2단.** 1단 = 작은 칩(28px/PC 30px) + 제목, 2단 = 텍스트(카드 전체 폭). `>`(`.statRowChevron`)는 **항상 표시**, 줄 수와 무관하게 **타일 전체 높이의 세로 중앙**(absolute, 오른쪽 12px/PC 16px). 1·2단 오른쪽에 `padding-right: 22px`로 쉐브론 자리를 비운다. 클래스: `.statTile`/`.statTileHead`/`.statTileTitle`/`.statTileBody` |
-| 높이 | padding 상하 10~12px(높이 비례, § 3-A) 좌우 14px(PC 16px 18px), 1·2단 gap 6px(PC 8px), `min-height` 없음 — 같은 행 타일은 `justify-content:flex-start`로 제목 높이를 맞춘다 |
+| 구조 | **세로 2단.** 1단 = 작은 칩(28px/PC 30px) + 제목, 2단 = 텍스트(카드 전체 폭). `>`(`.statRowChevron`)는 **항상 표시**, **타일 전체 높이의 세로 중앙**(absolute, 오른쪽 12px/PC 16px). 모바일은 1단(제목 줄)이 chevron 자리를 비우지 않고 줄 끝까지 쓰며, 2단만 오른쪽 20px(PC 22px)을 비운다. 모바일 2단은 `min-height:36px`(2줄)로 고정해 chevron 이 제목 줄과 겹치지 않게 한다. 클래스: `.statTile`/`.statTileHead`/`.statTileTitle`/`.statTileBody` |
+| 높이 | padding 상하 10~12px(높이 비례, § 3-A) 좌우 14px(PC 16px 18px), 1·2단 gap 8px, `min-height` 없음 — 같은 행 타일은 `justify-content:flex-start`로 제목 높이를 맞춘다 |
 | 제목 | **"액티비티" / "다이닝"만**. "가보고 싶은 액티비티" 같은 상태 동사는 쓰지 않는다 — 상태는 섹션 제목(`STATUS_LABELS`)이 전담 |
 
 **둘째 줄 (breakpoint = lg 1024px, /list 탭과 같은 앱 공통 기준):**
 
 | 폭 | 내용 | 클래스 |
 |---|---|---|
-| 모바일(<1024px) | 2줄 — 항목명(말줄임) / "외 N개"·"외 N곳"(N>0일 때만) | `.statRowPreview.statRowItem` / `.statRowMore` |
-| lg 이상(1024px부터, 추천 배너 2열과 동일) | 카드 제목 옆 전체 개수(12px, `--s-sub`), 최근 항목 최대 2개를 구분선 없이 표시. 항목명 옆에 값이 있는 날짜만 표시 | `.statTileCount` / `.statTileDesktopPreviews` |
+| 전 폭 공통 | 카드 제목 옆 전체 개수(12px, `--s-sub`), 최근 항목 최대 2개를 구분선 없이 한 줄씩 표시. 모바일(<1024px)은 이름만, lg 이상(1024px부터)은 항목명 옆에 값이 있는 날짜도 표시 | `.statTileCount` / `.statTileDesktopPreviews` |
 | 0개 | **폭과 무관하게 기존 빈 상태 문구** — 가보고 싶은 곳 "아직 담은 곳이 없어요" / 다녀온 곳 "아직 다녀온 곳이 없어요". "0개"로 쓰지 않는다 | `.statRowPreviewEmpty` |
 
-- 모바일에서도 항목명을 보인다: 세로 2단이라 2단 텍스트가 카드 전체 폭(쉐브론 자리 22px만 제외)을 쓰므로 항목명이 읽힌다. 길면 항목명만 말줄임, "외 N개"는 항상 보인다.
+- 모바일에서도 항목명(최대 2개)을 보인다: 2단 텍스트는 chevron 자리 20px 만 제외하고 카드 폭을 쓴다. 길면 항목명만 말줄임. "외 N개" 줄은 없다(개수는 제목 옆).
 - 넓은 홈 카드의 항목명은 12px(`--type-preview-meta`)과 `color-mix(in srgb, var(--s-sub) 75%, var(--s-ink))`를 사용한다. 날짜는 11px과 `--type-caption-color`를 사용한다. 위시리스트는 방문 예정일 뒤에 "예정", 다녀온 곳은 방문일을 표시한다.
 - 빈 상태 문구는 한 줄 말줄임 대신 **최대 2줄**(`line-clamp: 2`)로 접고 `word-break: keep-all`로 어절 단위로 끊는다. 모바일에서는 두 섹션의 줄바꿈 위치를 맞추기 위해 **"아직 담은 / 곳이 없어요"**, **"아직 다녀온 / 곳이 없어요"**로 강제 줄바꿈한다(`<br className="lg:hidden">`, 둘째 줄이 "곳이 없어요"로 같아 위아래가 정렬됨). lg 이상은 한 줄. 모바일에서는 해당 타일이 2줄만큼 커진다(빈 계정에서만 보이는 상태이므로 허용).
 - 개수는 있는데 제목을 못 받은 경우(방어 분기)는 폭과 무관하게 개수만 보여준다(`{count}{unit}`).

@@ -57,11 +57,13 @@ describe('HomeDashboard — 미리보기만 실패한 상태', () => {
     expect(html).not.toContain('외 ')
   })
 
-  it('개수는 모바일 본문(개수만 폴백)과 lg 헤더 양쪽에 그대로 표시된다', () => {
+  it('개수는 제목 줄에 타일당 한 번만 표시되고 본문에 "외 N개"·별도 폴백 개수는 없다', () => {
     for (const text of ['3개', '1곳', '2개', '5곳']) {
-      // 헤더 개수(lg 에서 표시) + 본문 폴백 개수(모바일에서 표시) = 타일당 2번
-      expect(html.split(`>${text}<`).length - 1).toBeGreaterThanOrEqual(2)
+      // 제목 옆 개수(모바일·PC 공통) 한 번 — 본문 폴백 개수가 있으면 2번이 된다
+      expect(html.split(`>${text}<`).length - 1).toBe(1)
     }
+    expect(html).not.toMatch(/외\s*\d/)
+    expect(html).not.toContain('FallbackCount')
   })
 
   it('"아직 담은/다녀온 곳이 없어요" 빈 상태로 오인되지 않는다', () => {

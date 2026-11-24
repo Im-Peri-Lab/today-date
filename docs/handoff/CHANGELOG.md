@@ -1611,3 +1611,11 @@ PR #161 의 "+ 시간 추가" 버튼 → 탭하면 칸 펼침 → 다이닝 미�
 - `POST /api/auth/invite`: 깨진 JSON 400, `server_error`·초대 메일 실패 `reportError`. `reportError` 에 fingerprint(tag) 추가. 오류 경계(`(home)/error.tsx`·`global-error.tsx`)는 `error.digest` 가 있으면 클라이언트 전송 생략. `accountDeletion`·`resend`(설정 미지정)·forgot 발송 실패·`addCoupleUser` 실패 보고 정리(unique 23505 는 로그만).
 - Preview 검증(임시 커밋으로 강제 실패, PR 에서 revert): 홈 서버 컴포넌트 오류 자동 수집 확인(보류 18번 남은 확인 ② 종결), 클라이언트 중복 제거, 미리보기 실패 4건 쿼리별 이슈 분리 확인.
 - 머지 `5cf5d82`, 원격·로컬 브랜치·worktree 삭제 확인. 후속 후보: forgot 라우트 바깥 `catch` 의 깨진 JSON 500 처리.
+
+---
+
+## 2026-11-24 — forgot 라우트 오류 처리 정리 (PR #194)
+
+- `POST /api/auth/forgot`: `readJsonBody` 로 깨진 JSON·빈 본문 400(Sentry 전송 없음), 바깥 `catch` 는 `reportError` 후 기존 500. 스키마 실패·미가입·미인증 이메일은 그대로 `{ success: true }`(사용자 열거 방지 불변). 토큰·메일 발송 로직 불변.
+- 테스트 `forgot/route.test.ts` 7개 추가. lint·vitest 353·build·CI(E2E 포함) 통과. 로컬 서버 curl 확인은 worktree 에 `.env.local` 이 없어(미들웨어가 `/setup` 으로 리다이렉트) 생략, 단위 테스트로 대체.
+- 머지 `9dc5162`, 원격·로컬 브랜치·worktree 삭제 확인.

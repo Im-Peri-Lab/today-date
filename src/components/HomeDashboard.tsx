@@ -69,10 +69,10 @@ function StatTile({
         {count > 0 && (
           <span className={styles.statTileCount}>{count}{unit}</span>
         )}
-      </div>
-      {/* 2단: 대표 항목 + 쉐브론(모바일은 이 영역 오른쪽 세로 중앙, lg 는 타일 세로 중앙) */}
-      <div className={styles.statTileBody}>
         <ChevronRight className={styles.statRowChevron} strokeWidth={1.75} aria-hidden="true" />
+      </div>
+      {/* 2단: 대표 항목(모바일은 항상 2줄 높이) */}
+      <div className={styles.statTileBody}>
         {count === 0 ? (
           <span className={cn(styles.statRowPreview, styles.statRowPreviewEmpty)}>
             {status === 'visited' ? '아직 다녀온' : '아직 담은'}{' '}

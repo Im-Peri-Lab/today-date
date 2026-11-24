@@ -1857,7 +1857,7 @@ a.notice:active {
   flex-direction: column;
   align-items: stretch;
   justify-content: flex-start; /* 줄 수가 달라도 같은 행 타일의 제목 높이를 맞춘다 */
-  gap: 6px;
+  gap: 8px; /* 1·2단 — 모바일 쉐브론(카드 세로 중앙)이 제목 줄과 겹치지 않게 */
   padding: clamp(10px, 1.0309svh + 2.9897px, 12px) 14px; /* 위아래 10~12, 화면 높이 비례(.statSections 주석) */
   min-height: 0;
 }
@@ -1869,10 +1869,10 @@ a.notice:active {
   min-width: 0;
 }
 
-/* 쉐브론 — 모바일: 본문(대표 항목) 영역의 오른쪽 세로 중앙(제목 줄은 폭을 그대로 쓴다). lg: 타일 전체 세로 중앙 */
+/* 쉐브론 — 모바일·PC 공통: 타일 전체 세로 중앙, 오른쪽 끝(제목 줄은 폭을 그대로 쓴다) */
 .statTile .statRowChevron {
   position: absolute;
-  right: 0;
+  right: 12px;
   top: 50%;
   transform: translateY(-50%);
 }
@@ -1882,9 +1882,16 @@ a.notice:active {
 }
 
 .statTileBody {
-  position: relative; /* 모바일: 쉐브론 기준 */
   min-width: 0;
   padding-right: 20px; /* 항목 이름은 쉐브론 앞에서 말줄임 */
+}
+
+/* 모바일: 대표 항목 영역을 항상 2줄 높이로 고정 — 항목 수와 무관하게 카드 높이가 같고
+   세로 중앙 쉐브론이 제목 줄과 겹치지 않는다(36px = 18px × 2) */
+@media (max-width: 1023.98px) {
+  .statTileBody {
+    min-height: 36px;
+  }
 }
 
 .statTileBody > span > .statRowPreview,
@@ -1974,6 +1981,17 @@ a.notice:active {
   white-space: nowrap;
 }
 
+/* 모바일: 대표 항목 2줄 높이 맞춤(기본 규칙 뒤에 둬야 덮어쓴다) */
+@media (max-width: 1023.98px) {
+  .statTileDesktopPreviews {
+    gap: 4px;
+  }
+
+  .statTilePreviewRow {
+    line-height: 16px;
+  }
+}
+
 @media (min-width: 1024px) {
   .statGrid {
     gap: 20px;
@@ -1985,7 +2003,6 @@ a.notice:active {
   }
 
   .statTileBody {
-    position: static; /* 쉐브론 기준을 타일로 되돌린다 */
     padding-right: 22px;
   }
 

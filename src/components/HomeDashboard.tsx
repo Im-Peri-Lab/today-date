@@ -192,11 +192,15 @@ export function HomeDashboard({
   const { data } = useDashboardStats(initialStats)
   const queryClient = useQueryClient()
 
+  function refreshStats() {
+    return queryClient.refetchQueries({ queryKey: ['dashboard-stats'] }, { cancelRefetch: false })
+  }
+
   return (
     <>
       <PullToRefresh
         className={styles.fill}
-        onRefresh={() => queryClient.refetchQueries({ queryKey: ['dashboard-stats'] })}
+        onRefresh={refreshStats}
       >
         <div
           className={cn(
@@ -207,6 +211,7 @@ export function HomeDashboard({
           <PageHeader
             title="오늘, 우리 어떻게 보낼까?"
             subtitle="우리 둘의 데이트를 채워가는 공간"
+            onBrandRefresh={refreshStats}
           />
 
           {/* 페어링 전 상태 안내 — 기능 카드들보다 위(별도 계위) */}

@@ -17,10 +17,12 @@ export function PageHeader({
   title,
   subtitle,
   homeNav = false,
+  onBrandRefresh,
 }: {
   title: string
   subtitle?: string
   homeNav?: boolean
+  onBrandRefresh?: () => void
 }) {
   const brand = (
     <>
@@ -36,6 +38,15 @@ export function PageHeader({
           <Link href="/" className={cn('flex items-center gap-2.5', styles.brandLink)} aria-label="홈으로">
             {brand}
           </Link>
+        ) : onBrandRefresh ? (
+          <button
+            type="button"
+            className={cn('flex items-center gap-2.5 active:opacity-70', styles.brandLink)}
+            aria-label="Today Date 홈 새로고침"
+            onClick={onBrandRefresh}
+          >
+            {brand}
+          </button>
         ) : (
           <div className="flex items-center gap-2.5">{brand}</div>
         )}
